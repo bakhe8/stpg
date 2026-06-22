@@ -1,0 +1,47 @@
+{
+  "reviewCenter": {
+    "loading": "جاري تحميل طابور المراجعات...",
+    "errorFetching": "حدث خطأ في جلب المهام",
+    "title": "مركز المراجعات",
+    "subtitle": "ما الذي ينتظر قرارك اليوم؟",
+    "empty": "لا توجد طلبات عضوية معلقة.",
+    "urgentGroup": "عاجل ({count})",
+    "normalGroup": "مهام عادية ({count})",
+    "by": "بواسطة:",
+    "detailsAndDecision": "التفاصيل والقرار",
+    "pageTitle": "مركز المراجعة",
+    "pendingCount": "{count} عناصر معلقة",
+    "loadError": "حدث خطأ أثناء تحميل المراجعات",
+    "loadingItems": "جاري تحميل المراجعات...",
+    "tabMemberships": "طلبات العضوية",
+    "tabRecords": "إثباتات الدفع",
+    "tabSubscriptions": "الاشتراكات",
+    "tabDisbursements": "طلبات الصرف",
+    "tabDisputes": "النزاعات",
+    "rejectReason": "سبب الرفض",
+    "rejectReasonGeneral": "سبب الرفض",
+    "unknownApplicant": "غير معروف",
+    "emptyRecords": "✓ لا توجد إثباتات دفع قيد المراجعة — كل الإيصالات تمت معالجتها",
+    "emptyDisbursements": "✓ لا توجد طلبات صرف معلقة",
+    "emptyDisputes": "✓ لا توجد نزاعات مفتوحة قيد المراجعة",
+    "resolveDecisionTitle": "قرار حل النزاع",
+    "ruleRecordsTitle": "لماذا تُراجع هذه الإيصالات؟",
+    "ruleRecordsDesc": "دورك كأمين صندوق أو مدير يتطلب التحقق من توافق الإيصالات المرفوعة مع المستحقات المسجلة قبل التأكيد.",
+    "ruleDisbursementsTitle": "لماذا يُطلب منك الموافقة على الصرف؟",
+    "ruleDisbursementsDesc": "طلبات الصرف تحتاج موافقة مخوّلة قبل التنفيذ. مراجعتك تضمن توافق الطلب مع بنود الصرف المعتمدة.",
+    "ruleDisputesTitle": "لماذا تُراجع هذه النزاعات؟",
+    "ruleDisputesDesc": "بوصفك محكّماً أو مديراً، يقع على عاتقك الفصل في النزاعات المفتوحة وفق لوائح الكيان.",
+    "amountSAR": "{amount} ر.س",
+    "referencePrefix": "المرجع: {ref}"
+    ,"joinRequestTitle": "طلب انضمام جديد"
+    ,"invitationRuleExplanation": "يتطلب الانضمام مراجعة الإدارة وفق سياسة العضوية المعتمدة."
+    ,"pendingVerification": "بانتظار التحقق من بيانات الطلب"
+    ,"applicant": "مقدم الطلب"
+    ,"paymentReceiptTitle": "إثبات دفع بانتظار المراجعة"
+    ,"paymentReceiptSubtitle": "دفعة بقيمة {amount} ر.س عن فترة {period}"
+    ,"member": "عضو"
+    ,"disputeReviewTitle": "نزاع يحتاج إلى مراجعة"
+    ,"disbursementApprovalTitle": "طلب صرف بانتظار الموافقة"
+    ,"disbursementApprovalSubtitle": "صرف إلى {name} بقيمة {amount} ر.س"
+  }
+}

@@ -1,0 +1,38 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+}
+
+.compact { padding: 5px 10px; }
+
+.icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.8;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.label { font-weight: 700; }
+
+.reason {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* ── Color variants ── */
+.blue   { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-strong); }
+.amber  { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); color: #92400e; }
+.red    { background: rgba(239,68,68,0.07);  border-color: rgba(239,68,68,0.2);  color: #991b1b; }
+.gray   { background: var(--surface-muted);  border-color: var(--border);         color: var(--text-secondary); }

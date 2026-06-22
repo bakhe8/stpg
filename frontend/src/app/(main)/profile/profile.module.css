@@ -1,0 +1,291 @@
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  direction: rtl;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40vh;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Banners ── */
+.activationBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.bannerIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.bannerBody p {
+  margin: 0.25rem 0 0;
+  color: #92400e;
+  font-size: 0.9rem;
+}
+
+.verifiedBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+}
+
+.cardHint {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Field rows ── */
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fieldRow:last-of-type {
+  border-bottom: none;
+}
+
+.fieldLabel {
+  flex-shrink: 0;
+  width: 120px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.fieldValue {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fieldStack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldHint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.unverifiedTag {
+  font-size: 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+/* ── Inline edit ── */
+.inlineForm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.inlineInput {
+  flex: 1;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.inlineInput:focus { border-color: var(--accent-primary); }
+
+.editBtn {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+}
+
+.editBtn:hover { background: var(--accent-soft); }
+
+.saveBtn {
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.saveBtn:disabled { opacity: 0.6; }
+
+.cancelBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.editMsg {
+  font-size: 0.875rem;
+  color: #16a34a;
+  margin-top: 0.75rem;
+}
+
+.editError {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .fieldRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fieldLabel {
+    width: auto;
+  }
+
+  .fieldValue,
+  .fieldStack,
+  .inlineForm {
+    width: 100%;
+  }
+
+  .inlineForm {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .inlineInput {
+    flex-basis: 100%;
+  }
+}
+
+/* ── OTP form ── */
+.otpForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 300px;
+}
+
+.otpInput {
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.3em;
+  direction: ltr;
+  outline: none;
+}
+
+.otpInput:focus { border-color: var(--accent-primary); }
+
+/* ── Buttons ── */
+.primaryBtn {
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.primaryBtn:hover { background: var(--accent-strong); }
+.primaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ghostBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  width: fit-content;
+}
+
+/* ── Messages ── */
+.statusMsg  { color: var(--text-secondary); font-size: 0.9rem; }
+.successMsg { color: #16a34a; font-weight: 600; font-size: 0.95rem; }
+.errorMsg   { color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem; }

@@ -1,0 +1,425 @@
+.page { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+.pageHeader { display: flex; flex-direction: column; gap: 4px; }
+.pageTitle { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.pageSubtitle { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+
+/* ── Attention Section ── */
+.attentionSection {
+  background: #fef3c7;
+  border: 1.5px solid #fde047;
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attentionTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #713f12;
+}
+
+.attentionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.attentionPath { color: #92400e; }
+
+.stateBadge {
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stateBadge[data-state="CONDITIONAL"] { background: rgba(245,158,11,0.15); color: #b45309; }
+.stateBadge[data-state="SUSPENDED"] { background: rgba(239,68,68,0.15); color: #b91c1c; }
+
+/* ── Wallet List ── */
+.walletList { display: flex; flex-direction: column; gap: 20px; }
+
+.walletCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Wallet Context Header ── */
+.walletHeader {
+  padding: 14px 20px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--accent-border);
+}
+
+.walletHeaderMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.walletEntityLabel {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.walletSep { color: var(--text-muted); font-size: 0.75rem; }
+
+.walletName {
+  font-weight: 700;
+  color: var(--accent-strong);
+  font-size: 0.95rem;
+}
+
+.walletPathName {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ── Payment Status ── */
+.paymentSection { padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.paymentClean {
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  color: #166534;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(34,197,94,0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(34,197,94,0.2);
+}
+
+.paymentCleanTitle {
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 2px;
+}
+
+.paymentCleanSub {
+  font-size: 0.78rem;
+  color: #166534;
+  opacity: 0.8;
+}
+
+.checkIcon { color: #22c55e; font-size: 1.1rem; margin-top: 1px; }
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+/* متأخرة جداً — 30+ يوم */
+.paymentRowCritical {
+  background: rgba(127, 29, 29, 0.08);
+  border-color: rgba(239, 68, 68, 0.7);
+  border-width: 1.5px;
+}
+
+.paymentCriticalNote {
+  font-size: 0.75rem;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.payBtnCritical {
+  background: #dc2626;
+  animation: urgentPulse 2s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.82; }
+}
+
+/* فترة السماح — 1–15 يوم */
+.paymentRowGrace {
+  background: rgba(251, 191, 36, 0.05);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+/* متأخرة — 15–30 يوم */
+.paymentRowOverdue {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.paymentRowPending {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.paymentRowWaiting {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.paymentIcon { font-size: 1.1rem; flex-shrink: 0; }
+
+.paymentBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.paymentLabel { font-size: 0.85rem; color: var(--text-primary); }
+
+.paymentAmount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.payBtn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  background: var(--accent-primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.payBtnSecondary {
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+}
+
+.waitingBadge {
+  font-size: 0.75rem;
+  color: #4338ca;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 3px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Rights Section ── */
+.rightsSection {
+  padding: 14px 20px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.rightsSectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rightsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.rightItem {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rightName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rightMeta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.rightWarning {
+  font-size: 0.72rem;
+  color: #b45309;
+  background: rgba(245,158,11,0.1);
+  padding: 2px 7px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.rightRequestBtn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 4px;
+}
+
+.rightRequestBtn:hover { text-decoration: underline; }
+
+/* ── Centered / Loading / Error ── */
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.errorMsg { color: #ef4444; padding: 40px; text-align: center; }
+
+.empty {
+  text-align: center;
+  padding: 48px;
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+  border-radius: 16px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.emptyTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyHint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+.emptyEntityList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.emptyEntityCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: var(--transition-fast);
+}
+
+.emptyEntityCard:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+}
+
+.emptyEntityName {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyEntityArrow {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.emptyLink {
+  font-size: 0.9rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.emptyLink:hover { text-decoration: underline; }
+
+.membershipMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+}
+
+.membershipRole {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.membershipSep {
+  color: var(--text-muted);
+}
+
+.membershipState {
+  font-weight: 700;
+}
+
+.stateActive {
+  color: #15803d;
+}
+
+.stateWarning {
+  color: #b45309;
+}
+
+@media (max-width: 640px) {
+  .walletHeaderMeta { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .rightsGrid { grid-template-columns: 1fr; }
+}

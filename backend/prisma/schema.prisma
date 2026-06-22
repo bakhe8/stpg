@@ -1,0 +1,1887 @@
+// =================================================================
+// CollectiveTrustOS — Prisma Schema
+// نظام تشغيل للثقة الجماعية
+// =================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =================================================================
+// GROUP -1: PLATFORM LAYER
+// طبقة المنصة — منفصلة تماماً عن Tenant Layer
+// MVP: قاعدة بيانات واحدة + فصل منطقي عبر entity_id + PBAC في التطبيق
+// =================================================================
+
+/// حساب القائم على المنصة — مستقل تماماً عن Person (Tenant)
+model PlatformAccount {
+  id           String       @id @default(uuid()) @db.Uuid
+  email        String       @unique
+  /// كلمة مرور مشفرة بـ bcrypt — Platform Operators يسجلون بـ email+password لا OTP
+  passwordHash String
+  name         String
+  role         PlatformRole @default(SUPPORT)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  accessLogs PlatformAccessLog[]
+  supportSessions SupportSession[]
+
+  @@map("platform_accounts")
+}
+
+/// سجل كل وصول من Platform Operator لبيانات كيان
+/// هذا السجل مرئي لمدير الكيان — شرط أساسي للثقة
+model PlatformAccessLog {
+  id                  String             @id @default(uuid()) @db.Uuid
+  platformAccountId   String             @db.Uuid
+  entityId            String             @db.Uuid
+  accessType          PlatformAccessType
+  /// وصف دقيق لما تم الوصول إليه
+  dataScope           String
+  /// السبب الموثق وجوباً قبل أي وصول
+  reason              String
+  startedAt           DateTime           @default(now())
+  /// null = الجلسة لا تزال مفتوحة
+  endedAt             DateTime?
+  /// هل أُشعر مدير الكيان؟
+  notifiedEntityAdmin Boolean            @default(false)
+  /// للـ Break-glass فقط: هل تمت المراجعة الداخلية بعد 48 ساعة؟
+  reviewed            Boolean            @default(false)
+
+  platformAccount PlatformAccount @relation(fields: [platformAccountId], references: [id])
+
+  @@index([entityId])
+  @@index([platformAccountId])
+  @@map("platform_access_logs")
+}
+
+/// جلسة الدعم الفني المحددة بزمن، تُمكّن مسؤولي المنصة من الدخول لكيان معين
+model SupportSession {
+  id                  String             @id @default(uuid()) @db.Uuid
+  entityId            String             @db.Uuid
+  platformAccountId   String             @db.Uuid
+  status              SupportSessionStatus @default(ACTIVE)
+  /// النطاق أو الصلاحية الممنوحة
+  scope               String
+  /// وقت الانتهاء
+  expiresAt           DateTime
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  platformAccount     PlatformAccount    @relation(fields: [platformAccountId], references: [id])
+  entity              Entity             @relation(fields: [entityId], references: [id])
+
+  @@index([entityId])
+  @@index([platformAccountId])
+  @@map("support_sessions")
+}
+
+/// اعتراض مدير الكيان على قرار تعليق من المنصة
+model PlatformSuspensionAppeal {
+  id            String    @id @default(uuid()) @db.Uuid
+  entityId      String    @db.Uuid
+  submittedById String    @db.Uuid
+  reason        String
+  /// PENDING | REVIEWED | RESOLVED
+  status        String    @default("PENDING")
+  response      String?
+  resolvedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  submittedBy Person @relation(fields: [submittedById], references: [id])
+
+  @@index([entityId])
+  @@index([status])
+  @@map("platform_suspension_appeals")
+}
+
+// =================================================================
+// GROUP 0: AUTHENTICATION
+// المصادقة — OAuth + Push Notifications + JWT
+// =================================================================
+
+/// الشخص الحقيقي — حساب واحد لكل إنسان في النظام
+model Person {
+  id           String   @id @default(uuid()) @db.Uuid
+  username     String   @unique
+  name         String
+  phoneNumber  String?  @unique
+  email        String?  @unique
+  passwordHash String?
+  avatarUrl    String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens                  RefreshToken[]
+  oauthAccounts                  OAuthAccount[]
+  deviceTokens                   DeviceToken[]
+  memberships                    Membership[]
+  votes                          Vote[]
+  appeals                        Appeal[]
+  decisionsCreated               Decision[]                 @relation("DecisionCreator")
+  uploadedDocuments              Document[]
+  auditLogs                      AuditLog[]
+  notifications                  Notification[]
+  invitationsCreated             Invitation[]
+  membershipApplications         MembershipApplication[]    @relation("MembershipApplicant")
+  membershipApplicationsReviewed MembershipApplication[]    @relation("MembershipReviewer")
+  platformSuspensionAppeals      PlatformSuspensionAppeal[]
+
+  @@map("persons")
+}
+
+/// Refresh Token للجلسات الطويلة
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  personId  String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  person Person @relation(fields: [personId], references: [id])
+
+  @@index([personId])
+  @@map("refresh_tokens")
+}
+
+/// حساب تسجيل الدخول عبر طرف ثالث (Google, Apple)
+model OAuthAccount {
+  id         String   @id @default(uuid()) @db.Uuid
+  personId   String   @db.Uuid
+  provider   String // google, apple
+  providerId String
+  email      String?
+  createdAt  DateTime @default(now())
+
+  person Person @relation(fields: [personId], references: [id])
+
+  @@unique([provider, providerId])
+  @@index([personId])
+  @@map("oauth_accounts")
+}
+
+/// أجهزة المستخدم لاستقبال إشعارات Push Notifications (بديل الـ SMS)
+model DeviceToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  personId  String   @db.Uuid
+  token     String   @unique
+  deviceOs  String? // ios, android, web
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id])
+
+  @@index([personId])
+  @@map("device_tokens")
+}
+
+/// رابط دعوة للانضمام لكيان — يُنشأ من قِبل المؤسس أو المدير ويُرسل للمدعوين
+model Invitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  token       String    @unique @default(uuid()) @db.Uuid
+  entityId    String    @db.Uuid
+  createdById String    @db.Uuid
+  expiresAt   DateTime?
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  entity                 Entity                  @relation(fields: [entityId], references: [id])
+  createdBy              Person                  @relation(fields: [createdById], references: [id])
+  membershipApplications MembershipApplication[]
+
+  @@index([entityId])
+  @@map("invitations")
+}
+
+// =================================================================
+// GROUP 1: IDENTITY & MEMBERSHIPS
+// الهوية والعضويات
+// =================================================================
+
+/// عضوية الشخص في كيان معين — الشخص يملك عضويات متعددة في كيانات مختلفة
+model Membership {
+  id        String     @id @default(uuid()) @db.Uuid
+  personId  String     @db.Uuid
+  entityId  String     @db.Uuid
+  role      MemberRole @default(MEMBER)
+  joinedAt  DateTime   @default(now())
+  exitedAt  DateTime?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  person           Person                @relation(fields: [personId], references: [id])
+  entity           Entity                @relation(fields: [entityId], references: [id])
+  preferences      MemberPreference?
+  subscriptions    Subscription[]
+  dependents       Dependent[]
+  beneficiary      Beneficiary?
+  committeeMembers CommitteeMembership[]
+  householdMember  HouseholdMembership?
+
+  @@unique([personId, entityId])
+  @@index([personId])
+  @@index([entityId])
+  @@map("memberships")
+}
+
+/// طلب الانضمام — يسبق العضوية الفعلية ولا يمنح صلاحيات داخل الكيان
+model MembershipApplication {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  personId                String                      @db.Uuid
+  entityId                String                      @db.Uuid
+  invitationId            String?                     @db.Uuid
+  status                  MembershipApplicationStatus @default(PENDING)
+  requestedRole           MemberRole                  @default(MEMBER)
+  relationshipDescription String?
+  sponsorName             String?
+  note                    String?
+  reviewedById            String?                     @db.Uuid
+  reviewerNotes           String?
+  submittedAt             DateTime                    @default(now())
+  reviewedAt              DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+
+  person     Person      @relation("MembershipApplicant", fields: [personId], references: [id])
+  entity     Entity      @relation(fields: [entityId], references: [id])
+  invitation Invitation? @relation(fields: [invitationId], references: [id])
+  reviewedBy Person?     @relation("MembershipReviewer", fields: [reviewedById], references: [id])
+
+  @@unique([personId, entityId])
+  @@index([entityId, status])
+  @@index([personId, status])
+  @@map("membership_applications")
+}
+
+/// تفضيلات العضو وشروطه للاشتراك — تُستخدم في محرك التوافق
+model MemberPreference {
+  id           String @id @default(uuid()) @db.Uuid
+  membershipId String @unique @db.Uuid
+
+  /// أنواع الحوكمة التي يقبلها العضو
+  acceptedGovernanceTypes GovernancePathType[]
+
+  /// سقف الصرف الأقصى الذي يقبله العضو
+  maxSpendingCapAccepted Decimal? @db.Decimal(12, 2)
+
+  /// هل يشترط وجود مراجع مستقل؟
+  requiresAuditAccess Boolean @default(false)
+
+  /// هل يشترط موافقة لجنة على القرارات؟
+  requiresCommitteeApproval Boolean @default(false)
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  membership Membership @relation(fields: [membershipId], references: [id])
+
+  @@map("member_preferences")
+}
+
+/// المعالون التابعون للعضو — للأهلية في بنود كالعلاج والزواج
+model Dependent {
+  id           String    @id @default(uuid()) @db.Uuid
+  membershipId String    @db.Uuid
+  name         String
+  relation     String // ابن، زوجة، والد، أخت...
+  birthDate    DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  membership  Membership   @relation(fields: [membershipId], references: [id])
+  beneficiary Beneficiary?
+
+  @@index([membershipId])
+  @@map("dependents")
+}
+
+// =================================================================
+// GROUP 2: ENTITIES
+// الكيانات — العائلة، العمارة، الحي، القبيلة
+// =================================================================
+
+/// الكيان هو التجمع الأساسي الدائم الذي يحمل هوية مستقلة
+model Entity {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String
+  type        EntityType
+  description String?
+  logoUrl     String?
+  isActive    Boolean    @default(true)
+  foundedAt   DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  /// الكيان الأب — للكيانات الفرعية (فخذ قبيلة، عائلة داخل صندوق ممتد)
+  parentEntityId String? @db.Uuid
+
+  /// الحملة المؤقتة — تُغلق تلقائياً عند انتهاء الهدف أو التاريخ
+  isCampaign     Boolean   @default(false)
+  campaignEndsAt DateTime?
+
+  /// حالة الكيان على مستوى المنصة — يضبطها Platform Operator فقط
+  platformStatus  EntityPlatformStatus @default(ACTIVE)
+  suspendedAt     DateTime?
+  suspendedReason String?
+
+  /// بيانات الحساب البنكي — للتحويلات الخارجية
+  bankAccountNumber String?
+  bankName          String?
+
+  /// طلب إغلاق الكيان — يُبدأ من المؤسس ويُعتمد من المنصة
+  closureStatus      String?   // PENDING_CLOSURE | CLOSED | ARCHIVED
+  closureRequestedAt DateTime?
+  closureReason      String?
+
+  memberships            Membership[]
+  wallets                Wallet[]
+  policy                 EntityPolicy?
+  ledgerAccount          LedgerAccount?
+  outgoingRelationships  EntityRelationship[]    @relation("SourceEntity")
+  incomingRelationships  EntityRelationship[]    @relation("TargetEntity")
+  auditLogs              AuditLog[]
+  documents              Document[]
+  beneficiaries          Beneficiary[]
+  committees             Committee[]
+  households             Household[]
+  subEntities            Entity[]                @relation("SubEntity")
+  parentEntity           Entity?                 @relation("SubEntity", fields: [parentEntityId], references: [id])
+  walletOwnerships       WalletOwnership[]
+  invitations            Invitation[]
+  membershipApplications MembershipApplication[]
+  supportSessions        SupportSession[]
+
+  @@index([parentEntityId])
+  @@map("entities")
+}
+
+/// دستور الكيان — السياسات والقواعد العامة التي تحكمه
+model EntityPolicy {
+  id       String @id @default(uuid()) @db.Uuid
+  entityId String @unique @db.Uuid
+
+  // --- سياسات العضوية ---
+  allowOpenMembership    Boolean @default(false) // هل يسمح بالانضمام الحر؟
+  requiresMemberApproval Boolean @default(true) // هل يحتاج موافقة المدير؟
+  allowMultiplePaths     Boolean @default(true) // هل يسمح بمسارات حوكمة متعددة؟
+  allowSubEntities       Boolean @default(false) // هل يسمح بكيانات فرعية؟
+  allowEntityRelations   Boolean @default(true) // هل يسمح بالربط مع كيانات أخرى؟
+
+  // --- أنواع الحوكمة المسموح بها في هذا الكيان ---
+  allowedGovernanceTypes GovernancePathType[]
+
+  // --- سياسات القرار الافتراضية ---
+  defaultVoteType       VoteType @default(SIMPLE_MAJORITY)
+  decisionQuorumPercent Int      @default(50)
+
+  // --- سياسات الشفافية الافتراضية ---
+  defaultTransparency TransparencyLevel @default(VISIBLE_TO_PARTICIPANTS)
+
+  // --- سياسات الاعتراضات ---
+  allowAppeals      Boolean @default(true)
+  appealTimeoutDays Int     @default(14)
+
+  // --- قواعد إضافية مرنة بـ JSONB ---
+  extraRules Json?
+
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entity         Entity          @relation(fields: [entityId], references: [id])
+  policyVersions PolicyVersion[]
+
+  @@map("entity_policies")
+}
+
+// =================================================================
+// GROUP 3: WALLETS & GOVERNANCE PATHS
+// المحافظ ومسارات الحوكمة — أهم طبقة في النظام
+// =================================================================
+
+/// المحفظة — الوعاء المالي لهدف واحد محدد
+model Wallet {
+  id          String            @id @default(uuid()) @db.Uuid
+  entityId    String            @db.Uuid
+  name        String
+  description String?
+  benefitType WalletBenefitType @default(SEPARABLE)
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  entity                      Entity               @relation(fields: [entityId], references: [id])
+  policy                      WalletPolicy?
+  governancePaths             GovernancePath[]
+  ledgerAccount               LedgerAccount?
+  documents                   Document[]
+  outgoingWalletRelationships WalletRelationship[] @relation("SourceWallet")
+  incomingWalletRelationships WalletRelationship[] @relation("TargetWallet")
+  ownerships                  WalletOwnership[]
+
+  @@index([entityId])
+  @@map("wallets")
+}
+
+/// سياسات المحفظة — قواعد الاشتراك والاستفادة والانسحاب
+model WalletPolicy {
+  id       String @id @default(uuid()) @db.Uuid
+  walletId String @unique @db.Uuid
+
+  // --- قواعد الاشتراك ---
+  subscriptionAmount    Decimal?              @db.Decimal(12, 2) // null = متغير حسب المسار
+  subscriptionFrequency SubscriptionFrequency @default(MONTHLY)
+  gracePeriodDays       Int                   @default(30) // فترة السماح قبل التعليق
+
+  // --- قواعد الاستفادة ---
+  minimumActiveMonths Int      @default(3) // فترة انتظار قبل الأهلية
+  maxBenefitPerYear   Decimal? @db.Decimal(12, 2)
+
+  // --- قواعد الانسحاب ---
+  exitNoticeDays   Int              @default(30)
+  exitRefundPolicy ExitRefundPolicy @default(NO_REFUND)
+
+  // --- سياسات الشفافية ---
+  balanceTransparency     TransparencyLevel @default(VISIBLE_TO_PARTICIPANTS)
+  transactionTransparency TransparencyLevel @default(VISIBLE_TO_PARTICIPANTS)
+  beneficiaryTransparency TransparencyLevel @default(VISIBLE_TO_COMMITTEE)
+
+  extraRules Json?
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  wallet         Wallet          @relation(fields: [walletId], references: [id])
+  policyVersions PolicyVersion[]
+
+  @@map("wallet_policies")
+}
+
+/// مسار الحوكمة — طريقة اتخاذ القرار وإدارة الثقة داخل المحفظة
+/// الفلسفة: أعضاء متفقون على هدف المحفظة ومختلفون على طريقة الثقة
+model GovernancePath {
+  id          String             @id @default(uuid()) @db.Uuid
+  walletId    String             @db.Uuid
+  committeeId String?            @db.Uuid
+  name        String
+  type        GovernancePathType
+  description String?
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  wallet               Wallet                   @relation(fields: [walletId], references: [id])
+  committee            Committee?               @relation(fields: [committeeId], references: [id])
+  policy               PathPolicy?
+  subscriptions        Subscription[]
+  spendingItems        SpendingItem[]
+  ledgerAccount        LedgerAccount?
+  documents            Document[]
+  decisions            Decision[]
+  disbursementRequests DisbursementRequest[]
+  transfersFrom        BalanceTransferRequest[] @relation("TransferFrom")
+  transfersTo          BalanceTransferRequest[] @relation("TransferTo")
+
+  @@index([walletId])
+  @@index([committeeId])
+  @@map("governance_paths")
+}
+
+/// سياسات مسار الحوكمة — قواعد القرار والتصويت والاعتراض
+model PathPolicy {
+  id               String @id @default(uuid()) @db.Uuid
+  governancePathId String @unique @db.Uuid
+
+  // --- قواعد القرار ---
+  voteType              VoteType
+  individualSpendingCap Decimal? @db.Decimal(12, 2) // للقرار الفردي بسقف فقط
+  requiresDocuments     Boolean  @default(true)
+
+  // --- قواعد التصويت ---
+  quorumPercent       Int @default(50) // نسبة الحضور للانعقاد
+  approvalPercent     Int @default(51) // نسبة الموافقة للإقرار
+  votingDurationHours Int @default(72)
+
+  // --- قواعد الاعتراض ---
+  allowAppeals     Boolean @default(true)
+  appealWindowDays Int     @default(7)
+
+  // --- قواعد مالية ---
+  /// لا يجوز النقل بين مسارات إلا بإجراء رسمي وقرار موثق
+  allowBalanceTransfer Boolean @default(false)
+
+  extraRules Json?
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  governancePath GovernancePath  @relation(fields: [governancePathId], references: [id])
+  policyVersions PolicyVersion[]
+
+  @@map("path_policies")
+}
+
+/// بند الصرف — التصنيف النهائي للإنفاق داخل المسار
+model SpendingItem {
+  id               String  @id @default(uuid()) @db.Uuid
+  governancePathId String  @db.Uuid
+  name             String
+  description      String?
+
+  // --- شروط الاستحقاق ---
+  eligibilityCriteria Json? // شروط قابلة للتكوين
+  requiredDocuments   String[] // أنواع المستندات المطلوبة
+
+  // --- سقف الصرف ---
+  maxAmountPerRequest Decimal? @db.Decimal(12, 2)
+  maxAmountPerYear    Decimal? @db.Decimal(12, 2)
+
+  // --- الخصوصية ---
+  privacyLevel TransparencyLevel @default(VISIBLE_TO_PARTICIPANTS)
+
+  // --- الموافقة ---
+  requiresCommitteeApproval Boolean @default(false)
+  allowsException           Boolean @default(false)
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  governancePath       GovernancePath        @relation(fields: [governancePathId], references: [id])
+  ledgerAccount        LedgerAccount?
+  decisions            Decision[]
+  disbursementRequests DisbursementRequest[]
+
+  @@index([governancePathId])
+  @@map("spending_items")
+}
+
+/// اشتراك العضو في مسار — آلة الحالة: Interested → Conditional → Active → Suspended → Exited
+model Subscription {
+  id               String            @id @default(uuid()) @db.Uuid
+  membershipId     String            @db.Uuid
+  governancePathId String            @db.Uuid
+  state            SubscriptionState @default(INTERESTED)
+
+  /// Snapshot من اللائحة والشروط وقت الاشتراك — عقد المشاركة
+  policySnapshot Json
+
+  // --- التواريخ ---
+  interestedAt DateTime  @default(now())
+  activeAt     DateTime? // متى أصبح فعالاً
+  suspendedAt  DateTime? // متى علّق
+  exitedAt     DateTime? // متى انسحب
+
+  // --- تفاصيل الدفع المتفق عليها ---
+  agreedAmount Decimal? @db.Decimal(12, 2)
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  membership     Membership      @relation(fields: [membershipId], references: [id])
+  governancePath GovernancePath  @relation(fields: [governancePathId], references: [id])
+  paymentDues    PaymentDue[]
+  paymentRecords PaymentRecord[]
+
+  @@unique([membershipId, governancePathId])
+  @@index([governancePathId])
+  @@map("subscriptions")
+}
+
+// =================================================================
+// GROUP 4: ENTITY & WALLET RELATIONSHIPS
+// العلاقات بين الكيانات والمحافظ
+// =================================================================
+
+/// العلاقة بين كيانين — تداخل عضوية، دعم مالي، محفظة مشتركة...
+model EntityRelationship {
+  id             String                 @id @default(uuid()) @db.Uuid
+  sourceEntityId String                 @db.Uuid
+  targetEntityId String                 @db.Uuid
+  type           EntityRelationshipType
+
+  terms          Json? // شروط العلاقة المتفق عليها
+  /// حالة الموافقة الثنائية: PENDING بانتظار الطرف الهدف
+  approvalStatus RelationshipStatus @default(PENDING)
+  approvedById   String?            @db.Uuid // من وافق من الطرف الهدف
+  approvedAt     DateTime?
+  isActive       Boolean            @default(false) // false حتى تُوافَق
+  startedAt      DateTime           @default(now())
+  endedAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sourceEntity Entity @relation("SourceEntity", fields: [sourceEntityId], references: [id])
+  targetEntity Entity @relation("TargetEntity", fields: [targetEntityId], references: [id])
+
+  @@index([sourceEntityId])
+  @@index([targetEntityId])
+  @@map("entity_relationships")
+}
+
+/// العلاقة بين محفظتين — مشتركة، دعم، تقارير فقط
+model WalletRelationship {
+  id             String @id @default(uuid()) @db.Uuid
+  sourceWalletId String @db.Uuid
+  targetWalletId String @db.Uuid
+
+  relationshipType    WalletRelationshipType
+  contributionPercent Decimal?               @db.Decimal(5, 2)
+  hasVotingRights     Boolean                @default(false)
+  hasOversightRights  Boolean                @default(false)
+
+  /// حالة الموافقة الثنائية: PENDING بانتظار الطرف الهدف
+  approvalStatus RelationshipStatus @default(PENDING)
+  approvedById   String?            @db.Uuid
+  approvedAt     DateTime?
+
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sourceWallet Wallet @relation("SourceWallet", fields: [sourceWalletId], references: [id])
+  targetWallet Wallet @relation("TargetWallet", fields: [targetWalletId], references: [id])
+
+  @@map("wallet_relationships")
+}
+
+/// ملكية نسبية للمحفظة — كل سجل يمثل حصة كيان في محفظة مشتركة
+model WalletOwnership {
+  id           String  @id @default(uuid()) @db.Uuid
+  walletId     String  @db.Uuid
+  entityId     String  @db.Uuid
+  sharePercent Decimal @db.Decimal(5, 2) // 0.00 – 100.00
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+  entity Entity @relation(fields: [entityId], references: [id])
+
+  @@unique([walletId, entityId])
+  @@index([walletId])
+  @@index([entityId])
+  @@map("wallet_ownerships")
+}
+
+// =================================================================
+// GROUP 5: DECISIONS & VOTING
+// القرارات والتصويت — كل قرار كائن مستقل قابل للتتبع
+// =================================================================
+
+/// القرار — أي قرار رسمي في النظام يكون كائناً مستقلاً موثقاً
+model Decision {
+  id String @id @default(uuid()) @db.Uuid
+
+  // --- الموضوع ---
+  subjectType SubjectType
+  subjectId   String      @db.Uuid
+
+  // --- نوع وسياق القرار ---
+  decisionType      DecisionType
+  governancePathId  String?      @db.Uuid
+  spendingItemId    String?      @db.Uuid
+  createdById       String       @db.Uuid
+  /// للقرار العاجل EMERGENCY_THEN_REVIEW — معرّف قرار المراجعة المرتبط
+  relatedDecisionId String?      @db.Uuid
+
+  // --- تفاصيل ---
+  title       String
+  description String?
+  amount      Decimal? @db.Decimal(12, 2) // للقرارات المالية
+
+  // --- التصويت ---
+  voteType        VoteType
+  votersScope     VotersScope
+  quorumPercent   Int         @default(50)
+  approvalPercent Int         @default(51)
+
+  // --- النتيجة ---
+  result             DecisionResult          @default(PENDING)
+  status             DecisionStatus          @default(OPEN)
+  executionStatus    DecisionExecutionStatus @default(NOT_STARTED)
+  executionUpdatedAt DateTime?
+
+  // --- التوقيت ---
+  opensAt  DateTime  @default(now())
+  closesAt DateTime
+  closedAt DateTime?
+
+  /// معرّفات المستندات المرفقة
+  attachments String[]
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  governancePath          GovernancePath?          @relation(fields: [governancePathId], references: [id])
+  spendingItem            SpendingItem?            @relation(fields: [spendingItemId], references: [id])
+  createdBy               Person                   @relation("DecisionCreator", fields: [createdById], references: [id])
+  votes                   Vote[]
+  appeals                 Appeal[]
+  documents               Document[]
+  transactions            LedgerTransaction[]
+  balanceTransferRequests BalanceTransferRequest[]
+
+  @@index([governancePathId])
+  @@index([subjectType, subjectId])
+  @@map("decisions")
+}
+
+/// صوت العضو في قرار ما
+model Vote {
+  id          String     @id @default(uuid()) @db.Uuid
+  decisionId  String     @db.Uuid
+  personId    String     @db.Uuid
+  /// معرّف الأسرة — يُملأ فقط لقرارات ONE_FAMILY_ONE_VOTE لمنع تصويت مزدوج
+  householdId String?    @db.Uuid
+  choice      VoteChoice
+  isSecret    Boolean    @default(false)
+  /// للتصويت بحسب المساهمة — قيمة الصوت
+  weight      Decimal    @default(1) @db.Decimal(5, 2)
+  notes       String?
+  votedAt     DateTime   @default(now())
+
+  decision  Decision   @relation(fields: [decisionId], references: [id])
+  person    Person     @relation(fields: [personId], references: [id])
+  household Household? @relation(fields: [householdId], references: [id])
+
+  @@unique([decisionId, personId])
+  @@unique([decisionId, householdId], map: "vote_decision_household_unique")
+  @@index([decisionId])
+  @@map("votes")
+}
+
+/// الاعتراض — حق رسمي موثق لكل عضو على أي قرار يمس حقوقه
+model Appeal {
+  id              String     @id @default(uuid()) @db.Uuid
+  decisionId      String     @db.Uuid
+  appealedById    String     @db.Uuid
+  policyVersionId String?    @db.Uuid
+  type            AppealType
+  reason          String
+
+  /// معرّفات المستندات الداعمة
+  evidence        String[]
+  requestedAction String? // ما يطلبه المعترض
+
+  // --- المراجعة ---
+  /// معرّف الشخص المراجع (قد يكون مراجع، لجنة، مجلس إدارة)
+  reviewerId    String? @db.Uuid
+  reviewerNotes String?
+
+  status AppealStatus @default(OPEN)
+
+  // --- التوقيت ---
+  submittedAt      DateTime  @default(now())
+  responseDeadline DateTime
+  respondedAt      DateTime?
+  closedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  decision      Decision       @relation(fields: [decisionId], references: [id])
+  appealedBy    Person         @relation(fields: [appealedById], references: [id])
+  policyVersion PolicyVersion? @relation(fields: [policyVersionId], references: [id])
+  documents     Document[]
+
+  @@index([decisionId])
+  @@index([appealedById])
+  @@index([policyVersionId])
+  @@map("appeals")
+}
+
+/// النزاع — خلاف رسمي يحتاج تحكيماً وقد يُصعَّد خارج النظام
+/// الفرق عن Appeal: الاعتراض ضد قرار محدد، النزاع قضية أشمل بين طرفين
+model Dispute {
+  id       String @id @default(uuid()) @db.Uuid
+  entityId String @db.Uuid
+
+  /// تضييق نطاق النزاع إلى محفظة أو مسار محدد (اختياري)
+  walletId         String? @db.Uuid
+  governancePathId String? @db.Uuid
+
+  // --- أطراف النزاع ---
+  initiatorId  String  @db.Uuid // من فتح النزاع
+  respondentId String? @db.Uuid // الطرف الآخر (قد يكون الإدارة)
+
+  title       String
+  description String
+  type        DisputeType
+
+  // --- الأدلة والمستندات ---
+  evidence String[] // معرّفات المستندات
+
+  // --- المراجعة والتحكيم ---
+  arbitratorId    String? @db.Uuid
+  arbitratorNotes String?
+  resolution      String?
+
+  status DisputeStatus @default(OPEN)
+
+  // --- التوقيت ---
+  openedAt DateTime  @default(now())
+  closedAt DateTime?
+  deadline DateTime?
+
+  // --- الاعتراض المرتبط (اختياري) ---
+  linkedAppealId  String? @db.Uuid
+  policyVersionId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  policyVersion PolicyVersion? @relation(fields: [policyVersionId], references: [id])
+  documents     Document[]
+
+  @@index([entityId])
+  @@index([initiatorId])
+  @@index([policyVersionId])
+  @@map("disputes")
+}
+
+// =================================================================
+// GROUP 6: FINANCIAL LEDGER
+// الدفتر المالي — محاسبة مزدوجة، مقسّم لكل مستوى
+// =================================================================
+
+/// حساب دفتري — لكل كيان، محفظة، مسار، وبند صرف حسابه المستقل
+model LedgerAccount {
+  id   String            @id @default(uuid()) @db.Uuid
+  type LedgerAccountType
+
+  // --- المرجع: واحد فقط يكون غير null حسب النوع ---
+  entityId         String? @unique @db.Uuid
+  walletId         String? @unique @db.Uuid
+  governancePathId String? @unique @db.Uuid
+  spendingItemId   String? @unique @db.Uuid
+
+  currency String  @default("SAR")
+  balance  Decimal @default(0) @db.Decimal(15, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entity         Entity?         @relation(fields: [entityId], references: [id])
+  wallet         Wallet?         @relation(fields: [walletId], references: [id])
+  governancePath GovernancePath? @relation(fields: [governancePathId], references: [id])
+  spendingItem   SpendingItem?   @relation(fields: [spendingItemId], references: [id])
+  entries        LedgerEntry[]
+
+  @@map("ledger_accounts")
+}
+
+/// العملية المالية الكاملة — لا حذف أبداً، الأخطاء تُعالج بعمليات عكسية
+model LedgerTransaction {
+  id         String                @id @default(uuid()) @db.Uuid
+  type       LedgerTransactionType
+  moneyType  MoneyType
+  originKind MoneyOriginKind       @default(UNSPECIFIED)
+
+  amount      Decimal @db.Decimal(15, 2)
+  currency    String  @default("SAR")
+  description String
+
+  /// رقم مرجعي خارجي: رقم إيصال، فاتورة، تحويل بنكي
+  reference String?
+
+  /// القرار المرتبط بهذه العملية (إن وجد)
+  decisionId String? @db.Uuid
+
+  /// الشخص الذي أقر العملية
+  approvedById String? @db.Uuid
+
+  /// للعمليات العكسية — معرّف العملية الأصلية المعكوسة
+  reversedTransactionId String? @unique @db.Uuid
+  isReversed            Boolean @default(false)
+
+  /// تتبع مصدر التمويل — لعمليات الدعم والنقل بين الكيانات
+  sourceMembershipId String? @db.Uuid
+  sourceEntityId     String? @db.Uuid
+
+  /// تتبع موحد لأصل المال عبر كل المسارات
+  originEntityId         String? @db.Uuid
+  originWalletId         String? @db.Uuid
+  originGovernancePathId String? @db.Uuid
+  originMembershipId     String? @db.Uuid
+  originPersonId         String? @db.Uuid
+  originNote             String?
+
+  /// معرّفات مستندات الإثبات (إيصال، صورة تحويل)
+  attachments String[]
+
+  createdAt DateTime @default(now())
+
+  decision Decision?     @relation(fields: [decisionId], references: [id])
+  entries  LedgerEntry[]
+
+  @@index([decisionId])
+  @@index([sourceEntityId])
+  @@index([originEntityId])
+  @@index([originMembershipId])
+  @@index([originPersonId])
+  @@map("ledger_transactions")
+}
+
+/// قيد الحساب — كل عملية تُنتج قيوداً (مدين/دائن) لضمان التوازن
+model LedgerEntry {
+  id            String          @id @default(uuid()) @db.Uuid
+  transactionId String          @db.Uuid
+  accountId     String          @db.Uuid
+  type          LedgerEntryType
+  amount        Decimal         @db.Decimal(15, 2)
+
+  createdAt DateTime @default(now())
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id])
+  account     LedgerAccount     @relation(fields: [accountId], references: [id])
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@map("ledger_entries")
+}
+
+/// لقطة الرصيد — أرشفة دورية للأرصدة للتقارير والتدقيق
+model BalanceSnapshot {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @db.Uuid
+  balance   Decimal  @db.Decimal(15, 2)
+  /// الفترة بصيغة YYYY-MM للأرشفة الشهرية
+  period    String
+  takenAt   DateTime @default(now())
+
+  @@index([accountId, period])
+  @@map("balance_snapshots")
+}
+
+// =================================================================
+// GROUP 7: SUPPORT, AUDIT & NOTIFICATIONS
+// الدعم، التدقيق، والإشعارات
+// =================================================================
+
+/// المستند — المرفقات والإيصالات والتقارير الطبية وما شابه
+model Document {
+  id           String @id @default(uuid()) @db.Uuid
+  uploadedById String @db.Uuid
+
+  name     String
+  fileUrl  String
+  fileType String // PDF, IMAGE, EXCEL...
+  fileSize Int // bytes
+
+  /// سياق المستند: أي كيان ينتمي إليه
+  entityId              String? @db.Uuid
+  walletId              String? @db.Uuid
+  governancePathId      String? @db.Uuid
+  decisionId            String? @db.Uuid
+  disbursementRequestId String? @db.Uuid
+  appealId              String? @db.Uuid
+  disputeId             String? @db.Uuid
+
+  privacyLevel TransparencyLevel @default(VISIBLE_TO_COMMITTEE)
+
+  createdAt DateTime @default(now())
+
+  uploadedBy          Person               @relation(fields: [uploadedById], references: [id])
+  entity              Entity?              @relation(fields: [entityId], references: [id])
+  wallet              Wallet?              @relation(fields: [walletId], references: [id])
+  governancePath      GovernancePath?      @relation(fields: [governancePathId], references: [id])
+  decision            Decision?            @relation(fields: [decisionId], references: [id])
+  disbursementRequest DisbursementRequest? @relation(fields: [disbursementRequestId], references: [id])
+  appeal              Appeal?              @relation(fields: [appealId], references: [id])
+  dispute             Dispute?             @relation(fields: [disputeId], references: [id])
+
+  @@index([entityId])
+  @@index([uploadedById])
+  @@index([walletId])
+  @@index([governancePathId])
+  @@index([decisionId])
+  @@index([disbursementRequestId])
+  @@index([appealId])
+  @@index([disputeId])
+  @@map("documents")
+}
+
+/// سجل التدقيق — غير قابل للحذف، يوثق كل تغيير وقرار في النظام
+model AuditLog {
+  id     String      @id @default(uuid()) @db.Uuid
+  action AuditAction
+
+  /// من نفّذ الفعل
+  personId String? @db.Uuid
+
+  /// على أي كيان جرى الحدث (للفلترة السريعة)
+  entityId String? @db.Uuid
+
+  /// الجدول والسجل المستهدف
+  targetType String // اسم الجدول
+  targetId   String @db.Uuid
+
+  /// ماذا تغير
+  oldValue Json?
+  newValue Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  person Person? @relation(fields: [personId], references: [id])
+  entity Entity? @relation(fields: [entityId], references: [id])
+
+  @@index([targetType, targetId])
+  @@index([personId])
+  @@index([entityId])
+  @@map("audit_logs")
+}
+
+/// الإشعار — تنبيهات للأعضاء عن القرارات والدفعات والاعتراضات
+model Notification {
+  id       String @id @default(uuid()) @db.Uuid
+  personId String @db.Uuid
+
+  type  NotificationType
+  title String
+  body  String
+
+  targetType NotificationTargetType?
+  targetId   String?                 @db.Uuid
+
+  isRead Boolean   @default(false)
+  sentAt DateTime  @default(now())
+  readAt DateTime?
+
+  person Person @relation(fields: [personId], references: [id])
+
+  @@index([personId, isRead])
+  @@map("notifications")
+}
+
+/// القاعدة القابلة للتكوين — بديل عن كتابة القواعد جامدة في الكود
+/// التسلسل الهرمي: entity → wallet → path → spending_item → member
+model Rule {
+  id String @id @default(uuid()) @db.Uuid
+
+  // --- السياق: على أي مستوى تنطبق القاعدة ---
+  targetType RuleTargetType
+  targetId   String         @db.Uuid
+
+  name        String
+  description String?
+
+  ruleType RuleType
+
+  /// قيمة القاعدة — مرنة بـ JSONB
+  ruleData Json
+
+  isActive  Boolean  @default(true)
+  priority  Int      @default(0) // الأعلى أولوية يُطبَّق أولاً
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([targetType, targetId])
+  @@map("rules")
+}
+
+/// النسخ التاريخية للسياسات — يُرجع إليها عند النزاعات
+/// القاعدة: يُقرأ نسخة السياسة وقت حدوث القرار، لا النسخة الحالية
+model PolicyVersion {
+  id String @id @default(uuid()) @db.Uuid
+
+  // --- المصدر: أحد هذه فقط غير null ---
+  entityPolicyId String? @db.Uuid
+  walletPolicyId String? @db.Uuid
+  pathPolicyId   String? @db.Uuid
+
+  version      Int
+  /// نسخة كاملة من السياسة وقت إنشاء هذا الإصدار
+  snapshot     Json
+  changedById  String  @db.Uuid
+  changeReason String?
+
+  createdAt DateTime @default(now())
+
+  entityPolicy EntityPolicy? @relation(fields: [entityPolicyId], references: [id])
+  walletPolicy WalletPolicy? @relation(fields: [walletPolicyId], references: [id])
+  pathPolicy   PathPolicy?   @relation(fields: [pathPolicyId], references: [id])
+  appeals      Appeal[]
+  disputes     Dispute[]
+
+  @@index([entityPolicyId])
+  @@index([walletPolicyId])
+  @@index([pathPolicyId])
+  @@map("policy_versions")
+}
+
+// =================================================================
+// GROUP 8: PAYMENT DUES & DISBURSEMENT REQUESTS
+// جدول الدفعات المستحقة وطلبات الصرف
+// =================================================================
+
+/// دفعة اشتراك مستحقة — تُولَّد تلقائياً عند تفعيل الاشتراك لكل فترة
+model PaymentDue {
+  id             String           @id @default(uuid()) @db.Uuid
+  subscriptionId String           @db.Uuid
+  /// الفترة بصيغة YYYY-MM
+  periodLabel    String
+  dueDate        DateTime
+  amountDue      Decimal          @db.Decimal(12, 2)
+  status         PaymentDueStatus @default(PENDING)
+  settledAt      DateTime?
+
+  /// معرّف العملية المالية عند التسديد
+  transactionId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription   Subscription    @relation(fields: [subscriptionId], references: [id])
+  paymentRecords PaymentRecord[]
+
+  @@unique([subscriptionId, periodLabel])
+  @@index([subscriptionId])
+  @@map("payment_dues")
+}
+
+/// سجل إثبات سداد اشتراك — يمر بالمراجعة قبل اعتماد القيد المالي
+model PaymentRecord {
+  id                   String              @id @default(uuid()) @db.Uuid
+  subscriptionId       String              @db.Uuid
+  paymentDueId         String              @db.Uuid
+  submittedById        String              @db.Uuid
+  amount               Decimal             @db.Decimal(12, 2)
+  reference            String
+  description          String?
+  attachments          String[]
+  status               PaymentRecordStatus @default(SUBMITTED)
+  paymentMethod        PaymentMethod       @default(MANUAL)
+  gatewayTransactionId String?             @unique
+
+  reviewedById  String? @db.Uuid
+  reviewerNotes String?
+  transactionId String? @unique @db.Uuid
+
+  submittedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+  confirmedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  paymentDue   PaymentDue   @relation(fields: [paymentDueId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([paymentDueId])
+  @@index([submittedById])
+  @@map("payment_records")
+}
+
+/// المستفيد المعتمد لطلبات الصرف — قد يكون عضواً أو معالاً أو طرفاً خارجياً
+model Beneficiary {
+  id           String          @id @default(uuid()) @db.Uuid
+  entityId     String          @db.Uuid
+  type         BeneficiaryType @default(EXTERNAL)
+  membershipId String?         @unique @db.Uuid
+  dependentId  String?         @unique @db.Uuid
+  displayName  String
+  notes        String?
+  annualCap    Decimal?        @db.Decimal(12, 2)
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  entity               Entity                @relation(fields: [entityId], references: [id])
+  membership           Membership?           @relation(fields: [membershipId], references: [id])
+  dependent            Dependent?            @relation(fields: [dependentId], references: [id])
+  disbursementRequests DisbursementRequest[]
+
+  @@index([entityId])
+  @@index([membershipId])
+  @@index([dependentId])
+  @@map("beneficiaries")
+}
+
+/// طلب صرف من عضو — يسبق القرار الرسمي وتنفيذ المحاسبة
+model DisbursementRequest {
+  id               String @id @default(uuid()) @db.Uuid
+  governancePathId String @db.Uuid
+  spendingItemId   String @db.Uuid
+  requestedById    String @db.Uuid
+
+  /// المستفيد المرتبط بالسجل المالي (اختياري)
+  beneficiaryId    String?  @db.Uuid
+  beneficiaryName  String
+  beneficiaryNotes String?
+  amount           Decimal  @db.Decimal(12, 2)
+  description      String
+  attachments      String[]
+
+  status DisbursementRequestStatus @default(PENDING)
+
+  reviewedById  String? @db.Uuid
+  reviewerNotes String?
+  /// القرار الرسمي المرتبط بهذا الطلب (اختياري)
+  decisionId    String? @db.Uuid
+  /// العملية المالية عند التنفيذ
+  transactionId String? @unique @db.Uuid
+
+  requestedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+  executedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  governancePath GovernancePath @relation(fields: [governancePathId], references: [id])
+  spendingItem   SpendingItem   @relation(fields: [spendingItemId], references: [id])
+  beneficiary    Beneficiary?   @relation(fields: [beneficiaryId], references: [id])
+  documents      Document[]
+
+  @@index([governancePathId])
+  @@index([requestedById])
+  @@index([beneficiaryId])
+  @@map("disbursement_requests")
+}
+
+// =================================================================
+// GROUP: HOUSEHOLDS
+// الأسر — وحدة التصويت "صوت لكل أسرة" في كيانات العائلات
+// =================================================================
+
+/// الأسرة كوحدة تصويت — تمنع هيمنة العائلات الكبيرة على التصويت
+model Household {
+  id       String @id @default(uuid()) @db.Uuid
+  entityId String @db.Uuid
+  name     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entity  Entity                @relation(fields: [entityId], references: [id])
+  members HouseholdMembership[]
+  votes   Vote[]
+
+  @@index([entityId])
+  @@map("households")
+}
+
+/// ربط العضوية بالأسرة — عضو واحد ينتمي لأسرة واحدة فقط داخل الكيان
+model HouseholdMembership {
+  householdId  String @db.Uuid
+  membershipId String @unique @db.Uuid
+
+  household  Household  @relation(fields: [householdId], references: [id])
+  membership Membership @relation(fields: [membershipId], references: [id])
+
+  @@id([householdId, membershipId])
+  @@map("household_memberships")
+}
+
+// =================================================================
+// GROUP: BALANCE TRANSFERS
+// طلبات نقل الرصيد بين المسارات
+// =================================================================
+
+/// طلب نقل رصيد بين مسارين — يتطلب قراراً رسمياً موثقاً
+model BalanceTransferRequest {
+  id         String                       @id @default(uuid()) @db.Uuid
+  fromPathId String                       @db.Uuid
+  toPathId   String                       @db.Uuid
+  amount     Decimal                      @db.Decimal(12, 2)
+  reason     String
+  status     BalanceTransferRequestStatus @default(PENDING)
+
+  requestedById String  @db.Uuid
+  decisionId    String? @db.Uuid
+  transactionId String? @unique @db.Uuid
+
+  reviewerNotes String?
+  reviewedById  String?   @db.Uuid
+  reviewedAt    DateTime?
+  executedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fromPath GovernancePath @relation("TransferFrom", fields: [fromPathId], references: [id])
+  toPath   GovernancePath @relation("TransferTo", fields: [toPathId], references: [id])
+  decision Decision?      @relation(fields: [decisionId], references: [id])
+
+  @@index([fromPathId])
+  @@index([toPathId])
+  @@map("balance_transfer_requests")
+}
+
+// =================================================================
+// GROUP: COMMITTEES
+// اللجان — مجموعات متخصصة داخل الكيان ترتبط بمسارات الحوكمة
+// =================================================================
+
+/// لجنة متخصصة داخل الكيان (صحية، اجتماعية، مالية...)
+model Committee {
+  id          String   @id @default(uuid()) @db.Uuid
+  entityId    String   @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entity  Entity                @relation(fields: [entityId], references: [id])
+  members CommitteeMembership[]
+  paths   GovernancePath[]
+
+  @@index([entityId])
+  @@map("committees")
+}
+
+/// ربط العضوية باللجنة — عضو يمكن أن ينتمي لأكثر من لجنة
+model CommitteeMembership {
+  committeeId  String @db.Uuid
+  membershipId String @db.Uuid
+
+  committee  Committee  @relation(fields: [committeeId], references: [id])
+  membership Membership @relation(fields: [membershipId], references: [id])
+
+  @@id([committeeId, membershipId])
+  @@map("committee_memberships")
+}
+
+// =================================================================
+// ENUMS
+// =================================================================
+
+/// نوع الكيان
+enum EntityType {
+  FAMILY // عائلة
+  TRIBE // قبيلة
+  BUILDING // عمارة
+  NEIGHBORHOOD // حي
+  COMMUNITY // جماعة عامة
+  CAMPAIGN // حملة مؤقتة
+
+  @@map("entity_type")
+}
+
+/// دور العضو داخل الكيان
+enum MemberRole {
+  FOUNDER // مؤسس
+  ADMIN // مدير
+  TREASURER // أمين صندوق
+  AUDITOR // مراجع
+  COMMITTEE_MEMBER // عضو لجنة
+  MEMBER // عضو عادي
+
+  @@map("member_role")
+}
+
+enum MembershipApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+
+  @@map("membership_application_status")
+}
+
+/// نوع مسار الحوكمة
+enum GovernancePathType {
+  BOARD // مجلس إدارة منتخب
+  COMMITTEE // لجنة معينة
+  INDIVIDUAL_WITH_CAP // قرار فردي بسقف محدد
+  PUBLIC_VOTE // تصويت عام لكل الأعضاء
+  DONATION_ONLY // تبرع فقط، بلا حق استفادة
+  EMERGENCY_FAST // قرار عاجل ثم مراجعة لاحقة
+
+  @@map("governance_path_type")
+}
+
+/// حالة اشتراك العضو — آلة الحالة الكاملة
+enum SubscriptionState {
+  INTERESTED // مهتم — لم يقرر بعد
+  CONDITIONAL // مشروط — ينتظر تحقق شروطه
+  ACTIVE // فعّال — متوافق ويدفع ويستفيد
+  SUSPENDED // معلّق — توقف بسبب عدم الدفع أو تغيير الشروط
+  EXITED // منسحب — خرج من المسار
+  SUPPORTER_ONLY // داعم فقط — يدفع بلا حق استفادة
+
+  @@map("subscription_state")
+}
+
+/// مستوى شفافية المعلومة
+enum TransparencyLevel {
+  PUBLIC_TO_MEMBERS // لكل أعضاء الكيان
+  VISIBLE_TO_PARTICIPANTS // لمشتركي المحفظة أو المسار فقط
+  VISIBLE_TO_COMMITTEE // للجنة فقط
+  VISIBLE_TO_AUDITOR // للمراجع فقط
+  HIDDEN_SENSITIVE // مخفي تماماً إلا لمعالج الحالة
+  AGGREGATED_ONLY // إجمالي فقط، بدون تفاصيل أفراد
+
+  @@map("transparency_level")
+}
+
+/// نوع الأموال — يحدد حقوق الدافع
+enum MoneyType {
+  SUBSCRIPTION // اشتراك — التزام دوري مقابل حقوق محددة
+  DONATION // تبرع — دعم اختياري بلا حق استفادة تلقائي
+  SERVICE_FEE // رسم خدمات — تغطية تكلفة مستمرة
+  PROJECT_CONTRIBUTION // مساهمة مشروع — تمويل هدف محدد
+  ENTITY_SUPPORT // دعم من كيان لآخر — دعم مؤسسي
+  CASE_DONATION // تبرع لحالة — مخصص لبند أو حملة محددة
+
+  @@map("money_type")
+}
+
+/// نوع أصل المال — مصدر المبلغ قبل تسجيل العملية
+enum MoneyOriginKind {
+  UNSPECIFIED // غير محدد (توافق خلفي أو إدخال قديم)
+  SUBSCRIPTION_PAYMENT // دفعة اشتراك من عضو
+  PATH_DISBURSEMENT // صرف من رصيد مسار
+  PATH_TRANSFER // تحويل بين مسارات
+  REVERSAL // عكس عملية سابقة
+  MANUAL_ADJUSTMENT // تسوية/إدخال يدوي
+
+  @@map("money_origin_kind")
+}
+
+/// نوع استفادة المحفظة
+enum WalletBenefitType {
+  SEPARABLE // مصلحة قابلة للفصل — استفادة فردية (علاج، زواج)
+  SHARED // مصلحة مشتركة — استفادة جماعية (حارس، مصعد)
+
+  @@map("wallet_benefit_type")
+}
+
+/// دورية الاشتراك
+enum SubscriptionFrequency {
+  MONTHLY // شهري
+  QUARTERLY // ربع سنوي
+  ANNUAL // سنوي
+
+  @@map("subscription_frequency")
+}
+
+/// سياسة الاسترداد عند الانسحاب
+enum ExitRefundPolicy {
+  NO_REFUND // لا استرداد
+  PARTIAL_REFUND // استرداد جزئي
+  FULL_REFUND // استرداد كامل
+
+  @@map("exit_refund_policy")
+}
+
+/// نوع القرار
+enum DecisionType {
+  CREATE_WALLET // إنشاء محفظة
+  CREATE_PATH // إنشاء مسار
+  DISBURSE_FUNDS // صرف مبلغ
+  MODIFY_SUBSCRIPTION // تعديل اشتراك
+  MODIFY_GOVERNANCE // تعديل حوكمة
+  TRANSFER_BALANCE // نقل رصيد بين مسارات
+  ACCEPT_MEMBER // قبول عضو
+  EXPEL_MEMBER // إيقاف عضو
+  OPEN_DISPUTE // فتح نزاع
+  CLOSE_WALLET // إغلاق محفظة
+  FREEZE_WALLET // تجميد محفظة
+  MERGE_PATHS // دمج مسارين
+
+  @@map("decision_type")
+}
+
+/// نتيجة القرار
+enum DecisionResult {
+  PENDING // معلق — لم يُبَتّ فيه بعد
+  APPROVED // مقبول
+  REJECTED // مرفوض
+
+  @@map("decision_result")
+}
+
+/// حالة القرار
+enum DecisionStatus {
+  OPEN // مفتوح للتصويت
+  CLOSED // مغلق بقرار نهائي
+  APPEALED // معترض عليه
+  EXPIRED // انتهت مدته بدون نصاب
+
+  @@map("decision_status")
+}
+
+/// حالة تنفيذ القرار الفعلية
+enum DecisionExecutionStatus {
+  NOT_STARTED
+  PARTIAL
+  COMPLETED
+  REVERSED
+  FAILED
+
+  @@map("decision_execution_status")
+}
+
+/// نوع التصويت
+enum VoteType {
+  ONE_MEMBER_ONE_VOTE // صوت لكل عضو
+  ONE_FAMILY_ONE_VOTE // صوت لكل أسرة — يمنع هيمنة العائلات الكبيرة
+  SUBSCRIBERS_ONLY // فقط من يدفع يصوت
+  BY_CONTRIBUTION // حسب حجم المساهمة — يُستخدم بحذر
+  SIMPLE_MAJORITY // أغلبية بسيطة 50%+1
+  TWO_THIRDS // أغلبية الثلثين — للقرارات الثقيلة
+  SECRET // تصويت سري — للقرارات الحساسة
+  COMMITTEE_APPROVAL // موافقة اللجنة فقط
+  INDIVIDUAL_WITH_CAP // قرار فردي بسقف محدد
+  EMERGENCY_THEN_REVIEW // قرار عاجل ينفذ فوراً ثم يُراجع
+
+  @@map("vote_type")
+}
+
+/// خيار التصويت
+enum VoteChoice {
+  APPROVE // موافق
+  REJECT // رافض
+  ABSTAIN // ممتنع
+
+  @@map("vote_choice")
+}
+
+/// نوع الإجراء (اعتراض / نزاع / مراجعة)
+enum AppealType {
+  CLARIFICATION_REQUEST // طلب توضيح — خطورة منخفضة
+  APPEAL // اعتراض — خطورة متوسطة
+  FORMAL_REVIEW // مراجعة رسمية من المراجع — خطورة متوسطة
+  ESCALATION // تصعيد لجهة أعلى — خطورة عالية
+  INTERNAL_DISPUTE // نزاع داخلي — خطورة عالية
+  POLICY_VIOLATION // شبهة مخالفة لائحة — خطورة عالية
+  LEGAL_CONCERN // شبهة قانونية تحتاج جهة خارجية — حرجة
+
+  @@map("appeal_type")
+}
+
+/// حالة الاعتراض
+enum AppealStatus {
+  OPEN // مفتوح — لم يُعالج بعد
+  UNDER_REVIEW // قيد المراجعة
+  CLOSED // مغلق بقرار نهائي
+  ESCALATED // مصعّد لجهة أعلى
+
+  @@map("appeal_status")
+}
+
+/// نوع العلاقة بين كيانين
+enum EntityRelationshipType {
+  MEMBERSHIP_OVERLAP // تداخل عضوية — النظام يرى المشتركين في الاثنين
+  FINANCIAL_SUPPORT // دعم مالي من كيان لآخر
+  SHARED_WALLET // محفظة مشتركة يمولها كيانان
+  MANAGEMENT_DELEGATION // تفويض إدارة — كيان يدير نيابة عن آخر
+  MERGER // دمج كيانين أو محفظتين
+  CONTRIBUTION_NO_VOTE // تمويل فقط — بلا حق قرار
+  CONTRIBUTION_WITH_OVERSIGHT // تمويل مع حق رقابة
+  REPORT_SHARING // مشاركة تقارير وشفافية فقط
+
+  @@map("entity_relationship_type")
+}
+
+/// نوع الحساب الدفتري
+enum LedgerAccountType {
+  ENTITY // رصيد الكيان الإجمالي
+  WALLET // رصيد المحفظة
+  PATH // رصيد المسار داخل المحفظة
+  SPENDING_ITEM // ما صُرف على بند معين
+  EXTERNAL // دعم مصدره كيان خارجي
+
+  @@map("ledger_account_type")
+}
+
+/// نوع العملية المالية
+enum LedgerTransactionType {
+  SUBSCRIPTION_PAYMENT // دفع اشتراك شهري
+  DONATION // تبرع
+  SERVICE_FEE // رسم خدمات
+  PROJECT_CONTRIBUTION // مساهمة مشروع
+  DISBURSEMENT // صرف — دفع لمستفيد
+  TRANSFER // تحويل بين مسارات أو محافظ
+  ENTITY_SUPPORT // دعم مالي من كيان لآخر
+  ADJUSTMENT // تعديل — قيد تصحيحي
+  REVERSAL // عكس — عملية عكسية لتصحيح خطأ
+
+  @@map("ledger_transaction_type")
+}
+
+/// نوع القيد المحاسبي
+enum LedgerEntryType {
+  DEBIT // مدين
+  CREDIT // دائن
+
+  @@map("ledger_entry_type")
+}
+
+/// نوع النزاع
+enum DisputeType {
+  FINANCIAL_MISCONDUCT // سوء إدارة مالية
+  GOVERNANCE_VIOLATION // مخالفة الحوكمة
+  MEMBER_CONFLICT // نزاع بين أعضاء
+  POLICY_BREACH // انتهاك اللائحة
+  UNFAIR_DECISION // قرار غير عادل
+  TRANSPARENCY_ISSUE // إشكالية في الشفافية
+  LEGAL_MATTER // قضية قانونية
+
+  @@map("dispute_type")
+}
+
+/// حالة النزاع
+enum DisputeStatus {
+  OPEN // مفتوح
+  UNDER_MEDIATION // قيد الوساطة
+  ESCALATED // مصعّد لجهة خارجية
+  RESOLVED // محسوم
+  CLOSED // مغلق
+
+  @@map("dispute_status")
+}
+
+/// مستوى تطبيق القاعدة
+enum RuleTargetType {
+  ENTITY // على مستوى الكيان
+  WALLET // على مستوى المحفظة
+  PATH // على مستوى المسار
+  SPENDING_ITEM // على مستوى بند الصرف
+  MEMBERSHIP // على مستوى عضوية بعينها
+
+  @@map("rule_target_type")
+}
+
+/// نوع المستفيد المالي
+enum BeneficiaryType {
+  MEMBER
+  DEPENDENT
+  EXTERNAL
+
+  @@map("beneficiary_type")
+}
+
+/// حالة سجل إثبات سداد الاشتراك
+enum PaymentRecordStatus {
+  PROCESSING // قيد المعالجة (بوابة الدفع)
+  SUBMITTED // أُرسل وينتظر المراجعة
+  CONFIRMED // اعتُمد وسُجل في الدفتر
+  REJECTED // رُفض بعد المراجعة
+  CANCELLED // أُلغي من مقدّمه قبل المراجعة
+
+  @@map("payment_record_status")
+}
+
+/// حالة الدفعة المستحقة
+enum PaymentDueStatus {
+  PENDING // لم تُسدَّد بعد
+  PAID // مدفوعة
+  OVERDUE // متأخرة عن موعدها
+  WAIVED // معفاة بقرار رسمي
+
+  @@map("payment_due_status")
+}
+
+/// طريقة الدفع
+enum PaymentMethod {
+  MANUAL
+  STRIPE
+  MOYASAR
+
+  @@map("payment_method")
+}
+
+/// حالة طلب الصرف
+enum DisbursementRequestStatus {
+  PENDING // بانتظار المراجعة
+  APPROVED // معتمد — ينتظر التنفيذ
+  REJECTED // مرفوض
+  EXECUTED // منفَّذ — صُرف فعلاً
+  CANCELLED // ملغى من قِبَل مقدِّمه
+
+  @@map("disbursement_request_status")
+}
+
+/// حالة طلب نقل الرصيد بين المسارات
+enum BalanceTransferRequestStatus {
+  PENDING // بانتظار القرار
+  APPROVED // معتمد — ينتظر التنفيذ
+  REJECTED // مرفوض
+  EXECUTED // منفَّذ
+  CANCELLED // ملغى
+
+  @@map("balance_transfer_request_status")
+}
+
+/// حالة موافقة العلاقة بين الكيانين
+enum RelationshipStatus {
+  PENDING // بانتظار موافقة الطرف الهدف
+  ACTIVE // مفعّلة — وافق الطرفان
+  REJECTED // رفضها الطرف الهدف
+  ENDED // منتهية
+
+  @@map("relationship_status")
+}
+
+/// نوع الكيان المستهدف في القرار
+enum SubjectType {
+  ENTITY
+  WALLET
+  PATH
+  SPENDING_ITEM
+  MEMBERSHIP
+
+  @@map("subject_type")
+}
+
+/// نطاق المصوّتين في القرار
+enum VotersScope {
+  ALL_MEMBERS // كل أعضاء الكيان
+  PATH_SUBSCRIBERS // مشتركو المسار فقط
+  COMMITTEE // اللجنة فقط
+
+  @@map("voters_scope")
+}
+
+/// نوع القاعدة القابلة للتكوين
+enum RuleType {
+  SPENDING_LIMIT // سقف صرف
+  REQUIRES_DOCUMENTS // يشترط مستندات
+  QUORUM // نصاب قانوني
+  TRANSFER // شروط النقل
+  ELIGIBILITY // شروط الأهلية
+
+  @@map("rule_type")
+}
+
+/// نوع الإشعار
+enum NotificationType {
+  VOTE_REQUIRED // قرار يحتاج تصويت
+  PAYMENT_CONFIRMED // تأكيد دفعة
+  PAYMENT_DUE // دفعة مستحقة
+  APPEAL_UPDATE // تحديث اعتراض
+  POLICY_CHANGED // تغيير سياسة
+  GOVERNANCE_CHANGED // تغيير حوكمة
+  RELATIONSHIP_REQUEST // طلب ربط كيان
+  CAMPAIGN_EXPIRED // انتهاء مدة حملة تلقائياً
+  MEMBERSHIP_APPLICATION_APPROVED
+  MEMBERSHIP_APPLICATION_REJECTED
+  PLATFORM_ACCESS
+
+  @@map("notification_type")
+}
+
+/// نوع الهدف المرتبط بالإشعار
+enum NotificationTargetType {
+  DECISION
+  APPEAL
+  SUBSCRIPTION
+  WALLET
+  GOVERNANCE_PATH
+  ENTITY
+  ENTITY_RELATIONSHIP
+
+  @@map("notification_target_type")
+}
+
+/// نوع علاقة المحفظتين
+enum WalletRelationshipType {
+  SHARED // محفظة مشتركة
+  SUPPORT // دعم مالي
+  REPORT_ONLY // تقارير فقط
+
+  @@map("wallet_relationship_type")
+}
+
+/// أنواع أحداث سجل التدقيق
+enum AuditAction {
+  CREATE // إنشاء
+  UPDATE // تعديل
+  DELETE // حذف (منع قانوني — للتسجيل فقط)
+  APPROVE // موافقة
+  REJECT // رفض
+  VOTE // تصويت
+  APPEAL // اعتراض
+  LOGIN // دخول
+  LOGOUT // خروج
+
+  @@map("audit_action")
+}
+
+/// قالب لإنشاء الكيانات الجديدة مع محافظها ومساراتها الافتراضية
+model EntityTemplate {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String
+  type        EntityType
+  description String?
+
+  /// سياسات الكيان الافتراضية
+  defaultPolicy Json?
+
+  /// المحافظ الافتراضية (مصفوفة JSON)
+  defaultWallets Json?
+
+  /// مسارات الحوكمة الافتراضية (مصفوفة JSON)
+  defaultPaths Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =================================================================
+// PLATFORM LAYER ENUMS — تابعة لـ GROUP -1
+// =================================================================
+
+/// دور المستخدم في منصة CollectiveTrustOS (Platform Layer فقط)
+enum PlatformRole {
+  OWNER // مالك المنصة — صلاحيات كاملة
+  SUPER_ADMIN // مشرف عام — إدارة يومية
+  SUPPORT // دعم فني — وصول مقيّد بالزمن والسبب
+  ANALYST // محلل — إحصاءات مجمّعة فقط، بدون PII
+
+  @@map("platform_role")
+}
+
+/// نوع وصول Platform Operator لبيانات كيان
+enum PlatformAccessType {
+  READ // قراءة عادية ضمن دعم فني
+  SUPPORT // حل مشكلة تقنية محددة
+  ADMIN_ACTION // إجراء إداري (تعليق، تفعيل)
+  BREAK_GLASS // وصول استثنائي طارئ
+
+  @@map("platform_access_type")
+}
+
+/// حالة الكيان على مستوى المنصة — يضبطها Platform Operator فقط
+enum EntityPlatformStatus {
+  ACTIVE // نشط
+  SUSPENDED // معلّق — لا عمليات جديدة، لا دخول للأعضاء
+  READ_ONLY // قراءة فقط — الأعضاء يرون بياناتهم لكن لا يتصرفون
+  PENDING_REVIEW // قيد المراجعة — الكيان يعمل مع إشعار للمدير
+
+  @@map("entity_platform_status")
+}
+
+/// حالة جلسة الدعم
+enum SupportSessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+
+  @@map("support_session_status")
+}

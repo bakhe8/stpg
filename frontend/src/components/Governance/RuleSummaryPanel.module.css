@@ -1,0 +1,28 @@
+.panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.title {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

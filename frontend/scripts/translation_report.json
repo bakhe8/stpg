@@ -1,0 +1,308 @@
+{
+  "unusedKeysCount": 51,
+  "unusedKeysSample": [
+    "admin.finance.activeSubscriptions",
+    "admin.platformAccess.readOnly",
+    "admin.platformAccess.techSupport",
+    "admin.platformAccess.adminAction",
+    "admin.platformAccess.emergencyAccess",
+    "admin.platformAccess.desc1",
+    "admin.platformAccess.desc2",
+    "admin.platformAccess.colMember",
+    "admin.platformAccess.colRole",
+    "admin.platformAccess.colAccessType",
+    "admin.platformAccess.colDataAccessed",
+    "admin.platformAccess.colReason",
+    "admin.platformAccess.colTimestamp",
+    "admin.entityTabs.copied",
+    "admin.reviewCenter.noteRequired",
+    "admin.reviewCenter.confirm",
+    "admin.reviewCenter.rejectReason",
+    "admin.reviewCenter.unknownApplicant",
+    "admin.reviewCenter.relationship",
+    "admin.reviewCenter.sponsor",
+    "admin.reviewCenter.accept",
+    "admin.reviewCenter.activate",
+    "admin.reviewCenter.suspend",
+    "admin.reviewCenter.resolveAndClose",
+    "auditor.visibilityWarning",
+    "member.portal.regularStatus",
+    "member.portal.lastConfirmed",
+    "member.portal.ruleTitle",
+    "member.portal.ruleDesc",
+    "member.portal.veryOverdue",
+    "member.portal.suspensionWarning",
+    "member.portal.overdue",
+    "member.portal.payNowAlt",
+    "member.portal.dueOn",
+    "member.portal.proofPending",
+    "member.portal.underReview",
+    "member.portal.myRights",
+    "member.portal.limitPerRequest",
+    "member.portal.committeeApproval",
+    "member.portal.submitRequest",
+    "member.portal.loadingWallets",
+    "member.portal.myWallets",
+    "member.portal.myWalletsDesc",
+    "member.portal.subsAttention",
+    "member.paths.totalItemsBalance",
+    "member.paths.spendingItems",
+    "member.paths.activeSubscriptions",
+    "member.paths.openDecisions",
+    "member.paths.voteAction",
+    "member.membersPage.timelineDecision"
+  ],
+  "hardcodedCount": 252,
+  "hardcodedSample": [
+    {
+      "file": "\\app\\(main)\\auditor\\page.tsx",
+      "line": 431,
+      "text": "هذه البيانات مرئية للمراجع المالي فقط — لا تظهر لبقية الأعضاء"
+    },
+    {
+      "file": "\\app\\(main)\\disbursements\\page.tsx",
+      "line": 185,
+      "text": "ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\members\\page.tsx",
+      "line": 317,
+      "text": "إلغاء"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\page.tsx",
+      "line": 321,
+      "text": "الأعضاء"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\page.tsx",
+      "line": 336,
+      "text": "مركز المراجعات"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\page.tsx",
+      "line": 352,
+      "text": "✓ تم النسخ"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 76,
+      "text": "ملاحظة مطلوبة..."
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 177,
+      "text": "قبول وتفعيل العضوية"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 184,
+      "text": "رفض"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 275,
+      "text": "قبول"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 282,
+      "text": "رفض"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 348,
+      "text": "تفعيل"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 355,
+      "text": "تعليق"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 438,
+      "text": "موافقة"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 445,
+      "text": "رفض"
+    },
+    {
+      "file": "\\app\\(main)\\entities\\[id]\\review\\page.tsx",
+      "line": 514,
+      "text": "أُغلق وحُل"
+    },
+    {
+      "file": "\\app\\(main)\\finance\\page.tsx",
+      "line": 35,
+      "text": "ملغي"
+    },
+    {
+      "file": "\\app\\(main)\\paths\\[id]\\page.tsx",
+      "line": 373,
+      "text": "تصويت"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 84,
+      "text": "أنت منتظم في هذا المسار"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 87,
+      "text": "آخر دفعة مؤكَّدة · التالية في {new Date(dues[dues.length - 1]?.dueDate ?? \"\").toLocaleDateString(\"ar-SA\")}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 99,
+      "text": "لماذا ظهرت هذه المستحقات؟${pathName ?"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 100,
+      "text": "هذه المبالغ صدرت بناءً على شروط اشتراكك في هذا المسار. سداد كل فترة في موعدها يحافظ على حقوقك في الاستفادة من المحفظة."
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 112,
+      "text": "متأخرة جداً ({days} يوم) — {d.periodLabel}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 115,
+      "text": "قد يُوقَف اشتراكك إذا لم تُسوَّ هذه الدفعة"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 118,
+      "text": "{Number(d.amountDue).toLocaleString(\"ar-SA\")} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 122,
+      "text": "ادفع فوراً"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 136,
+      "text": "فترة سماح ({days} {days === 1 ? t(\"days\") : t(\"daysAlt\")} من الاستحقاق) — {d.periodLabel}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 139,
+      "text": "{Number(d.amountDue).toLocaleString(\"ar-SA\")} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 142,
+      "text": "ادفع"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 155,
+      "text": "متأخرة ({days} يوماً) — {d.periodLabel}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 158,
+      "text": "{Number(d.amountDue).toLocaleString(\"ar-SA\")} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 161,
+      "text": "ادفع الآن"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 172,
+      "text": "مستحقة {new Date(d.dueDate).toLocaleDateString(\"ar-SA\")} — {d.periodLabel}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 175,
+      "text": "{Number(d.amountDue).toLocaleString(\"ar-SA\")} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 178,
+      "text": "ادفع"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 188,
+      "text": "إثبات دفع ينتظر التأكيد — {r.paymentDue?.periodLabel}"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 191,
+      "text": "{Number(r.amount).toLocaleString(\"ar-SA\")} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 194,
+      "text": "قيد المراجعة"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 208,
+      "text": "حقوقي في هذا المسار"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 215,
+      "text": "سقف الطلب: {Number(item.maxAmountPerRequest).toLocaleString()} ر.س"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 219,
+      "text": "يتطلب موافقة لجنة"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 225,
+      "text": "قدّم طلباً ←"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 363,
+      "text": "جاري تحميل محافظك..."
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 375,
+      "text": "محافظي"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 376,
+      "text": "التزاماتي وحقوقي في كل صندوق"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 382,
+      "text": "⚠ اشتراكات تحتاج انتباه"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 392,
+      "text": "مشروط"
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 402,
+      "text": "أنت لست مشتركاً في أي مسار فعّال حالياً."
+    },
+    {
+      "file": "\\app\\(main)\\portal\\page.tsx",
+      "line": 403,
+      "text": "استعرض كياناتك ←"
+    },
+    {
+      "file": "\\app\\(main)\\rules\\page.test.tsx",
+      "line": 51,
+      "text": "إلزام أدلة في الاعتراض"
+    }
+  ]
+}

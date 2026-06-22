@@ -1,0 +1,259 @@
+.page { display: flex; flex-direction: column; gap: 24px; width: 100%; /* refresh linter */ }
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.addBtn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  
+}
+
+/* Form Card */
+.formCard {
+  background: var(--glass-bg);
+  
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.formTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: var(--transition-fast);
+  resize: vertical;
+}
+
+.input:focus {
+  border-color: var(--accent-primary);
+  
+}
+
+.submitBtn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition-fast);
+  align-self: flex-start;
+  min-width: 100px;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* List */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--glass-bg);
+  
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-fast);
+}
+
+.row:hover {
+  border-color: var(--accent-glow);
+  transform: translateX(-2px);
+}
+
+.rowIcon {
+  font-size: 1.3rem;
+  color: var(--accent-primary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-glow);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.rowInfo {
+  flex: 1;
+}
+
+.rowName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rowType {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roleBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rowArrow {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+.row:hover .rowArrow {
+  opacity: 1;
+  transform: translateX(-4px);
+}
+
+/* States */
+.centered {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.error {
+  color: #ef4444;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+}
+
+.templateDesc {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.statusActive {
+  background: #22c55e;
+}
+.statusInactive {
+  background: #ef4444;
+}
+
+.platformBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.platformBadge[data-status="READ_ONLY"] {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4338ca;
+}
+
+.platformBadge[data-status="PENDING_REVIEW"] {
+  background: rgba(234, 179, 8, 0.1);
+  color: #92400e;
+}

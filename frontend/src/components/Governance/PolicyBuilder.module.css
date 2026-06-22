@@ -1,0 +1,222 @@
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loading,
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.msg {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.msgOk {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.msgErr {
+  background: var(--error-bg);
+  color: var(--danger);
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sectionIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.questionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.questionRow:last-child {
+  border-bottom: none;
+}
+
+.questionLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.questionText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.questionHint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.toggle {
+  flex-shrink: 0;
+}
+
+.toggleBtn {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.toggleOn {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.toggleOff {
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--text-secondary);
+}
+
+.select {
+  padding: 7px 12px;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.numberInput {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.numField {
+  width: 64px;
+  padding: 7px 10px;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.unit {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.impactBox {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.impactTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.impactList {
+  margin: 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.impactItem {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.impactAppliesAt {
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--accent-border);
+  padding-top: 8px;
+}
+
+.saveRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.saveBtn {
+  padding: 10px 24px;
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1.5px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.versionNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}

@@ -1,0 +1,341 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  direction: rtl;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(201, 226, 218, 0.45), transparent 24rem),
+    var(--bg-primary);
+}
+
+.panel {
+  width: min(100%, 460px);
+  padding: 2.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.centeredPanel {
+  text-align: center;
+}
+
+.stateIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.errorTitle {
+  color: var(--danger);
+}
+
+.muted {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.entityCard {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.typeBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.title {
+  margin: 0.25rem 0 0.5rem;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.memberCount {
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.divider {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sectionTitle {
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.required,
+.error {
+  color: var(--danger);
+}
+
+.input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.6rem;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.error {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 0;
+  background: var(--accent-primary);
+  color: white;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.secondaryButton {
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.warning {
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--warning-border);
+  border-radius: 0.75rem;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  text-align: right;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.finePrint {
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+/* ── Success Panel ── */
+.successPanel { text-align: center; display: flex; flex-direction: column; gap: 16px; }
+.successIcon { font-size: 2.5rem; }
+
+/* ── Pre-join flow (before joining) ── */
+.preJoinFlow {
+  margin: 16px 0;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.preJoinSteps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.preJoinStep { display: flex; align-items: center; gap: 6px; }
+
+.preJoinBubble {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.preJoinBubbleDim { background: var(--bg-secondary); color: var(--text-muted); }
+
+.preJoinLabel { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.preJoinLabelDim { color: var(--text-muted); font-weight: 400; }
+
+.preJoinArrow { color: var(--text-muted); font-size: 0.9rem; }
+.preJoinArrowDim { opacity: 0.4; }
+
+.preJoinNote {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Policy Terms ── */
+.policyTermsBox {
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.policyTermsTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.policyTermsList {
+  margin: 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.policyTermsList li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Approval Flow (post-join) ── */
+.approvalFlow {
+  background: var(--bg-secondary);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: right;
+}
+
+.approvalTitle {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.approvalSteps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.approvalStep { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 70px; }
+
+.approvalStepBubble {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 800;
+  flex-shrink: 0;
+}
+
+.approvalDone .approvalStepBubble { background: #22c55e; color: #fff; }
+.approvalActive .approvalStepBubble { background: var(--accent-primary); color: #fff; }
+.approvalPending .approvalStepBubble { background: var(--bg-secondary); color: var(--text-muted); }
+
+.approvalStepLabel {
+  font-size: 0.72rem;
+  text-align: center;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.approvalDone .approvalStepLabel { color: #166534; font-weight: 600; }
+.approvalActive .approvalStepLabel { color: var(--accent-strong); font-weight: 700; }
+
+.approvalConnector {
+  height: 2px; width: 24px;
+  background: var(--border);
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+.approvalConnectorDone { background: #22c55e; }
+
+.approvalNote {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.approvalLink { color: var(--accent-primary); font-weight: 700; }
+
+@media (max-width: 520px) {
+  .page { padding: 1rem; }
+  .panel { padding: 1.5rem; }
+  .preJoinSteps { gap: 4px; }
+  .preJoinArrow { transform: rotate(90deg); }
+}

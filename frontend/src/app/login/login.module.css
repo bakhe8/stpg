@@ -1,0 +1,365 @@
+.container {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 16% 10%, rgba(201, 226, 218, 0.55), transparent 25rem),
+    var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background animated shapes */
+.shape {
+  position: absolute;
+  filter: blur(90px);
+  opacity: 0.65;
+  z-index: 0;
+  animation: float 20s ease-in-out infinite alternate;
+}
+
+.shape1 {
+  width: 400px;
+  height: 400px;
+  background: var(--accent-glow);
+  top: -100px;
+  left: -100px;
+}
+
+.shape2 {
+  width: 300px;
+  height: 300px;
+  background: var(--accent-secondary-glow);
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(1.1);
+  }
+  100% {
+    transform: translate(-30px, 50px) scale(0.9);
+  }
+}
+
+.glassCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  
+  border-radius: 24px;
+  padding: 48px;
+  width: 100%;
+  max-width: 440px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* Keep a restrained brand highlight without darkening the surface. */
+.glassCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  transform: none;
+  animation: shine 8s infinite;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% {
+    left: -45%;
+  }
+  45% {
+    left: 115%;
+  }
+  100% {
+    left: 115%;
+  }
+}
+
+.header {
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--accent-primary);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  transition: var(--transition-smooth);
+  outline: none;
+  direction: ltr; /* Phone numbers should be LTR */
+  text-align: left;
+}
+
+.input:focus {
+  border-color: var(--accent-primary);
+  background: var(--surface);
+}
+
+.otpContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  direction: ltr; /* OTP codes are LTR */
+}
+
+.otpInput {
+  width: 50px;
+  height: 60px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  transition: var(--transition-fast);
+  outline: none;
+}
+
+.otpInput:focus {
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  
+}
+
+.submitBtn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  background: var(--accent-strong);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  
+}
+
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  background: var(--error-bg);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--error-border);
+  margin-top: -8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success {
+  color: #16a34a;
+  font-size: 0.9rem;
+  background: var(--success-bg);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--success-border);
+}
+
+.secondaryBtn,
+.modeSwitch {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: 10px;
+  padding: 11px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.secondaryBtn:hover,
+.modeSwitch:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--glass-border);
+  border-radius: 50%;
+  border-top-color: var(--accent-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.resendText {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 16px;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: var(--accent-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: var(--transition-fast);
+}
+
+.resendBtn:hover {
+  color: var(--accent-primary);
+}
+
+.resendBtn:disabled {
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .glassCard {
+    padding: 32px 24px;
+    gap: 24px;
+  }
+}
+
+.nameOptionalText {
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-right: 4px;
+}
+
+.nameInput {
+  direction: rtl;
+  text-align: right;
+}
+
+.joinPrompt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.joinLink {
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.joinLink:hover {
+  text-decoration: underline;
+  color: var(--accent-strong);
+}
+
+.footerLink:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+.joinCard {
+  max-width: 600px;
+  margin: 20px;
+}
+
+.joinFlexRow {
+  display: flex;
+  gap: 16px;
+}
+
+.joinFlexItem {
+  flex: 1;
+}
+
+.joinDivider {
+  border: 1px solid var(--glass-border);
+  margin: 8px 0;
+}
+
+.joinTextarea {
+  min-height: 80px;
+  resize: vertical;
+}

@@ -1,0 +1,3237 @@
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+[browser] Error: MISSING_MESSAGE: Could not resolve `admin.entities` in messages for locale `ar`.
+    at MembersPage (src/app/(main)/entities/[id]/members/page.tsx:63:28)
+  61 | }) {
+  62 |   const { id: entityId } = use(params);
+> 63 |   const t = useTranslations("admin.entities");
+     |                            ^
+  64 |   const tCommon = useTranslations("common");
+  65 |
+  66 |   const getRoleLabel = (role: string) => { (src/app/(main)
+⨯ ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  [90m265 |[0m     [32m"currentStatusLabel"[0m: [32m"الحالة الحالية"[0m,
+  [90m266 |[0m     [32m"noteLabel"[0m: [32m"ملاحظة إضافية"[0m,
+[31m[1m>[0m [90m267 |[0m     [32m"notePlaceholder"[0m: [32m"disputeDesc"[0m: [32m"وصف المشكلة وتفاصيل الاعتراض"[0m,
+  [90m    |[0m                                     [31m[1m^[0m
+  [90m268 |[0m     [32m"submitBtn"[0m: [32m"إرسال الاعتراض"[0m,
+  [90m269 |[0m     [32m"submitting"[0m: [32m"جارٍ الإرسال..."[0m,
+  [90m270 |[0m     [32m"paySubmitSuccess"[0m: [32m"✓ تم رفع إثبات السداد وإرساله للمراج[0mعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+⨯ ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  [90m265 |[0m     [32m"currentStatusLabel"[0m: [32m"الحالة الحالية"[0m,
+  [90m266 |[0m     [32m"noteLabel"[0m: [32m"ملاحظة إضافية"[0m,
+[31m[1m>[0m [90m267 |[0m     [32m"notePlaceholder"[0m: [32m"disputeDesc"[0m: [32m"وصف المشكلة وتفاصيل الاعتراض"[0m,
+  [90m    |[0m                                     [31m[1m^[0m
+  [90m268 |[0m     [32m"submitBtn"[0m: [32m"إرسال الاعتراض"[0m,
+  [90m269 |[0m     [32m"submitting"[0m: [32m"جارٍ الإرسال..."[0m,
+  [90m270 |[0m     [32m"paySubmitSuccess"[0m: [32m"✓ تم رفع إثبات السداد وإرساله للمراج[0mعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+⨯ ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  [90m265 |[0m     [32m"currentStatusLabel"[0m: [32m"الحالة الحالية"[0m,
+  [90m266 |[0m     [32m"noteLabel"[0m: [32m"ملاحظة إضافية"[0m,
+[31m[1m>[0m [90m267 |[0m     [32m"notePlaceholder"[0m: [32m"disputeDesc"[0m: [32m"وصف المشكلة وتفاصيل الاعتراض"[0m,
+  [90m    |[0m                                     [31m[1m^[0m
+  [90m268 |[0m     [32m"submitBtn"[0m: [32m"إرسال الاعتراض"[0m,
+  [90m269 |[0m     [32m"submitting"[0m: [32m"جارٍ الإرسال..."[0m,
+  [90m270 |[0m     [32m"paySubmitSuccess"[0m: [32m"✓ تم رفع إثبات السداد وإرساله للمراج[0mعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+⨯ ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  [90m265 |[0m     [32m"currentStatusLabel"[0m: [32m"الحالة الحالية"[0m,
+  [90m266 |[0m     [32m"noteLabel"[0m: [32m"ملاحظة إضافية"[0m,
+[31m[1m>[0m [90m267 |[0m     [32m"notePlaceholder"[0m: [32m"disputeDesc"[0m: [32m"وصف المشكلة وتفاصيل الاعتراض"[0m,
+  [90m    |[0m                                     [31m[1m^[0m
+  [90m268 |[0m     [32m"submitBtn"[0m: [32m"إرسال الاعتراض"[0m,
+  [90m269 |[0m     [32m"submitting"[0m: [32m"جارٍ الإرسال..."[0m,
+  [90m270 |[0m     [32m"paySubmitSuccess"[0m: [32m"✓ تم رفع إثبات السداد وإرساله للمراج[0mعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+[browser] Uncaught Error: ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  265 |     "currentStatusLabel": "الحالة الحالية",
+  266 |     "noteLabel": "ملاحظة إضافية",
+> 267 |     "notePlaceholder": "disputeDesc": "وصف المشكلة وتفاصيل الاعتراض",
+      |                                     ^
+  268 |     "submitBtn": "إرسال الاعتراض",
+  269 |     "submitting": "جارٍ الإرسال...",
+  270 |     "paySubmitSuccess": "✓ تم رفع إثبات السداد وإرساله للمراجعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+    at <unknown> (Error: ./src/locales/ar/admin.json:267:37)
+    at <unknown> (Error: (./src/locales/ar/admin.json:267:37)
+⨯ ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  [90m265 |[0m     [32m"currentStatusLabel"[0m: [32m"الحالة الحالية"[0m,
+  [90m266 |[0m     [32m"noteLabel"[0m: [32m"ملاحظة إضافية"[0m,
+[31m[1m>[0m [90m267 |[0m     [32m"notePlaceholder"[0m: [32m"disputeDesc"[0m: [32m"وصف المشكلة وتفاصيل الاعتراض"[0m,
+  [90m    |[0m                                     [31m[1m^[0m
+  [90m268 |[0m     [32m"submitBtn"[0m: [32m"إرسال الاعتراض"[0m,
+  [90m269 |[0m     [32m"submitting"[0m: [32m"جارٍ الإرسال..."[0m,
+  [90m270 |[0m     [32m"paySubmitSuccess"[0m: [32m"✓ تم رفع إثبات السداد وإرساله للمراج[0mعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+[browser] Uncaught Error: ./src/locales/ar/admin.json:267:37
+Unable to make a module from invalid JSON
+  265 |     "currentStatusLabel": "الحالة الحالية",
+  266 |     "noteLabel": "ملاحظة إضافية",
+> 267 |     "notePlaceholder": "disputeDesc": "وصف المشكلة وتفاصيل الاعتراض",
+      |                                     ^
+  268 |     "submitBtn": "إرسال الاعتراض",
+  269 |     "submitting": "جارٍ الإرسال...",
+  270 |     "paySubmitSuccess": "✓ تم رفع إثبات السداد وإرساله للمراجعة",
+
+expected `,` or `}` at line 267 column 37
+
+
+    at <unknown> (Error: ./src/locales/ar/admin.json:267:37)
+    at <unknown> (Error: (./src/locales/ar/admin.json:267:37)
+⨯ ./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+⨯ ./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+⨯ ./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+
+./src/app/login/LoginForm.tsx:5:1
+Export verifyOtp doesn't exist in target module
+  [90m 3 |[0m [36mimport[0m [33mReact[0m, { useState, useRef, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m 4 |[0m [36mimport[0m { useTranslations } [36mfrom[0m [32m"next-intl"[0m;
+[31m[1m>[0m [90m 5 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m 6 |[0m   devLogin,
+  [90m   |[0m [31m[1m^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 7 |[0m   sendOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^[0m
+[31m[1m>[0m [90m 8 |[0m   verifyOtp,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m 9 |[0m   [36mtype[0m [33mAuthResponse[0m,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m10 |[0m } [36mfrom[0m [32m"../../lib/api/auth"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m11 |[0m [36mimport[0m styles [36mfrom[0m [32m"./login.module.css"[0m;
+  [90m12 |[0m
+  [90m13 |[0m [36mtype[0m [33mLoginMode[0m = [32m"phone"[0m | [32m"otp"[0m | [32m"dev"[0m;
+
+The export verifyOtp was not found in module [project]/src/lib/api/auth.ts [app-ssr] (ecmascript).
+Did you mean to import register?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+[browser] Uncaught Error: ./src/app/login/LoginForm.tsx:5:1
+Export sendOtp doesn't exist in target module
+   3 | import React, { useState, useRef, useEffect } from "react";
+   4 | import { useTranslations } from "next-intl";
+>  5 | import {
+     | ^^^^^^^
+>  6 |   devLogin,
+     | ^^^^^^^^^^^
+>  7 |   sendOtp,
+     | ^^^^^^^^^^
+>  8 |   verifyOtp,
+     | ^^^^^^^^^^^^
+>  9 |   type AuthResponse,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 10 | } from "../../lib/api/auth";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 | import styles from "./login.module.css";
+  12 |
+  13 | type LoginMode = "phone" | "otp" | "dev";
+
+The export sendOtp was not found in module [project]/src/lib/api/auth.ts [app-client] (ecmascript).
+Did you mean to import updateMe?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/app/login/LoginForm.tsx
+    ./src/app/login/page.tsx
+
+
+    at <unknown> (Error: ./src/app/login/LoginForm.tsx:5:1)
+    at <unknown> (Error: (./src/app/login/LoginForm.tsx:5:1)
+Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src\app\login\LoginForm.tsx:66:51)
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+  65 |           <p className={styles.subtitle}>
+> 66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+     |                                                   ^
+  67 |           </p>
+  68 |         </header>
+  69 | {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `auth.subtitle_login` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src\app\login\LoginForm.tsx:100:18)
+   98 |             <div className={styles.inputGroup}>
+   99 |               <label htmlFor="password-input" className={styles.label}>
+> 100 |                 {t("passwordLabel")}
+      |                  ^
+  101 |               </label>
+  102 |               <input
+  103 |                 id="password-input" {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `auth.passwordLabel` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src\app\login\LoginForm.tsx:122:65)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                                 ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `auth.loginBtn` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src\app\login\LoginForm.tsx:126:22)
+  124 |
+  125 |             <div className={styles.joinPrompt}>
+> 126 |               <span>{t("noAccount")}</span>
+      |                      ^
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")}
+  129 |               </Link> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `auth.noAccount` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src\app\login\LoginForm.tsx:128:18)
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+> 128 |                 {t("joinNow")}
+      |                  ^
+  129 |               </Link>
+  130 |             </div>
+  131 |           </form> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `auth.joinNow` in messages for locale `ar`.'
+}
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at Set.forEach (<anonymous>)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.switchToLogin` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:168:24)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  166 |             onClick={() => {
+  167 |               setMode(mode === "dev" ? "login" : "dev");
+> 168 |               setError(null);
+      |                        ^
+  169 |             }}
+  170 |           >
+  171 |             {mode === "dev" ? t("switchToLogin") : t("switchToDev")} (src/app/login/LoginForm.tsx:168:24)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.switchToLogin` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:168:24)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  166 |             onClick={() => {
+  167 |               setMode(mode === "dev" ? "login" : "dev");
+> 168 |               setError(null);
+      |                        ^
+  169 |             }}
+  170 |           >
+  171 |             {mode === "dev" ? t("switchToLogin") : t("switchToDev")} (src/app/login/LoginForm.tsx:168:24)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.subtitle_login` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:65:11)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  63 |         <header className={styles.header}>
+  64 |           <h1 className={styles.title}>CollectiveTrustOS</h1>
+> 65 |           <p className={styles.subtitle}>
+     |           ^
+  66 |             {mode === "dev" ? t("subtitle_dev") : t("subtitle_login")}
+  67 |           </p>
+  68 |         </header> (src/app/login/LoginForm.tsx:65:11)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.passwordLabel` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:99:30)
+    at LoginPage (src\app\login\page.tsx:17:7)
+   97 |             
+   98 |             <div className={styles.inputGroup}>
+>  99 |               <label htmlFor="password-input" className={styles.label}>
+      |                              ^
+  100 |                 {t("passwordLabel")}
+  101 |               </label>
+  102 |               <input (src/app/login/LoginForm.tsx:99:30)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.loginBtn` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:122:58)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  120 |               disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+  121 |             >
+> 122 |               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
+      |                                                          ^
+  123 |             </button>
+  124 |
+  125 |             <div className={styles.joinPrompt}> (src/app/login/LoginForm.tsx:122:58)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.noAccount` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:125:46)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  123 |             </button>
+  124 |
+> 125 |             <div className={styles.joinPrompt}>
+      |                                              ^
+  126 |               <span>{t("noAccount")}</span>
+  127 |               <Link href="/join" className={styles.joinLink}>
+  128 |                 {t("joinNow")} (src/app/login/LoginForm.tsx:125:46)
+[browser] Error: MISSING_MESSAGE: Could not resolve `auth.joinNow` in messages for locale `ar`.
+    at LoginForm (src/app/login/LoginForm.tsx:127:26)
+    at LoginPage (src\app\login\page.tsx:17:7)
+  125 |             <div className={styles.joinPrompt}>
+  126 |               <span>{t("noAccount")}</span>
+> 127 |               <Link href="/join" className={styles.joinLink}>
+      |                          ^
+  128 |                 {t("joinNow")}
+  129 |               </Link>
+  130 |             </div> (src/app/login/LoginForm.tsx:127:26)

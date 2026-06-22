@@ -1,0 +1,40 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.sm {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.green {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.red {
+  background: var(--error-bg);
+  color: var(--danger);
+}
+
+.yellow {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.blue {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.gray {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-secondary);
+}

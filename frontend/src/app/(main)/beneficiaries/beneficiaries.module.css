@@ -1,0 +1,67 @@
+.page { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+.pageHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.pageTitle { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
+
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.select { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 16px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; min-width: 200px; }
+
+.addBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition-fast); }
+.addBtn:hover { transform: translateY(-1px); }
+
+.prompt { background: var(--glass-bg); border: 1px dashed var(--glass-border); border-radius: 14px; padding: 48px; text-align: center; color: var(--text-secondary); }
+.empty { background: var(--glass-bg); border: 1px dashed var(--glass-border); border-radius: 14px; padding: 40px; text-align: center; color: var(--text-secondary); }
+
+.msg { padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; }
+.success { color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); }
+.error { color: #ef4444; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
+
+.centered { display: flex; justify-content: center; padding: 60px 0; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--glass-border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Form */
+.formCard { background: var(--glass-bg);  border: 1px solid var(--glass-border); border-radius: 16px; padding: 24px; }
+.formTitle { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
+.form { display: flex; flex-direction: column; gap: 14px; }
+.fieldGroup { display: flex; flex-direction: column; gap: 5px; }
+.fieldRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.label { font-size: 0.83rem; font-weight: 500; color: var(--text-secondary); }
+.input { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 14px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; transition: var(--transition-fast); }
+.input:focus { border-color: var(--accent-primary);  }
+.submitBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 12px 24px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; align-self: flex-start; transition: var(--transition-fast); }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Group */
+.group { display: flex; flex-direction: column; gap: 8px; }
+.groupTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* Beneficiary Card */
+.card {
+  background: var(--glass-bg);
+  
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+.info { flex: 1; }
+.name { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+.meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+.cap { font-size: 0.8rem; color: var(--text-secondary); }
+
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+.badgeMember { background: rgba(99,102,241,0.15); color: #818cf8; }
+.badgeDependent { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badgeExternal { background: var(--surface-muted); color: var(--text-muted); }

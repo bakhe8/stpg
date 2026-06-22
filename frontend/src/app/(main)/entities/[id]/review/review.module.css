@@ -1,0 +1,265 @@
+.page { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+.pageSubtitle { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+
+.totalBadge {
+  padding: 6px 16px;
+  background: var(--accent-primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+}
+
+.tab:hover { color: var(--accent-primary); }
+.tabActive { color: var(--accent-primary); border-bottom-color: var(--accent-primary); font-weight: 700; }
+
+.tabBadge {
+  padding: 1px 8px;
+  background: var(--accent-primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 20px;
+  text-align: center;
+}
+
+.tabContent { padding: 4px 0; }
+
+/* ── Review Cards ── */
+.cardList { display: flex; flex-direction: column; gap: 12px; }
+
+.reviewCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cardMeta { flex: 1; min-width: 160px; }
+
+.cardName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+
+.cardSub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  display: block;
+}
+
+.cardAmount {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+.cardRef {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stateBadge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stateBadge[data-state="INTERESTED"] { background: rgba(99,102,241,0.1); color: #4338ca; }
+.stateBadge[data-state="CONDITIONAL"] { background: rgba(245,158,11,0.1); color: #b45309; }
+
+.cardActions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.approveBtn {
+  padding: 7px 16px;
+  background: rgba(34,197,94,0.12);
+  color: #166534;
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.approveBtn:hover:not(:disabled) { background: rgba(34,197,94,0.2); }
+.approveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.rejectBtn {
+  padding: 7px 16px;
+  background: rgba(239,68,68,0.08);
+  color: #991b1b;
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.rejectBtn:hover:not(:disabled) { background: rgba(239,68,68,0.16); }
+.rejectBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Modal ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: min(100%, 400px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-lg, 0 20px 40px rgba(0,0,0,0.3));
+}
+
+.modalTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalTextarea {
+  width: 100%;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  resize: vertical;
+  font-family: inherit;
+  direction: rtl;
+  outline: none;
+}
+
+.modalTextarea:focus { border-color: var(--accent-primary); }
+
+.modalActions { display: flex; gap: 10px; }
+
+.modalConfirm {
+  flex: 1;
+  padding: 10px;
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modalConfirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modalCancel {
+  flex: 1;
+  padding: 10px;
+  background: var(--surface-muted, var(--bg-secondary));
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* ── Empty / Loading / Error ── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.errorMsg { color: #ef4444; padding: 40px; text-align: center; }
+
+@media (max-width: 640px) {
+  .reviewCard { flex-direction: column; align-items: flex-start; }
+  .cardActions { width: 100%; }
+  .approveBtn, .rejectBtn { flex: 1; }
+}

@@ -1,0 +1,8 @@
+# Production secrets — never commit these
+.env
+.env.production
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

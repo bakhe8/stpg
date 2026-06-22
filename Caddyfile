@@ -1,0 +1,44 @@
+# Caddyfile — Production (Hostinger VPS KVM 2)
+# Domain: stpg.wbgl.tech
+# Caddy يحصل على شهادة TLS تلقائياً من Let's Encrypt
+
+(security_headers) {
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+}
+
+:80 {
+    import security_headers
+
+    encode zstd gzip
+
+    # ── API (NestJS) — كل طلبات /api* تذهب للباكند ──────────
+    handle /api* {
+        reverse_proxy backend:3001 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    # ── الواجهة الأمامية (Next.js) — كل الباقي ──────────────
+    handle {
+        reverse_proxy frontend:3000 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}
