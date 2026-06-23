@@ -18,10 +18,10 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  @ApiProperty({ description: 'ID of the entity applying to' })
+  @ApiPropertyOptional({ description: 'ID of the entity applying to (optional)' })
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
-  entityId: string;
+  entityId?: string;
 
   @ApiPropertyOptional({ description: 'Branch or Family name' })
   @IsOptional()

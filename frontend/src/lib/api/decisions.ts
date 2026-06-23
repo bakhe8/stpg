@@ -14,6 +14,9 @@ export interface Decision {
   amount?: number | null;
   closesAt: string;
   createdAt: string;
+  canVote?: boolean;
+  hasVoted?: boolean;
+  governancePath?: { id: string; name: string };
   _count?: { votes: number };
 }
 

@@ -15,8 +15,29 @@ function isAccessError(msg: string) {
     lower.includes('waiting') || lower.includes('role') || lower.includes('permission');
 }
 
-function getDecisionReason(type: string, t: any) {
-  switch (type) {
+function getDecisionReason(decision: Decision, canVote: boolean, t: any) {
+  if (!canVote) {
+    if (decision.hasVoted) return t("reasonAlreadyVoted");
+    if (decision.votersScope === "COMMITTEE") return t("reasonVisibleCommitteeOnly");
+    if (decision.votersScope === "PATH_SUBSCRIBERS" || decision.governancePath) {
+      return t("reasonVisiblePathOnly", { path: decision.governancePath?.name ?? t("pathFallback") });
+    }
+    return t("reasonVisibleObserver");
+  }
+
+  if (decision.voteType === "ONE_FAMILY_ONE_VOTE") {
+    return t("reasonFamilyVote");
+  }
+
+  if (decision.votersScope === "PATH_SUBSCRIBERS") {
+    return t("reasonPathSubscriber", { path: decision.governancePath?.name ?? t("pathFallback") });
+  }
+
+  if (decision.votersScope === "COMMITTEE") {
+    return t("reasonCommitteeVote");
+  }
+
+  switch (decision.decisionType) {
     case "EXPEL_MEMBER": return t("reasonEviction");
     case "ACCEPT_MEMBER": return t("reasonMembership");
     case "DISBURSE_FUNDS": return t("reasonDisbursement");
@@ -33,7 +54,6 @@ function isDecisionOpen(decision: Decision) {
 function DecisionCard({ decision, onRefresh }: { decision: Decision; onRefresh: () => void }) {
   const t = useTranslations('decisions');
   const tCommon = useTranslations('common');
-  const tMember = useTranslations('member');
   const closesAt = new Date(decision.closesAt);
 
   const DECISION_TYPE_LABELS: Record<string, string> = {
@@ -51,6 +71,8 @@ function DecisionCard({ decision, onRefresh }: { decision: Decision; onRefresh: 
     MERGE_PATHS: t('typeMergePaths'),
   };
   const isOpen = isDecisionOpen(decision);
+  const canVote = isOpen && decision.canVote !== false && !decision.hasVoted;
+  const hasVoted = Boolean(decision.hasVoted);
 
   const STATUS_LABELS: Record<string, string> = {
     OPEN: t('statusOpen'),
@@ -169,8 +191,8 @@ function DecisionCard({ decision, onRefresh }: { decision: Decision; onRefresh: 
       
       {isOpen && (
         <RuleSummaryPanel
-          title={t("whyVoteTitle")}
-          summary={getDecisionReason(decision.decisionType, t)}
+          title={canVote ? t("whyVoteTitle") : t("whyVisibleTitle")}
+          summary={getDecisionReason(decision, canVote, t)}
           icon="📋"
         />
       )}
@@ -194,11 +216,23 @@ function DecisionCard({ decision, onRefresh }: { decision: Decision; onRefresh: 
       {isOpen && decision.voteType === 'ONE_FAMILY_ONE_VOTE' && (
         <div className={styles.householdVoteBanner}>
           <span className={styles.coiIcon}>⚠️</span>
-          <span>{tMember('familyVoteWarning')}</span>
+          <span>{t('familyVoteWarning')}</span>
         </div>
       )}
 
-      {isOpen && !voting && (
+      {isOpen && hasVoted && (
+        <div className={styles.infoBanner}>
+          {t("alreadyVoted")}
+        </div>
+      )}
+
+      {isOpen && !canVote && !hasVoted && (
+        <div className={styles.infoBanner}>
+          {t("notEligibleToVote")}
+        </div>
+      )}
+
+      {isOpen && canVote && !voting && (
         <button
           className={styles.voteBtn}
           onClick={() => setVoting(true)}
@@ -207,7 +241,7 @@ function DecisionCard({ decision, onRefresh }: { decision: Decision; onRefresh: 
         </button>
       )}
 
-      {isOpen && voting && (
+      {isOpen && canVote && voting && (
         <div className={styles.voteEditor}>
           {coiDeclared && (
             <div className={styles.coiActiveNote}>

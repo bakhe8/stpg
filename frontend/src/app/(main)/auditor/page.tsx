@@ -35,9 +35,11 @@ export default function AuditorPage() {
     SUBSCRIPTION_PAYMENT: t("opTypeSubscriptionPayment"),
     DONATION: t("opTypeDonation"),
     SERVICE_FEE: t("opTypeServiceFee"),
+    PROJECT_CONTRIBUTION: t("opTypeProjectContribution"),
     DISBURSEMENT: t("opTypeDisbursement"),
     TRANSFER: t("opTypeTransfer"),
     ENTITY_SUPPORT: t("opTypeEntitySupport"),
+    ADJUSTMENT: t("opTypeAdjustment"),
     CORRECTION: t("opTypeCorrection"),
     REVERSAL: t("opTypeReversal"),
   };

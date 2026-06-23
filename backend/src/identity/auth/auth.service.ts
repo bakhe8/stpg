@@ -66,14 +66,16 @@ export class AuthService {
         phoneNumber,
         passwordHash,
         isVerified: false,
-        membershipApplications: {
-          create: {
-            entityId,
-            relationshipDescription: branchOrFamily,
-            sponsorName: recommenderName,
-            note: notes,
+        ...(entityId && {
+          membershipApplications: {
+            create: {
+              entityId,
+              relationshipDescription: branchOrFamily,
+              sponsorName: recommenderName,
+              note: notes,
+            },
           },
-        },
+        }),
       },
       include: {
         membershipApplications: true,

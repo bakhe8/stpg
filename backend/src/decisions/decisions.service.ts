@@ -17,6 +17,7 @@ import {
   DecisionType,
   MemberRole,
   SubjectType,
+  SubscriptionState,
   VoteChoice,
   VoteType,
   VotersScope,
@@ -47,13 +48,16 @@ export class DecisionsService {
       context.pathPolicy?.voteType ??
       context.entityPolicy?.defaultVoteType ??
       dto.voteType;
+    const votersScope = this.resolveVotersScope(voteType, dto.votersScope);
     if (voteType === VoteType.ONE_FAMILY_ONE_VOTE) {
-      const householdCount = await this.prisma.household.count({
-        where: {
-          entityId,
-          members: { some: { membership: { isActive: true } } },
+      const householdCount = await this.countEligibleVoters(
+        {
+          governancePathId: context.pathId,
+          votersScope,
+          voteType,
         },
-      });
+        entityId,
+      );
       if (householdCount === 0) {
         throw new BadRequestException(
           'لا توجد أسر مسجلة في هذا الكيان — يجب تسجيل الأسر قبل استخدام هذا النوع من التصويت',
@@ -77,7 +81,6 @@ export class DecisionsService {
       await this.validateIndividualCapDecision(dto);
     }
 
-    const votersScope = this.resolveVotersScope(voteType, dto.votersScope);
     const quorumPercent =
       context.pathPolicy?.quorumPercent ??
       context.entityPolicy?.decisionQuorumPercent ??
@@ -204,11 +207,22 @@ export class DecisionsService {
     if (decision.voteType === VoteType.SECRET) {
       const isAdmin = await this.isAdminOrFounder(entityId, requesterId);
       if (!isAdmin) {
-        return { ...decision, votes: [] };
+        const votingState = await this.resolveVotingState(
+          decision,
+          entityId,
+          requesterId,
+        );
+        return { ...decision, ...votingState, votes: [] };
       }
     }
 
-    return decision;
+    const votingState = await this.resolveVotingState(
+      decision,
+      entityId,
+      requesterId,
+    );
+
+    return { ...decision, ...votingState };
   }
 
   async findPathDecisions(pathId: string, requesterId: string) {
@@ -221,18 +235,27 @@ export class DecisionsService {
     await this.requireMember(path.wallet.entityId, requesterId);
     await this.expireOverduePathDecisions(pathId);
 
-    return this.prisma.decision.findMany({
+    const decisions = await this.prisma.decision.findMany({
       where: { governancePathId: pathId },
       include: {
         createdBy: { select: { id: true, name: true } },
+        governancePath: {
+          select: {
+            id: true,
+            name: true,
+            wallet: { select: { entityId: true } },
+          },
+        },
         _count: { select: { votes: true, appeals: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return this.attachVotingState(decisions, requesterId);
   }
 
   async findAccessibleDecisions(requesterId: string) {
-    return this.prisma.decision.findMany({
+    const decisions = await this.prisma.decision.findMany({
       where: {
         governancePath: {
           wallet: {
@@ -246,12 +269,20 @@ export class DecisionsService {
       },
       include: {
         createdBy: { select: { id: true, name: true } },
-        governancePath: { select: { id: true, name: true } },
+        governancePath: {
+          select: {
+            id: true,
+            name: true,
+            wallet: { select: { entityId: true } },
+          },
+        },
         _count: { select: { votes: true, appeals: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
+
+    return this.attachVotingState(decisions, requesterId);
   }
 
   async getVotes(decisionId: string, requesterId: string) {
@@ -669,30 +700,33 @@ export class DecisionsService {
     entityId: string,
   ): Promise<number> {
     if (decision.voteType === VoteType.ONE_FAMILY_ONE_VOTE) {
-      // فقط الأسر التي تحتوي على عضو واحد نشط على الأقل
-      return this.prisma.household.count({
-        where: {
-          entityId,
-          members: {
-            some: { membership: { isActive: true } },
-          },
-        },
-      });
+      return this.countEligibleHouseholds(decision, entityId);
     }
     switch (decision.votersScope) {
       case VotersScope.ALL_MEMBERS:
+        if (decision.governancePathId) {
+          return this.countPathSubscribers(decision.governancePathId, entityId);
+        }
         return this.prisma.membership.count({
           where: { entityId, isActive: true },
         });
       case VotersScope.PATH_SUBSCRIBERS:
         if (!decision.governancePathId) return 0;
-        return this.prisma.subscription.count({
-          where: {
-            governancePathId: decision.governancePathId,
-            state: 'ACTIVE',
-          },
-        });
+        return this.countPathSubscribers(decision.governancePathId, entityId);
       case VotersScope.COMMITTEE:
+        if (decision.governancePathId) {
+          const committeeId = await this.resolvePathCommitteeId(
+            decision.governancePathId,
+          );
+          if (committeeId) {
+            return this.prisma.committeeMembership.count({
+              where: {
+                committeeId,
+                membership: { entityId, isActive: true },
+              },
+            });
+          }
+        }
         return this.prisma.membership.count({
           where: {
             entityId,
@@ -700,7 +734,6 @@ export class DecisionsService {
             role: {
               in: [
                 MemberRole.COMMITTEE_MEMBER,
-                MemberRole.AUDITOR,
                 MemberRole.ADMIN,
                 MemberRole.FOUNDER,
               ],
@@ -722,6 +755,13 @@ export class DecisionsService {
     entityId: string,
     personId: string,
   ): Promise<boolean> {
+    const eligibleForScope = await this.isEligibleForScope(
+      decision,
+      entityId,
+      personId,
+    );
+    if (!eligibleForScope) return false;
+
     // ONE_FAMILY_ONE_VOTE: الشخص يجب أن يكون في أسرة، وأسرته لم تصوّت بعد
     if (decision.voteType === VoteType.ONE_FAMILY_ONE_VOTE) {
       const membership = await this.prisma.membership.findFirst({
@@ -748,41 +788,47 @@ export class DecisionsService {
       return !alreadyVoted;
     }
 
+    return true;
+  }
+
+  private async isEligibleForScope(
+    decision: {
+      votersScope: VotersScope;
+      governancePathId?: string | null;
+    },
+    entityId: string,
+    personId: string,
+  ): Promise<boolean> {
     switch (decision.votersScope) {
       case VotersScope.ALL_MEMBERS:
+        if (decision.governancePathId) {
+          return this.hasActivePathSubscription(
+            decision.governancePathId,
+            entityId,
+            personId,
+          );
+        }
         return !!(await this.prisma.membership.findFirst({
           where: { entityId, personId, isActive: true },
         }));
       case VotersScope.PATH_SUBSCRIBERS:
         if (!decision.governancePathId) return false;
-        return !!(await this.prisma.subscription.findFirst({
-          where: {
-            governancePathId: decision.governancePathId,
-            state: 'ACTIVE',
-            membership: { personId },
-          },
-          include: { membership: true },
-        }));
+        return this.hasActivePathSubscription(
+          decision.governancePathId,
+          entityId,
+          personId,
+        );
       case VotersScope.COMMITTEE: {
         // إذا كان القرار مرتبطاً بمسار حوكمة، نتحقق من عضوية اللجنة المحددة
         if (decision.governancePathId) {
-          const path = await this.prisma.governancePath.findUnique({
-            where: { id: decision.governancePathId },
-            select: { committeeId: true },
-          });
-          if (path?.committeeId) {
-            // التحقق من عضوية الشخص في اللجنة المحددة لهذا المسار
-            const membership = await this.prisma.membership.findFirst({
-              where: { entityId, personId, isActive: true },
-              select: { id: true },
-            });
-            if (!membership) return false;
-            return !!(await this.prisma.committeeMembership.findUnique({
+          const committeeId = await this.resolvePathCommitteeId(
+            decision.governancePathId,
+          );
+          if (committeeId) {
+            return !!(await this.prisma.committeeMembership.findFirst({
               where: {
-                committeeId_membershipId: {
-                  committeeId: path.committeeId,
-                  membershipId: membership.id,
-                },
+                committeeId,
+                membership: { entityId, personId, isActive: true },
               },
             }));
           }
@@ -806,6 +852,183 @@ export class DecisionsService {
       default:
         return false;
     }
+  }
+
+  private async countEligibleHouseholds(
+    decision: {
+      governancePathId?: string | null;
+      votersScope: VotersScope;
+    },
+    entityId: string,
+  ) {
+    if (
+      decision.votersScope === VotersScope.ALL_MEMBERS &&
+      !decision.governancePathId
+    ) {
+      return this.prisma.household.count({
+        where: {
+          entityId,
+          members: { some: { membership: { isActive: true } } },
+        },
+      });
+    }
+
+    if (
+      decision.votersScope === VotersScope.ALL_MEMBERS ||
+      decision.votersScope === VotersScope.PATH_SUBSCRIBERS
+    ) {
+      if (!decision.governancePathId) return 0;
+      return this.prisma.household.count({
+        where: {
+          entityId,
+          members: {
+            some: {
+              membership: {
+                isActive: true,
+                subscriptions: {
+                  some: {
+                    governancePathId: decision.governancePathId,
+                    state: SubscriptionState.ACTIVE,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    if (decision.votersScope === VotersScope.COMMITTEE) {
+      const committeeId = decision.governancePathId
+        ? await this.resolvePathCommitteeId(decision.governancePathId)
+        : null;
+      if (committeeId) {
+        return this.prisma.household.count({
+          where: {
+            entityId,
+            members: {
+              some: {
+                membership: {
+                  isActive: true,
+                  committeeMembers: { some: { committeeId } },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      return this.prisma.household.count({
+        where: {
+          entityId,
+          members: {
+            some: {
+              membership: {
+                isActive: true,
+                role: {
+                  in: [
+                    MemberRole.COMMITTEE_MEMBER,
+                    MemberRole.ADMIN,
+                    MemberRole.FOUNDER,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    return 0;
+  }
+
+  private countPathSubscribers(governancePathId: string, entityId: string) {
+    return this.prisma.subscription.count({
+      where: {
+        governancePathId,
+        state: SubscriptionState.ACTIVE,
+        membership: { entityId, isActive: true },
+      },
+    });
+  }
+
+  private async hasActivePathSubscription(
+    governancePathId: string,
+    entityId: string,
+    personId: string,
+  ) {
+    return !!(await this.prisma.subscription.findFirst({
+      where: {
+        governancePathId,
+        state: SubscriptionState.ACTIVE,
+        membership: { entityId, personId, isActive: true },
+      },
+      select: { id: true },
+    }));
+  }
+
+  private async resolvePathCommitteeId(governancePathId: string) {
+    const path = await this.prisma.governancePath.findUnique({
+      where: { id: governancePathId },
+      select: { committeeId: true },
+    });
+    return path?.committeeId ?? null;
+  }
+
+  private async hasPersonVoted(decisionId: string, personId: string) {
+    return !!(await this.prisma.vote.findUnique({
+      where: { decisionId_personId: { decisionId, personId } },
+      select: { id: true },
+    }));
+  }
+
+  private async resolveVotingState(
+    decision: {
+      id: string;
+      status: DecisionStatus;
+      closesAt: Date;
+      votersScope: VotersScope;
+      voteType: VoteType;
+      governancePathId?: string | null;
+    },
+    entityId: string,
+    personId: string,
+  ) {
+    const hasVoted = await this.hasPersonVoted(decision.id, personId);
+    const isOpen =
+      decision.status === DecisionStatus.OPEN && decision.closesAt >= new Date();
+    const canVote =
+      isOpen && !hasVoted
+        ? await this.isEligibleVoter(decision, entityId, personId)
+        : false;
+
+    return { canVote, hasVoted };
+  }
+
+  private async attachVotingState<
+    T extends {
+      id: string;
+      status: DecisionStatus;
+      closesAt: Date;
+      subjectType: string;
+      subjectId: string;
+      votersScope: VotersScope;
+      voteType: VoteType;
+      governancePathId?: string | null;
+      governancePath?: { wallet: { entityId: string } } | null;
+    },
+  >(decisions: T[], requesterId: string) {
+    return Promise.all(
+      decisions.map(async (decision) => {
+        const entityId = await this.resolveDecisionEntityId(decision);
+        const votingState = await this.resolveVotingState(
+          decision,
+          entityId,
+          requesterId,
+        );
+        return { ...decision, ...votingState };
+      }),
+    );
   }
 
   private async resolveDecisionContext(dto: CreateDecisionDto) {

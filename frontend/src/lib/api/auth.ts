@@ -39,7 +39,7 @@ export function register(data: {
   name: string;
   phoneNumber: string;
   password: string;
-  entityId: string;
+  entityId?: string;
   branchOrFamily?: string;
   recommenderName?: string;
   notes?: string;

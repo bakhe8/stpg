@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   DecisionResult,
   DecisionStatus,
@@ -16,6 +16,11 @@ describe('DecisionsService', () => {
     governancePath: { findUnique: jest.Mock };
     entityPolicy: { findUnique: jest.Mock };
     membership: { findFirst: jest.Mock; count: jest.Mock };
+    subscription: { findFirst: jest.Mock; count: jest.Mock };
+    household: { count: jest.Mock };
+    householdMembership: { findMany: jest.Mock };
+    committeeMembership: { findFirst: jest.Mock; count: jest.Mock };
+    vote: { findUnique: jest.Mock; findFirst: jest.Mock; create: jest.Mock };
     decision: {
       create: jest.Mock;
       findMany: jest.Mock;
@@ -33,6 +38,25 @@ describe('DecisionsService', () => {
       membership: {
         findFirst: jest.fn().mockResolvedValue({ id: 'admin-membership' }),
         count: jest.fn(),
+      },
+      subscription: {
+        findFirst: jest.fn(),
+        count: jest.fn(),
+      },
+      household: {
+        count: jest.fn(),
+      },
+      householdMembership: {
+        findMany: jest.fn(),
+      },
+      committeeMembership: {
+        findFirst: jest.fn(),
+        count: jest.fn(),
+      },
+      vote: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        findFirst: jest.fn(),
+        create: jest.fn(),
       },
       decision: {
         create: jest.fn(),
@@ -128,7 +152,7 @@ describe('DecisionsService', () => {
       votes: [],
       governancePath: { wallet: { entityId: 'entity-id' } },
     });
-    prisma.membership.count.mockResolvedValue(10);
+    prisma.subscription.count.mockResolvedValue(10);
     prisma.decision.update.mockResolvedValue({
       id: 'decision-id',
       status: DecisionStatus.EXPIRED,
@@ -166,6 +190,45 @@ describe('DecisionsService', () => {
         },
       }),
     );
+  });
+
+  it('rejects one-family path votes from members who are not active path subscribers', async () => {
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      subjectType: SubjectType.SPENDING_ITEM,
+      subjectId: 'spending-item-id',
+      status: DecisionStatus.OPEN,
+      result: DecisionResult.PENDING,
+      closesAt: new Date(Date.now() + 60_000),
+      quorumPercent: 50,
+      approvalPercent: 51,
+      votersScope: VotersScope.ALL_MEMBERS,
+      governancePathId: 'path-id',
+      voteType: VoteType.ONE_FAMILY_ONE_VOTE,
+      votes: [],
+      governancePath: { wallet: { entityId: 'entity-id' } },
+    });
+    prisma.subscription.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.castVote('decision-id', 'person-id', {
+        choice: 'APPROVE',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.subscription.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          governancePathId: 'path-id',
+          membership: expect.objectContaining({
+            entityId: 'entity-id',
+            personId: 'person-id',
+            isActive: true,
+          }),
+        }),
+      }),
+    );
+    expect(prisma.vote.create).not.toHaveBeenCalled();
   });
 
   it('requires an approved amount for DISBURSE_FUNDS decisions', async () => {

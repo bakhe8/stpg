@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { devLogin, login, type AuthResponse } from "../../lib/api/auth";
 import styles from "./login.module.css";
 import Link from "next/link";
+import PhoneInput, { toE164 } from "../../components/shared/PhoneInput";
 
 type LoginMode = "login" | "dev";
 
@@ -33,8 +34,7 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
     try {
-      const fullPhoneNumber = `+9665${phoneNumber.trim()}`;
-      completeLogin(await login(fullPhoneNumber, password));
+      completeLogin(await login(toE164(phoneNumber), password));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("loginFailed"));
     } finally {
@@ -80,26 +80,13 @@ export default function LoginForm() {
               <label htmlFor="phone-input" className={styles.label}>
                 {t("phoneLabel")}
               </label>
-              <div className={styles.phoneInputWrapper}>
-                <span className={styles.phonePrefix}>05</span>
-                <input
-                  id="phone-input"
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="xxxxxxxx"
-                  className={styles.inputWithPrefix}
-                  value={phoneNumber}
-                  onChange={(event) => {
-                    const val = event.target.value.replace(/\D/g, "");
-                    if (val.length <= 8) {
-                      setPhoneNumber(val);
-                      setError(null);
-                    }
-                  }}
-                  disabled={isLoading}
-                  required
-                />
-              </div>
+              <PhoneInput
+                id="phone-input"
+                value={phoneNumber}
+                onChange={(digits) => { setPhoneNumber(digits); setError(null); }}
+                disabled={isLoading}
+                required
+              />
             </div>
             
             <div className={styles.inputGroup}>
@@ -124,7 +111,7 @@ export default function LoginForm() {
             <button
               type="submit"
               className={styles.submitBtn}
-              disabled={isLoading || !phoneNumber.trim() || !password.trim()}
+              disabled={isLoading || phoneNumber.length < 8 || !password.trim()}
             >
               {isLoading ? <span className={styles.loader} /> : t("loginBtn")}
             </button>
