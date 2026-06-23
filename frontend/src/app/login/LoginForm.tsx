@@ -33,7 +33,8 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
     try {
-      completeLogin(await login(phoneNumber.trim(), password));
+      const fullPhoneNumber = `05${phoneNumber.trim()}`;
+      completeLogin(await login(fullPhoneNumber, password));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("loginFailed"));
     } finally {
@@ -79,20 +80,26 @@ export default function LoginForm() {
               <label htmlFor="phone-input" className={styles.label}>
                 {t("phoneLabel")}
               </label>
-              <input
-                id="phone-input"
-                type="tel"
-                inputMode="tel"
-                placeholder="05xxxxxxxx"
-                className={styles.input}
-                value={phoneNumber}
-                onChange={(event) => {
-                  setPhoneNumber(event.target.value);
-                  setError(null);
-                }}
-                disabled={isLoading}
-                required
-              />
+              <div className={styles.phoneInputWrapper}>
+                <span className={styles.phonePrefix}>05</span>
+                <input
+                  id="phone-input"
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="xxxxxxxx"
+                  className={styles.inputWithPrefix}
+                  value={phoneNumber}
+                  onChange={(event) => {
+                    const val = event.target.value.replace(/\D/g, "");
+                    if (val.length <= 8) {
+                      setPhoneNumber(val);
+                      setError(null);
+                    }
+                  }}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
             </div>
             
             <div className={styles.inputGroup}>

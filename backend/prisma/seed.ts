@@ -10351,7 +10351,7 @@ async function main() {
   await seedEntityTemplates();
 
   const platformPassword =
-    process.env.SEED_PLATFORM_PASSWORD ?? 'SeedPlatform2026!';
+    process.env.SEED_PLATFORM_PASSWORD ?? '123456';
   const platformPasswordHash = await bcrypt.hash(platformPassword, 12);
   await upsertById(
     platformAccounts.map((account) => ({

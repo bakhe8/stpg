@@ -61,7 +61,7 @@ async function main() {
     }
 
     const platformPassword =
-      process.env.SEED_PLATFORM_PASSWORD ?? 'SeedPlatform2026!';
+      process.env.SEED_PLATFORM_PASSWORD ?? '123456';
     const activePlatformAccounts = platformAccounts.filter(
       (account) => account.isActive,
     );
