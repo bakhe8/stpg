@@ -1,10 +1,8 @@
+// في الإنتاج: /api (مسار نسبي — Caddy يوجّه /api* للباكند)
+// في التطوير المحلي: http://localhost:3001/api
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
-
-if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_API_URL) {
-  console.error("CRITICAL: NEXT_PUBLIC_API_URL is missing. API calls may fail.");
-}
+  (process.env.NODE_ENV === "production" ? "/api" : "http://localhost:3001/api");
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
