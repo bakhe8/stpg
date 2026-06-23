@@ -234,6 +234,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </nav>
 
+        <div className={styles.versionBadge}>
+          <span>CollectiveTrustOS</span>
+          <span className={styles.versionTag}>v1.0</span>
+        </div>
+
         <div className={styles.sidebarFooter}>
           <Link href="/profile" className={styles.userBadge}>
             <span className={styles.userAvatar}>
