@@ -161,3 +161,57 @@ export function respondToAppeal(
     body: JSON.stringify({ response, status }),
   });
 }
+
+// ── Template Management (Platform Admin) ────────────────────────────────────
+
+export interface EntityTemplate {
+  id: string;
+  name: string;
+  type: string;
+  description: string | null;
+  icon: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  enabledModules: string[] | null;
+  suggestedGoals: { name: string; icon?: string }[] | null;
+  defaultPolicy: Record<string, unknown> | null;
+  defaultWallets: { name: string; type?: string }[] | null;
+  defaultPaths: Record<string, unknown>[] | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateTemplatePayload = {
+  name: string;
+  type: string;
+  description?: string;
+  icon?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+  enabledModules?: string[];
+  suggestedGoals?: { name: string; icon?: string }[];
+  defaultPolicy?: Record<string, unknown>;
+  defaultWallets?: { name: string; type?: string }[];
+};
+
+export function getTemplates(all = true): Promise<EntityTemplate[]> {
+  return platformFetch(`/entity-templates?all=${all}`);
+}
+
+export function createTemplate(data: CreateTemplatePayload): Promise<EntityTemplate> {
+  return platformFetch("/entity-templates", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateTemplate(id: string, data: Partial<CreateTemplatePayload>): Promise<EntityTemplate> {
+  return platformFetch(`/entity-templates/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteTemplate(id: string): Promise<EntityTemplate> {
+  return platformFetch(`/entity-templates/${id}`, { method: "DELETE" });
+}

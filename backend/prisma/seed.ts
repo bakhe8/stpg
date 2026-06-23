@@ -36,6 +36,7 @@ const monthsAgo = (months: number) => {
 };
 const periodLabel = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+const seedPhone = (order: number) => `+9665${String(order).padStart(8, '0')}`;
 const compact = <T>(items: Array<T | null | undefined>) =>
   items.filter((item): item is T => item !== null && item !== undefined);
 const chunkArray = <T>(items: T[], chunkSize: number) => {
@@ -118,7 +119,7 @@ const people = [
     key: 'ahmed_family',
     username: 'seed.ahmed.family',
     name: 'أحمد الهاشمي',
-    phoneNumber: '+966500000001',
+    phoneNumber: seedPhone(1),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/ahmed.png',
     isVerified: true,
     createdAt: daysAgo(420),
@@ -127,7 +128,7 @@ const people = [
     key: 'sara_family',
     username: 'seed.sara.family',
     name: 'سارة الهاشمي',
-    phoneNumber: '+966500000002',
+    phoneNumber: seedPhone(2),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/sara.png',
     isVerified: true,
     createdAt: daysAgo(400),
@@ -136,7 +137,7 @@ const people = [
     key: 'nasser_family',
     username: 'seed.nasser.family',
     name: 'ناصر الهاشمي',
-    phoneNumber: '+966500000003',
+    phoneNumber: seedPhone(3),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/nasser.png',
     isVerified: true,
     createdAt: daysAgo(390),
@@ -145,7 +146,7 @@ const people = [
     key: 'layan_auditor',
     username: 'seed.layan.audit',
     name: 'ليان العتيبي',
-    phoneNumber: '+966500000004',
+    phoneNumber: seedPhone(4),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/layan.png',
     isVerified: true,
     createdAt: daysAgo(380),
@@ -154,7 +155,7 @@ const people = [
     key: 'majed_medical',
     username: 'seed.majed.medical',
     name: 'د. ماجد السبيعي',
-    phoneNumber: '+966500000005',
+    phoneNumber: seedPhone(5),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/majed.png',
     isVerified: true,
     createdAt: daysAgo(375),
@@ -163,7 +164,7 @@ const people = [
     key: 'noura_social',
     username: 'seed.noura.social',
     name: 'نورة الدوسري',
-    phoneNumber: '+966500000006',
+    phoneNumber: seedPhone(6),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/noura.png',
     isVerified: true,
     createdAt: daysAgo(370),
@@ -172,7 +173,7 @@ const people = [
     key: 'faisal_overlap',
     username: 'seed.faisal.overlap',
     name: 'فيصل القحطاني',
-    phoneNumber: '+966500000007',
+    phoneNumber: seedPhone(7),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/faisal.png',
     isVerified: true,
     createdAt: daysAgo(365),
@@ -181,7 +182,7 @@ const people = [
     key: 'tariq_complex',
     username: 'seed.tariq.complex',
     name: 'طارق المالكي',
-    phoneNumber: '+966500000027',
+    phoneNumber: seedPhone(27),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/tariq.png',
     isVerified: true,
     createdAt: daysAgo(362),
@@ -190,7 +191,7 @@ const people = [
     key: 'reem_overlap',
     username: 'seed.reem.overlap',
     name: 'ريم القحطاني',
-    phoneNumber: '+966500000008',
+    phoneNumber: seedPhone(8),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/reem.png',
     isVerified: true,
     createdAt: daysAgo(360),
@@ -199,7 +200,7 @@ const people = [
     key: 'omar_youth',
     username: 'seed.omar.youth',
     name: 'عمر الهاشمي',
-    phoneNumber: '+966500000009',
+    phoneNumber: seedPhone(9),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/omar.png',
     isVerified: true,
     createdAt: daysAgo(355),
@@ -208,7 +209,7 @@ const people = [
     key: 'amal_conditional',
     username: 'seed.amal.conditional',
     name: 'أمل الحربي',
-    phoneNumber: '+966500000010',
+    phoneNumber: seedPhone(10),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/amal.png',
     isVerified: true,
     createdAt: daysAgo(350),
@@ -217,7 +218,7 @@ const people = [
     key: 'khaled_suspended',
     username: 'seed.khaled.suspended',
     name: 'خالد المطيري',
-    phoneNumber: '+966500000011',
+    phoneNumber: seedPhone(11),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/khaled.png',
     isVerified: true,
     createdAt: daysAgo(345),
@@ -226,7 +227,7 @@ const people = [
     key: 'huda_exited',
     username: 'seed.huda.exited',
     name: 'هدى الزهراني',
-    phoneNumber: '+966500000012',
+    phoneNumber: seedPhone(12),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/huda.png',
     isVerified: true,
     createdAt: daysAgo(340),
@@ -235,7 +236,7 @@ const people = [
     key: 'abdullah_building',
     username: 'seed.abdullah.building',
     name: 'عبدالله العمري',
-    phoneNumber: '+966500000013',
+    phoneNumber: seedPhone(13),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/abdullah.png',
     isVerified: true,
     createdAt: daysAgo(335),
@@ -244,7 +245,7 @@ const people = [
     key: 'mona_building',
     username: 'seed.mona.building',
     name: 'منى العمري',
-    phoneNumber: '+966500000014',
+    phoneNumber: seedPhone(14),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/mona.png',
     isVerified: true,
     createdAt: daysAgo(330),
@@ -253,7 +254,7 @@ const people = [
     key: 'basel_building_auditor',
     username: 'seed.basel.building.audit',
     name: 'باسل الشريف',
-    phoneNumber: '+966500000015',
+    phoneNumber: seedPhone(15),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/basel.png',
     isVerified: true,
     createdAt: daysAgo(325),
@@ -262,7 +263,7 @@ const people = [
     key: 'yahya_neighborhood',
     username: 'seed.yahya.neighborhood',
     name: 'يحيى البقمي',
-    phoneNumber: '+966500000016',
+    phoneNumber: seedPhone(16),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/yahya.png',
     isVerified: true,
     createdAt: daysAgo(320),
@@ -271,7 +272,7 @@ const people = [
     key: 'asmaa_neighborhood',
     username: 'seed.asmaa.neighborhood',
     name: 'أسماء البقمي',
-    phoneNumber: '+966500000017',
+    phoneNumber: seedPhone(17),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/asmaa.png',
     isVerified: true,
     createdAt: daysAgo(315),
@@ -280,7 +281,7 @@ const people = [
     key: 'salem_neighborhood',
     username: 'seed.salem.neighborhood',
     name: 'سالم البقمي',
-    phoneNumber: '+966500000018',
+    phoneNumber: seedPhone(18),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/salem.png',
     isVerified: true,
     createdAt: daysAgo(310),
@@ -289,7 +290,7 @@ const people = [
     key: 'fahad_case',
     username: 'seed.fahad.case',
     name: 'فهد المطوع',
-    phoneNumber: '+966500000019',
+    phoneNumber: seedPhone(19),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/fahad.png',
     isVerified: true,
     createdAt: daysAgo(305),
@@ -298,7 +299,7 @@ const people = [
     key: 'rana_family',
     username: 'seed.rana.family',
     name: 'رنا الهاشمي',
-    phoneNumber: '+966500000020',
+    phoneNumber: seedPhone(20),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/rana.png',
     isVerified: true,
     createdAt: daysAgo(300),
@@ -307,7 +308,7 @@ const people = [
     key: 'ali_family',
     username: 'seed.ali.family',
     name: 'علي الهاشمي',
-    phoneNumber: '+966500000021',
+    phoneNumber: seedPhone(21),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/ali.png',
     isVerified: true,
     createdAt: daysAgo(295),
@@ -316,7 +317,7 @@ const people = [
     key: 'dalal_family',
     username: 'seed.dalal.family',
     name: 'دلال الهاشمي',
-    phoneNumber: '+966500000022',
+    phoneNumber: seedPhone(22),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/dalal.png',
     isVerified: true,
     createdAt: daysAgo(290),
@@ -325,7 +326,7 @@ const people = [
     key: 'yousef_family',
     username: 'seed.yousef.family',
     name: 'يوسف الهاشمي',
-    phoneNumber: '+966500000023',
+    phoneNumber: seedPhone(23),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/yousef.png',
     isVerified: true,
     createdAt: daysAgo(285),
@@ -334,7 +335,7 @@ const people = [
     key: 'mariam_family',
     username: 'seed.mariam.family',
     name: 'مريم الهاشمي',
-    phoneNumber: '+966500000024',
+    phoneNumber: seedPhone(24),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/mariam.png',
     isVerified: false,
     createdAt: daysAgo(280),
@@ -343,7 +344,7 @@ const people = [
     key: 'abdulrahman_tribe',
     username: 'seed.abdulrahman.tribe',
     name: 'عبدالرحمن السهمي',
-    phoneNumber: '+966500000025',
+    phoneNumber: seedPhone(25),
     avatarUrl:
       'https://seed.collectivetrust.local/avatars/abdulrahman-tribe.png',
     isVerified: true,
@@ -353,7 +354,7 @@ const people = [
     key: 'hissa_tribe',
     username: 'seed.hissa.tribe',
     name: 'حصة السهمية',
-    phoneNumber: '+966500000026',
+    phoneNumber: seedPhone(26),
     avatarUrl: 'https://seed.collectivetrust.local/avatars/hissa-tribe.png',
     isVerified: true,
     createdAt: daysAgo(270),
@@ -454,7 +455,7 @@ const buildGeneratedPeople = ({
       key: `${prefix}_${code}`,
       username: `seed.${usernamePrefix}.${code}`,
       name: `${label} ${code} ${familyName}`,
-      phoneNumber: `+9665${String(phoneBase + order).padStart(8, '0')}`,
+      phoneNumber: seedPhone(phoneBase + order),
       avatarUrl: `https://seed.collectivetrust.local/avatars/${prefix}-${code}.png`,
       isVerified: verified,
       createdAt: daysAgo(startDaysAgo - index),
@@ -1378,56 +1379,112 @@ const generatedExtraHouseholds = chunkArray(familyExtraKeys, 3)
 householdDefinitions.push(...generatedExtraHouseholds);
 
 const entityTemplates = [
+  // ── ١. صندوق عائلي بسيط ──────────────────────────────────────────
   {
     id: entityTemplateId('standard-family'),
-    name: 'صندوق عائلة قياسي',
+    name: 'صندوق عائلي',
     type: 'FAMILY',
-    description:
-      'قالب افتراضي لإنشاء صندوق عائلة مع محفظة رئيسية واحتياطية ومسار حوكمة.',
-    defaultPolicy: {
-      requireApproval: true,
-      minApprovalPercentage: 50,
-    } as Prisma.InputJsonValue,
+    icon: '🏠',
+    isActive: true,
+    sortOrder: 0,
+    description: 'مثالي للعائلات الصغيرة والكبيرة — اشتراكات، توزيع، أهداف مشتركة.',
+    enabledModules: ['payments', 'beneficiaries'] as unknown as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'قطة الجمعات', icon: '💰' },
+      { name: 'هدايا الخريجين', icon: '🎓' },
+      { name: 'قطة المناسبات', icon: '🎉' },
+    ] as unknown as Prisma.InputJsonValue,
+    defaultPolicy: { requiresMemberApproval: true, allowOpenMembership: false } as Prisma.InputJsonValue,
     defaultWallets: [
-      { id: 'w1', name: 'المحفظة الرئيسية', type: 'MAIN', currency: 'SAR' },
-      {
-        id: 'w2',
-        name: 'المحفظة الاحتياطية',
-        type: 'RESERVE',
-        currency: 'SAR',
-      },
+      { id: 'w1', name: 'الصندوق الرئيسي', type: 'MAIN', currency: 'SAR' },
     ] as Prisma.InputJsonValue,
-    defaultPaths: [
-      {
-        name: 'المسار القياسي للمصروفات',
-        walletTempId: 'w1',
-        rules: [
-          { threshold: 0, requiredApprovals: 2 },
-          { threshold: 10000, requiredApprovals: 3 },
-        ],
-      },
-    ] as Prisma.InputJsonValue,
+    defaultPaths: [] as Prisma.InputJsonValue,
   },
+
+  // ── ٢. مجموعة مسجد أو حي ─────────────────────────────────────────
+  {
+    id: entityTemplateId('mosque-neighborhood'),
+    name: 'مجموعة مسجد / حي',
+    type: 'NEIGHBORHOOD',
+    icon: '🕌',
+    isActive: true,
+    sortOrder: 1,
+    description: 'لجماعة المسجد أو أهل الحي — تبرعات وإنفاق وقرارات جماعية بسيطة.',
+    enabledModules: ['payments', 'decisions', 'beneficiaries'] as unknown as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'صندوق المسجد', icon: '🕌' },
+      { name: 'مساعدة المحتاجين', icon: '🤲' },
+      { name: 'أنشطة الحي', icon: '🏘️' },
+    ] as unknown as Prisma.InputJsonValue,
+    defaultPolicy: { requiresMemberApproval: true, allowOpenMembership: false } as Prisma.InputJsonValue,
+    defaultWallets: [
+      { id: 'w1', name: 'الصندوق الرئيسي', type: 'MAIN', currency: 'SAR' },
+    ] as Prisma.InputJsonValue,
+    defaultPaths: [] as Prisma.InputJsonValue,
+  },
+
+  // ── ٣. أصدقاء العمل ──────────────────────────────────────────────
+  {
+    id: entityTemplateId('work-friends'),
+    name: 'أصدقاء العمل',
+    type: 'COMMUNITY',
+    icon: '🤝',
+    isActive: true,
+    sortOrder: 2,
+    description: 'لزملاء العمل أو مجموعة الأصدقاء — تتبّع المدفوعات والاشتراكات ببساطة.',
+    enabledModules: ['payments'] as unknown as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'صندوق الأفراح', icon: '🎊' },
+      { name: 'رحلات ورفاهية', icon: '✈️' },
+    ] as unknown as Prisma.InputJsonValue,
+    defaultPolicy: { requiresMemberApproval: false, allowOpenMembership: false } as Prisma.InputJsonValue,
+    defaultWallets: [
+      { id: 'w1', name: 'الصندوق', type: 'MAIN', currency: 'SAR' },
+    ] as Prisma.InputJsonValue,
+    defaultPaths: [] as Prisma.InputJsonValue,
+  },
+
+  // ── ٤. صندوق مؤقت / حملة ────────────────────────────────────────
+  {
+    id: entityTemplateId('temporary-campaign'),
+    name: 'صندوق مؤقت',
+    type: 'CAMPAIGN',
+    icon: '⏳',
+    isActive: true,
+    sortOrder: 3,
+    description: 'لجمع تبرعات أو تحقيق هدف محدد بزمن — يُغلق تلقائياً عند بلوغ الهدف.',
+    enabledModules: ['payments', 'beneficiaries'] as unknown as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'الهدف الرئيسي', icon: '🎯' },
+    ] as unknown as Prisma.InputJsonValue,
+    defaultPolicy: { requiresMemberApproval: false, allowOpenMembership: true } as Prisma.InputJsonValue,
+    defaultWallets: [
+      { id: 'w1', name: 'صندوق الحملة', type: 'MAIN', currency: 'SAR' },
+    ] as Prisma.InputJsonValue,
+    defaultPaths: [] as Prisma.InputJsonValue,
+  },
+
+  // ── ٥. تعاونية / جمعية رسمية (كامل الميزات) ──────────────────────
   {
     id: entityTemplateId('cooperative-community'),
-    name: 'جمعية تعاونية',
+    name: 'تعاونية / جمعية',
     type: 'COMMUNITY',
-    description:
-      'قالب للجمعيات التعاونية مع التركيز على الاشتراكات والمحافظ المتعددة.',
-    defaultPolicy: {
-      requireApproval: true,
-      minApprovalPercentage: 75,
-    } as Prisma.InputJsonValue,
+    icon: '🏛️',
+    isActive: true,
+    sortOrder: 4,
+    description: 'للتعاونيات والجمعيات الرسمية — حوكمة كاملة مع لجان وتدقيق وقرارات.',
+    enabledModules: ['payments', 'decisions', 'committees', 'beneficiaries', 'auditor'] as unknown as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'صندوق الاشتراكات', icon: '💳' },
+      { name: 'الاحتياطي', icon: '🏦' },
+    ] as unknown as Prisma.InputJsonValue,
+    defaultPolicy: { requiresMemberApproval: true, allowOpenMembership: false, allowMultiplePaths: true } as Prisma.InputJsonValue,
     defaultWallets: [
       { id: 'w1', name: 'محفظة الاشتراكات', type: 'MAIN', currency: 'SAR' },
-      { id: 'w2', name: 'محفظة الاستثمارات', type: 'RESERVE', currency: 'SAR' },
+      { id: 'w2', name: 'المحفظة الاحتياطية', type: 'RESERVE', currency: 'SAR' },
     ] as Prisma.InputJsonValue,
     defaultPaths: [
-      {
-        name: 'مسار الاستثمار',
-        walletTempId: 'w2',
-        rules: [{ threshold: 0, requiredApprovals: 5 }],
-      },
+      { name: 'مسار الصرف القياسي', walletTempId: 'w1', rules: [{ threshold: 0, requiredApprovals: 2 }, { threshold: 10000, requiredApprovals: 3 }] },
     ] as Prisma.InputJsonValue,
   },
 ];
@@ -4841,6 +4898,18 @@ const subscriptionDefinitions: SeedSubscriptionDefinition[] = [
     suspendedAt: null,
     exitedAt: null,
     notes: 'عضو مقيم.',
+  },
+  {
+    entityKey: 'building_nakheel',
+    personKey: 'tariq_complex',
+    pathKey: 'building_maintenance_public',
+    state: 'ACTIVE',
+    agreedAmount: '220.00',
+    interestedAt: daysAgo(150),
+    activeAt: daysAgo(144),
+    suspendedAt: null,
+    exitedAt: null,
+    notes: 'مدير تشغيلي يتابع الصيانة والفواتير.',
   },
   {
     entityKey: 'building_nakheel',
@@ -10292,6 +10361,11 @@ async function seedEntityTemplates() {
         name: item.name,
         type: item.type as never,
         description: item.description,
+        icon: (item as { icon?: string }).icon,
+        isActive: (item as { isActive?: boolean }).isActive ?? true,
+        sortOrder: (item as { sortOrder?: number }).sortOrder ?? 0,
+        enabledModules: (item as { enabledModules?: Prisma.InputJsonValue }).enabledModules,
+        suggestedGoals: (item as { suggestedGoals?: Prisma.InputJsonValue }).suggestedGoals,
         defaultPolicy: item.defaultPolicy,
         defaultWallets: item.defaultWallets,
         defaultPaths: item.defaultPaths,
@@ -10359,16 +10433,88 @@ async function recomputeLedgerBalances() {
   }
 }
 
+const retiredFaisalEntityKeys = [
+  'neighborhood_rawdah',
+  'campaign_fahad',
+  'tribe_sahm',
+  'family_youth',
+  'family_bridge_pilot',
+] as const;
+
+const retiredFaisalSubscriptionKeys = [
+  ['neighborhood_rawdah', 'faisal_overlap', 'neighborhood_council'],
+  ['neighborhood_rawdah', 'faisal_overlap', 'neighborhood_weighted'],
+  ['campaign_fahad', 'faisal_overlap', 'campaign_supporters'],
+  ['family_youth', 'faisal_overlap', 'youth_board'],
+  ['tribe_sahm', 'faisal_overlap', 'tribe_relief_council'],
+  ['family_bridge_pilot', 'faisal_overlap', 'family_bridge_board'],
+] as const;
+
+async function cleanupRetiredSeedRows() {
+  const retiredMembershipIds = retiredFaisalEntityKeys.map((entityKey) =>
+    membershipId(entityKey, 'faisal_overlap'),
+  );
+  const retiredSubscriptionIds = retiredFaisalSubscriptionKeys.map(
+    ([entityKey, personKey, pathKey]) =>
+      subscriptionId(entityKey, personKey, pathKey),
+  );
+  const retiredPreferenceIds = retiredFaisalEntityKeys.map((entityKey) =>
+    seedId('member-preference', `${entityKey}:faisal_overlap`),
+  );
+  const retiredDueIds = [
+    paymentDueId('due_neighborhood_faisal_weighted_2026_06'),
+  ];
+  const retiredRecordIds = [
+    paymentRecordId('record_neighborhood_faisal_submitted'),
+  ];
+
+  await prisma.paymentRecord.deleteMany({
+    where: {
+      OR: [
+        { id: { in: retiredRecordIds } },
+        { paymentDueId: { in: retiredDueIds } },
+        { paymentDue: { subscriptionId: { in: retiredSubscriptionIds } } },
+      ],
+    },
+  });
+  await prisma.paymentDue.deleteMany({
+    where: {
+      OR: [
+        { id: { in: retiredDueIds } },
+        { subscriptionId: { in: retiredSubscriptionIds } },
+      ],
+    },
+  });
+  await prisma.subscription.deleteMany({
+    where: { id: { in: retiredSubscriptionIds } },
+  });
+  await prisma.committeeMembership.deleteMany({
+    where: { membershipId: { in: retiredMembershipIds } },
+  });
+  await prisma.memberPreference.deleteMany({
+    where: { id: { in: retiredPreferenceIds } },
+  });
+  await prisma.document.deleteMany({
+    where: { id: documentId('doc_payment_neighborhood_faisal') },
+  });
+  await prisma.membership.deleteMany({
+    where: { id: { in: retiredMembershipIds } },
+  });
+}
+
 async function main() {
   console.log(
     `Seeding comprehensive STGP dataset (profile=${ACTIVE_SEED_PROFILE}, referenceDate=${formatSeedDate(NOW)})...`,
   );
 
   await seedEntityTemplates();
+  await cleanupRetiredSeedRows();
 
   const platformPassword =
     process.env.SEED_PLATFORM_PASSWORD ?? '123456';
   const platformPasswordHash = await bcrypt.hash(platformPassword, 12);
+  const seedUserPassword = process.env.SEED_USER_PASSWORD ?? '123456';
+  const seedUserPasswordHash = await bcrypt.hash(seedUserPassword, 12);
   await upsertById(
     platformAccounts.map((account) => ({
       id: platformAccountId(account.key),
@@ -10394,6 +10540,7 @@ async function main() {
         username: person.username,
         name: person.name,
         phoneNumber: person.phoneNumber,
+        passwordHash: seedUserPasswordHash,
         avatarUrl: person.avatarUrl,
         isVerified: person.isVerified,
         createdAt: person.createdAt,
@@ -10403,6 +10550,7 @@ async function main() {
         username: person.username,
         name: person.name,
         phoneNumber: person.phoneNumber,
+        passwordHash: seedUserPasswordHash,
         avatarUrl: person.avatarUrl,
         isVerified: person.isVerified,
         createdAt: person.createdAt,

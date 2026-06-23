@@ -749,7 +749,11 @@ async function main() {
       !session.scope.trim() ||
       !entities.some((entity) => entity.id === session.entityId) ||
       !account?.isActive ||
-      account.role !== PlatformRole.SUPPORT ||
+      ![
+        PlatformRole.SUPPORT,
+        PlatformRole.SUPER_ADMIN,
+        PlatformRole.OWNER,
+      ].includes(account.role) ||
       !hasValidTimeState
     );
   });
@@ -758,7 +762,7 @@ async function main() {
       findings,
       'error',
       'SUPPORT_SESSION_INVALID',
-      'Support sessions require an active support account, valid entity, scope, and status-consistent time window.',
+      'Support sessions require an active platform support-capable account, valid entity, scope, and status-consistent time window.',
       invalidSupportSessions.length,
       sampleList(invalidSupportSessions.map((session) => session.id)),
     );

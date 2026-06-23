@@ -14,6 +14,7 @@ import {
   MembershipApplicationStatus,
   EntityType,
   GovernancePathType,
+  Prisma,
 } from '@prisma/client';
 import { CreateEntityDto } from './dto/create-entity.dto';
 import { UpdateEntityDto } from './dto/update-entity.dto';
@@ -57,6 +58,10 @@ export class EntitiesService {
           type: dto.type,
           description: dto.description,
           logoUrl: dto.logoUrl,
+          templateId: template?.id ?? null,
+          enabledModules: template?.enabledModules
+            ? toJsonValue(template.enabledModules)
+            : Prisma.JsonNull,
           policy: {
             create: template?.defaultPolicy
               ? (template.defaultPolicy as Record<string, unknown>)

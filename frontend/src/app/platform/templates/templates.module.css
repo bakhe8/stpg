@@ -1,0 +1,371 @@
+.page {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  direction: rtl;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a2035;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.createBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.createBtn:hover { background: #1d4ed8; }
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #dc2626;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* ── Form ──────────────────────────────────────────────── */
+.formCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a2035;
+  margin: 0 0 1.25rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input, .select, .textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  color: #1a2035;
+  background: #fff;
+  direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
+}
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.textarea { resize: vertical; }
+
+.section {
+  margin-bottom: 1.25rem;
+}
+.sectionLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.3rem;
+}
+.hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+}
+
+.modulesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.moduleToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #374151;
+  cursor: pointer;
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+}
+.moduleToggle:has(input:checked) {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+.moduleToggle input { cursor: pointer; }
+
+.goalsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  min-height: 32px;
+}
+.goalChip {
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.chipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+}
+.chipRemove:hover { color: #ef4444; }
+
+.goalRow {
+  display: flex;
+  gap: 0.5rem;
+}
+.addGoalBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.addGoalBtn:hover { background: #1d4ed8; }
+
+.activeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+}
+.activeRow input { cursor: pointer; }
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+.saveBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.saveBtn:hover:not(:disabled) { background: #1d4ed8; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cancelBtn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.65rem 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.cancelBtn:hover { background: #e5e7eb; }
+
+/* ── List ──────────────────────────────────────────────── */
+.loading, .empty {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: #2563eb; }
+.cardInactive {
+  opacity: 0.6;
+  background: #fafafa;
+}
+
+.cardIcon {
+  font-size: 2rem;
+  width: 2.5rem;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.cardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.cardName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a2035;
+}
+.cardType {
+  font-size: 0.78rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 20px;
+  padding: 0.15rem 0.6rem;
+}
+.badgeInactive {
+  font-size: 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 20px;
+  padding: 0.15rem 0.5rem;
+}
+
+.cardDesc {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+}
+
+.cardModules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+.moduleBadge {
+  font-size: 0.75rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 20px;
+  padding: 0.15rem 0.55rem;
+}
+.noModules {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.cardGoals {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.goalsLabel {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+.goalBadge {
+  font-size: 0.75rem;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+}
+
+.cardActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.editBtn, .hideBtn, .showBtn, .deleteBtn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.editBtn  { background: #f3f4f6; color: #374151; }
+.editBtn:hover  { background: #e5e7eb; }
+.hideBtn  { background: #fef9c3; color: #854d0e; }
+.hideBtn:hover  { background: #fef08a; }
+.showBtn  { background: #d1fae5; color: #065f46; }
+.showBtn:hover  { background: #a7f3d0; }
+.deleteBtn { background: #fef2f2; color: #dc2626; }
+.deleteBtn:hover { background: #fee2e2; }
+
+@media (max-width: 640px) {
+  .page { padding: 1rem; }
+  .formGrid { grid-template-columns: 1fr; }
+  .card { flex-wrap: wrap; }
+  .cardActions { flex-direction: row; width: 100%; }
+}

@@ -4,7 +4,9 @@ import { createSeedDb, resolveSeedRuntimeOptions } from './seed-runtime';
 async function main() {
   const runtime = resolveSeedRuntimeOptions();
   const { pool, prisma } = createSeedDb(runtime.connectionString);
-  const apiUrl = process.env.SEED_SMOKE_API_URL ?? 'http://localhost:3001';
+  const apiUrl = (
+    process.env.SEED_SMOKE_API_URL ?? 'http://localhost:3001/api'
+  ).replace(/\/$/, '');
 
   try {
     const people = await prisma.person.findMany({

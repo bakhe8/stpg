@@ -9,6 +9,7 @@ import styles from './platform.module.css';
 const NAV_LINKS = [
   { href: '/platform', label: 'الكيانات', icon: '⬡' },
   { href: '/platform/appeals', label: 'الاعتراضات', icon: '⚖' },
+  { href: '/platform/templates', label: 'القوالب', icon: '◈' },
 ];
 
 export default function PlatformLayout({

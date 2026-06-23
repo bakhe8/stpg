@@ -341,6 +341,14 @@ model Entity {
   bankAccountNumber String?
   bankName          String?
 
+  /// القالب الذي أُنشئ منه الكيان (مرجع تاريخي — لا يُقيّد الكيان)
+  templateId  String?   @db.Uuid
+  template    EntityTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  /// الوحدات المُفعَّلة في هذا الكيان (تبدأ من القالب وتقبل التوسعة)
+  /// مثال: ["payments","decisions","beneficiaries"]
+  enabledModules Json?
+
   /// طلب إغلاق الكيان — يُبدأ من المؤسس ويُعتمد من المنصة
   closureStatus      String?   // PENDING_CLOSURE | CLOSED | ARCHIVED
   closureRequestedAt DateTime?
@@ -1830,6 +1838,22 @@ model EntityTemplate {
   type        EntityType
   description String?
 
+  /// أيقونة القالب (emoji أو رمز)
+  icon        String?
+
+  /// هل القالب نشط ويظهر للمستخدمين؟
+  isActive    Boolean    @default(true)
+
+  /// ترتيب العرض
+  sortOrder   Int        @default(0)
+
+  /// الوحدات المُفعَّلة افتراضياً عند إنشاء كيان من هذا القالب
+  /// مثال: ["payments","decisions","committees","beneficiaries","auditor"]
+  enabledModules Json?
+
+  /// الأهداف/المحافظ المقترحة (مصفوفة JSON: [{name, icon}])
+  suggestedGoals Json?
+
   /// سياسات الكيان الافتراضية
   defaultPolicy Json?
 
@@ -1841,6 +1865,10 @@ model EntityTemplate {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  entities    Entity[]
+
+  @@map("entity_templates")
 }
 
 // =================================================================

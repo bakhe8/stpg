@@ -56,7 +56,12 @@ export interface EntityTemplate {
   id: string;
   name: string;
   type: string;
-  description?: string;
+  description?: string | null;
+  icon?: string | null;
+  isActive?: boolean;
+  sortOrder?: number;
+  enabledModules?: string[] | null;
+  suggestedGoals?: { name: string; icon?: string }[] | null;
   defaultPolicy?: Record<string, unknown> | null;
   defaultWallets?: Record<string, unknown>[] | null;
   defaultPaths?: Record<string, unknown>[] | null;
