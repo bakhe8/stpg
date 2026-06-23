@@ -4844,6 +4844,18 @@ const subscriptionDefinitions: SeedSubscriptionDefinition[] = [
   },
   {
     entityKey: 'building_nakheel',
+    personKey: 'tariq_complex',
+    pathKey: 'building_maintenance_public',
+    state: 'ACTIVE',
+    agreedAmount: '220.00',
+    interestedAt: daysAgo(150),
+    activeAt: daysAgo(144),
+    suspendedAt: null,
+    exitedAt: null,
+    notes: 'مدير تشغيلي يتابع الصيانة والفواتير.',
+  },
+  {
+    entityKey: 'building_nakheel',
     personKey: 'ali_family',
     pathKey: 'building_maintenance_public',
     state: 'ACTIVE',
@@ -10292,6 +10304,11 @@ async function seedEntityTemplates() {
         name: item.name,
         type: item.type as never,
         description: item.description,
+        icon: (item as { icon?: string }).icon,
+        isActive: (item as { isActive?: boolean }).isActive ?? true,
+        sortOrder: (item as { sortOrder?: number }).sortOrder ?? 0,
+        enabledModules: (item as { enabledModules?: Prisma.InputJsonValue }).enabledModules,
+        suggestedGoals: (item as { suggestedGoals?: Prisma.InputJsonValue }).suggestedGoals,
         defaultPolicy: item.defaultPolicy,
         defaultWallets: item.defaultWallets,
         defaultPaths: item.defaultPaths,
@@ -10359,16 +10376,88 @@ async function recomputeLedgerBalances() {
   }
 }
 
+const retiredFaisalEntityKeys = [
+  'neighborhood_rawdah',
+  'campaign_fahad',
+  'tribe_sahm',
+  'family_youth',
+  'family_bridge_pilot',
+] as const;
+
+const retiredFaisalSubscriptionKeys = [
+  ['neighborhood_rawdah', 'faisal_overlap', 'neighborhood_council'],
+  ['neighborhood_rawdah', 'faisal_overlap', 'neighborhood_weighted'],
+  ['campaign_fahad', 'faisal_overlap', 'campaign_supporters'],
+  ['family_youth', 'faisal_overlap', 'youth_board'],
+  ['tribe_sahm', 'faisal_overlap', 'tribe_relief_council'],
+  ['family_bridge_pilot', 'faisal_overlap', 'family_bridge_board'],
+] as const;
+
+async function cleanupRetiredSeedRows() {
+  const retiredMembershipIds = retiredFaisalEntityKeys.map((entityKey) =>
+    membershipId(entityKey, 'faisal_overlap'),
+  );
+  const retiredSubscriptionIds = retiredFaisalSubscriptionKeys.map(
+    ([entityKey, personKey, pathKey]) =>
+      subscriptionId(entityKey, personKey, pathKey),
+  );
+  const retiredPreferenceIds = retiredFaisalEntityKeys.map((entityKey) =>
+    seedId('member-preference', `${entityKey}:faisal_overlap`),
+  );
+  const retiredDueIds = [
+    paymentDueId('due_neighborhood_faisal_weighted_2026_06'),
+  ];
+  const retiredRecordIds = [
+    paymentRecordId('record_neighborhood_faisal_submitted'),
+  ];
+
+  await prisma.paymentRecord.deleteMany({
+    where: {
+      OR: [
+        { id: { in: retiredRecordIds } },
+        { paymentDueId: { in: retiredDueIds } },
+        { paymentDue: { subscriptionId: { in: retiredSubscriptionIds } } },
+      ],
+    },
+  });
+  await prisma.paymentDue.deleteMany({
+    where: {
+      OR: [
+        { id: { in: retiredDueIds } },
+        { subscriptionId: { in: retiredSubscriptionIds } },
+      ],
+    },
+  });
+  await prisma.subscription.deleteMany({
+    where: { id: { in: retiredSubscriptionIds } },
+  });
+  await prisma.committeeMembership.deleteMany({
+    where: { membershipId: { in: retiredMembershipIds } },
+  });
+  await prisma.memberPreference.deleteMany({
+    where: { id: { in: retiredPreferenceIds } },
+  });
+  await prisma.document.deleteMany({
+    where: { id: documentId('doc_payment_neighborhood_faisal') },
+  });
+  await prisma.membership.deleteMany({
+    where: { id: { in: retiredMembershipIds } },
+  });
+}
+
 async function main() {
   console.log(
     `Seeding comprehensive STGP dataset (profile=${ACTIVE_SEED_PROFILE}, referenceDate=${formatSeedDate(NOW)})...`,
   );
 
   await seedEntityTemplates();
+  await cleanupRetiredSeedRows();
 
   const platformPassword =
     process.env.SEED_PLATFORM_PASSWORD ?? '123456';
   const platformPasswordHash = await bcrypt.hash(platformPassword, 12);
+  const seedUserPassword = process.env.SEED_USER_PASSWORD ?? '123456';
+  const seedUserPasswordHash = await bcrypt.hash(seedUserPassword, 12);
   await upsertById(
     platformAccounts.map((account) => ({
       id: platformAccountId(account.key),
@@ -10394,6 +10483,7 @@ async function main() {
         username: person.username,
         name: person.name,
         phoneNumber: person.phoneNumber,
+        passwordHash: seedUserPasswordHash,
         avatarUrl: person.avatarUrl,
         isVerified: person.isVerified,
         createdAt: person.createdAt,
@@ -10403,6 +10493,7 @@ async function main() {
         username: person.username,
         name: person.name,
         phoneNumber: person.phoneNumber,
+        passwordHash: seedUserPasswordHash,
         avatarUrl: person.avatarUrl,
         isVerified: person.isVerified,
         createdAt: person.createdAt,

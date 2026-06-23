@@ -87,9 +87,12 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const { phoneNumber, password } = dto;
+    const phoneCandidates = this.getPhoneLoginCandidates(phoneNumber);
 
-    const person = await this.prisma.person.findUnique({
-      where: { phoneNumber },
+    const person = await this.prisma.person.findFirst({
+      where: {
+        phoneNumber: { in: phoneCandidates },
+      },
     });
 
     if (!person || !person.passwordHash) {
@@ -272,6 +275,26 @@ export class AuthService {
   }
 
   // ── مساعد داخلي ────────────────────────────────────────────────────
+  private getPhoneLoginCandidates(phoneNumber: string): string[] {
+    const trimmed = phoneNumber.trim();
+    const digits = trimmed.replace(/\D/g, '');
+    const candidates = new Set<string>([trimmed]);
+
+    if (/^05\d{8}$/.test(digits)) {
+      candidates.add(`+9665${digits.slice(2)}`);
+    }
+
+    if (/^5\d{8}$/.test(digits)) {
+      candidates.add(`+966${digits}`);
+    }
+
+    if (/^\d{8}$/.test(digits)) {
+      candidates.add(`+9665${digits}`);
+    }
+
+    return [...candidates].filter(Boolean);
+  }
+
   private async issueTokenPair(person: Person) {
     const accessToken = this.jwtService.sign(
       { sub: person.id, username: person.username, userType: 'tenant' },
