@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   getEntity,
   updateEntity,
+  updateEntityModules,
   getClosureChecklist,
   requestClosure,
   Entity,
@@ -13,6 +14,17 @@ import {
 } from "../../../../../lib/api/entities";
 import ConfirmActionDialog from "../../../../../components/shared/ConfirmActionDialog";
 import styles from "./settings.module.css";
+
+const ALL_MODULES = [
+  { key: "payments",      label: "المالية والاشتراكات",    desc: "المحافظ، الاشتراكات، تتبّع المدفوعات" },
+  { key: "decisions",     label: "القرارات والتصويت",       desc: "إصدار القرارات، التصويت، الأغلبية" },
+  { key: "committees",    label: "اللجان",                 desc: "تشكيل اللجان، مركز المراجعة" },
+  { key: "beneficiaries", label: "الصرف والمستفيدون",      desc: "طلبات الصرف، قائمة المستفيدين" },
+  { key: "auditor",       label: "التدقيق والتحليل",       desc: "سجل التدقيق، التقارير، الإحصاءات" },
+  { key: "governance",    label: "مسارات الحوكمة",         desc: "اللوائح الداخلية، مسارات الموافقة" },
+  { key: "documents",     label: "المستندات",              desc: "رفع وإدارة المستندات" },
+  { key: "disputes",      label: "الطعون والاعتراضات",     desc: "تقديم الطعون، مراجعة الاعتراضات" },
+];
 
 export default function EntitySettingsPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +49,11 @@ export default function EntitySettingsPage() {
   const [closureSubmitting, setClosureSubmitting] = useState(false);
   const [closureMsg, setClosureMsg] = useState<string | null>(null);
 
+  // Modules state
+  const [modulesSaving, setModulesSaving] = useState(false);
+  const [modulesMsg, setModulesMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [enabledModules, setEnabledModules] = useState<string[] | null>(null);
+
   const isFounderOrAdmin = entity?.myRole === "FOUNDER" || entity?.myRole === "ADMIN";
 
   useEffect(() => {
@@ -49,6 +66,7 @@ export default function EntitySettingsPage() {
         setDescription(e.description ?? "");
         setBankAccountNumber(e.bankAccountNumber ?? "");
         setBankName(e.bankName ?? "");
+        setEnabledModules(e.enabledModules ?? null);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -91,6 +109,34 @@ export default function EntitySettingsPage() {
       setClosureMsg(err instanceof Error ? err.message : "فشل إرسال طلب الإغلاق");
     } finally {
       setClosureSubmitting(false);
+    }
+  }
+
+  async function handleSaveModules() {
+    if (!id) return;
+    setModulesSaving(true);
+    setModulesMsg(null);
+    try {
+      const updated = await updateEntityModules(id, enabledModules);
+      setEntity((prev) => prev ? { ...prev, enabledModules: updated.enabledModules } : prev);
+      setModulesMsg({ type: "success", text: "تم حفظ الوحدات — ستظهر التغييرات عند التنقل" });
+    } catch (err) {
+      setModulesMsg({ type: "error", text: err instanceof Error ? err.message : "فشل الحفظ" });
+    } finally {
+      setModulesSaving(false);
+    }
+  }
+
+  function toggleModule(key: string) {
+    if (enabledModules === null) {
+      // كل الوحدات مفعّلة → ابدأ بقائمة كاملة ثم أزل هذه الوحدة
+      setEnabledModules(ALL_MODULES.map((m) => m.key).filter((k) => k !== key));
+    } else {
+      setEnabledModules(
+        enabledModules.includes(key)
+          ? enabledModules.filter((m) => m !== key)
+          : [...enabledModules, key]
+      );
     }
   }
 
@@ -169,6 +215,59 @@ export default function EntitySettingsPage() {
           </button>
         </form>
       </section>
+
+      {/* ── الوحدات المُفعَّلة ── */}
+      {isFounderOrAdmin && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>وحدات الكيان</h2>
+          <p className={styles.sectionDesc}>
+            حدّد الميزات التي يحتاجها كيانك — الوحدات غير المُفعَّلة تختفي من القائمة الجانبية لجميع الأعضاء.
+            يمكن تفعيل أي وحدة في أي وقت لاحقاً.
+          </p>
+
+          {enabledModules === null && (
+            <div className={styles.allModulesNote}>
+              كل الوحدات مُفعَّلة حالياً (قالب مخصص أو كامل الميزات)
+            </div>
+          )}
+
+          <div className={styles.modulesGrid}>
+            {ALL_MODULES.map((m) => {
+              const isOn = enabledModules === null || enabledModules.includes(m.key);
+              return (
+                <label key={m.key} className={`${styles.moduleCard} ${isOn ? styles.moduleCardOn : ""}`}>
+                  <div className={styles.moduleCardHeader}>
+                    <input
+                      type="checkbox"
+                      checked={isOn}
+                      onChange={() => toggleModule(m.key)}
+                      disabled={!isFounderOrAdmin}
+                    />
+                    <span className={styles.moduleLabel}>{m.label}</span>
+                  </div>
+                  <p className={styles.moduleDesc}>{m.desc}</p>
+                </label>
+              );
+            })}
+          </div>
+
+          <div className={styles.modulesCore}>
+            <span className={styles.moduleCoreBadge}>الرئيسية</span>
+            <span className={styles.moduleCoreBadge}>الأعضاء</span>
+            <span className={styles.moduleCoreNote}>دائماً مُفعَّلتان</span>
+          </div>
+
+          {modulesMsg && (
+            <div className={`${styles.msg} ${modulesMsg.type === "success" ? styles.msgSuccess : styles.msgError}`}>
+              {modulesMsg.text}
+            </div>
+          )}
+
+          <button className={styles.saveBtn} onClick={handleSaveModules} disabled={modulesSaving || !isFounderOrAdmin}>
+            {modulesSaving ? "جارٍ الحفظ…" : "حفظ الوحدات"}
+          </button>
+        </section>
+      )}
 
       {/* ── طلب الإغلاق (للمؤسس والمدير فقط) ── */}
       {isFounderOrAdmin && (

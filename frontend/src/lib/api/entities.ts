@@ -20,6 +20,8 @@ export interface Entity {
   closureRequestedAt?: string | null;
   closureReason?: string | null;
   description?: string | null;
+  enabledModules?: string[] | null;
+  templateId?: string | null;
 }
 
 export interface EntityMember {
@@ -232,6 +234,16 @@ export function updateEntity(
   return fetchApi(`/entities/${entityId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
+  });
+}
+
+export function updateEntityModules(
+  entityId: string,
+  modules: string[] | null,
+): Promise<Entity> {
+  return fetchApi(`/entities/${entityId}/modules`, {
+    method: "PATCH",
+    body: JSON.stringify({ modules }),
   });
 }
 

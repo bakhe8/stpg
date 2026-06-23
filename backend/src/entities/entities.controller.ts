@@ -76,6 +76,16 @@ export class EntitiesController {
     return this.entitiesService.updateEntity(id, user.id, dto);
   }
 
+  @ApiOperation({ summary: 'تحديث الوحدات المُفعَّلة في الكيان' })
+  @Patch(':id/modules')
+  updateModules(
+    @Param('id') id: string,
+    @Body('modules') modules: string[] | null,
+    @CurrentUser() user: Person,
+  ) {
+    return this.entitiesService.updateEntityModules(id, user.id, modules);
+  }
+
   @ApiOperation({ summary: 'استرجاع سياسة الحوكمة للكيان' })
   @ApiResponse({ status: 200, description: 'سياسة الكيان' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })

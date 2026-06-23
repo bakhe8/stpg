@@ -20,6 +20,30 @@ import { setupPushNotifications, unsubscribePushNotifications } from "../../lib/
 import GlobalSearch from "../shared/GlobalSearch";
 import BottomNav from "./BottomNav";
 
+// الوحدات الأساسية — دائمة التفعيل بغض النظر عن القالب
+const CORE_ROUTES = new Set([
+  "/dashboard", "/portal", "/entities", "/notifications", "/profile", "/health",
+]);
+
+// ربط كل مسار بالوحدة التي تُفعّله
+const ROUTE_MODULE: Record<string, string> = {
+  "/finance":               "payments",
+  "/subscriptions":         "payments",
+  "/wallets":               "payments",
+  "/decisions":             "decisions",
+  "/committees":            "committees",
+  "/review-center":         "committees",
+  "/beneficiaries":         "beneficiaries",
+  "/disbursements":         "beneficiaries",
+  "/disbursement-requests": "beneficiaries",
+  "/rules":                 "governance",
+  "/paths":                 "governance",
+  "/auditor":               "auditor",
+  "/analytics":             "auditor",
+  "/documents":             "documents",
+  "/disputes":              "disputes",
+};
+
 interface NavItem {
   href: string;
   label: string;
@@ -123,6 +147,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const hasEntities = entities.length > 0;
   const allItems = navSections.flatMap((section) => section.items);
 
+  // حساب union للوحدات المُفعَّلة عبر كل كيانات المستخدم
+  // إذا كان أي كيان enabledModules=null فكل الوحدات مفتوحة
+  const enabledModulesUnion: Set<string> | null = (() => {
+    if (!hasEntities) return null;
+    if (entities.some((e) => !e.enabledModules)) return null; // null = كل شيء
+    const union = new Set<string>();
+    entities.forEach((e) => (e.enabledModules ?? []).forEach((m) => union.add(m)));
+    return union;
+  })();
+
+  const isModuleEnabled = (href: string): boolean => {
+    if (CORE_ROUTES.has(href)) return true;
+    if (enabledModulesUnion === null) return true;
+    const mod = ROUTE_MODULE[href];
+    return !mod || enabledModulesUnion.has(mod);
+  };
+
   // للمستخدم الجديد بلا كيانات: اعرض فقط dashboard + entities
   const newUserItems: NavItem[] = [
     { href: '/dashboard', label: t('dashboard'), icon: '⌂' },
@@ -135,7 +176,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         .map((section) => ({
           ...section,
           items: section.items.filter(
-            (item) => !item.roles || hasAnyRole(entities, item.roles),
+            (item) =>
+              isModuleEnabled(item.href) &&
+              (!item.roles || hasAnyRole(entities, item.roles)),
           ),
         }))
         .filter((section) => section.items.length > 0)

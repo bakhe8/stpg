@@ -202,6 +202,30 @@ export class EntitiesService {
     return entity;
   }
 
+  async updateEntityModules(id: string, adminId: string, modules: string[] | null) {
+    await this.requireAdminOrFounder(id, adminId);
+
+    const entity = await this.prisma.entity.update({
+      where: { id },
+      data: {
+        enabledModules: modules === null ? Prisma.JsonNull : toJsonValue(modules),
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        action: AuditAction.UPDATE,
+        personId: adminId,
+        entityId: id,
+        targetType: 'entities',
+        targetId: id,
+        newValue: { enabledModules: modules },
+      },
+    });
+
+    return entity;
+  }
+
   async getPolicy(entityId: string, requesterId: string) {
     await this.requireMember(entityId, requesterId);
 
