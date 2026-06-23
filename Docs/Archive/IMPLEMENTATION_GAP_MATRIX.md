@@ -1,6 +1,6 @@
 # مصفوفة توافق التنفيذ مع المخطط
 
-آخر تدقيق: 2026-06-22 (محدَّثة: 2026-06-22 — إنجاز فلسفة الواجهة + بدء المرحلة 10)
+آخر تدقيق: 2026-06-23 (محدَّثة: 2026-06-23 — Entity Templates + Adaptive Sidebar في v2-development)
 
 تعتمد هذه المصفوفة على:
 
@@ -69,3 +69,18 @@
 | Support View بجلسة زمنية وموافقة مسبقة | يحتاج backend جديد (session model + approval flow) |
 | RLS كامل على مستوى قاعدة البيانات | يحتاج ربط TenantContextService بكل طلب |
 | واجهة Conflict of Interest الاستباقية | ذُكر في `06` لكن لم يُصمَّم بعد |
+
+---
+
+## v2-development — مُنجز 2026-06-23
+
+| المجال | الحالة | الملاحظة |
+|---|---|---|
+| Entity Templates — نموذج البيانات | ✅ | حقول icon, isActive, sortOrder, enabledModules, suggestedGoals على EntityTemplate؛ templateId و enabledModules على Entity |
+| Entity Templates — Backend CRUD | ✅ | entity-templates.service + controller؛ GET عام، POST/PATCH/DELETE للمنصة |
+| Entity Templates — Seed | ✅ | 5 قوالب بالوحدات المناسبة؛ خطأ FRIENDS enum أُصلح بتغييره لـ COMMUNITY |
+| Entity Templates — Platform Admin UI | ✅ | platform/templates/page.tsx — إنشاء، تعديل، تفعيل/إيقاف، حذف |
+| Entity Templates — معالج الإنشاء | ✅ | entities/new/page.tsx مُعاد كتابته: 3 خطوات بدلاً من 6 |
+| Adaptive Sidebar | ✅ | AppShell يُخفي بنود التنقل بحسب union لـ enabledModules |
+| Modules Settings | ✅ | entities/[id]/settings — قسم toggle للوحدات مع حفظ عبر PATCH /entities/:id/modules |
+| تطبيق على الإنتاج | ⏳ | لا يُنقل لـ main إلا بقرار صريح من المطوّر |

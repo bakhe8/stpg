@@ -7,7 +7,7 @@
 
 ---
 
-> **حالة الوثيقة — 2026-06-22**
+> **حالة الوثيقة — 2026-06-23**
 >
 > خطة المراحل أدناه محفوظة كسجل تاريخي لمسار التنفيذ، وليست وصفاً دقيقاً للحالة الحالية بمفردها.
 > عند التعارض، تكون أولوية الاعتماد لجدول **الحالة الحالية المعتمدة** التالي ثم للكود وعمليات التحقق الفعلية.
@@ -26,6 +26,8 @@
 | هوية الواجهات ومكوّنات تفسير الثقة | ✅ مكتملة بالكامل | جميع الشاشات العشر موافقة لـ `Docs/07_Frontend`؛ `paths/[id]` أُصلح فيه bug غياب أزرار التبويبات؛ `wallets/[id]` استُبدلت فيه `confirm()/alert()` بـ `ConfirmActionDialog` |
 | توافق الشاشات مع فلسفة الحوكمة | ✅ مكتمل — 2026-06-22 | 10/10 شاشات تتبع "القواعد قبل الإجراءات"؛ تفاصيل في `Docs/IMPLEMENTATION_GAP_MATRIX.md` |
 | استجابة الجوال (Mobile Responsive) | ✅ مكتمل — 2026-06-22 | BottomNav (5 بنود + more) + Responsive CSS عالمي + EmptyState component + breakpoints لـ 4 صفحات إضافية |
+| **v2 — نظام قوالب الكيانات (Entity Templates)** | ✅ مكتمل — 2026-06-23 (v2-development) | مخطط قاعدة البيانات + CRUD backend + 5 قوالب مبدئية + واجهة Platform Admin + معالج إنشاء 3 خطوات — تفاصيل أدناه |
+| **v2 — السايدبار المتكيّف (Adaptive Sidebar)** | ✅ مكتمل — 2026-06-23 (v2-development) | AppShell يحسب union لـ enabledModules عبر كل كيانات المستخدم ويُخفي/يُظهر بنود التنقل بناءً عليها — تفاصيل أدناه |
 
 ---
 
@@ -1165,4 +1167,109 @@ Support View محدد المدة والموافقة → غير مكتمل ✗
 - `Docs/07_Frontend/Details_of_confidence_during_daily_use.md`
 - `Docs/07_Frontend/frontend_refactoring_report.md`
 - `Docs/07_Frontend/frontend_design_notes.md`
+
+---
+
+## v2 — نظام قوالب الكيانات + السايدبار المتكيّف (2026-06-23)
+
+> الكود في فرع `v2-development`. الإنتاج لا يزال على `main` (v1.0).
+> commit: `3189c03`
+
+### الفلسفة
+
+القالب هو نقطة بداية، ليس قفصاً.
+كيان يُنشأ من قالب "صندوق عائلي بسيط" يمكن توسيعه لاحقاً بتفعيل أي وحدة.
+`templateId` على الكيان هو مرجع تاريخي فقط، وليس قيداً.
+
+---
+
+### 1. نظام قوالب الكيانات (Entity Templates)
+
+#### التغييرات في قاعدة البيانات
+```
+EntityTemplate:
+  + icon            String?
+  + isActive        Boolean @default(true)
+  + sortOrder       Int @default(0)
+  + enabledModules  Json?   — مصفوفة الوحدات الافتراضية (مثل ["payments","beneficiaries"])
+  + suggestedGoals  Json?
+
+Entity:
+  + templateId      String? @db.Uuid  (FK → entity_templates, ON DELETE SET NULL)
+  + enabledModules  Json?   — نسخة مستقلة قابلة للتعديل
+```
+
+Migration: `backend/prisma/migrations/20260623120000_add_template_modules/migration.sql`
+
+#### القوالب الخمسة المبدئية (في seed)
+
+| القالب | النوع | الوحدات المبدئية |
+|---|---|---|
+| 🏠 صندوق عائلي | FAMILY | payments, beneficiaries |
+| 🕌 مجموعة مسجد / حي | NEIGHBORHOOD | payments, decisions, beneficiaries |
+| 🤝 أصدقاء / زملاء | COMMUNITY | payments |
+| ⏳ صندوق مؤقت | CAMPAIGN | payments, beneficiaries |
+| 🏛️ تعاونية / جمعية | COMMUNITY | payments, decisions, committees, beneficiaries, auditor |
+
+#### Backend
+- `entity-templates.service.ts` — CRUD كامل (findAll/findOne/create/update/remove)
+- `entity-templates.controller.ts` — GET (JwtGuard)، POST/PATCH/DELETE (PlatformGuard)
+- `entities.service.ts`:
+  - `createEntity` — يُعيّن `templateId` و`enabledModules` من القالب عند الإنشاء
+  - `updateEntityModules` — endpoint جديد `PATCH /entities/:id/modules`
+- `entities.controller.ts` — أضيف `PATCH :id/modules`
+
+#### Frontend
+- `platform/templates/page.tsx` — واجهة CRUD كاملة لإدارة القوالب (للمشغّل)
+- `entities/new/page.tsx` — معالج 3 خطوات: (1) اختيار قالب (2) تسمية (3) مراجعة + قانوني
+- قالب `__custom__` يتيح اختيار النوع وجميع الوحدات يدوياً
+
+---
+
+### 2. السايدبار المتكيّف (Adaptive Sidebar)
+
+#### المبدأ
+بدلاً من إظهار كل بنود التنقل لكل المستخدمين، يُحسب الـ AppShell مجموع (union) وحدات كل كيانات المستخدم ويُخفي الأقسام غير المُفعَّلة.
+
+#### ROUTE_MODULE — ربط كل مسار بوحدته
+
+| المسار | الوحدة |
+|---|---|
+| /finance, /subscriptions, /wallets | payments |
+| /decisions | decisions |
+| /committees, /review-center | committees |
+| /beneficiaries, /disbursements, /disbursement-requests | beneficiaries |
+| /auditor, /analytics | auditor |
+| /rules, /paths | governance |
+| /documents | documents |
+| /disputes | disputes |
+| /dashboard, /portal, /entities, /notifications, /health | (core — دائمة) |
+
+#### منطق الـ union
+```
+if (لا توجد كيانات) → اعرض المسارات الأساسية فقط
+if (أي كيان له enabledModules=null) → اعرض كل شيء
+else → اعرض union كل enabledModules عبر جميع كيانات المستخدم
+```
+
+#### إعدادات الكيان — قسم الوحدات
+في `entities/[id]/settings/page.tsx`:
+- بطاقات toggle لـ 8 وحدات (payments, decisions, committees, beneficiaries, auditor, governance, documents, disputes)
+- الحفظ يُرسل `PATCH /entities/:id/modules`
+- مؤسس / مدير الكيان فقط
+
+---
+
+### الحالة والخطوات التالية
+
+| المهمة | الحالة |
+|---|---|
+| Entity Templates — Backend + Seed | ✅ مكتمل |
+| Entity Templates — Frontend (Platform CRUD) | ✅ مكتمل |
+| Entity Templates — معالج الإنشاء 3 خطوات | ✅ مكتمل |
+| Adaptive Sidebar — AppShell | ✅ مكتمل |
+| Modules Settings — صفحة الإعدادات | ✅ مكتمل |
+| تطبيق الـ migration على الإنتاج | ⏳ عند إطلاق v2 |
+| زرع القوالب على الإنتاج | ⏳ عند إطلاق v2 |
+| اختبار end-to-end لتجربة الإنشاء بالقالب | ⏳ قبل إطلاق v2 |
 - `Docs/05_Rules_and_Governance/access_control_and_privacy.md` (مستويات الشفافية الستة)
