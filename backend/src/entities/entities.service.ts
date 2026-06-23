@@ -29,6 +29,15 @@ import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class EntitiesService {
+  private readonly membershipRolePriority: Record<MemberRole, number> = {
+    [MemberRole.FOUNDER]: 0,
+    [MemberRole.ADMIN]: 1,
+    [MemberRole.TREASURER]: 2,
+    [MemberRole.AUDITOR]: 3,
+    [MemberRole.COMMITTEE_MEMBER]: 4,
+    [MemberRole.MEMBER]: 5,
+  };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
@@ -160,15 +169,33 @@ export class EntitiesService {
       include: {
         memberships: {
           where: { personId, isActive: true },
-          select: { id: true, role: true },
+          select: { id: true, role: true, joinedAt: true },
           take: 1,
         },
         _count: { select: { memberships: { where: { isActive: true } } } },
       },
-      orderBy: { foundedAt: 'desc' },
     });
 
-    return entities.map(({ memberships, ...entity }) => ({
+    const sortedEntities = entities.sort((left, right) => {
+      const leftMembership = left.memberships[0];
+      const rightMembership = right.memberships[0];
+      const leftPriority =
+        this.membershipRolePriority[leftMembership?.role ?? MemberRole.MEMBER] ??
+        Number.MAX_SAFE_INTEGER;
+      const rightPriority =
+        this.membershipRolePriority[rightMembership?.role ?? MemberRole.MEMBER] ??
+        Number.MAX_SAFE_INTEGER;
+
+      return (
+        leftPriority - rightPriority ||
+        (leftMembership?.joinedAt?.getTime() ?? 0) -
+          (rightMembership?.joinedAt?.getTime() ?? 0) ||
+        left.foundedAt.getTime() - right.foundedAt.getTime() ||
+        left.name.localeCompare(right.name, 'ar')
+      );
+    });
+
+    return sortedEntities.map(({ memberships, ...entity }) => ({
       ...entity,
       myMembershipId: memberships[0]?.id ?? null,
       myRole: memberships[0]?.role ?? null,
