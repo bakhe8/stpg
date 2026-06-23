@@ -33,7 +33,7 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
     try {
-      const fullPhoneNumber = `05${phoneNumber.trim()}`;
+      const fullPhoneNumber = `+9665${phoneNumber.trim()}`;
       completeLogin(await login(fullPhoneNumber, password));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("loginFailed"));
