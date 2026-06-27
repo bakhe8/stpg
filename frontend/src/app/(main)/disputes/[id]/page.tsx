@@ -10,12 +10,13 @@ import {
   escalateDispute,
   Dispute,
 } from "../../../../lib/api/disputes";
+import type { Translator } from "../../../../lib/i18n";
 import styles from "./dispute-detail.module.css";
 import { DISPUTE_TYPE_KEYS } from "../../../../lib/enum-labels";
 import RequestTimeline, { TimelineStep } from "../../../../components/shared/RequestTimeline";
 import RuleSummaryPanel from "../../../../components/Governance/RuleSummaryPanel";
 
-function buildDisputeTimeline(d: Dispute, t: any): TimelineStep[] {
+function buildDisputeTimeline(d: Dispute, t: Translator): TimelineStep[] {
   const isResolved = d.status === "RESOLVED" || d.status === "CLOSED";
   const isEscalated = d.status === "ESCALATED";
   const isMediation = d.status === "UNDER_MEDIATION";

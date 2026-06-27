@@ -24,8 +24,12 @@ import {
   CreateCampaignDto,
 } from './dto/create-sub-entity.dto';
 import type { Person } from '@prisma/client';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('entities')
 @ApiBearerAuth('access-token')
@@ -146,10 +150,7 @@ export class EntitiesController {
   @ApiOperation({ summary: 'خيارات الأطراف المتاحة عند فتح نزاع' })
   @ApiResponse({ status: 200, description: 'أسماء ومعرفات أعضاء الكيان فقط' })
   @Get(':id/dispute-respondents')
-  getDisputeRespondents(
-    @Param('id') id: string,
-    @CurrentUser() user: Person,
-  ) {
+  getDisputeRespondents(@Param('id') id: string, @CurrentUser() user: Person) {
     return this.entitiesService.getDisputeRespondentOptions(id, user.id);
   }
 
@@ -278,7 +279,11 @@ export class EntitiesController {
     @Body() body: { reason: string },
     @CurrentUser() user: Person,
   ) {
-    return this.entitiesService.submitSuspensionAppeal(id, user.id, body.reason);
+    return this.entitiesService.submitSuspensionAppeal(
+      id,
+      user.id,
+      body.reason,
+    );
   }
 
   @ApiOperation({ summary: 'استرجاع الاعتراضات المقدمة لكيان' })

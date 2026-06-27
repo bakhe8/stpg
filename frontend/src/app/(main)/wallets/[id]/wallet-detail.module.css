@@ -146,3 +146,112 @@
 
 .headerActions { display: flex; align-items: center; gap: 10px; }
 .btnTransfer { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 10px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+.transferForm {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.transferFormHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.transferTitle {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.transferHint {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.transferFields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .transferFields { grid-template-columns: 1fr; }
+}
+
+.transferField,
+.transferFieldWide {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.transferFieldWide {
+  grid-column: 1 / -1;
+}
+
+.transferField select,
+.transferField input,
+.transferFieldWide input {
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.transferActions {
+  display: flex;
+  gap: 10px;
+}
+
+.transferRequestList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transferRequestRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  background: rgba(0,0,0,0.03);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.transferRequestAmount {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.transferRequestMeta {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.badgeAPPROVED,
+.badgeEXECUTED {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.badgePROCESSING {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+}

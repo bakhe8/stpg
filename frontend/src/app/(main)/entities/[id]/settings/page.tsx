@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   getEntity,
@@ -16,7 +16,6 @@ import styles from "./settings.module.css";
 
 export default function EntitySettingsPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
 
   const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(true);

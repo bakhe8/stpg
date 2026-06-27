@@ -5,7 +5,6 @@ import { JwtGuard } from '../identity/auth/jwt.guard';
 import { EntityRelationshipsService } from './entity-relationships.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('entity-relationships')
 @ApiBearerAuth('access-token')
 @Controller('entities')

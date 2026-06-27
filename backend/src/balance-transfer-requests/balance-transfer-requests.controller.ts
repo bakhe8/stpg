@@ -1,13 +1,23 @@
-import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { BalanceTransferRequestsService } from './balance-transfer-requests.service';
 import {
   CreateTransferRequestDto,
   ReviewTransferDto,
 } from './dto/balance-transfer.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtGuard } from '../identity/auth/jwt.guard';
 
 @ApiTags('balance-transfers')
 @ApiBearerAuth('access-token')
+@UseGuards(JwtGuard)
 @Controller('balance-transfer-requests')
 export class BalanceTransferRequestsController {
   constructor(

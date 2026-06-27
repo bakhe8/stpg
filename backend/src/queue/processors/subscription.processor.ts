@@ -12,15 +12,25 @@ import {
   QUEUE_SUBSCRIPTIONS,
   JOB_PROCESS_DUE_SUBSCRIPTIONS,
 } from '../queue.constants';
+import { TenantContextService } from '../../core/tenant-context/tenant-context.service';
 
 @Processor(QUEUE_SUBSCRIPTIONS)
 export class SubscriptionProcessor {
   private readonly logger = new Logger(SubscriptionProcessor.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContextService,
+  ) {}
 
   @Process(JOB_PROCESS_DUE_SUBSCRIPTIONS)
   async processDueSubscriptions(job: Job) {
+    return this.tenantContext.runInternal(() =>
+      this.processDueSubscriptionsInternal(job),
+    );
+  }
+
+  private async processDueSubscriptionsInternal(job: Job) {
     this.logger.log(`Processing due subscriptions — job ${job.id}`);
 
     const now = new Date();

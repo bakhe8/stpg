@@ -20,7 +20,6 @@ self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   
   const targetType = event.notification.data?.targetType;
-  const targetId = event.notification.data?.targetId;
   let url = '/';
 
   if (targetType === 'DECISION') {

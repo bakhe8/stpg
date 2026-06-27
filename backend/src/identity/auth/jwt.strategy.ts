@@ -19,7 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (payload.userType === 'platform') {
       const account = await this.prisma.platformAccount.findUnique({
         where: { id: payload.sub },
-        select: { id: true, email: true, name: true, role: true, isActive: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isActive: true,
+        },
       });
       if (!account || !account.isActive) {
         throw new UnauthorizedException();

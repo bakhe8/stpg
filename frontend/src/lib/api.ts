@@ -2,11 +2,50 @@
 // في التطوير المحلي: http://localhost:3001/api
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "production" ? "/api" : "http://localhost:3001/api");
+  (process.env.NODE_ENV === "production"
+    ? "/api"
+    : "http://localhost:3001/api");
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("accessToken");
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function inferEntityIdFromEndpoint(
+  endpoint: string,
+  method = "GET",
+): string | null {
+  const [, queryString] = endpoint.split("?");
+  if (queryString) {
+    const queryEntityId = new URLSearchParams(queryString).get("entityId");
+    if (queryEntityId && UUID_RE.test(queryEntityId)) return queryEntityId;
+  }
+
+  const path = endpoint.split("?")[0];
+  if (
+    method.toUpperCase() === "POST" &&
+    /^\/entities\/[0-9a-f-]{36}\/(?:join|memberships)$/i.test(path)
+  ) {
+    return null;
+  }
+
+  const patterns = [
+    /^\/entities\/([0-9a-f-]{36})(?:\/|$)/i,
+    /^\/analytics\/entities\/([0-9a-f-]{36})(?:\/|$)/i,
+    /^\/auditor\/([0-9a-f-]{36})(?:\/|$)/i,
+    /^\/support\/sessions\/([0-9a-f-]{36})(?:\/|$)/i,
+    /^\/membership-applications\/entity\/([0-9a-f-]{36})(?:\/|$)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = path.match(pattern);
+    if (match?.[1] && UUID_RE.test(match[1])) return match[1];
+  }
+
+  return null;
 }
 
 function persistAccessToken(accessToken: string) {
@@ -44,7 +83,12 @@ export async function fetchApi<T>(
   if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
 
   if (typeof window !== "undefined") {
-    const currentEntityId = localStorage.getItem("currentEntityId");
+    const inferredEntityId = inferEntityIdFromEndpoint(
+      endpoint,
+      options.method,
+    );
+    const currentEntityId =
+      inferredEntityId ?? localStorage.getItem("currentEntityId");
     if (currentEntityId && !headers.has("X-Entity-ID")) {
       headers.set("X-Entity-ID", currentEntityId);
     }

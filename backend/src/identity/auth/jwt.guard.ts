@@ -16,13 +16,13 @@ export class JwtGuard extends AuthGuard('jwt') {
     context: import('@nestjs/common').ExecutionContext,
     status?: unknown,
   ): TUser {
-    const authenticated = super.handleRequest(
+    const authenticated: unknown = super.handleRequest(
       err,
       user,
       info,
       context,
       status,
-    ) as TUser;
+    );
     const allowPlatform = this.reflector.getAllAndOverride<boolean>(
       ALLOW_PLATFORM_KEY,
       [context.getHandler(), context.getClass()],
@@ -33,6 +33,6 @@ export class JwtGuard extends AuthGuard('jwt') {
         'حسابات المنصة لا تستخدم واجهات أعضاء الكيانات',
       );
     }
-    return authenticated;
+    return authenticated as TUser;
   }
 }

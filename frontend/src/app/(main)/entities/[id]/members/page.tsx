@@ -19,12 +19,16 @@ import {
   rejectMembershipApplication,
   MembershipApplication,
 } from "../../../../../lib/api/membership-applications";
+import type { Translator } from "../../../../../lib/i18n";
 import styles from "./members.module.css";
 import RequestTimeline, {
   TimelineStep,
 } from "../../../../../components/shared/RequestTimeline";
 
-function buildApplicationTimeline(app: MembershipApplication, t: any): TimelineStep[] {
+function buildApplicationTimeline(
+  app: MembershipApplication,
+  t: Translator,
+): TimelineStep[] {
   const isFinal =
     app.status === "APPROVED" ||
     app.status === "REJECTED" ||
@@ -124,7 +128,7 @@ export default function MembersPage({
     } finally {
       setLoading(false);
     }
-  }, [entityId]);
+  }, [entityId, t]);
 
   useEffect(() => {
     void loadAll();

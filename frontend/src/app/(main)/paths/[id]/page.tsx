@@ -186,6 +186,14 @@ export default function PathDetailPage() {
         }
       />
 
+      {msg && (
+        <div
+          className={`${styles.msg} ${msg.startsWith("⚠") ? styles.error : styles.success}`}
+        >
+          {msg}
+        </div>
+      )}
+
       {/* ── تبويبات ── */}
       <div className={styles.tabs}>
         <button className={`${styles.tab} ${tab === 'items' ? styles.tabActive : ''}`} onClick={() => setTab('items')}>

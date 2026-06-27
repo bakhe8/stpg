@@ -119,7 +119,11 @@ export class PlatformEntitiesService {
     });
   }
 
-  async getSuspensionAppeals(filters: { status?: string; page?: number; limit?: number }) {
+  async getSuspensionAppeals(filters: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 20;
     const skip = (page - 1) * limit;

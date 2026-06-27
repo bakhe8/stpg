@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BadRequestException } from '@nestjs/common';
 import { BeneficiaryType } from '@prisma/client';
 import { LedgerService } from '../ledger/ledger.service';

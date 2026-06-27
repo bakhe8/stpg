@@ -21,7 +21,6 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -36,17 +35,31 @@ export class AuthController {
     return this.authService.devLogin(dto.username);
   }
 
-  @ApiOperation({ summary: 'تسجيل حساب جديد برقم الجوال وكلمة المرور وتقديم طلب عضوية لكيان' })
-  @ApiResponse({ status: 201, description: 'تم إنشاء الحساب وطلب العضوية بنجاح' })
-  @ApiResponse({ status: 400, description: 'بيانات غير صحيحة أو رقم الجوال مسجل مسبقاً' })
+  @ApiOperation({
+    summary: 'تسجيل حساب جديد برقم الجوال وكلمة المرور وتقديم طلب عضوية لكيان',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'تم إنشاء الحساب وطلب العضوية بنجاح',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'بيانات غير صحيحة أو رقم الجوال مسجل مسبقاً',
+  })
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @ApiOperation({ summary: 'تسجيل الدخول برقم الجوال وكلمة المرور' })
-  @ApiResponse({ status: 200, description: 'تم تسجيل الدخول بنجاح وإصدار رمز الوصول' })
-  @ApiResponse({ status: 400, description: 'رقم الجوال أو كلمة المرور غير صحيحة' })
+  @ApiResponse({
+    status: 200,
+    description: 'تم تسجيل الدخول بنجاح وإصدار رمز الوصول',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'رقم الجوال أو كلمة المرور غير صحيحة',
+  })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
@@ -54,12 +67,15 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'تسجيل الدخول عبر مزود خارجي (OAuth) - اختياري' })
-  @ApiResponse({ status: 200, description: 'تم المصادقة بنجاح وإصدار رمز الوصول' })
+  @ApiResponse({
+    status: 200,
+    description: 'تم المصادقة بنجاح وإصدار رمز الوصول',
+  })
   @ApiResponse({ status: 400, description: 'بيانات غير صحيحة' })
   @Post('oauth')
   @HttpCode(HttpStatus.OK)
   async oauthLogin(@Body() dto: OAuthLoginDto) {
-    return this.authService.oauthLogin(dto.provider, dto.providerId, dto.email || '', dto.name);
+    return this.authService.oauthLogin(dto.provider, dto.idToken, dto.name);
   }
 
   @ApiOperation({ summary: 'تسجيل جهاز لاستقبال إشعارات Push' })
@@ -67,14 +83,24 @@ export class AuthController {
   @Post('device-token')
   @UseGuards(JwtGuard)
   @HttpCode(HttpStatus.OK)
-  async registerDeviceToken(@Body() dto: RegisterDeviceTokenDto, @CurrentUser() person: Person) {
-    await this.authService.registerDeviceToken(person.id, dto.token, dto.deviceOs);
+  async registerDeviceToken(
+    @Body() dto: RegisterDeviceTokenDto,
+    @CurrentUser() person: Person,
+  ) {
+    await this.authService.registerDeviceToken(
+      person.id,
+      dto.token,
+      dto.deviceOs,
+    );
     return { message: 'Device token registered' };
   }
 
   @ApiOperation({ summary: 'تجديد رمز الوصول باستخدام رمز التحديث' })
   @ApiResponse({ status: 200, description: 'تم تجديد رمز الوصول بنجاح' })
-  @ApiResponse({ status: 400, description: 'رمز التحديث غير صحيح أو منتهي الصلاحية' })
+  @ApiResponse({
+    status: 400,
+    description: 'رمز التحديث غير صحيح أو منتهي الصلاحية',
+  })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshTokenDto) {

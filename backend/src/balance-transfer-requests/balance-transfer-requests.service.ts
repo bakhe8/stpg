@@ -10,6 +10,7 @@ import { LedgerService } from '../ledger/ledger.service';
 import {
   CreateTransferRequestDto,
   ReviewTransferDto,
+  TransferReviewStatus,
 } from './dto/balance-transfer.dto';
 import {
   AuditAction,
@@ -18,6 +19,8 @@ import {
   DecisionStatus,
   DecisionType,
   MemberRole,
+  PathPolicy,
+  Prisma,
   VoteType,
   VotersScope,
 } from '@prisma/client';
@@ -128,68 +131,94 @@ export class BalanceTransferRequestsService {
     const entityId = request.fromPath.wallet.entityId;
     await this.requireAdminOrTreasurer(entityId, reviewerId);
 
-    if (dto.status === 'REJECTED') {
-      return this.prisma.balanceTransferRequest.update({
-        where: { id },
-        data: {
-          status: BalanceTransferRequestStatus.REJECTED,
-          reviewedById: reviewerId,
-          reviewerNotes: dto.reviewerNotes,
-          reviewedAt: new Date(),
-        },
+    if (dto.status === TransferReviewStatus.REJECTED) {
+      return this.prisma.$transaction(async (tx) => {
+        const rejected = await tx.balanceTransferRequest.update({
+          where: { id },
+          data: {
+            status: BalanceTransferRequestStatus.REJECTED,
+            reviewedById: reviewerId,
+            reviewerNotes: dto.reviewerNotes,
+            reviewedAt: new Date(),
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            action: AuditAction.REJECT,
+            personId: reviewerId,
+            entityId,
+            targetType: 'balance_transfer_requests',
+            targetId: id,
+            oldValue: { status: request.status },
+            newValue: {
+              status: BalanceTransferRequestStatus.REJECTED,
+              reviewerNotes: dto.reviewerNotes,
+            },
+          },
+        });
+
+        return rejected;
       });
     }
 
-    // إذا تمت الموافقة، نتحقق مما إذا كان النقل يتطلب قراراً حوكمياً
     const policy = request.fromPath.policy;
-    let decisionId = null;
+    if (!policy) {
+      throw new BadRequestException('لا توجد سياسة حوكمة للمسار المصدر');
+    }
 
-    if (policy?.voteType && policy.voteType !== VoteType.INDIVIDUAL_WITH_CAP) {
-      // إنشاء قرار آلي
-      const decision = await this.prisma.decision.create({
+    return this.prisma.$transaction(async (tx) => {
+      const decision = await this.createTransferDecision(
+        tx,
+        request,
+        policy,
+        reviewerId,
+      );
+
+      const approved = await tx.balanceTransferRequest.update({
+        where: { id },
         data: {
-          decisionType: DecisionType.TRANSFER_BALANCE,
-          subjectType: 'PATH',
-          subjectId: request.fromPathId,
-          governancePathId: request.fromPathId,
-          createdById: reviewerId,
-          title: `طلب نقل رصيد بقيمة ${request.amount.toString()}`,
-          description: `نقل رصيد إلى المسار الهدف للأسباب التالية: ${request.reason}`,
-          amount: request.amount,
-          voteType: policy.voteType ?? VoteType.SIMPLE_MAJORITY,
-          votersScope: VotersScope.PATH_SUBSCRIBERS,
-          quorumPercent: policy.quorumPercent ?? 50,
-          approvalPercent: policy.approvalPercent ?? 51,
-          closesAt: new Date(
-            Date.now() + (policy.votingDurationHours ?? 48) * 60 * 60 * 1000,
-          ),
-          status: DecisionStatus.OPEN,
-          result: DecisionResult.PENDING,
+          status: BalanceTransferRequestStatus.APPROVED,
+          reviewedById: reviewerId,
+          reviewerNotes: dto.reviewerNotes,
+          reviewedAt: new Date(),
+          decisionId: decision.id,
         },
       });
-      decisionId = decision.id;
 
-      await this.prisma.auditLog.create({
+      await tx.auditLog.create({
         data: {
           action: AuditAction.CREATE,
           personId: reviewerId,
           entityId,
           targetType: 'decisions',
           targetId: decision.id,
-          newValue: { type: 'TRANSFER_BALANCE', requestId: id },
+          newValue: {
+            type: DecisionType.TRANSFER_BALANCE,
+            requestId: id,
+            autoApproved:
+              policy.voteType === VoteType.INDIVIDUAL_WITH_CAP ? true : false,
+          },
         },
       });
-    }
 
-    return this.prisma.balanceTransferRequest.update({
-      where: { id },
-      data: {
-        status: BalanceTransferRequestStatus.APPROVED,
-        reviewedById: reviewerId,
-        reviewerNotes: dto.reviewerNotes,
-        reviewedAt: new Date(),
-        decisionId,
-      },
+      await tx.auditLog.create({
+        data: {
+          action: AuditAction.APPROVE,
+          personId: reviewerId,
+          entityId,
+          targetType: 'balance_transfer_requests',
+          targetId: id,
+          oldValue: { status: request.status },
+          newValue: {
+            status: BalanceTransferRequestStatus.APPROVED,
+            decisionId: decision.id,
+            reviewerNotes: dto.reviewerNotes,
+          },
+        },
+      });
+
+      return approved;
     });
   }
 
@@ -213,16 +242,15 @@ export class BalanceTransferRequestsService {
     const entityId = request.fromPath.wallet.entityId;
     await this.requireAdminOrTreasurer(entityId, executorId);
 
-    // إذا كان هناك قرار مرتبط، يجب أن يكون مغلقاً ومقبولاً
-    if (request.decision) {
-      if (
-        request.decision.status !== DecisionStatus.CLOSED ||
-        request.decision.result !== DecisionResult.APPROVED
-      ) {
-        throw new BadRequestException(
-          'القرار المرتبط بالنقل لم يتم اعتماده بعد',
-        );
-      }
+    if (!request.decisionId || !request.decision) {
+      throw new BadRequestException('يتطلب تنفيذ النقل قراراً موثقاً');
+    }
+
+    if (
+      request.decision.status !== DecisionStatus.CLOSED ||
+      request.decision.result !== DecisionResult.APPROVED
+    ) {
+      throw new BadRequestException('القرار المرتبط بالنقل لم يتم اعتماده بعد');
     }
 
     const reference = `TRF-${Date.now().toString().slice(-6)}-${request.id.slice(0, 4)}`;
@@ -300,5 +328,68 @@ export class BalanceTransferRequestsService {
       where: { entityId, personId, isActive: true },
     });
     if (!m) throw new ForbiddenException('يجب أن تكون عضواً في الكيان');
+  }
+
+  private async createTransferDecision(
+    tx: Prisma.TransactionClient,
+    request: {
+      id: string;
+      fromPathId: string;
+      toPathId: string;
+      amount: Prisma.Decimal | number;
+      reason: string;
+    },
+    policy: PathPolicy,
+    reviewerId: string,
+  ) {
+    const amount = Number(request.amount);
+    const now = new Date();
+    const isIndividualApproval =
+      policy.voteType === VoteType.INDIVIDUAL_WITH_CAP;
+
+    if (isIndividualApproval) {
+      const cap =
+        policy.individualSpendingCap === null
+          ? null
+          : Number(policy.individualSpendingCap);
+      if (cap === null) {
+        throw new BadRequestException(
+          'سياسة القرار الفردي لا تحدد سقفاً للنقل',
+        );
+      }
+      if (amount > cap) {
+        throw new BadRequestException('مبلغ النقل يتجاوز سقف القرار الفردي');
+      }
+    }
+
+    return tx.decision.create({
+      data: {
+        decisionType: DecisionType.TRANSFER_BALANCE,
+        subjectType: 'PATH',
+        subjectId: request.fromPathId,
+        governancePathId: request.fromPathId,
+        createdById: reviewerId,
+        title: `طلب نقل رصيد بقيمة ${request.amount.toString()}`,
+        description: `نقل رصيد إلى المسار الهدف ${request.toPathId}. السبب: ${request.reason}`,
+        amount: request.amount,
+        voteType: policy.voteType,
+        votersScope: VotersScope.PATH_SUBSCRIBERS,
+        quorumPercent: policy.quorumPercent ?? 50,
+        approvalPercent: policy.approvalPercent ?? 51,
+        closesAt: isIndividualApproval
+          ? now
+          : new Date(
+              now.getTime() +
+                (policy.votingDurationHours ?? 48) * 60 * 60 * 1000,
+            ),
+        closedAt: isIndividualApproval ? now : null,
+        status: isIndividualApproval
+          ? DecisionStatus.CLOSED
+          : DecisionStatus.OPEN,
+        result: isIndividualApproval
+          ? DecisionResult.APPROVED
+          : DecisionResult.PENDING,
+      },
+    });
   }
 }

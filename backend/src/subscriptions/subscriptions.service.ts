@@ -435,6 +435,27 @@ export class SubscriptionsService {
     }
   }
 
+  async generatePaymentDuesForRequester(
+    subscriptionId: string,
+    requesterId: string,
+  ) {
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+      include: { membership: { select: { entityId: true } } },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException('الاشتراك غير موجود');
+    }
+
+    await this.requireAdminOrTreasurerOrFounder(
+      subscription.membership.entityId,
+      requesterId,
+    );
+    await this.generatePaymentDues(subscriptionId);
+    return { ok: true };
+  }
+
   async getMyPaymentDues(personId: string) {
     const memberships = await this.prisma.membership.findMany({
       where: { personId, isActive: true },

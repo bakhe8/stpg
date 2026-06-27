@@ -1,8 +1,14 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { AuditorService } from './auditor.service';
 import { JwtGuard } from '../identity/auth/jwt.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-
+import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 
 @ApiTags('auditor')
 @ApiBearerAuth('access-token')
@@ -12,42 +18,66 @@ export class AuditorController {
   constructor(private readonly auditorService: AuditorService) {}
 
   @Get(':entityId/operations')
-  getOperations() {
-    return this.auditorService.getOperations();
+  getOperations(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getOperations(entityId, user.id);
   }
 
   @Get(':entityId/documents')
-  getDocuments(@Param('entityId') entityId: string) {
-    return this.auditorService.getDocuments(entityId);
+  getDocuments(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getDocuments(entityId, user.id);
   }
 
   @Get(':entityId/decisions')
-  getDecisions(@Param('entityId') entityId: string) {
-    return this.auditorService.getDecisions(entityId);
+  getDecisions(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getDecisions(entityId, user.id);
   }
 
   @Get(':entityId/exceptions')
-  getExceptions(@Param('entityId') entityId: string) {
-    return this.auditorService.getExceptions(entityId);
+  getExceptions(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getExceptions(entityId, user.id);
   }
 
   @Get(':entityId/conflicts')
-  getConflicts() {
-    return this.auditorService.getConflicts();
+  getConflicts(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getConflicts(entityId, user.id);
   }
 
   @Get(':entityId/appeals')
-  getAppeals(@Param('entityId') entityId: string) {
-    return this.auditorService.getAppeals(entityId);
+  getAppeals(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getAppeals(entityId, user.id);
   }
 
   @Get(':entityId/report')
-  getReport(@Param('entityId') entityId: string) {
-    return this.auditorService.getReport(entityId);
+  getReport(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getReport(entityId, user.id);
   }
 
   @Get(':entityId/audit-logs')
-  getAuditLogs(@Param('entityId') entityId: string) {
-    return this.auditorService.getAuditLogs(entityId);
+  getAuditLogs(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.auditorService.getAuditLogs(entityId, user.id);
   }
 }

@@ -18,7 +18,6 @@ import { UpdateWalletRelationshipDto } from './dto/update-wallet-relationship.dt
 import { RejectWalletRelationshipDto } from './dto/reject-wallet-relationship.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('wallet-relationships')
 @ApiBearerAuth('access-token')

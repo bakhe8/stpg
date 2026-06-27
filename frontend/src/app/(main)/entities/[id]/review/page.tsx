@@ -29,6 +29,7 @@ import {
 } from '../../../../../lib/api/disputes';
 import { getEntityWallets } from '../../../../../lib/api/wallets';
 import { getWalletPaths } from '../../../../../lib/api/wallets';
+import type { Translator } from '../../../../../lib/i18n';
 import {
   approveMembershipApplication,
   getEntityMembershipApplications,
@@ -67,7 +68,7 @@ function ActionNoteModal({
   onConfirm: (note: string) => void;
   onCancel: () => void;
   requireNote: boolean;
-  t: any;
+  t: Translator;
 }) {
   const [note, setNote] = useState('');
   return (
@@ -104,7 +105,7 @@ function MembershipApplicationsTab({
 }: {
   applications: MembershipApplication[];
   onRefresh: () => void;
-  t: any;
+  t: Translator;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
@@ -212,7 +213,7 @@ function RecordsTab({
   records,
   onRefresh,
 }: {
-  t: any;
+  t: Translator;
   records: PaymentRecord[];
   onRefresh: () => void;
 }) {
@@ -313,7 +314,7 @@ function SubscriptionsTab({
 }: {
   subscriptions: Subscription[];
   onRefresh: () => void;
-  t: any;
+  t: Translator;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -388,7 +389,7 @@ function DisbursementsTab({
 }: {
   requests: DisbursementRequest[];
   onRefresh: () => void;
-  t: any;
+  t: Translator;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
@@ -480,7 +481,7 @@ function DisputesTab({
 }: {
   disputes: Dispute[];
   onRefresh: () => void;
-  t: any;
+  t: Translator;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [resolveTarget, setResolveTarget] = useState<string | null>(null);
@@ -609,7 +610,7 @@ export default function ReviewCenterPage() {
     } finally {
       setLoading(false);
     }
-  }, [entityId]);
+  }, [entityId, t]);
 
   useEffect(() => {
     void loadAll();

@@ -10,10 +10,16 @@ export interface IPushProvider {
   /**
    * Send a push notification to a specific device token
    */
-  sendToDevice(token: string, payload: PushNotificationPayload): Promise<boolean>;
-  
+  sendToDevice(
+    token: string,
+    payload: PushNotificationPayload,
+  ): Promise<boolean>;
+
   /**
    * Send a push notification to multiple device tokens
    */
-  sendToDevices(tokens: string[], payload: PushNotificationPayload): Promise<string[]>;
+  sendToDevices(
+    tokens: string[],
+    payload: PushNotificationPayload,
+  ): Promise<string[]>;
 }

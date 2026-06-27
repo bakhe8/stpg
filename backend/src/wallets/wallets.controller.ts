@@ -20,8 +20,12 @@ import { UpdateWalletPolicyDto } from './dto/update-wallet-policy.dto';
 import { CloseWalletDto } from './dto/close-wallet.dto';
 import { SetWalletOwnershipDto } from './dto/set-wallet-ownership.dto';
 import type { Person } from '@prisma/client';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('wallets')
 @ApiBearerAuth('access-token')

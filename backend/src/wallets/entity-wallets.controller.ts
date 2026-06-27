@@ -15,7 +15,6 @@ import { CreateWalletDto } from './dto/create-wallet.dto';
 import { WalletsService } from './wallets.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('wallets')
 @ApiBearerAuth('access-token')
 @Controller('entities')

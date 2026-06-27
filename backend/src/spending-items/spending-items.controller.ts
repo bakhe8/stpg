@@ -19,7 +19,6 @@ import { UpdateSpendingItemDto } from './dto/update-spending-item.dto';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('spending-items')
 @ApiBearerAuth('access-token')
 @Controller('spending-items')

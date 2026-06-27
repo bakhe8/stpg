@@ -15,7 +15,6 @@ import { CreatePathDto } from './dto/create-path.dto';
 import { GovernancePathsService } from './governance-paths.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('governance-paths')
 @ApiBearerAuth('access-token')
 @Controller('wallets')

@@ -6,7 +6,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
@@ -24,7 +24,12 @@ async function bootstrap() {
   const originsEnv = process.env.ALLOWED_ORIGINS ?? process.env.CORS_ORIGINS;
   const allowedOrigins = originsEnv
     ? originsEnv.split(',')
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3333', 'http://localhost:3100'];
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3333',
+        'http://localhost:3100',
+      ];
 
   const corsOptions: CorsOptions = {
     origin: (origin, callback) => {

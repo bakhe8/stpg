@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { SmsProvider, SmsSendResult } from '../sms-provider.interface';
 
+type TwilioMessageResponse = {
+  sid?: string;
+  message?: string;
+};
+
 @Injectable()
 export class TwilioProvider implements SmsProvider {
   private readonly logger = new Logger(TwilioProvider.name);
@@ -16,17 +21,19 @@ export class TwilioProvider implements SmsProvider {
       Body: `Your verification code: ${otp}`,
     });
 
-    const credentials = Buffer.from(`${this.accountSid}:${this.authToken}`).toString('base64');
+    const credentials = Buffer.from(
+      `${this.accountSid}:${this.authToken}`,
+    ).toString('base64');
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${credentials}`,
+        Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: body.toString(),
     });
 
-    const json = await res.json();
+    const json = (await res.json()) as TwilioMessageResponse;
     if (res.ok) {
       return { success: true, messageId: json.sid };
     }

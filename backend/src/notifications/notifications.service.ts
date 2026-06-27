@@ -31,12 +31,19 @@ export class NotificationsService {
   ) {}
 
   // ── تسجيل اشتراك أجهزة الـ Push ──────────────────────────────────
-  async subscribeDevice(personId: string, subscription: any, deviceOs: string = 'web') {
-    const tokenStr = typeof subscription === 'string' ? subscription : JSON.stringify(subscription);
-    
+  async subscribeDevice(
+    personId: string,
+    subscription: any,
+    deviceOs: string = 'web',
+  ) {
+    const tokenStr =
+      typeof subscription === 'string'
+        ? subscription
+        : JSON.stringify(subscription);
+
     // Check if it already exists
     const existing = await this.prisma.deviceToken.findUnique({
-      where: { token: tokenStr }
+      where: { token: tokenStr },
     });
 
     if (existing) {
@@ -60,10 +67,13 @@ export class NotificationsService {
   }
 
   async unsubscribeDevice(personId: string, subscription: any) {
-    const tokenStr = typeof subscription === 'string' ? subscription : JSON.stringify(subscription);
-    
+    const tokenStr =
+      typeof subscription === 'string'
+        ? subscription
+        : JSON.stringify(subscription);
+
     const existing = await this.prisma.deviceToken.findUnique({
-      where: { token: tokenStr }
+      where: { token: tokenStr },
     });
 
     if (existing && existing.personId === personId) {
@@ -111,7 +121,7 @@ export class NotificationsService {
     // Dispatch
     const promises = deviceTokens.map((device) => {
       const inputsForPerson = personMap.get(device.personId) || [];
-      return inputsForPerson.map((input) => 
+      return inputsForPerson.map((input) =>
         this.pushProvider.sendToDevice(device.token, {
           title: input.title,
           body: input.body,
@@ -119,8 +129,8 @@ export class NotificationsService {
             targetType: input.targetType ?? '',
             targetId: input.targetId ?? '',
             type: input.type,
-          }
-        })
+          },
+        }),
       );
     });
 

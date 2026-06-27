@@ -23,7 +23,12 @@ import {
   ApprovePaymentRecordDto,
   RejectPaymentRecordDto,
 } from './dto/review-payment-record.dto';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('subscriptions')
 @ApiBearerAuth('access-token')
@@ -49,7 +54,9 @@ export class SubscriptionsController {
   }
 
   // اشتراكات عضوية / مسار / كيان
-  @ApiOperation({ summary: 'استرجاع قائمة الاشتراكات (خاصة بمسار أو عضوية أو كيان)' })
+  @ApiOperation({
+    summary: 'استرجاع قائمة الاشتراكات (خاصة بمسار أو عضوية أو كيان)',
+  })
   @ApiResponse({ status: 200, description: 'قائمة الاشتراكات' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
   @Get()
@@ -235,9 +242,16 @@ export class SubscriptionsController {
   @ApiOperation({ summary: 'توليد الدفعات المستحقة لاشتراك معين' })
   @ApiResponse({ status: 200, description: 'تم توليد الدفعات المستحقة بنجاح' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
+  @ApiResponse({ status: 403, description: 'غير مصرح' })
   @ApiResponse({ status: 404, description: 'الاشتراك غير موجود' })
   @Patch(':id/generate-dues')
-  generateDues(@Param('id') id: string) {
-    return this.subscriptionsService.generatePaymentDues(id);
+  generateDues(
+    @CurrentUser() user: Person,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.subscriptionsService.generatePaymentDuesForRequester(
+      id,
+      user.id,
+    );
   }
 }

@@ -7,7 +7,9 @@ export class RegisterDeviceTokenDto {
   @IsNotEmpty()
   token: string;
 
-  @ApiPropertyOptional({ description: 'The OS of the device (ios, android, web)' })
+  @ApiPropertyOptional({
+    description: 'The OS of the device (ios, android, web)',
+  })
   @IsString()
   @IsOptional()
   deviceOs?: string;

@@ -8,12 +8,16 @@ import { SMS_PROVIDER } from './sms-provider.interface';
   providers: [
     {
       provide: SMS_PROVIDER,
-      useFactory: (): InstanceType<typeof MockSmsProvider | typeof UnifonicProvider | typeof TwilioProvider> => {
+      useFactory: (): InstanceType<
+        typeof MockSmsProvider | typeof UnifonicProvider | typeof TwilioProvider
+      > => {
         const provider = process.env.SMS_PROVIDER ?? 'mock';
         if (provider === 'unifonic') return new UnifonicProvider();
         if (provider === 'twilio') return new TwilioProvider();
         if (provider === 'mock') return new MockSmsProvider();
-        throw new Error(`SMS_PROVIDER "${provider}" غير مدعوم. القيم المقبولة: mock | unifonic | twilio`);
+        throw new Error(
+          `SMS_PROVIDER "${provider}" غير مدعوم. القيم المقبولة: mock | unifonic | twilio`,
+        );
       },
     },
   ],

@@ -9,6 +9,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  React.useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <html lang="ar" dir="rtl">
       <body

@@ -21,6 +21,7 @@ import { RespondAppealDto } from './dto/respond-appeal.dto';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { RulesService } from '../rules/rules.service';
+import { TenantContextService } from '../core/tenant-context/tenant-context.service';
 
 @Injectable()
 export class AppealsService {
@@ -28,6 +29,7 @@ export class AppealsService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly rulesService: RulesService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async fileAppeal(appellantId: string, dto: FileAppealDto) {
@@ -235,12 +237,16 @@ export class AppealsService {
   }
 
   async escalateOverdueAppeals() {
-    return this.autoEscalateOverdueAppeals({});
+    return this.tenantContext.runInternal(() =>
+      this.autoEscalateOverdueAppeals({}),
+    );
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleAutoEscalationCron() {
-    await this.autoEscalateOverdueAppeals({});
+    await this.tenantContext.runInternal(() =>
+      this.autoEscalateOverdueAppeals({}),
+    );
   }
 
   private async autoEscalateOverdueAppeals(filter: {

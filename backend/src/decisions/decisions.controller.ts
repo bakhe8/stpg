@@ -15,8 +15,12 @@ import { CurrentUser } from '../identity/auth/decorators/current-user.decorator'
 import type { Person } from '@prisma/client';
 import { CreateDecisionDto } from './dto/create-decision.dto';
 import { CastVoteDto } from './dto/cast-vote.dto';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @UseGuards(JwtGuard)
 @ApiTags('decisions')
@@ -35,7 +39,9 @@ export class DecisionsController {
     return this.decisionsService.createDecision(user.id, dto);
   }
 
-  @ApiOperation({ summary: 'استرجاع قائمة القرارات (لمسار محدد أو القرارات المتاحة)' })
+  @ApiOperation({
+    summary: 'استرجاع قائمة القرارات (لمسار محدد أو القرارات المتاحة)',
+  })
   @ApiResponse({ status: 200, description: 'قائمة القرارات' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
   @Get()

@@ -100,8 +100,13 @@ export class PlatformEntitiesController {
     @Body() body: { response: string; status: 'REVIEWED' | 'RESOLVED' },
     @CurrentPlatformUser() operator: { role: PlatformRole },
   ) {
-    if (operator.role !== PlatformRole.OWNER && operator.role !== PlatformRole.SUPER_ADMIN) {
-      throw new ForbiddenException('الرد على الاعتراضات يتطلب OWNER أو SUPER_ADMIN');
+    if (
+      operator.role !== PlatformRole.OWNER &&
+      operator.role !== PlatformRole.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(
+        'الرد على الاعتراضات يتطلب OWNER أو SUPER_ADMIN',
+      );
     }
     return this.service.respondToAppeal(id, body.response, body.status);
   }

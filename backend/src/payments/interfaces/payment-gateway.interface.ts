@@ -4,6 +4,7 @@ export interface PaymentIntentOptions {
   metadata?: Record<string, string>;
   description?: string;
   callbackUrl?: string;
+  idempotencyKey?: string;
 }
 
 export interface PaymentIntentResult {
@@ -18,12 +19,19 @@ export interface WebhookVerificationResult {
   transactionId?: string;
   status?: 'SUCCESS' | 'FAILED' | 'PENDING';
   metadata?: Record<string, string>;
-  amount?: number;
+  amountMinor?: number;
+  currency?: string;
+  eventId?: string;
 }
 
 export interface IPaymentGateway {
-  createPaymentIntent(options: PaymentIntentOptions): Promise<PaymentIntentResult>;
-  verifyWebhook(payload: any, signature?: string): Promise<WebhookVerificationResult>;
+  createPaymentIntent(
+    options: PaymentIntentOptions,
+  ): Promise<PaymentIntentResult>;
+  verifyWebhook(
+    payload: unknown,
+    signature?: string,
+  ): Promise<WebhookVerificationResult>;
 }
 
 export const MOYASAR_PROVIDER = 'MOYASAR_PROVIDER';

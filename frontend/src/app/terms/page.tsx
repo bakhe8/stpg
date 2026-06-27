@@ -98,7 +98,7 @@ export default function TermsPage() {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>٧. إخلاء المسؤولية</h2>
           <p className={styles.sectionText}>
-            تُقدَّم الخدمة "كما هي" دون ضمانات صريحة أو ضمنية. لا نضمن خلوّ المنصة
+            تُقدَّم الخدمة &quot;كما هي&quot; دون ضمانات صريحة أو ضمنية. لا نضمن خلوّ المنصة
             من الأخطاء في جميع الأوقات. ننصح بالاحتفاظ بنسخ احتياطية من البيانات
             المالية الحساسة خارج المنصة.
           </p>

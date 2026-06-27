@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getEntities, Entity } from '../../../lib/api/entities';
+import { getEntities } from '../../../lib/api/entities';
 import { getReviewTasksForEntities } from '../../../lib/api/review-center';
 import { ReviewTask } from '../../../lib/models/ReviewTask';
 import { ADMIN_ROLES, filterEntitiesByRoles } from '../../../lib/access';
+import type { Translator } from '../../../lib/i18n';
 import { useTranslations } from 'next-intl';
 import styles from './review-center.module.css';
 
@@ -36,7 +37,7 @@ export default function ReviewCenterPage() {
       }
     }
     void loadTasks();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
@@ -91,7 +92,7 @@ export default function ReviewCenterPage() {
   );
 }
 
-function TaskCard({ task, t }: { task: ReviewTask, t: (key: string, values?: any) => string }) {
+function TaskCard({ task, t }: { task: ReviewTask, t: Translator }) {
   const getIcon = () => {
     switch (task.type) {
       case 'JOIN_REQUEST': return '👋';

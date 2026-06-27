@@ -18,7 +18,6 @@ import { RuleTargetType } from '@prisma/client';
 import { CreateRuleDto, UpdateRuleDto } from './dto/create-rule.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('rules')
 @ApiBearerAuth('access-token')

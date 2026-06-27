@@ -26,7 +26,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message =
         typeof res === 'string'
           ? res
-          : (res as Record<string, unknown>).message?.toString() ?? exception.message;
+          : ((res as Record<string, unknown>).message?.toString() ??
+            exception.message);
     } else if (exception instanceof Error) {
       this.logger.error(exception.message, exception.stack);
     } else {

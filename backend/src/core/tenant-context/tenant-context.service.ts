@@ -4,6 +4,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 export interface TenantContext {
   entityId?: string;
   personId?: string;
+  platformAccountId?: string;
+  internalAccess?: boolean;
 }
 
 @Injectable()
@@ -15,6 +17,13 @@ export class TenantContextService {
    */
   run<R>(context: TenantContext, callback: () => R): R {
     return this.als.run(context, callback);
+  }
+
+  runInternal<R>(callback: () => R): R {
+    return this.als.run(
+      { ...this.getContext(), internalAccess: true },
+      callback,
+    );
   }
 
   /**
@@ -29,5 +38,17 @@ export class TenantContextService {
    */
   get entityId(): string | undefined {
     return this.getContext()?.entityId;
+  }
+
+  get personId(): string | undefined {
+    return this.getContext()?.personId;
+  }
+
+  get platformAccountId(): string | undefined {
+    return this.getContext()?.platformAccountId;
+  }
+
+  get internalAccess(): boolean {
+    return this.getContext()?.internalAccess === true;
   }
 }

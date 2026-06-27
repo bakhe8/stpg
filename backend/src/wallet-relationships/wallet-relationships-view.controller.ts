@@ -5,7 +5,6 @@ import { JwtGuard } from '../identity/auth/jwt.guard';
 import { WalletRelationshipsService } from './wallet-relationships.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('wallet-relationships')
 @ApiBearerAuth('access-token')
 @Controller('wallets')

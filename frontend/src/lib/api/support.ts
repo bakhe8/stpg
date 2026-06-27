@@ -17,17 +17,3 @@ export interface SupportSession {
 export async function getActiveSessions(entityId: string): Promise<SupportSession[]> {
   return fetchApi(`/support/sessions/${entityId}`);
 }
-
-export async function createSupportSession(data: { entityId: string; platformAccountId: string; scope: string; hours: number }) {
-  return fetchApi("/support/sessions", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export async function revokeSupportSession(sessionId: string, entityId: string) {
-  return fetchApi(`/support/sessions/${sessionId}/revoke`, {
-    method: "POST",
-    body: JSON.stringify({ entityId }),
-  });
-}

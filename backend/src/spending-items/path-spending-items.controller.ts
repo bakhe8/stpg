@@ -15,7 +15,6 @@ import { CreateSpendingItemDto } from './dto/create-spending-item.dto';
 import { SpendingItemsService } from './spending-items.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('spending-items')
 @ApiBearerAuth('access-token')
 @Controller('paths')

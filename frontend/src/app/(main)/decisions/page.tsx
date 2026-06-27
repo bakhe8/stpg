@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getDecisions, castVote, retryExecution, Decision } from '../../../lib/api/decisions';
+import type { Translator } from '../../../lib/i18n';
 import styles from './decisions.module.css';
 import RuleSummaryPanel from '../../../components/Governance/RuleSummaryPanel';
 import AccessReasonPanel, { inferReason } from '../../../components/shared/AccessReasonPanel';
@@ -15,7 +16,7 @@ function isAccessError(msg: string) {
     lower.includes('waiting') || lower.includes('role') || lower.includes('permission');
 }
 
-function getDecisionReason(decision: Decision, canVote: boolean, t: any) {
+function getDecisionReason(decision: Decision, canVote: boolean, t: Translator) {
   if (!canVote) {
     if (decision.hasVoted) return t("reasonAlreadyVoted");
     if (decision.votersScope === "COMMITTEE") return t("reasonVisibleCommitteeOnly");

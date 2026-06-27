@@ -1,11 +1,17 @@
 import {
   IsNotEmpty,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Min,
 } from 'class-validator';
+
+export enum TransferReviewStatus {
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
 
 export class CreateTransferRequestDto {
   @IsUUID()
@@ -26,9 +32,9 @@ export class CreateTransferRequestDto {
 }
 
 export class ReviewTransferDto {
-  @IsString()
+  @IsEnum(TransferReviewStatus)
   @IsNotEmpty()
-  status: 'APPROVED' | 'REJECTED';
+  status: TransferReviewStatus;
 
   @IsString()
   @IsOptional()

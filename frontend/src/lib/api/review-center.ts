@@ -5,6 +5,7 @@ import { getEntityWallets, getWalletPaths } from "./wallets";
 import { ReviewTask } from "../models/ReviewTask";
 import { Entity } from "./entities";
 import { getEntityMembershipApplications } from "./membership-applications";
+import type { Translator } from "../i18n";
 
 /**
  * Aggregates all pending review tasks for the provided entities.
@@ -12,7 +13,7 @@ import { getEntityMembershipApplications } from "./membership-applications";
  */
 export async function getReviewTasksForEntities(
   entities: Entity[],
-  t: (key: string, values?: any) => string
+  t: Translator,
 ): Promise<ReviewTask[]> {
   const tasks: ReviewTask[] = [];
 

@@ -13,7 +13,7 @@
     }
 }
 
-:80 {
+stpg.wbgl.tech {
     import security_headers
 
     encode zstd gzip

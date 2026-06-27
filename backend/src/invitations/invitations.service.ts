@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
-  BadRequestException,
   ConflictException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
@@ -18,12 +17,14 @@ import {
   Prisma,
 } from '@prisma/client';
 import { getRefreshTokenSecret } from '../identity/auth/jwt-secrets';
+import { TenantContextService } from '../core/tenant-context/tenant-context.service';
 
 @Injectable()
 export class InvitationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async createInvitation(creatorId: string, dto: CreateInvitationDto) {
@@ -57,8 +58,23 @@ export class InvitationsService {
   async getInvitationPreview(token: string) {
     const invitation = await this.prisma.invitation.findUnique({
       where: { token },
-      include: {
-        entity: {
+      select: {
+        entityId: true,
+        isActive: true,
+        expiresAt: true,
+        maxUses: true,
+        usedCount: true,
+      },
+    });
+
+    if (!invitation) throw new NotFoundException('رابط الدعوة غير موجود');
+    this.assertValid(invitation);
+
+    return this.tenantContext.run(
+      { entityId: invitation.entityId },
+      async () => {
+        const entity = await this.prisma.entity.findUnique({
+          where: { id: invitation.entityId },
           select: {
             id: true,
             name: true,
@@ -67,27 +83,32 @@ export class InvitationsService {
             logoUrl: true,
             _count: { select: { memberships: { where: { exitedAt: null } } } },
           },
-        },
+        });
+        if (!entity) throw new NotFoundException('الكيان غير موجود');
+
+        return {
+          entityId: entity.id,
+          entityName: entity.name,
+          entityType: entity.type,
+          description: entity.description,
+          logoUrl: entity.logoUrl,
+          memberCount: entity._count.memberships,
+        };
       },
-    });
-
-    if (!invitation) throw new NotFoundException('رابط الدعوة غير موجود');
-    this.assertValid(invitation);
-
-    return {
-      entityId: invitation.entity.id,
-      entityName: invitation.entity.name,
-      entityType: invitation.entity.type,
-      description: invitation.entity.description,
-      logoUrl: invitation.entity.logoUrl,
-      memberCount: invitation.entity._count.memberships,
-    };
+    );
   }
 
   async joinViaInvitation(token: string, dto: JoinInvitationDto) {
     const invitation = await this.prisma.invitation.findUnique({
       where: { token },
-      include: { entity: true },
+      select: {
+        id: true,
+        entityId: true,
+        isActive: true,
+        expiresAt: true,
+        maxUses: true,
+        usedCount: true,
+      },
     });
 
     if (!invitation) throw new NotFoundException('رابط الدعوة غير موجود');
@@ -155,7 +176,14 @@ export class InvitationsService {
   ) {
     const invitation = await this.prisma.invitation.findUnique({
       where: { token },
-      include: { entity: true },
+      select: {
+        id: true,
+        entityId: true,
+        isActive: true,
+        expiresAt: true,
+        maxUses: true,
+        usedCount: true,
+      },
     });
 
     if (!invitation) throw new NotFoundException('رابط الدعوة غير موجود');

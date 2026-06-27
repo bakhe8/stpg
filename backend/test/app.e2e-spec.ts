@@ -8,6 +8,8 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+jest.setTimeout(30000);
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const NULL_UUID = '00000000-0000-0000-0000-000000000001';
@@ -34,7 +36,11 @@ describe('CollectiveTrustOS E2E', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     );
 
     // Register Swagger (mirrors main.ts setup — not run automatically in test harness)
@@ -42,7 +48,10 @@ describe('CollectiveTrustOS E2E', () => {
       .setTitle('CollectiveTrustOS API')
       .setDescription('E2E test Swagger instance')
       .setVersion('1.0')
-      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+      .addBearerAuth(
+        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        'access-token',
+      )
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api/docs', app, document);
@@ -84,29 +93,99 @@ describe('CollectiveTrustOS E2E', () => {
 
   describe('Auth: JWT protection', () => {
     const protectedRoutes: [string, string][] = [
-      ['GET',  `/analytics/fund-health?entityId=${NULL_UUID}`],
-      ['GET',  `/entities/${NULL_UUID}/wallets`],
-      ['GET',  `/wallets/${NULL_UUID}/paths`],
-      ['GET',  `/wallets/${NULL_UUID}/ownership`],
-      ['GET',  `/ledger/summary?entityId=${NULL_UUID}`],
-      ['GET',  `/ledger/accounts/${NULL_UUID}/transactions`],
-      ['GET',  `/memberships/${NULL_UUID}/subscriptions`],
-      ['GET',  `/entities/${NULL_UUID}/relationships`],
-      ['GET',  `/wallets/${NULL_UUID}/relationships`],
-      ['GET',  `/auth/me`],
+      ['GET', `/analytics/fund-health?entityId=${NULL_UUID}`],
+      ['GET', `/entities/${NULL_UUID}/wallets`],
+      ['GET', `/wallets/${NULL_UUID}/paths`],
+      ['GET', `/wallets/${NULL_UUID}/ownership`],
+      ['GET', `/ledger/summary?entityId=${NULL_UUID}`],
+      ['GET', `/ledger/accounts/${NULL_UUID}/transactions`],
+      ['GET', `/memberships/${NULL_UUID}/subscriptions`],
+      ['GET', `/entities/${NULL_UUID}/relationships`],
+      ['GET', `/wallets/${NULL_UUID}/relationships`],
+      ['GET', `/support/sessions/${NULL_UUID}`],
+      ['GET', `/balance-transfer-requests/${NULL_UUID}`],
+      ['GET', `/auth/me`],
     ];
 
     it.each(protectedRoutes)('%s %s → 401 without token', (method, path) => {
-      return (request(app.getHttpServer()) as unknown as Record<string, (p: string) => request.Test>)
+      return (
+        request(app.getHttpServer()) as unknown as Record<
+          string,
+          (p: string) => request.Test
+        >
+      )
         [method.toLowerCase()](path)
         .expect(401);
     });
 
-    it.each(protectedRoutes)('%s %s → 401 with invalid token', (method, path) => {
-      return (request(app.getHttpServer()) as unknown as Record<string, (p: string) => request.Test>)
-        [method.toLowerCase()](path)
-        .set('Authorization', INVALID_TOKEN)
+    it.each(protectedRoutes)(
+      '%s %s → 401 with invalid token',
+      (method, path) => {
+        return (
+          request(app.getHttpServer()) as unknown as Record<
+            string,
+            (p: string) => request.Test
+          >
+        )
+          [method.toLowerCase()](path)
+          .set('Authorization', INVALID_TOKEN)
+          .expect(401);
+      },
+    );
+  });
+
+  // ── Security regressions ───────────────────────────────────────────────────
+
+  describe('Security regressions', () => {
+    it('POST /transfers remains retired and unavailable', async () => {
+      await request(app.getHttpServer())
+        .post('/transfers')
+        .send({
+          fromWalletId: NULL_UUID,
+          toWalletId: NULL_UUID,
+          amount: 10,
+        })
+        .expect(404);
+    });
+
+    it('POST /ledger/transfers is protected by JWT', async () => {
+      await request(app.getHttpServer())
+        .post('/ledger/transfers')
+        .send({
+          sourcePathId: NULL_UUID,
+          targetPathId: NULL_UUID,
+          amount: 10,
+          description: 'blocked unauthenticated transfer',
+          decisionId: NULL_UUID,
+        })
         .expect(401);
+    });
+
+    it('POST /support/entities/:id/sessions is protected by JWT/platform guards', async () => {
+      await request(app.getHttpServer())
+        .post(`/support/entities/${NULL_UUID}/sessions`)
+        .send({ scope: 'debug', hours: 1 })
+        .expect(401);
+    });
+
+    it('POST /balance-transfer-requests is protected by JWT', async () => {
+      await request(app.getHttpServer())
+        .post('/balance-transfer-requests')
+        .send({
+          fromPathId: NULL_UUID,
+          toPathId: NULL_UUID,
+          amount: 10,
+          reason: 'blocked unauthenticated balance transfer',
+        })
+        .expect(401);
+    });
+
+    it('POST /balance-transfer-requests/:id/review rejects invalid status values', async () => {
+      await request(app.getHttpServer())
+        .post(`/balance-transfer-requests/${NULL_UUID}/review`)
+        .set('Authorization', authHeader)
+        .send({ status: 'NOPE' })
+        .expect(400);
     });
   });
 
@@ -164,7 +243,12 @@ describe('CollectiveTrustOS E2E', () => {
       await request(app.getHttpServer())
         .post('/ledger/entity-support')
         .set('Authorization', authHeader)
-        .send({ sourcePathId: 'not-uuid', targetPathId: 'not-uuid', amount: 100, description: 'test' })
+        .send({
+          sourcePathId: 'not-uuid',
+          targetPathId: 'not-uuid',
+          amount: 100,
+          description: 'test',
+        })
         .expect(400);
     });
 
@@ -189,7 +273,13 @@ describe('CollectiveTrustOS E2E', () => {
       await request(app.getHttpServer())
         .post('/ledger/disbursements')
         .set('Authorization', authHeader)
-        .send({ pathId: NULL_UUID, spendingItemId: NULL_UUID, decisionId: NULL_UUID, amount: -50, description: 'test' })
+        .send({
+          pathId: NULL_UUID,
+          spendingItemId: NULL_UUID,
+          decisionId: NULL_UUID,
+          amount: -50,
+          description: 'test',
+        })
         .expect(400);
     });
   });
@@ -201,8 +291,8 @@ describe('CollectiveTrustOS E2E', () => {
       const res = await request(app.getHttpServer())
         .get(`/ledger/summary?entityId=${NULL_UUID}`)
         .set('Authorization', authHeader);
-      // 403 if membership check fails first; 404 if entity lookup fails first
-      expect([403, 404]).toContain(res.status);
+      // 400 if tenant context validation rejects first; otherwise 403/404.
+      expect([400, 403, 404]).toContain(res.status);
     });
 
     it('GET /ledger/accounts/:id/transactions with non-existent account → 404', async () => {

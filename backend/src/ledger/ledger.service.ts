@@ -880,10 +880,8 @@ export class LedgerService {
       where: {
         type: EntityRelationshipType.FINANCIAL_SUPPORT,
         isActive: true,
-        OR: [
-          { sourceEntityId, targetEntityId },
-          { sourceEntityId: targetEntityId, targetEntityId: sourceEntityId },
-        ],
+        sourceEntityId,
+        targetEntityId,
       },
     });
     if (!relationship) {
@@ -891,6 +889,7 @@ export class LedgerService {
     }
 
     await this.requireTreasurerOrAdmin(sourceEntityId, adminId);
+    await this.validateEntitySupportDecision(dto, sourceEntityId);
 
     const sourceAccount = sourcePath.ledgerAccount;
     if (!sourceAccount)
@@ -908,7 +907,7 @@ export class LedgerService {
           amount: dto.amount,
           description: dto.description,
           reference: dto.reference ?? null,
-          decisionId: dto.decisionId ?? null,
+          decisionId: dto.decisionId,
           approvedById: adminId,
           sourceEntityId,
           originEntityId: sourceEntityId,
@@ -971,13 +970,65 @@ export class LedgerService {
             sourcePathId: dto.sourcePathId,
             targetPathId: dto.targetPathId,
             targetEntityId,
-            decisionId: dto.decisionId ?? null,
+            decisionId: dto.decisionId,
           },
         },
       });
 
       return txn;
     });
+  }
+
+  private async validateEntitySupportDecision(
+    dto: RecordEntitySupportDto,
+    sourceEntityId: string,
+  ) {
+    const decision = await this.prisma.decision.findUnique({
+      where: { id: dto.decisionId },
+      include: {
+        governancePath: {
+          select: { wallet: { select: { entityId: true } } },
+        },
+      },
+    });
+
+    if (!decision) {
+      throw new NotFoundException('قرار الدعم المالي غير موجود');
+    }
+
+    if (
+      decision.status !== DecisionStatus.CLOSED ||
+      decision.result !== DecisionResult.APPROVED
+    ) {
+      throw new ForbiddenException(
+        'قرار الدعم المالي يجب أن يكون مغلقاً وموافقاً عليه',
+      );
+    }
+
+    if (
+      decision.decisionType !== DecisionType.DISBURSE_FUNDS &&
+      decision.decisionType !== DecisionType.TRANSFER_BALANCE
+    ) {
+      throw new BadRequestException(
+        'نوع القرار لا يسمح بتسجيل دعم مالي بين الكيانات',
+      );
+    }
+
+    if (decision.amount && Number(decision.amount) !== dto.amount) {
+      throw new BadRequestException('مبلغ القرار لا يطابق مبلغ الدعم المالي');
+    }
+
+    const decisionBelongsToSource =
+      (decision.subjectType === 'ENTITY' &&
+        decision.subjectId === sourceEntityId) ||
+      (decision.subjectType === 'PATH' &&
+        decision.subjectId === dto.sourcePathId) ||
+      decision.governancePathId === dto.sourcePathId ||
+      decision.governancePath?.wallet.entityId === sourceEntityId;
+
+    if (!decisionBelongsToSource) {
+      throw new ForbiddenException('قرار الدعم لا يخص الكيان أو المسار المصدر');
+    }
   }
 
   // ── لقطة رصيد شهرية ─────────────────────────────────────────────

@@ -9,7 +9,7 @@ import {
   approveEntityRelationship, rejectEntityRelationship,
   Entity, EntityMember, EntityRelationship,
 } from '../../../../lib/api/entities';
-import { getActiveSessions, revokeSupportSession, createSupportSession, SupportSession } from '../../../../lib/api/support';
+import { getActiveSessions, SupportSession } from '../../../../lib/api/support';
 import PlatformSupportBanner from '../../../../components/platform/PlatformSupportBanner';
 import { ENTITY_TYPE_KEYS } from '../../../../lib/enum-labels';
 import {
@@ -64,7 +64,6 @@ export default function EntityDetailPage() {
   
   const [supportSessions, setSupportSessions] = useState<SupportSession[]>([]);
   const [supportLoading, setSupportLoading] = useState(false);
-  const [supportMsg, setSupportMsg] = useState<string | null>(null);
 
   interface PathCompat {
     walletId: string;
@@ -261,28 +260,9 @@ export default function EntityDetailPage() {
     try {
       setSupportSessions(await getActiveSessions(id));
     } catch (e) {
-      setSupportMsg(e instanceof Error ? e.message : t('generalError'));
+      console.error(e);
     } finally {
       setSupportLoading(false);
-    }
-  }
-
-  async function handleRevokeSupport(sessionId: string) {
-    try {
-      await revokeSupportSession(sessionId, id as string);
-      await loadSupport();
-    } catch (e) {
-      setSupportMsg(e instanceof Error ? e.message : t('generalError'));
-    }
-  }
-
-  async function handleRequestSupport() {
-    try {
-      await createSupportSession({ entityId: id as string, platformAccountId: "ADMIN", scope: "ALL", hours: 24 });
-      await loadSupport();
-      alert(t('supportRequested'));
-    } catch (e) {
-      setSupportMsg(e instanceof Error ? e.message : t('generalError'));
     }
   }
 
@@ -896,12 +876,6 @@ export default function EntityDetailPage() {
               <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>{t('supportTitle')}</h3>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('supportDesc')}</p>
             </div>
-            <button 
-              className={styles.btnApprove}
-              onClick={handleRequestSupport}
-            >
-              {t('requestSupportBtn')}
-            </button>
           </div>
 
           {supportLoading ? (
@@ -922,13 +896,6 @@ export default function EntityDetailPage() {
                       {t('sessionExpiresAt', { date: new Date(s.expiresAt).toLocaleString('ar-SA') })}
                     </div>
                   </div>
-                  <button 
-                    className={styles.btnReject}
-                    onClick={() => handleRevokeSupport(s.id)}
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                  >
-                    {t('revokeSessionBtn')}
-                  </button>
                 </div>
               ))}
             </div>

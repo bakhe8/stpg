@@ -996,7 +996,8 @@ export class DecisionsService {
   ) {
     const hasVoted = await this.hasPersonVoted(decision.id, personId);
     const isOpen =
-      decision.status === DecisionStatus.OPEN && decision.closesAt >= new Date();
+      decision.status === DecisionStatus.OPEN &&
+      decision.closesAt >= new Date();
     const canVote =
       isOpen && !hasVoted
         ? await this.isEligibleVoter(decision, entityId, personId)

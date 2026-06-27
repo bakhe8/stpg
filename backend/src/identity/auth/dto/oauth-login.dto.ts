@@ -1,23 +1,23 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+
+export enum OAuthProvider {
+  GOOGLE = 'google',
+  APPLE = 'apple',
+}
 
 export class OAuthLoginDto {
-  @ApiProperty({ description: 'The OAuth provider (e.g., google, apple)' })
+  @ApiProperty({ enum: OAuthProvider, description: 'The OAuth provider' })
+  @IsEnum(OAuthProvider)
+  @IsNotEmpty()
+  provider: OAuthProvider;
+
+  @ApiProperty({ description: 'The signed ID token returned by the provider' })
   @IsString()
   @IsNotEmpty()
-  provider: string;
+  idToken: string;
 
-  @ApiProperty({ description: 'The unique provider user ID' })
-  @IsString()
-  @IsNotEmpty()
-  providerId: string;
-
-  @ApiPropertyOptional({ description: 'The email from the provider' })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({ description: 'The name from the provider' })
+  @ApiPropertyOptional({ description: 'Optional display name hint' })
   @IsOptional()
   @IsString()
   name?: string;

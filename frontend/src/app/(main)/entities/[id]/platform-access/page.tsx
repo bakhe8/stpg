@@ -37,7 +37,7 @@ export default function PlatformAccessPage() {
         setError(err instanceof Error ? err.message : t("platformAccess.loadError"));
       })
       .finally(() => setLoading(false));
-  }, [entityId]);
+  }, [entityId, t]);
 
   return (
     <div className={styles.wrap}>

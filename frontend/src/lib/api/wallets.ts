@@ -154,15 +154,3 @@ export async function rejectWalletRelationship(id: string, reason?: string) {
     body: JSON.stringify({ reason }),
   });
 }
-
-export async function executeTransfer(data: {
-  sourceWalletId: string;
-  targetWalletId: string;
-  amount: number;
-  reason: string;
-}) {
-  return fetchApi("/transfers", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}

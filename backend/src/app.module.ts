@@ -43,7 +43,6 @@ import { PaymentsModule } from './payments/payments.module';
 import { SearchModule } from './search/search.module';
 import { TemporalModule } from './temporal/temporal.module';
 import { SupportModule } from './support/support.module';
-import { TransfersModule } from './transfers/transfers.module';
 
 @Module({
   imports: [
@@ -85,7 +84,6 @@ import { TransfersModule } from './transfers/transfers.module';
     SearchModule,
     TemporalModule,
     SupportModule,
-    TransfersModule,
   ],
   controllers: [AppController],
   providers: [

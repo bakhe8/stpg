@@ -12,7 +12,6 @@ import { CurrentUser } from '../identity/auth/decorators/current-user.decorator'
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('analytics')
 @ApiBearerAuth('access-token')

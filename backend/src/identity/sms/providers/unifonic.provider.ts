@@ -1,11 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { SmsProvider, SmsSendResult } from '../sms-provider.interface';
 
+type UnifonicMessageResponse = {
+  Success?: string;
+  Message?: string;
+  data?: {
+    MessageID?: string;
+  };
+};
+
 @Injectable()
 export class UnifonicProvider implements SmsProvider {
   private readonly logger = new Logger(UnifonicProvider.name);
   private readonly apiKey = process.env.UNIFONIC_API_KEY!;
-  private readonly senderId = process.env.UNIFONIC_SENDER_ID ?? 'CollectiveTrust';
+  private readonly senderId =
+    process.env.UNIFONIC_SENDER_ID ?? 'CollectiveTrust';
   private readonly baseUrl = 'https://el.cloud.unifonic.com/rest/SMS/messages';
 
   async sendOtp(phoneNumber: string, otp: string): Promise<SmsSendResult> {
@@ -22,7 +31,7 @@ export class UnifonicProvider implements SmsProvider {
       body: body.toString(),
     });
 
-    const json = await res.json();
+    const json = (await res.json()) as UnifonicMessageResponse;
     if (json.Success === 'True') {
       return { success: true, messageId: json.data?.MessageID };
     }

@@ -17,7 +17,6 @@ import { FileAppealDto } from './dto/file-appeal.dto';
 import { RespondAppealDto } from './dto/respond-appeal.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('appeals')
 @ApiBearerAuth('access-token')

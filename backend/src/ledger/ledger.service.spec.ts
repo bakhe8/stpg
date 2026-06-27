@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ForbiddenException } from '@nestjs/common';
 import {
   DecisionResult,
@@ -255,12 +254,24 @@ describe('LedgerService', () => {
       wallet: { entityId: targetEntityId },
       ledgerAccount: { id: 'target-account', balance: 0 },
     });
+    const makeSupportDecision = (amount = 200) => ({
+      id: 'decision-id',
+      decisionType: DecisionType.DISBURSE_FUNDS,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      subjectType: 'PATH',
+      subjectId: 'source-path-id',
+      governancePathId: 'source-path-id',
+      governancePath: { wallet: { entityId: 'entity-a' } },
+      amount,
+    });
 
     it('creates DEBIT on source and CREDIT on target across two entities', async () => {
       prisma.governancePath.findUnique
         .mockResolvedValueOnce(makeSourcePath())
         .mockResolvedValueOnce(makeTargetPath());
       prisma.entityRelationship.findFirst.mockResolvedValue({ id: 'rel-id' });
+      prisma.decision.findUnique.mockResolvedValue(makeSupportDecision());
       prisma.ledgerTransaction.create.mockImplementation(
         ({ data }: { data: Record<string, unknown> }) =>
           Promise.resolve({ id: 'txn-id', ...data }),
@@ -271,6 +282,7 @@ describe('LedgerService', () => {
         targetPathId: 'target-path-id',
         amount: 200,
         description: 'دعم مالي',
+        decisionId: 'decision-id',
       });
 
       expect(prisma.ledgerTransaction.create).toHaveBeenCalledWith(
@@ -278,10 +290,19 @@ describe('LedgerService', () => {
           data: expect.objectContaining({
             entries: {
               create: [
-                { accountId: 'source-account', type: LedgerEntryType.DEBIT, amount: 200 },
-                { accountId: 'target-account', type: LedgerEntryType.CREDIT, amount: 200 },
+                {
+                  accountId: 'source-account',
+                  type: LedgerEntryType.DEBIT,
+                  amount: 200,
+                },
+                {
+                  accountId: 'target-account',
+                  type: LedgerEntryType.CREDIT,
+                  amount: 200,
+                },
               ],
             },
+            decisionId: 'decision-id',
           }),
         }),
       );
@@ -298,6 +319,7 @@ describe('LedgerService', () => {
           targetPathId: 'target-path-id',
           amount: 100,
           description: 'خطأ',
+          decisionId: 'decision-id',
         }),
       ).rejects.toThrow('المصدر والهدف في نفس الكيان');
     });
@@ -314,6 +336,7 @@ describe('LedgerService', () => {
           targetPathId: 'target-path-id',
           amount: 100,
           description: 'دعم',
+          decisionId: 'decision-id',
         }),
       ).rejects.toThrow('لا توجد علاقة دعم مالي');
     });
@@ -323,6 +346,7 @@ describe('LedgerService', () => {
         .mockResolvedValueOnce(makeSourcePath())
         .mockResolvedValueOnce(makeTargetPath());
       prisma.entityRelationship.findFirst.mockResolvedValue({ id: 'rel-id' });
+      prisma.decision.findUnique.mockResolvedValue(makeSupportDecision(999));
       prisma.ledgerTransaction.create.mockResolvedValue({ id: 'txn-id' });
       prisma.ledgerAccount.updateMany.mockResolvedValueOnce({ count: 0 });
 
@@ -332,6 +356,7 @@ describe('LedgerService', () => {
           targetPathId: 'target-path-id',
           amount: 999,
           description: 'أكثر من الرصيد',
+          decisionId: 'decision-id',
         }),
       ).rejects.toThrow('الرصيد غير كافٍ لإتمام الدعم');
     });

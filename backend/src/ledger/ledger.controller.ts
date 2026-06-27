@@ -17,8 +17,12 @@ import { RecordDisbursementDto } from './dto/record-disbursement.dto';
 import { RecordTransferDto } from './dto/record-transfer.dto';
 import { RecordReversalDto } from './dto/record-reversal.dto';
 import { RecordEntitySupportDto } from './dto/record-entity-support.dto';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @UseGuards(JwtGuard)
 @ApiTags('ledger')

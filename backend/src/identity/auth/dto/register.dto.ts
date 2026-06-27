@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsUUID, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ description: 'Full name' })
@@ -18,7 +24,9 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  @ApiPropertyOptional({ description: 'ID of the entity applying to (optional)' })
+  @ApiPropertyOptional({
+    description: 'ID of the entity applying to (optional)',
+  })
   @IsOptional()
   @IsUUID()
   entityId?: string;

@@ -20,7 +20,6 @@ import {
   getRuleTemplates,
 } from "../../../lib/api/rules";
 import { getPathSpendingItems, SpendingItem } from "../../../lib/api/paths";
-import { RuleDesigner } from "../../../components/Governance/RuleDesigner";
 import PolicyBuilder from "../../../components/Governance/PolicyBuilder";
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
 import AccessReasonPanel from "../../../components/shared/AccessReasonPanel";
@@ -164,8 +163,6 @@ export default function RulesPage() {
     ruleDataText: RULE_TYPES[0].example,
   });
   const [formRuleDataError, setFormRuleDataError] = useState<string | null>(null);
-  const [advancedModeForm, setAdvancedModeForm] = useState(false);
-  const [advancedModeDraft, setAdvancedModeDraft] = useState(false);
 
   const [evalForm, setEvalForm] = useState({
     amount: "",
@@ -186,16 +183,6 @@ export default function RulesPage() {
 
   const selectedTargetId = targetIdByType(targetType);
 
-
-  function tryParseJsonText(text: string): Record<string, unknown> | null {
-    try {
-      const p = JSON.parse(text);
-      if (typeof p === 'object' && p !== null && !Array.isArray(p)) {
-        return p as Record<string, unknown>;
-      }
-    } catch (e) {}
-    return null;
-  }
 
   function hasDuplicateRule(ruleType: string, ruleData: Record<string, unknown>) {
     const incomingSignature = buildRuleSignature(ruleType, ruleData);

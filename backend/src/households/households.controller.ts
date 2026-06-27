@@ -20,7 +20,6 @@ import {
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('households')
 @ApiBearerAuth('access-token')
 @Controller('households')

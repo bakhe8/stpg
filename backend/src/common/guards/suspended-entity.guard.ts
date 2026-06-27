@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TenantContextService } from '../../core/tenant-context/tenant-context.service';
 
 type GuardRequest = {
   params?: Record<string, string>;
@@ -15,42 +16,47 @@ type GuardRequest = {
 
 @Injectable()
 export class SuspendedEntityGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContextService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<GuardRequest>();
-    if (request.originalUrl?.startsWith('/platform/')) return true;
-    // تصدير البيانات مضمون حتى حال التعليق (حق لا يُسلب)
-    if (request.originalUrl?.split('?')[0].endsWith('/export')) return true;
-    // الاعتراض على التعليق يجب أن يُقبل دائماً
-    if (request.originalUrl?.includes('/platform-appeal')) return true;
+    return this.tenantContext.runInternal(async () => {
+      const request = context.switchToHttp().getRequest<GuardRequest>();
+      if (request.originalUrl?.startsWith('/platform/')) return true;
+      // تصدير البيانات مضمون حتى حال التعليق (حق لا يُسلب)
+      if (request.originalUrl?.split('?')[0].endsWith('/export')) return true;
+      // الاعتراض على التعليق يجب أن يُقبل دائماً
+      if (request.originalUrl?.includes('/platform-appeal')) return true;
 
-    const entityId = await this.resolveEntityId(request);
-    if (!entityId) return true;
+      const entityId = await this.resolveEntityId(request);
+      if (!entityId) return true;
 
-    const entity = await this.prisma.entity.findUnique({
-      where: { id: entityId },
-      select: { platformStatus: true, suspendedReason: true },
+      const entity = await this.prisma.entity.findUnique({
+        where: { id: entityId },
+        select: { platformStatus: true, suspendedReason: true },
+      });
+
+      if (!entity) return true;
+
+      if (entity.platformStatus === 'SUSPENDED') {
+        throw new ForbiddenException({
+          message: 'هذا الكيان معلّق مؤقتاً من قِبَل فريق المنصة',
+          reason: entity.suspendedReason,
+          code: 'ENTITY_SUSPENDED',
+        });
+      }
+
+      if (entity.platformStatus === 'READ_ONLY' && request.method !== 'GET') {
+        throw new ForbiddenException({
+          message: 'هذا الكيان في وضع القراءة فقط مؤقتاً',
+          code: 'ENTITY_READ_ONLY',
+        });
+      }
+
+      return true;
     });
-
-    if (!entity) return true;
-
-    if (entity.platformStatus === 'SUSPENDED') {
-      throw new ForbiddenException({
-        message: 'هذا الكيان معلّق مؤقتاً من قِبَل فريق المنصة',
-        reason: entity.suspendedReason,
-        code: 'ENTITY_SUSPENDED',
-      });
-    }
-
-    if (entity.platformStatus === 'READ_ONLY' && request.method !== 'GET') {
-      throw new ForbiddenException({
-        message: 'هذا الكيان في وضع القراءة فقط مؤقتاً',
-        code: 'ENTITY_READ_ONLY',
-      });
-    }
-
-    return true;
   }
 
   private async resolveEntityId(request: GuardRequest): Promise<string | null> {

@@ -9,6 +9,7 @@ import {
   updateEntityPolicy,
   getPolicyImpact,
 } from "../../lib/api/entities";
+import type { Translator } from "../../lib/i18n";
 import styles from "./PolicyBuilder.module.css";
 
 interface Props {
@@ -271,7 +272,7 @@ function Question({
   hint?: string;
   value?: boolean;
   onChange: (v: boolean) => void;
-  t: any;
+  t: Translator;
 }) {
   return (
     <div className={styles.questionRow}>

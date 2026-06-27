@@ -1,22 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { DisputeStatus, DisputeType } from '@prisma/client';
+import { DisputeStatus, DisputeType, MemberRole, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuditorService {
   constructor(private prisma: PrismaService) {}
 
-  async getOperations() {
-    // Note: We use raw query or Prisma relations if we had account.entityId.
-    // For now we just return latest transactions overall since STGP is single-entity or we filter by entity somehow
-    // Let's just return some ledger transactions. The schema says LedgerTransaction has no direct entityId link except via Decision or maybe we just return all for MVP.
+  async getOperations(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.ledgerTransaction.findMany({
+      where: this.transactionEntityWhere(entityId),
       orderBy: { id: 'desc' },
       take: 200,
     });
   }
 
-  async getDocuments(entityId: string) {
+  async getDocuments(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.document.findMany({
       where: { entityId },
       include: {
@@ -26,17 +26,27 @@ export class AuditorService {
     });
   }
 
-  async getDecisions(entityId: string) {
+  async getDecisions(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.decision.findMany({
-      where: { subjectId: entityId },
+      where: {
+        OR: [
+          { subjectType: 'ENTITY', subjectId: entityId },
+          { governancePath: { wallet: { entityId } } },
+        ],
+      },
       orderBy: { id: 'desc' },
     });
   }
 
-  async getExceptions(entityId: string) {
+  async getExceptions(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.decision.findMany({
       where: {
-        subjectId: entityId,
+        OR: [
+          { subjectType: 'ENTITY', subjectId: entityId },
+          { governancePath: { wallet: { entityId } } },
+        ],
         // using relatedDecisionId to signify an override or exception
         relatedDecisionId: { not: null },
       },
@@ -44,12 +54,20 @@ export class AuditorService {
     });
   }
 
-  getConflicts() {
-    // Simplification for MVP: We just return an empty array or try to find some heuristics
-    return Promise.resolve([]);
+  async getConflicts(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
+    return this.prisma.dispute.findMany({
+      where: {
+        entityId,
+        type: DisputeType.MEMBER_CONFLICT,
+        status: DisputeStatus.OPEN,
+      },
+      orderBy: { id: 'desc' },
+    });
   }
 
-  async getAppeals(entityId: string) {
+  async getAppeals(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.dispute.findMany({
       where: {
         entityId,
@@ -60,14 +78,17 @@ export class AuditorService {
     });
   }
 
-  async getReport(entityId: string) {
+  async getReport(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     const period = new Date().toISOString().slice(0, 7);
 
     const [totalOperations, exceptions, conflicts, appeals, docs] =
       await Promise.all([
-        this.prisma.ledgerTransaction.count(),
-        this.getExceptions(entityId),
-        this.getConflicts(),
+        this.prisma.ledgerTransaction.count({
+          where: this.transactionEntityWhere(entityId),
+        }),
+        this.getExceptions(entityId, requesterId),
+        this.getConflicts(entityId, requesterId),
         this.prisma.dispute.count({
           where: {
             entityId,
@@ -93,11 +114,67 @@ export class AuditorService {
     };
   }
 
-  async getAuditLogs(entityId: string) {
+  async getAuditLogs(entityId: string, requesterId: string) {
+    await this.requireAuditor(entityId, requesterId);
     return this.prisma.auditLog.findMany({
       where: { entityId },
       orderBy: { id: 'desc' },
       take: 200,
     });
+  }
+
+  private async requireAuditor(entityId: string, personId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      where: {
+        entityId,
+        personId,
+        isActive: true,
+        role: {
+          in: [MemberRole.AUDITOR, MemberRole.ADMIN, MemberRole.FOUNDER],
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException(
+        'يتطلب الوصول دور مراجع أو مدير داخل الكيان',
+      );
+    }
+  }
+
+  private transactionEntityWhere(
+    entityId: string,
+  ): Prisma.LedgerTransactionWhereInput {
+    return {
+      OR: [
+        { sourceEntityId: entityId },
+        { originEntityId: entityId },
+        {
+          decision: {
+            OR: [
+              { subjectType: 'ENTITY', subjectId: entityId },
+              { governancePath: { wallet: { entityId } } },
+            ],
+          },
+        },
+        {
+          entries: {
+            some: {
+              account: {
+                OR: [
+                  { entityId },
+                  { wallet: { entityId } },
+                  { governancePath: { wallet: { entityId } } },
+                  {
+                    spendingItem: { governancePath: { wallet: { entityId } } },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    };
   }
 }

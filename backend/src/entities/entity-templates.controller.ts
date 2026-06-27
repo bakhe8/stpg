@@ -3,7 +3,6 @@ import { EntityTemplatesService } from './entity-templates.service';
 import { JwtGuard } from '../identity/auth/jwt.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('entities')
 @ApiBearerAuth('access-token')

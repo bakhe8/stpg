@@ -11,7 +11,6 @@ import {
   approveWalletRelationship,
   rejectWalletRelationship,
   createWalletRelationship,
-  executeTransfer,
   Wallet,
   GovernancePath,
   WalletRelationship,
@@ -20,6 +19,11 @@ import {
   getAccountTransactions,
   LedgerEntry,
 } from "../../../../lib/api/ledger";
+import {
+  BalanceTransferRequest,
+  createBalanceTransferRequest,
+  getPathBalanceTransferRequests,
+} from "../../../../lib/api/balance-transfer-requests";
 import { getRules, Rule } from "../../../../lib/api/rules";
 import RuleSummaryPanel from "../../../../components/Governance/RuleSummaryPanel";
 import ConfirmActionDialog from "../../../../components/shared/ConfirmActionDialog";
@@ -39,18 +43,32 @@ export default function WalletDetailPage() {
   const [selectedPathAccountId, setSelectedPathAccountId] = useState<
     string | null
   >(null);
+  const [selectedTransferPathId, setSelectedTransferPathId] = useState<
+    string | null
+  >(null);
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
+  const [transferRequests, setTransferRequests] = useState<
+    BalanceTransferRequest[]
+  >([]);
   const [incomingRels, setIncomingRels] = useState<WalletRelationship[]>([]);
   const [outgoingRels, setOutgoingRels] = useState<WalletRelationship[]>([]);
   const [walletRules, setWalletRules] = useState<Rule[]>([]);
   const [loading, setLoading] = useState(true);
   const [txLoading, setTxLoading] = useState(false);
+  const [transferRequestsLoading, setTransferRequestsLoading] =
+    useState(false);
+  const [showTransferForm, setShowTransferForm] = useState(false);
+  const [transferSubmitting, setTransferSubmitting] = useState(false);
+  const [transferForm, setTransferForm] = useState({
+    fromPathId: "",
+    toPathId: "",
+    amount: "",
+    reason: "",
+  });
   
   const [showRelForm, setShowRelForm] = useState(false);
   const [newRel, setNewRel] = useState({ targetWalletId: '', relationshipType: 'FUNDING', contributionPercent: '' });
   
-  const [showTransferForm, setShowTransferForm] = useState(false);
-  const [transferData, setTransferData] = useState({ targetWalletId: '', amount: '', reason: '' });
   const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'reject'; relId: string } | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
@@ -129,37 +147,73 @@ export default function WalletDetailPage() {
     }
   }
 
-  async function handleTransfer(e: React.FormEvent) {
-    e.preventDefault();
-    if (!transferData.targetWalletId || !transferData.amount) {
-      setStatusMsg({ text: t('fieldsRequired'), ok: false });
-      return;
-    }
+  async function loadPathActivity(path: GovernancePath) {
+    if (!wallet || !path.ledgerAccountId) return;
+    setSelectedPathAccountId(path.ledgerAccountId);
+    setSelectedTransferPathId(path.id);
+    setTransferForm((prev) => ({
+      ...prev,
+      fromPathId: prev.fromPathId || path.id,
+    }));
+    setTxLoading(true);
+    setTransferRequestsLoading(true);
     try {
-      await executeTransfer({
-        sourceWalletId: wallet!.id,
-        targetWalletId: transferData.targetWalletId,
-        amount: parseFloat(transferData.amount),
-        reason: transferData.reason,
-      });
-      setShowTransferForm(false);
-      setTransferData({ targetWalletId: '', amount: '', reason: '' });
-      setStatusMsg({ text: t('transferSuccess'), ok: true });
-      await loadData();
-    } catch (e: unknown) {
-      setStatusMsg({ text: e instanceof Error ? e.message : t('transferFailed'), ok: false });
+      const [nextTransactions, nextRequests] = await Promise.all([
+        getAccountTransactions(path.ledgerAccountId),
+        getPathBalanceTransferRequests(wallet.entityId, path.id),
+      ]);
+      setTransactions(nextTransactions);
+      setTransferRequests(nextRequests);
+    } catch {
+      setTransactions([]);
+      setTransferRequests([]);
+    } finally {
+      setTxLoading(false);
+      setTransferRequestsLoading(false);
     }
   }
 
-  async function loadTransactions(accountId: string) {
-    setSelectedPathAccountId(accountId);
-    setTxLoading(true);
+  async function handleCreateTransferRequest(e: React.FormEvent) {
+    e.preventDefault();
+    if (!wallet) return;
+    if (
+      !transferForm.fromPathId ||
+      !transferForm.toPathId ||
+      !transferForm.amount
+    ) {
+      setStatusMsg({ text: t("balanceTransferFieldsRequired"), ok: false });
+      return;
+    }
+
+    setTransferSubmitting(true);
+    setStatusMsg(null);
     try {
-      setTransactions(await getAccountTransactions(accountId));
-    } catch {
-      setTransactions([]);
+      const request = await createBalanceTransferRequest(wallet.entityId, {
+        fromPathId: transferForm.fromPathId,
+        toPathId: transferForm.toPathId,
+        amount: Number(transferForm.amount),
+        reason: transferForm.reason || t("balanceTransferDefaultReason"),
+      });
+      setStatusMsg({ text: t("balanceTransferRequestCreated"), ok: true });
+      setShowTransferForm(false);
+      setTransferForm({
+        fromPathId: request.fromPathId,
+        toPathId: "",
+        amount: "",
+        reason: "",
+      });
+      if (selectedTransferPathId) {
+        setTransferRequests(
+          await getPathBalanceTransferRequests(wallet.entityId, selectedTransferPathId),
+        );
+      }
+    } catch (e: unknown) {
+      setStatusMsg({
+        text: e instanceof Error ? e.message : t("balanceTransferRequestFailed"),
+        ok: false,
+      });
     } finally {
-      setTxLoading(false);
+      setTransferSubmitting(false);
     }
   }
 
@@ -202,53 +256,22 @@ export default function WalletDetailPage() {
           <div className={styles.subtitle}>{wallet.currency}</div>
         </div>
         <div className={styles.headerActions}>
+          {paths.length >= 2 && (
+            <button
+              className={styles.btnTransfer}
+              onClick={() => setShowTransferForm((current) => !current)}
+              type="button"
+            >
+              {showTransferForm
+                ? t("balanceTransferCancel")
+                : t("balanceTransferNew")}
+            </button>
+          )}
           <div className={styles.balanceBadge}>
             {formatCurrency(wallet.balance ?? 0, wallet.currency)}
           </div>
-          <button 
-            className={styles.btnTransfer} 
-            onClick={() => setShowTransferForm(!showTransferForm)}
-          >
-            {t('transferBtn')}
-          </button>
         </div>
       </div>
-
-      {showTransferForm && (
-        <form onSubmit={handleTransfer} className={`${styles.relItem} ${styles.relFormItem} ${styles.transferFormWrapper}`}>
-          <h4 className={styles.relFormTitle}>{t('transferFormTitle')}</h4>
-          <div className={styles.relFormGroup}>
-            <input 
-              placeholder={t('targetWalletPlaceholder')} 
-              required
-              value={transferData.targetWalletId}
-              onChange={e => setTransferData({...transferData, targetWalletId: e.target.value})}
-              className={styles.relFormInput}
-            />
-            <input 
-              type="number" 
-              placeholder={t('amountPlaceholder')} 
-              required
-              min="1"
-              step="0.01"
-              value={transferData.amount}
-              onChange={e => setTransferData({...transferData, amount: e.target.value})}
-              className={styles.relFormInput}
-            />
-            <input 
-              placeholder={t('reasonPlaceholder')} 
-              required
-              value={transferData.reason}
-              onChange={e => setTransferData({...transferData, reason: e.target.value})}
-              className={styles.relFormInput}
-            />
-          </div>
-          <div className={styles.relFormButtons}>
-            <button type="submit" className={styles.btnApprove}>{t('confirmTransfer')}</button>
-            <button type="button" onClick={() => setShowTransferForm(false)} className={styles.btnReject}>{t('cancelBtn')}</button>
-          </div>
-        </form>
-      )}
 
       {/* ── سياق الحوكمة ── */}
       {paths.length > 0 && (
@@ -296,6 +319,114 @@ export default function WalletDetailPage() {
         </div>
       )}
 
+      {showTransferForm && (
+        <form
+          className={styles.transferForm}
+          onSubmit={handleCreateTransferRequest}
+        >
+          <div className={styles.transferFormHeader}>
+            <div>
+              <h2 className={styles.transferTitle}>
+                {t("balanceTransferTitle")}
+              </h2>
+              <p className={styles.transferHint}>
+                {t("balanceTransferHint")}
+              </p>
+            </div>
+          </div>
+          <div className={styles.transferFields}>
+            <label className={styles.transferField}>
+              <span>{t("balanceTransferFrom")}</span>
+              <select
+                value={transferForm.fromPathId}
+                onChange={(e) =>
+                  setTransferForm({
+                    ...transferForm,
+                    fromPathId: e.target.value,
+                    toPathId:
+                      transferForm.toPathId === e.target.value
+                        ? ""
+                        : transferForm.toPathId,
+                  })
+                }
+                required
+              >
+                <option value="">{t("balanceTransferChoosePath")}</option>
+                {paths.map((path) => (
+                  <option key={path.id} value={path.id}>
+                    {path.name} - {formatCurrency(path.balance, path.currency)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={styles.transferField}>
+              <span>{t("balanceTransferTo")}</span>
+              <select
+                value={transferForm.toPathId}
+                onChange={(e) =>
+                  setTransferForm({
+                    ...transferForm,
+                    toPathId: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">{t("balanceTransferChoosePath")}</option>
+                {paths
+                  .filter((path) => path.id !== transferForm.fromPathId)
+                  .map((path) => (
+                    <option key={path.id} value={path.id}>
+                      {path.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label className={styles.transferField}>
+              <span>{t("balanceTransferAmount")}</span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={transferForm.amount}
+                onChange={(e) =>
+                  setTransferForm({ ...transferForm, amount: e.target.value })
+                }
+                placeholder={t("balanceTransferAmountPlaceholder")}
+                required
+              />
+            </label>
+            <label className={styles.transferFieldWide}>
+              <span>{t("balanceTransferReason")}</span>
+              <input
+                value={transferForm.reason}
+                onChange={(e) =>
+                  setTransferForm({ ...transferForm, reason: e.target.value })
+                }
+                placeholder={t("balanceTransferReasonPlaceholder")}
+              />
+            </label>
+          </div>
+          <div className={styles.transferActions}>
+            <button
+              type="submit"
+              className={styles.btnApprove}
+              disabled={transferSubmitting}
+            >
+              {transferSubmitting
+                ? t("balanceTransferSubmitting")
+                : t("balanceTransferSubmit")}
+            </button>
+            <button
+              type="button"
+              className={styles.btnReject}
+              onClick={() => setShowTransferForm(false)}
+            >
+              {t("cancelBtn")}
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className={styles.grid}>
         {/* Paths */}
         <div className={styles.card}>
@@ -311,9 +442,7 @@ export default function WalletDetailPage() {
                   <button
                     className={`${styles.pathRow} ${selectedPathAccountId === p.ledgerAccountId ? styles.pathActive : ""}`}
                     onClick={() => {
-                      if (p.ledgerAccountId) {
-                        void loadTransactions(p.ledgerAccountId);
-                      }
+                      void loadPathActivity(p);
                     }}
                     disabled={!p.ledgerAccountId}
                   >
@@ -369,6 +498,42 @@ export default function WalletDetailPage() {
                     {tx.type === "CREDIT" ? "+" : "-"}
                     {formatCurrency(tx.amount, wallet.currency)}
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className={styles.card}>
+          <div className={styles.cardTitle}>
+            {selectedTransferPathId
+              ? t("balanceTransferRequestsTitle")
+              : t("balanceTransferChoosePathForRequests")}
+          </div>
+          {transferRequestsLoading ? (
+            <div className={styles.centered}>
+              <div className={styles.spinnerSm} />
+            </div>
+          ) : selectedTransferPathId && transferRequests.length === 0 ? (
+            <div className={styles.empty}>
+              {t("balanceTransferNoRequests")}
+            </div>
+          ) : (
+            <div className={styles.transferRequestList}>
+              {transferRequests.map((request) => (
+                <div key={request.id} className={styles.transferRequestRow}>
+                  <div>
+                    <div className={styles.transferRequestAmount}>
+                      {formatCurrency(Number(request.amount), wallet.currency)}
+                    </div>
+                    <div className={styles.transferRequestMeta}>
+                      {request.reason || t("balanceTransferNoReason")}
+                    </div>
+                  </div>
+                  <span
+                    className={`${styles.badge} ${styles[`badge${request.status}`] ?? ""}`}
+                  >
+                    {request.status}
+                  </span>
                 </div>
               ))}
             </div>

@@ -21,6 +21,7 @@ import {
   getMyMembershipApplications,
   MembershipApplication,
 } from "../../../lib/api/membership-applications";
+import type { Translator } from "../../../lib/i18n";
 import { ENTITY_TYPE_KEYS } from "../../../lib/enum-labels";
 import styles from "./dashboard.module.css";
 
@@ -39,7 +40,7 @@ function buildActionItems(
   paymentDues: PaymentDue[],
   paymentRecords: PaymentRecord[],
   membershipApplications: MembershipApplication[],
-  t: (key: string, values?: any) => string,
+  t: Translator,
 ): ActionItem[] {
   const items: ActionItem[] = [];
 

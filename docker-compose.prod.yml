@@ -36,6 +36,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── تهيئة مستخدم تطبيق غير superuser ─────────────────────
+  db-init:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_APP_USER: ${DB_APP_USER:-stgp_app}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+    volumes:
+      - ./deploy/postgres/init-app-role.sh:/init-app-role.sh:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "/init-app-role.sh"]
+
   # ── الخادم الخلفي (NestJS) ───────────────────────────────
   backend:
     build:
@@ -44,7 +59,8 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/stgp_prod?sslmode=disable
+      DATABASE_URL: postgres://${DB_APP_USER:-stgp_app}:${DB_APP_PASSWORD}@postgres:5432/stgp_prod?sslmode=disable
+      MIGRATION_DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/stgp_prod?sslmode=disable
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       PLATFORM_BOOTSTRAP_SECRET: ${PLATFORM_BOOTSTRAP_SECRET}
@@ -61,8 +77,8 @@ services:
     volumes:
       - uploads:/app/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     healthcheck:
@@ -71,7 +87,7 @@ services:
       timeout: 5s
       retries: 8
       start_period: 45s
-    command: sh -c "npx prisma migrate deploy && node dist/main"
+    command: sh -c "DATABASE_URL=$${MIGRATION_DATABASE_URL} npx prisma migrate deploy && node dist/main"
 
   # ── الواجهة الأمامية (Next.js) ───────────────────────────
   frontend:
@@ -94,7 +110,9 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "3080:80"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

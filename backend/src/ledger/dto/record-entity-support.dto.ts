@@ -4,6 +4,7 @@ import {
   IsPositive,
   IsUUID,
   IsOptional,
+  IsNotEmpty,
   MaxLength,
 } from 'class-validator';
 
@@ -22,9 +23,9 @@ export class RecordEntitySupportDto {
   @MaxLength(500)
   description: string;
 
-  @IsOptional()
   @IsUUID()
-  decisionId?: string;
+  @IsNotEmpty()
+  decisionId: string;
 
   @IsOptional()
   @IsString()

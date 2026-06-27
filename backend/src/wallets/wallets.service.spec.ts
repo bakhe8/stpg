@@ -15,18 +15,6 @@ describe('WalletsService — setWalletOwnership', () => {
     $transaction: jest.Mock;
   };
   let service: WalletsService;
-  // Wallet fixture reused across describe blocks
-  const WALLET_WITH_ACCOUNT = {
-    id: 'wallet-id',
-    entityId: 'entity-id',
-    isActive: true,
-    ledgerAccount: { balance: 1000, currency: 'SAR' },
-    ownerships: [] as {
-      entityId: string;
-      sharePercent: number;
-      entity: { id: string; name: string; type: string };
-    }[],
-  };
 
   const WALLET = { id: 'wallet-id', entityId: 'entity-id', isActive: true };
 
@@ -148,18 +136,37 @@ describe('WalletsService — getWalletOwnershipReport', () => {
       entityId: 'entity-id',
       ledgerAccount: { balance: 1000, currency: 'SAR' },
       ownerships: [
-        { entityId: 'entity-a', sharePercent: 60, entity: { id: 'entity-a', name: 'صندوق أ', type: 'FUND' } },
-        { entityId: 'entity-b', sharePercent: 40, entity: { id: 'entity-b', name: 'صندوق ب', type: 'FUND' } },
+        {
+          entityId: 'entity-a',
+          sharePercent: 60,
+          entity: { id: 'entity-a', name: 'صندوق أ', type: 'FUND' },
+        },
+        {
+          entityId: 'entity-b',
+          sharePercent: 40,
+          entity: { id: 'entity-b', name: 'صندوق ب', type: 'FUND' },
+        },
       ],
     });
 
-    const report = await service.getWalletOwnershipReport('wallet-id', 'requester-id');
+    const report = await service.getWalletOwnershipReport(
+      'wallet-id',
+      'requester-id',
+    );
 
     expect(report.balance).toBe(1000);
     expect(report.currency).toBe('SAR');
     expect(report.ownerships).toEqual([
-      expect.objectContaining({ entityId: 'entity-a', sharePercent: 60, shareAmount: 600 }),
-      expect.objectContaining({ entityId: 'entity-b', sharePercent: 40, shareAmount: 400 }),
+      expect.objectContaining({
+        entityId: 'entity-a',
+        sharePercent: 60,
+        shareAmount: 600,
+      }),
+      expect.objectContaining({
+        entityId: 'entity-b',
+        sharePercent: 40,
+        shareAmount: 400,
+      }),
     ]);
   });
 
@@ -169,12 +176,23 @@ describe('WalletsService — getWalletOwnershipReport', () => {
       entityId: 'entity-id',
       ledgerAccount: { balance: 0, currency: 'SAR' },
       ownerships: [
-        { entityId: 'entity-a', sharePercent: 70, entity: { id: 'entity-a', name: 'أ', type: 'FUND' } },
-        { entityId: 'entity-b', sharePercent: 30, entity: { id: 'entity-b', name: 'ب', type: 'FUND' } },
+        {
+          entityId: 'entity-a',
+          sharePercent: 70,
+          entity: { id: 'entity-a', name: 'أ', type: 'FUND' },
+        },
+        {
+          entityId: 'entity-b',
+          sharePercent: 30,
+          entity: { id: 'entity-b', name: 'ب', type: 'FUND' },
+        },
       ],
     });
 
-    const report = await service.getWalletOwnershipReport('wallet-id', 'requester-id');
+    const report = await service.getWalletOwnershipReport(
+      'wallet-id',
+      'requester-id',
+    );
 
     expect(report.balance).toBe(0);
     report.ownerships.forEach((o) => expect(o.shareAmount).toBe(0));
@@ -186,13 +204,28 @@ describe('WalletsService — getWalletOwnershipReport', () => {
       entityId: 'entity-id',
       ledgerAccount: { balance: 100, currency: 'SAR' },
       ownerships: [
-        { entityId: 'entity-a', sharePercent: 33.33, entity: { id: 'entity-a', name: 'أ', type: 'FUND' } },
-        { entityId: 'entity-b', sharePercent: 33.33, entity: { id: 'entity-b', name: 'ب', type: 'FUND' } },
-        { entityId: 'entity-c', sharePercent: 33.34, entity: { id: 'entity-c', name: 'ج', type: 'FUND' } },
+        {
+          entityId: 'entity-a',
+          sharePercent: 33.33,
+          entity: { id: 'entity-a', name: 'أ', type: 'FUND' },
+        },
+        {
+          entityId: 'entity-b',
+          sharePercent: 33.33,
+          entity: { id: 'entity-b', name: 'ب', type: 'FUND' },
+        },
+        {
+          entityId: 'entity-c',
+          sharePercent: 33.34,
+          entity: { id: 'entity-c', name: 'ج', type: 'FUND' },
+        },
       ],
     });
 
-    const report = await service.getWalletOwnershipReport('wallet-id', 'requester-id');
+    const report = await service.getWalletOwnershipReport(
+      'wallet-id',
+      'requester-id',
+    );
 
     report.ownerships.forEach((o) => {
       const decimals = (o.shareAmount.toString().split('.')[1] ?? '').length;
@@ -210,7 +243,10 @@ describe('WalletsService — getWalletOwnershipReport', () => {
       ownerships: [],
     });
 
-    const report = await service.getWalletOwnershipReport('wallet-id', 'requester-id');
+    const report = await service.getWalletOwnershipReport(
+      'wallet-id',
+      'requester-id',
+    );
 
     expect(report.ownerships).toHaveLength(0);
     expect(report.balance).toBe(500);

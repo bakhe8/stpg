@@ -20,7 +20,6 @@ import { CreateDependentDto } from './dto/create-dependent.dto';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('memberships')
 @ApiBearerAuth('access-token')
 @Controller('memberships')

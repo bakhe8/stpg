@@ -17,13 +17,17 @@ import {
   cancelDisbursementRequest,
   DisbursementRequest,
 } from "../../../lib/api/disbursement-requests";
+import type { Translator } from "../../../lib/i18n";
 import styles from "./disbursement-requests.module.css";
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
 import RequestTimeline, { TimelineStep } from "../../../components/shared/RequestTimeline";
 import VisibilityNotice from "../../../components/shared/VisibilityNotice";
 import ConfirmActionDialog from "../../../components/shared/ConfirmActionDialog";
 
-function buildDisbursementTimeline(r: DisbursementRequest, t: any): TimelineStep[] {
+function buildDisbursementTimeline(
+  r: DisbursementRequest,
+  t: Translator,
+): TimelineStep[] {
   const submitted: TimelineStep = {
     label: t("timelineSubmitted"),
     at: r.requestedAt,

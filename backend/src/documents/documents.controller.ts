@@ -16,7 +16,6 @@ import type { Person } from '@prisma/client';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('documents')
 @ApiBearerAuth('access-token')

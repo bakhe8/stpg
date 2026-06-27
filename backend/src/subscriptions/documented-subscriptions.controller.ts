@@ -15,7 +15,6 @@ import { SubscribeDto } from './dto/subscribe.dto';
 import { SubscriptionsService } from './subscriptions.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('subscriptions')
 @ApiBearerAuth('access-token')
 @Controller()

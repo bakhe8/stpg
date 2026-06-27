@@ -16,7 +16,6 @@ import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import { BeneficiariesService } from './beneficiaries.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('beneficiaries')
 @ApiBearerAuth('access-token')
 @Controller('beneficiaries')

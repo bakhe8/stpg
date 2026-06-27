@@ -1,22 +1,57 @@
-import { Controller, Get, Post, Param, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { SupportService } from './support.service';
+import { JwtGuard } from '../identity/auth/jwt.guard';
+import { PlatformGuard } from '../identity/auth/platform.guard';
+import { AllowPlatform } from '../identity/auth/decorators/allow-platform.decorator';
+import { CurrentPlatformUser } from '../identity/auth/decorators/current-platform-user.decorator';
+import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
+import { CreateSupportSessionDto } from './dto/support-session.dto';
 
 @Controller('support')
 export class SupportController {
   constructor(private readonly supportService: SupportService) {}
 
   @Get('sessions/:entityId')
-  async getSessions(@Param('entityId') entityId: string) {
-    return this.supportService.getActiveSessions(entityId);
+  @AllowPlatform()
+  @UseGuards(JwtGuard)
+  async getSessions(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentUser() user: { id: string; userType: 'tenant' | 'platform' },
+  ) {
+    return this.supportService.getActiveSessions(entityId, user);
   }
 
-  @Post('sessions')
-  async createSession(@Body() dto: { entityId: string; platformAccountId: string; scope: string; hours: number }) {
-    return this.supportService.requestSupportAccess(dto.entityId, dto.platformAccountId, dto.scope, dto.hours);
+  @Post('entities/:entityId/sessions')
+  @AllowPlatform()
+  @UseGuards(JwtGuard, PlatformGuard)
+  async createSession(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @CurrentPlatformUser() operator: { id: string },
+    @Body() dto: CreateSupportSessionDto,
+  ) {
+    return this.supportService.requestSupportAccess(
+      entityId,
+      operator.id,
+      dto.scope,
+      dto.hours,
+    );
   }
 
-  @Post('sessions/:id/revoke')
-  async revokeSession(@Param('id') sessionId: string, @Body() dto: { entityId: string }) {
-    return this.supportService.revokeSupportAccess(sessionId, dto.entityId);
+  @Post('entities/:entityId/sessions/:id/revoke')
+  @AllowPlatform()
+  @UseGuards(JwtGuard, PlatformGuard)
+  async revokeSession(
+    @Param('entityId', ParseUUIDPipe) entityId: string,
+    @Param('id', ParseUUIDPipe) sessionId: string,
+  ) {
+    return this.supportService.revokeSupportAccess(sessionId, entityId);
   }
 }

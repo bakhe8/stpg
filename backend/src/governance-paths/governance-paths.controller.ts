@@ -21,7 +21,6 @@ import { ClosePathDto } from './dto/close-path.dto';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @ApiTags('governance-paths')
 @ApiBearerAuth('access-token')
 @Controller('paths')

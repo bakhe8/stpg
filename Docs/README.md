@@ -67,6 +67,14 @@
 
 ---
 
+### 🚦 [08_Production_Readiness](08_Production_Readiness/) — جاهزية الإنتاج
+| الوثيقة | الوصف |
+|---|---|
+| [Deployment_Decisions.md](08_Production_Readiness/Deployment_Decisions.md) | قرار الاستضافة والتشغيل والنسخ الاحتياطي للإنتاج |
+| [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md) | تقرير تنفيذ تدقيق منطق العمل وإغلاق المخاطر الحرجة والمتبقي التشغيلي قبل الإنتاج |
+
+---
+
 ## الاستاك التقني
 
 | الطبقة | التقنية |
@@ -83,19 +91,18 @@
 
 ---
 
-## حالة التنفيذ (21 يونيو 2026)
+## حالة التنفيذ الحالية (27 يونيو 2026)
 
 | المكوّن | الحالة |
 |---|---|
-| Backend — 23 وحدة | ✅ مكتمل + TypeScript صفر أخطاء |
-| Frontend — 22 صفحة | ✅ مكتمل + Build نظيف |
-| Prisma Schema + Migrations | ✅ محدّث |
-| Docker Images | ✅ Backend + Frontend |
-| Unit Tests | ✅ 15 ملف spec |
-| E2E Tests | ✅ 1 ملف |
+| Backend | Build + lint + unit/security tests ناجحة |
+| Frontend | Build + lint ناجحان |
+| Prisma Schema + Migrations | محدثة، مع migration لتشديد RLS |
+| Docker Images | تم بناؤها وتشغيل smoke test محلي |
+| Security Regression Tests | تغطي `/transfers`، support، ledger، balance transfer، OAuth، payments |
+| Production Readiness | كود المخاطر مغلق؛ يلزم أسرار production واختبارات provider live قبل الإطلاق |
 
-> للتغطية التفصيلية: [IMPLEMENTATION_COVERAGE_PHASES_1_3.md](../IMPLEMENTATION_COVERAGE_PHASES_1_3.md)
-> للقرارات التقنية المفتوحة: [OPEN_DECISIONS.md](../OPEN_DECISIONS.md)
+> للتفصيل الحالي: [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md)
 
 ---
 

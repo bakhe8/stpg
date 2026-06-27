@@ -8,7 +8,9 @@ import {
 @Injectable()
 export class PlatformGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: { userType?: string } }>();
     const user = request.user;
 
     if (!user || user.userType !== 'platform') {

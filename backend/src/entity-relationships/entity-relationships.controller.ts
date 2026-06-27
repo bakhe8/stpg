@@ -20,7 +20,6 @@ import { CreateEntityRelationshipDto } from './dto/create-entity-relationship.dt
 import { UpdateEntityRelationshipDto } from './dto/update-entity-relationship.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-
 @UseGuards(JwtGuard)
 @ApiTags('entity-relationships')
 @ApiBearerAuth('access-token')

@@ -2,12 +2,13 @@
 
 import React from "react";
 import styles from "../../app/(main)/rules/rules.module.css";
+import type { Translator } from "../../lib/i18n";
 
 interface RuleDesignerProps {
   ruleType: string;
   ruleData: Record<string, unknown>;
   onChange: (data: Record<string, unknown>) => void;
-  t: (key: string, values?: any) => string;
+  t: Translator;
 }
 
 export function RuleDesigner({ ruleType, ruleData, onChange, t }: RuleDesignerProps) {

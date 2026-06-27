@@ -26,6 +26,7 @@ import {
 } from './dto/create-sub-entity.dto';
 import { toJsonValue } from '../prisma/json-value';
 import { NotificationsService } from '../notifications/notifications.service';
+import { TenantContextService } from '../core/tenant-context/tenant-context.service';
 
 @Injectable()
 export class EntitiesService {
@@ -41,6 +42,7 @@ export class EntitiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async createEntity(creatorId: string, dto: CreateEntityDto) {
@@ -180,11 +182,13 @@ export class EntitiesService {
       const leftMembership = left.memberships[0];
       const rightMembership = right.memberships[0];
       const leftPriority =
-        this.membershipRolePriority[leftMembership?.role ?? MemberRole.MEMBER] ??
-        Number.MAX_SAFE_INTEGER;
+        this.membershipRolePriority[
+          leftMembership?.role ?? MemberRole.MEMBER
+        ] ?? Number.MAX_SAFE_INTEGER;
       const rightPriority =
-        this.membershipRolePriority[rightMembership?.role ?? MemberRole.MEMBER] ??
-        Number.MAX_SAFE_INTEGER;
+        this.membershipRolePriority[
+          rightMembership?.role ?? MemberRole.MEMBER
+        ] ?? Number.MAX_SAFE_INTEGER;
 
       return (
         leftPriority - rightPriority ||
@@ -766,6 +770,12 @@ export class EntitiesService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async archiveExpiredCampaigns() {
+    return this.tenantContext.runInternal(() =>
+      this.archiveExpiredCampaignsInternal(),
+    );
+  }
+
+  private async archiveExpiredCampaignsInternal() {
     const now = new Date();
     const expired = await this.prisma.entity.findMany({
       where: { isCampaign: true, isActive: true, campaignEndsAt: { lte: now } },
@@ -1045,7 +1055,10 @@ export class EntitiesService {
         },
       }),
       this.prisma.dispute.count({
-        where: { entityId, status: { in: ['OPEN', 'UNDER_MEDIATION', 'ESCALATED'] } },
+        where: {
+          entityId,
+          status: { in: ['OPEN', 'UNDER_MEDIATION', 'ESCALATED'] },
+        },
       }),
       this.prisma.wallet.findMany({
         where: { entityId },
@@ -1064,7 +1077,10 @@ export class EntitiesService {
           key: 'no_open_disbursements',
           label: 'لا توجد طلبات صرف مفتوحة',
           passed: openDisbursements === 0,
-          detail: openDisbursements > 0 ? `${openDisbursements} طلب صرف قيد المراجعة` : null,
+          detail:
+            openDisbursements > 0
+              ? `${openDisbursements} طلب صرف قيد المراجعة`
+              : null,
         },
         {
           key: 'no_open_disputes',
@@ -1076,22 +1092,34 @@ export class EntitiesService {
           key: 'zero_balance',
           label: 'رصيد المحافظ صفر أو محوّل',
           passed: totalBalance <= 0,
-          detail: totalBalance > 0 ? `يوجد رصيد غير محوّل: ${totalBalance.toLocaleString('ar-SA')} ر.س` : null,
+          detail:
+            totalBalance > 0
+              ? `يوجد رصيد غير محوّل: ${totalBalance.toLocaleString('ar-SA')} ر.س`
+              : null,
         },
       ],
-      canClose: openDisbursements === 0 && openDisputes === 0 && totalBalance <= 0,
+      canClose:
+        openDisbursements === 0 && openDisputes === 0 && totalBalance <= 0,
     };
   }
 
   async requestClosure(entityId: string, requesterId: string, reason: string) {
     const membership = await this.prisma.membership.findFirst({
-      where: { entityId, personId: requesterId, isActive: true, role: { in: ['FOUNDER', 'ADMIN'] } },
+      where: {
+        entityId,
+        personId: requesterId,
+        isActive: true,
+        role: { in: ['FOUNDER', 'ADMIN'] },
+      },
     });
-    if (!membership) throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً للكيان');
+    if (!membership)
+      throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً للكيان');
 
     const checklist = await this.getClosureChecklist(entityId, requesterId);
     if (!checklist.canClose) {
-      throw new BadRequestException('لا يمكن طلب الإغلاق قبل استيفاء شروط القائمة');
+      throw new BadRequestException(
+        'لا يمكن طلب الإغلاق قبل استيفاء شروط القائمة',
+      );
     }
 
     return this.prisma.entity.update({
@@ -1101,7 +1129,12 @@ export class EntitiesService {
         closureRequestedAt: new Date(),
         closureReason: reason,
       },
-      select: { id: true, name: true, closureStatus: true, closureRequestedAt: true },
+      select: {
+        id: true,
+        name: true,
+        closureStatus: true,
+        closureRequestedAt: true,
+      },
     });
   }
 
