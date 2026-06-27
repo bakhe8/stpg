@@ -24,11 +24,12 @@ export class SuspendedEntityGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     return this.tenantContext.runInternal(async () => {
       const request = context.switchToHttp().getRequest<GuardRequest>();
-      if (request.originalUrl?.startsWith('/platform/')) return true;
+      const path = this.requestPath(request);
+      if (path.startsWith('/platform/')) return true;
       // تصدير البيانات مضمون حتى حال التعليق (حق لا يُسلب)
-      if (request.originalUrl?.split('?')[0].endsWith('/export')) return true;
+      if (path.endsWith('/export')) return true;
       // الاعتراض على التعليق يجب أن يُقبل دائماً
-      if (request.originalUrl?.includes('/platform-appeal')) return true;
+      if (path.includes('/platform-appeal')) return true;
 
       const entityId = await this.resolveEntityId(request);
       if (!entityId) return true;
@@ -87,7 +88,7 @@ export class SuspendedEntityGuard implements CanActivate {
     const id = params.id;
     if (!id) return null;
 
-    const path = request.originalUrl?.split('?')[0] ?? '';
+    const path = this.requestPath(request);
     if (path.includes('/payment-records/')) {
       const record = await this.prisma.paymentRecord.findUnique({
         where: { id },
@@ -248,6 +249,11 @@ export class SuspendedEntityGuard implements CanActivate {
       default:
         return null;
     }
+  }
+
+  private requestPath(request: GuardRequest): string {
+    const path = request.originalUrl?.split('?')[0] ?? '';
+    return path.startsWith('/api/') ? path.slice('/api'.length) : path;
   }
 
   private async entityFromWallet(walletId: string) {

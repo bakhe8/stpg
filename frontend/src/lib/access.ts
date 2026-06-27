@@ -20,6 +20,7 @@ export const OVERSIGHT_ROLES: MemberRole[] = [
   "TREASURER",
   "AUDITOR",
 ];
+export const AUDITOR_ROLES: MemberRole[] = ["FOUNDER", "ADMIN", "AUDITOR"];
 export const COMMITTEE_ROLES: MemberRole[] = [
   "FOUNDER",
   "ADMIN",

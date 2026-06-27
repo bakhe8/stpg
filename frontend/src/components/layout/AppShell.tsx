@@ -14,6 +14,7 @@ import {
   MemberRole,
   OVERSIGHT_ROLES,
   ADMIN_ROLES,
+  AUDITOR_ROLES,
   hasAnyRole,
 } from "../../lib/access";
 import { setupPushNotifications, unsubscribePushNotifications } from "../../lib/push";
@@ -114,7 +115,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           href: "/auditor",
           label: t("auditor"),
           icon: "⌕",
-          roles: OVERSIGHT_ROLES,
+          roles: AUDITOR_ROLES,
         },
       ],
     },

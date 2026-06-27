@@ -6,8 +6,8 @@ import styles from "./auditor.module.css";
 import { getEntities, Entity } from "../../../lib/api/entities";
 import VisibilityNotice from "../../../components/shared/VisibilityNotice";
 import {
+  AUDITOR_ROLES,
   filterEntitiesByRoles,
-  OVERSIGHT_ROLES,
 } from "../../../lib/access";
 import {
   getAuditorOperations,
@@ -98,7 +98,7 @@ export default function AuditorPage() {
     async function loadEntities() {
       try {
         const data = await getEntities();
-        const allowedEntities = filterEntitiesByRoles(data, OVERSIGHT_ROLES);
+        const allowedEntities = filterEntitiesByRoles(data, AUDITOR_ROLES);
         setEntities(allowedEntities);
         if (allowedEntities.length > 0) {
           setSelectedEntityId(allowedEntities[0].id);

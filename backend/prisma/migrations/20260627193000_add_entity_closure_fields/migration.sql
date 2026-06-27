@@ -1,0 +1,4 @@
+ALTER TABLE "entities"
+  ADD COLUMN IF NOT EXISTS "closureStatus" TEXT,
+  ADD COLUMN IF NOT EXISTS "closureRequestedAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "closureReason" TEXT;

@@ -21,6 +21,9 @@
 8. تم جعل entity support يتطلب قراراً واتجاهاً صحيحاً لعلاقة الدعم المالي.
 9. تم تنظيف lint للواجهة والخلفية، وإضافة اختبارات regression و E2E للمخاطر الأمنية.
 10. تم تحديث Docker/Caddy/TLS وإضافة smoke test محلي عبر Docker.
+11. تم تشغيل تجربة حسابات seed حسب الأدوار، وإغلاق تعارضين ظهرا أثناء الاختبار:
+    - `SuspendedEntityGuard` كان لا يطبق حالة `READ_ONLY/SUSPENDED` على مسارات تبدأ بـ `/api`.
+    - الواجهة كانت تعرض صفحة auditor لأمين الصندوق رغم أن API auditor يرفضه.
 
 **القرار النهائي:** من ناحية الكود، بنود التقرير مغلقة. من ناحية الإنتاج الفعلي، لا يزال يلزم إدخال أسرار الإنتاج وتشغيل اختبارات live مع Stripe/Moyasar و OAuth/DNS/TLS قبل فتح النظام للعامة.
 
@@ -48,6 +51,7 @@
 | P3-04 | docs status | منجز | هذا التقرير و README محدثان |
 | P3-05 | TLS/Caddy | منجز إعدادياً | Caddy domain + فتح 80/443 |
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
+| P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 
 ---
 
@@ -269,6 +273,29 @@
 2. `docker-compose.prod.yml` يفتح `80:80`, `443:443`, و `443:443/udp`.
 3. `NEXT_PUBLIC_API_URL` و `FRONTEND_PUBLIC_URL` موجودان في `.env.production.example`.
 
+### BL-14 - تجربة حسابات الاختبار حسب الصلاحيات
+
+**الهدف:** التحقق من أن الواجهات والمسارات تتغير حسب الدور ونوع الكيان وحالة الاشتراك والمنصة.
+**الحالة:** منجز.
+
+**ما ظهر أثناء الاختبار وتم إصلاحه:**
+
+1. `SuspendedEntityGuard` كان يعتمد على أول جزء من `originalUrl` لتحديد المورد. مع `app.setGlobalPrefix('api')` أصبح أول جزء هو `api` لا `entities` أو `wallets`، فكانت محاولة كتابة على كيان `READ_ONLY` تصل إلى DTO validation وتعود 400 بدلاً من 403. تم تطبيع المسار بإزالة `/api` قبل resolution، وأضيف اختبار regression.
+2. `OVERSIGHT_ROLES` في الواجهة كان يشمل `TREASURER` ويستخدم أيضاً لصفحة auditor. هذا أظهر رابط auditor لناصر، بينما backend auditor يسمح فقط لـ `AUDITOR`, `ADMIN`, `FOUNDER`. تم إضافة `AUDITOR_ROLES` واستخدامه في AppShell وصفحة auditor، مع بقاء treasurer في analytics/finance.
+3. بيانات خالد ليست عضوية معلقة؛ عضويته نشطة، لكن لديه subscription بحالة `SUSPENDED` في مسار `مجلس طوارئ الأسرة`. لذلك يظهر له تنبيه الاشتراك المعلق في Dashboard كما هو متوقع.
+
+**نتيجة الاختبار:**
+
+1. دخول المطورين عبر `/login` نجح لحساب أحمد الهاشمي.
+2. كل الحسابات الـ 11 نجحت في `/dashboard` و `/entities`.
+3. API role smoke: 30/30.
+4. Playwright role smoke:
+   - 11/11 nav checks حسب الدور.
+   - لا توجد console errors.
+   - لا توجد failed API responses غير متوقعة.
+   - desktop screenshots للحالات المميزة.
+   - mobile smoke لأحمد وفيصل.
+
 ---
 
 ## 4. الواجهة بعد إغلاق التحويل المباشر
@@ -294,6 +321,9 @@ backend npm run test:e2e                                            PASS - 43 te
 backend npx prisma validate                                         PASS
 frontend npm run lint                                               PASS
 frontend npm run build                                              PASS
+backend npm test -- --runInBand common/guards/suspended-entity.guard.spec.ts PASS - 2 tests
+Seed API role smoke                                                  PASS - 30/30
+Seed Playwright role smoke                                           PASS - 11/11 nav, 0 console errors, 0 failed API
 docker compose config --quiet                                       PASS
 docker compose -f docker-compose.prod.yml config --quiet             PASS
 docker compose up -d --build                                        PASS
