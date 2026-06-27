@@ -12,6 +12,14 @@ type LoginMode = "login" | "dev";
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === "true";
 
 function completeLogin(response: AuthResponse) {
+  if (
+    !response?.accessToken ||
+    !response.refreshToken ||
+    !response.person?.id
+  ) {
+    throw new Error("تعذر تسجيل الدخول. الرجاء التحقق من البيانات والمحاولة مرة أخرى.");
+  }
+
   localStorage.setItem("accessToken", response.accessToken);
   localStorage.setItem("refreshToken", response.refreshToken);
   localStorage.setItem("personId", response.person.id);
