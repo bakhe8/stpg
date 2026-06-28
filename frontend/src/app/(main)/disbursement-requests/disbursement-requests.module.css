@@ -156,6 +156,10 @@
 .btnSuccess,
 .btnDanger,
 .btnGhost {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 16px;
   border-radius: 9px;
   cursor: pointer;

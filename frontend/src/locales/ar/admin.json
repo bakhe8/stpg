@@ -209,7 +209,14 @@
     "nextStep3Desc": "شروط الدفع، السقوف، والقواعد المالية",
     "setupBtnInline": "إعداد",
     "appSubmitted": "تم تقديم الطلب",
-    "appReviewed": "تمت المراجعة"
+    "appReviewed": "تمت المراجعة",
+    "membersPage": {
+      "statusApproved": "مقبول",
+      "statusRejected": "مرفوض",
+      "statusCancelled": "ملغي",
+      "timelineDecision": "القرار",
+      "requestRejected": "تم رفض الطلب"
+    }
   },
   "finance": {
     "title": "المالية والحسابات",

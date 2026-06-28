@@ -139,14 +139,46 @@ export class SearchService implements OnModuleInit {
       });
 
       const body: unknown = result.body;
-      return this.extractHits<EntitySearchDocument>(body).map((hit) => ({
+      const entities = this.extractHits<EntitySearchDocument>(body).map((hit) => ({
         id: hit._id,
         ...hit._source,
       }));
+      if (entities.length > 0) return entities;
+
+      return this.searchEntitiesFromDatabase(query, allowedEntityIds);
     } catch (err) {
       this.logger.error(`Entity search failed for query: ${query}`, err);
-      return [];
+      return this.searchEntitiesFromDatabase(query, allowedEntityIds);
     }
+  }
+
+  private async searchEntitiesFromDatabase(query: string, entityIds: string[]) {
+    const entities = await this.prisma.entity.findMany({
+      where: {
+        id: { in: entityIds },
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        platformStatus: true,
+        createdAt: true,
+      },
+      orderBy: { name: 'asc' },
+      take: 10,
+    });
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      name: entity.name,
+      type: entity.type,
+      status: entity.platformStatus,
+      createdAt: entity.createdAt,
+    }));
   }
 
   private extractHits<TDocument extends Record<string, unknown>>(

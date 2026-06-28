@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { fetchApi } from "../../lib/api";
+import { ENTITY_TYPE_KEYS } from "../../lib/enum-labels";
 import styles from "./GlobalSearch.module.css";
 
 interface SearchResult {
@@ -15,8 +16,43 @@ interface SearchResult {
   score: number;
 }
 
+type SearchEntityResult = {
+  id?: string;
+  name?: string;
+  type?: string;
+  status?: string | null;
+  platformStatus?: string | null;
+  score?: number;
+};
+
+type GroupedSearchResponse = {
+  entities?: SearchEntityResult[];
+};
+
+function normalizeSearchResponse(response: unknown): SearchResult[] {
+  if (Array.isArray(response)) return response as SearchResult[];
+
+  const grouped = response as GroupedSearchResponse;
+  return (grouped.entities ?? [])
+    .filter((entity): entity is SearchEntityResult & { id: string; name: string } =>
+      Boolean(entity.id && entity.name),
+    )
+    .map((entity) => ({
+      id: entity.id,
+      type: "Entity",
+      title: entity.name,
+      subtitle: [entity.type, entity.platformStatus ?? entity.status]
+        .filter(Boolean)
+        .join(" · "),
+      url: `/entities/${entity.id}`,
+      score: entity.score ?? 1,
+    }));
+}
+
 export default function GlobalSearch() {
   const t = useTranslations("search");
+  const tEnums = useTranslations("enums");
+  const tStatus = useTranslations("status");
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -40,8 +76,7 @@ export default function GlobalSearch() {
         setLoading(true);
         fetchApi(`/search?q=${encodeURIComponent(query)}`)
           .then((res) => {
-            const results = res as SearchResult[];
-            setResults(results);
+            setResults(normalizeSearchResponse(res));
             setIsOpen(true);
           })
           .catch(() => setResults([]))
@@ -61,6 +96,29 @@ export default function GlobalSearch() {
     router.push(url);
   };
 
+  function translateOrFallback(
+    translator: ReturnType<typeof useTranslations>,
+    key: string | undefined,
+    fallback: string,
+  ) {
+    if (!key) return fallback;
+    try {
+      return translator(key as Parameters<typeof translator>[0]);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function formatResultSubtitle(result: SearchResult) {
+    if (!result.subtitle || result.type !== "Entity") return result.subtitle;
+    const [rawType, rawStatus] = result.subtitle.split(" · ");
+    const typeKey = ENTITY_TYPE_KEYS[rawType];
+    const statusKey = rawStatus?.toLowerCase();
+    const typeLabel = translateOrFallback(tEnums, typeKey, rawType);
+    const statusLabel = translateOrFallback(tStatus, statusKey, rawStatus ?? "");
+    return [typeLabel, statusLabel].filter(Boolean).join(" · ");
+  }
+
   return (
     <div className={styles.searchWrapper} ref={wrapperRef}>
       <div className={styles.searchInputWrapper}>
@@ -77,26 +135,34 @@ export default function GlobalSearch() {
         {loading && <span className={styles.loadingSpinner}></span>}
       </div>
 
-      {isOpen && results.length > 0 && (
+      {isOpen && (
         <div className={styles.resultsDropdown}>
-          {results.map((result) => (
-            <div
-              key={`${result.type}-${result.id}`}
-              className={styles.resultItem}
-              onClick={() => handleResultClick(result.url)}
-            >
-              <div className={styles.resultIcon}>
-                {result.type === "Entity" ? "⬡"
-                  : result.type === "Wallet" ? "◫"
-                  : result.type === "Decision" ? "✓"
-                  : result.type === "Membership" ? "👤"
-                  : "📄"}
-              </div>
-              <div className={styles.resultContent}>
-                <div className={styles.resultTitle}>{result.title}</div>
-                {result.subtitle && <div className={styles.resultSubtitle}>{result.subtitle}</div>}
-              </div>
-            </div>
+          {results.length === 0 && !loading ? (
+            <div className={styles.emptyResult}>{t("noResults")}</div>
+          ) : results.map((result) => (
+            (() => {
+              const subtitle = formatResultSubtitle(result);
+              return (
+                <button
+                  type="button"
+                  key={`${result.type}-${result.id}`}
+                  className={styles.resultItem}
+                  onClick={() => handleResultClick(result.url)}
+                >
+                  <div className={styles.resultIcon}>
+                    {result.type === "Entity" ? "⬡"
+                      : result.type === "Wallet" ? "◫"
+                      : result.type === "Decision" ? "✓"
+                      : result.type === "Membership" ? "👤"
+                      : "📄"}
+                  </div>
+                  <div className={styles.resultContent}>
+                    <div className={styles.resultTitle}>{result.title}</div>
+                    {subtitle && <div className={styles.resultSubtitle}>{subtitle}</div>}
+                  </div>
+                </button>
+              );
+            })()
           ))}
         </div>
       )}

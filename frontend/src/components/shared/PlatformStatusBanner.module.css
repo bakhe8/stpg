@@ -85,6 +85,10 @@
 
 .exportBtn,
 .logBtn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 0.82rem;
@@ -104,6 +108,10 @@
 }
 
 .appealBtn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 0.82rem;
@@ -151,6 +159,10 @@
 
 .appealSubmitBtn {
   align-self: flex-start;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 16px;
   border-radius: 6px;
   font-size: 0.82rem;

@@ -90,7 +90,8 @@
     "loginDescription": "سجل الدخول إلى حسابك في منصة CollectiveTrustOS لإدارة المحافظ والكيانات الخاصة بك"
   },
   "search": {
-    "placeholder": "بحث (عن كيان، محفظة، قرار، ...)"
+    "placeholder": "بحث (عن كيان، محفظة، قرار، ...)",
+    "noResults": "لا توجد نتائج مطابقة"
   },
   "status": {
     "active": "نشط",

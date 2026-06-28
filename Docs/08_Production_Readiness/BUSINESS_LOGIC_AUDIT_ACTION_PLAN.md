@@ -333,6 +333,16 @@
 6. تم تحسين قراءة عنوان الشريط العلوي على mobile.
 7. تم تكبير أهداف اللمس الصغيرة في AppShell وروابط dashboard/login.
 8. تم تهدئة الزخرفة داخل بطاقة الدخول حتى لا تزاحم العنوان.
+9. تم تنفيذ جولة UX أعمق على مسارات تشغيلية فعلية: إنشاء كيان، الدفع/إثبات السداد، مركز المراجعات، صفحة أعضاء الكيان، طلبات الصرف، البحث العام، وحالات العضو المعلّق ومتعدد الكيانات.
+10. تم إصلاح صفحة إنشاء الكيان على الجوال؛ كانت خطوة "قبل أن تبدأ" تجعل زر البدء ملاصقاً لشريط التنقل السفلي، فأضيفت مساحة أمان وتخفيض كثافة البطاقة على الشاشات الصغيرة.
+11. تم تكبير روابط التنبيه في dashboard مثل `عرض الاشتراكات` و`الاشتراكات` من روابط نصية قصيرة إلى أهداف لمس بارتفاع 40px.
+12. تم تكبير أزرار بنر حالة المنصة، وأزرار صفحة أعضاء الكيان، وأزرار طلبات الصرف إلى أهداف لمس لا تقل عن 40-44px.
+13. تم إصلاح خطأ ترجمة مفقود في صفحة أعضاء الكيان: `entities.membersPage.timelineDecision`.
+14. تم إصلاح نص عربي في صفحة المالية كان يحتوي حرفاً غير عربي داخل رسالة الدفع الإلكتروني.
+15. تم إصلاح البحث العام: الواجهة كانت تتوقع مصفوفة بينما API يرجع كائناً مجمعاً `{ entities }`، فتم تطبيع الاستجابة وإضافة حالة `لا توجد نتائج مطابقة`.
+16. تم جعل نتائج البحث أزراراً قابلة للوصول بالكيبورد بدلاً من `div` قابلة للنقر فقط.
+17. تم إضافة fallback في backend search إلى Prisma عند فراغ/تعطل OpenSearch، مع بقاء فلترة العضوية النشطة قبل البحث.
+18. تم ترجمة نتيجة البحث من أكواد مثل `FAMILY · ACTIVE` إلى نص واجهة مثل `عائلة · نشط`.
 
 ---
 
@@ -384,6 +394,11 @@ OpenSearch cluster health                                             PASS - yel
 Temporal cluster health                                               PASS - SERVING
 UX Playwright rendered audit                                           PASS - 22 states, desktop/mobile, 0 failed API
 UX final spot check after fixes                                        PASS - no console errors, no overlay, no overflow, no small targets
+UX deep route audit                                                     PASS - 44 states then 7 focused post-fix routes, desktop/mobile
+UX interaction audit                                                    PASS - wizard, portal/payment, review center, members, disbursement, search
+Search API fallback                                                     PASS - `الهاشمي` returns allowed seeded entity without OpenSearch reindex
+Search UI translated result                                             PASS - `صندوق عائلة الهاشمي` shows `عائلة · نشط`
+Git Bash production-smoke.sh local stack                                PASS - frontend, health, docs-json, OpenSearch, Temporal
 ```
 
 ---

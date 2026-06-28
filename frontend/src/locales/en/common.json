@@ -90,7 +90,8 @@
     "loginDescription": "Sign in to your CollectiveTrustOS account to manage wallets and entities"
   },
   "search": {
-    "placeholder": "Search (entity, wallet, decision, ...)"
+    "placeholder": "Search (entity, wallet, decision, ...)",
+    "noResults": "No matching results"
   },
   "status": {
     "active": "Active",

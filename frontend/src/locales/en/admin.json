@@ -201,7 +201,14 @@
     "nextStep3Desc": "Payment terms, caps, and financial rules",
     "setupBtnInline": "Set Up ←",
     "appSubmitted": "Application submitted",
-    "appReviewed": "Review complete"
+    "appReviewed": "Review complete",
+    "membersPage": {
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "statusCancelled": "Cancelled",
+      "timelineDecision": "Decision",
+      "requestRejected": "Request rejected"
+    }
   },
   "finance": {
     "title": "Finance & Accounts",

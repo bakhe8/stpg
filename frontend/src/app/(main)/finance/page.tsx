@@ -500,7 +500,7 @@ function FinanceContent() {
                             onClick={async () => {
                                try {
                                  const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'STRIPE' }) });
-                                 alert(`تم تحويلك افتراضياً לבوابة الدفع (Stripe). الجلسة: ${res.id}`);
+                                 alert(`تم تحويلك افتراضياً لبوابة الدفع (Stripe). الجلسة: ${res.id}`);
                                  setTimeout(() => void loadFinanceData(selectedId), 2000);
                                } catch(e) {
                                  alert(`Error: ${e instanceof Error ? e.message : 'Failed'}`);
@@ -515,7 +515,7 @@ function FinanceContent() {
                             onClick={async () => {
                                try {
                                  const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'MOYASAR' }) });
-                                 alert(`تم تحويلك افتراضياً לבوابة الدفع (Moyasar). الجلسة: ${res.id}`);
+                                 alert(`تم تحويلك افتراضياً لبوابة الدفع (Moyasar). الجلسة: ${res.id}`);
                                  setTimeout(() => void loadFinanceData(selectedId), 2000);
                                } catch(e) {
                                  alert(`Error: ${e instanceof Error ? e.message : 'Failed'}`);

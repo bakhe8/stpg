@@ -397,7 +397,7 @@
   }
 
   .content {
-    padding: 20px 16px calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: 20px 16px calc(112px + env(safe-area-inset-bottom, 0px));
   }
 
   .overlay {
