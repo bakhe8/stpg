@@ -34,7 +34,7 @@ Backup Schedule: Weekly
 يتم تشغيل الخدمات التالية على نفس السيرفر باستخدام Docker Compose:
 
 ```text
-Caddy
+Caddy كوكيل داخلي لتطبيق STGP
 Frontend - Next.js
 Backend - NestJS
 Postgres
@@ -45,7 +45,10 @@ OpenSearch
 Temporal Workflow Engine
 ```
 
-ويتم اعتماد Caddy كخادم وكيل لإدارة الوصول الخارجي وشهادات HTTPS.
+على سيرفر `wbgl.tech` الحالي توجد أكثر من خدمة. لذلك يكون Nginx على المضيف هو
+بوابة 80/443 العامة ومدير شهادات HTTPS، ثم يمرر `stpg.wbgl.tech` إلى Caddy
+الداخلي الخاص بـ STGP على `127.0.0.1:3080`. يبقى Caddy مسؤولاً عن توجيه
+`/api` و`/health` إلى الباك إند وباقي المسارات إلى الواجهة.
 
 ## رابعاً: قرار التخزين
 
@@ -108,7 +111,9 @@ Temporal Workflow Engine
 3001  Backend internal
 ```
 
-ويكون الوصول إلى النظام من الخارج عبر Caddy فقط.
+ويكون الوصول إلى النظام من الخارج عبر Nginx العام، ثم Caddy الداخلي الخاص
+بالـ STGP. لا تُفتح Postgres أو Redis أو OpenSearch أو Temporal أو backend
+مباشرة على الإنترنت.
 
 ## سابعاً: قرار Docker
 

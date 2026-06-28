@@ -87,7 +87,8 @@ docker compose -f docker-compose.prod.yml ps
 # ── 7. اختبار Health Check ─────────────────────────────────
 echo ""
 echo "▶ اختبار الاتصال بالباكند..."
-if curl -sf http://localhost:3001/health > /dev/null 2>&1; then
+if curl -sf http://localhost:3001/health > /dev/null 2>&1 || \
+  docker compose -f docker-compose.prod.yml exec -T backend wget -qO- http://localhost:3001/health >/dev/null 2>&1; then
   echo "✓ الباكند يعمل"
 else
   echo "⚠ الباكند لم يستجب بعد — قد يحتاج وقتاً أطول"

@@ -77,7 +77,16 @@ printf 'BASE_URL=%s\n' "${BASE_URL}"
 
 check_url "frontend public page" "${BASE_URL}/"
 check_url "public backend health via Caddy" "${BASE_URL}/health"
-check_url "internal backend health" "${INTERNAL_BACKEND_URL}/health"
+if curl -fsS --max-time 20 "${INTERNAL_BACKEND_URL}/health" >/dev/null; then
+  pass "internal backend health"
+elif command -v docker >/dev/null && [ -f "${COMPOSE_DIR}/docker-compose.prod.yml" ] && \
+  docker compose "${COMPOSE_ENV_ARGS[@]}" -f "${COMPOSE_DIR}/docker-compose.prod.yml" ps --services --filter status=running | grep -qx backend && \
+  docker compose "${COMPOSE_ENV_ARGS[@]}" -f "${COMPOSE_DIR}/docker-compose.prod.yml" exec -T backend \
+    wget -qO- http://localhost:3001/health >/dev/null; then
+  pass "internal backend health via compose"
+else
+  fail "internal backend health"
+fi
 check_url "Swagger JSON" "${API_URL}/docs-json"
 
 if [ "${EXPECT_DEV_LOGIN_DISABLED}" = "true" ]; then

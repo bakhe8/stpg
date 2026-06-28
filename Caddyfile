@@ -1,6 +1,7 @@
-# Caddyfile — Production (Hostinger VPS KVM 2)
+# Caddyfile — STGP internal proxy behind host Nginx
 # Domain: stpg.wbgl.tech
-# Caddy يحصل على شهادة TLS تلقائياً من Let's Encrypt
+# Nginx on the VPS terminates TLS for multiple apps, then proxies this
+# subdomain to Caddy on 127.0.0.1:3080.
 
 (security_headers) {
     header {
@@ -13,7 +14,7 @@
     }
 }
 
-stpg.wbgl.tech {
+:80 {
     import security_headers
 
     encode zstd gzip

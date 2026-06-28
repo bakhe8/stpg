@@ -162,14 +162,15 @@ services:
       backend:
         condition: service_healthy
 
-  # ── الوكيل العكسي (Caddy — TLS تلقائي) ──────────────────
+  # ── الوكيل الداخلي (Caddy خلف Nginx العام على السيرفر) ────
+  #
+  # wbgl.tech يستضيف أكثر من برنامج. لذلك Nginx على المضيف هو
+  # من يمسك 80/443 و TLS، ثم يمرر stpg.wbgl.tech إلى Caddy هنا.
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - "127.0.0.1:${STGP_HTTP_PORT:-3080}:80"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

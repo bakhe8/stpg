@@ -1,66 +1,91 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import styles from './page.module.css';
 
-const ENTITY_TYPES = [
-  { icon: '🏠', label: 'الصناديق العائلية' },
-  { icon: '🏕️', label: 'القبائل والعشائر' },
-  { icon: '🤝', label: 'التعاونيات' },
-  { icon: '🏛️', label: 'الجمعيات' },
-  { icon: '👥', label: 'اللجان' },
-  { icon: '🏘️', label: 'أحياء السكن' },
+export const metadata: Metadata = {
+  title: 'CollectiveTrustOS | نظام تشغيل للثقة الجماعية',
+  description:
+    'منصة حوكمة ومال للصناديق العائلية، العمائر، الأحياء، القبائل، والحملات المؤقتة، تفصل المال والقرار والحقوق حسب الكيان والمحفظة ومسار الحوكمة.',
+};
+
+const RELATIONSHIP_CHAIN = [
+  'عضو',
+  'كيان',
+  'محفظة',
+  'مسار حوكمة',
+  'اشتراك فعال',
+  'حقوق والتزامات',
 ] as const;
 
-const STEPS = [
+const TRUST_PROBLEMS = [
+  'كيف لا تختلط أموال العائلة والعمارة والحي؟',
+  'من يحق له التصويت أو الاستفادة من هذه المحفظة؟',
+  'ما القرار الذي سمح بالصرف، ومن راجعه؟',
+  'كيف يعترض العضو بدون أن يتحول الخلاف إلى قطيعة؟',
+] as const;
+
+const OPERATING_LAYERS = [
   {
-    n: '١',
-    title: 'أنشئ كيانك',
-    desc: 'حدّد النوع، ضع القواعد والأدوار، وامنح كل عضو صلاحياته الدقيقة.',
+    label: '01',
+    title: 'كيانات ومحافظ قابلة للتكوين',
+    desc: 'صندوق عائلة، عمارة، حي، قبيلة، حملة علاج، أو مبادرة مؤقتة. كل كيان له قواعده ومحافظه ونطاقات استفادته.',
   },
   {
-    n: '٢',
-    title: 'ادعُ الأعضاء',
-    desc: 'شارك رابط دعوة واحداً. الأعضاء يتقدّمون والإدارة توافق بنقرة.',
+    label: '02',
+    title: 'مسارات حوكمة داخل المحفظة',
+    desc: 'قد يتفق الأعضاء على هدف المحفظة ويختلفون في طريقة الثقة. النظام يفصل المسار والمال والقرار دون كسر الهدف المشترك.',
   },
   {
-    n: '٣',
-    title: 'أدِر وتتبّع',
-    desc: 'اشتراكات، قرارات، صرف، تدقيق — كل شيء موثّق وشفاف في مكان واحد.',
+    label: '03',
+    title: 'قرار قبل كل أثر مالي',
+    desc: 'الصرف لا يصبح نهائياً بمجرد ضغط زر. يجب أن يرتبط بقرار صالح، أهلية واضحة، ورصيد في الحساب الصحيح.',
+  },
+  {
+    label: '04',
+    title: 'اعتراض ونزاع وتدقيق',
+    desc: 'كل طلب وقرار واعتراض يظهر كتسلسل مفهوم: من فعل ماذا، متى، على أي محفظة أو مسار، وما الذي تغيّر بعده.',
   },
 ] as const;
 
-const FEATURES = [
+const PRODUCT_STORIES = [
   {
-    icon: '◎',
-    title: 'إدارة الأعضاء والأدوار',
-    desc: 'مؤسس، مدير، مدقق، عضو، داعم — كل دور يرى ما يخصّه فقط. طلبات الانضمام تمر بمسار موافقة قابل للضبط.',
+    title: 'صندوق عائلة بسيط',
+    context: 'اشتراك شهري، محفظة طوارئ، عضو متأخر، وقرار صرف عادي.',
+    outcome: 'المؤسس يرى الالتزامات، أمين الصندوق يرى الأثر المالي، والعضو يعرف ما عليه وما يحق له.',
   },
   {
-    icon: '💳',
-    title: 'تتبّع الاشتراكات والمدفوعات',
-    desc: 'سجّل كل دفعة، تتبّع التأخير، وراقب رصيد كل عضو لحظةً بلحظة. تقارير شاملة للحالة المالية.',
+    title: 'عمارة بخدمة مشتركة',
+    context: 'حارس أو مصعد يستفيد منه الجميع، لكن بعض السكان لا يدفعون.',
+    outcome: 'تظهر نسبة التغطية والعجز بدون التعامل معها كحالة علاج فردية قابلة للفصل.',
   },
   {
-    icon: '✓',
-    title: 'قرارات شفافة وموثّقة',
-    desc: 'كل قرار له تصويت، نصاب، وسجل لا يُمحى. القرارات تُرفق بالمستندات وتخضع للطعن والاستئناف.',
+    title: 'حملة علاج مؤقتة',
+    context: 'تبرعات داعمين، خصوصية مستفيد، مستندات حساسة، واعتراض محتمل.',
+    outcome: 'المال مخصص للحالة، والشفافية تضبط المال دون كشف ما لا يلزم كشفه.',
   },
   {
-    icon: '🔗',
-    title: 'دعوات بسيطة وفعّالة',
-    desc: 'رابط دعوة واحد يُرسَل لأي شخص. العضو الجديد يرى تفاصيل الكيان وشروط الانضمام قبل التقديم.',
+    title: 'عضو في أكثر من كيان',
+    context: 'شخص واحد داخل صندوق عائلة وصندوق عمارة بصلاحيات والتزامات مختلفة.',
+    outcome: 'لا تختلط القرارات أو الأموال، ويظهر سبب كل مطالبة أو حق داخل سياقه الصحيح.',
   },
-  {
-    icon: '📋',
-    title: 'سجل تدقيق كامل',
-    desc: 'كل حدث في المنصة مسجّل: من فعل ماذا ومتى. لجان التدقيق تملك صلاحية الاطلاع الكاملة.',
-  },
-  {
-    icon: '🏦',
-    title: 'صرف الدعم والمستفيدون',
-    desc: 'أدِر طلبات الصرف، حدّد المستفيدين، وتتبّع حالة كل طلب من التقديم حتى التحويل.',
-  },
+] as const;
+
+const GOVERNANCE_FLOW = [
+  'طلب صرف',
+  'تحقق أهلية',
+  'قرار حوكمي',
+  'قيد دفتري',
+  'إشعار وتدقيق',
+] as const;
+
+const ROLE_PROMISES = [
+  ['المؤسس', 'يبني القواعد ويرى الصورة الكاملة.'],
+  ['المسؤول', 'يدير الأعضاء والطلبات اليومية.'],
+  ['أمين الصندوق', 'يرى المدفوعات والأرصدة وأثر الاعتماد.'],
+  ['المدقق', 'يراجع التسلسل دون صلاحية تعديل.'],
+  ['العضو', 'يفهم حقوقه والتزاماته وسبب كل قرار.'],
 ] as const;
 
 export default async function Home() {
@@ -70,164 +95,205 @@ export default async function Home() {
   }
 
   return (
-    <div className={styles.root}>
-
-      {/* ── Navbar ─────────────────────────────────────────────────── */}
+    <main className={styles.root}>
       <header className={styles.nav}>
         <div className={styles.navInner}>
-          <div className={styles.brand}>
-            <span className={styles.brandMark}>◇</span>
+          <Link href="/" className={styles.brand} aria-label="CollectiveTrustOS">
+            <span className={styles.brandMark}>CT</span>
             <span>CollectiveTrustOS</span>
-          </div>
-          <nav className={styles.navLinks}>
-            <a href="#features" className={styles.navLink}>الميزات</a>
-            <a href="#how" className={styles.navLink}>كيف يعمل</a>
-            <Link href="/login" className={styles.navCta}>دخول</Link>
+          </Link>
+          <nav className={styles.navLinks} aria-label="روابط صفحة الهبوط">
+            <a href="#model" className={styles.navLink}>النموذج</a>
+            <a href="#stories" className={styles.navLink}>السيناريوهات</a>
+            <a href="#governance" className={styles.navLink}>الحوكمة</a>
+            <Link href="/login" className={styles.navCta}>تسجيل الدخول</Link>
           </nav>
         </div>
       </header>
 
-      {/* ── Hero ───────────────────────────────────────────────────── */}
       <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>منصة حوكمة الصناديق الجماعية</div>
-          <h1 className={styles.heroTitle}>
-            أدِر صندوقك الجماعي<br />
-            <span className={styles.heroAccent}>بوضوح وثقة</span>
-          </h1>
-          <p className={styles.heroDesc}>
-            منصة متكاملة تجمع الأعضاء، تتبّع المدفوعات، وتوثّق القرارات —
-            سواء كنت تدير صندوقاً عائلياً أو قبلياً أو تعاونية أو جمعية.
-          </p>
-          <div className={styles.heroActions}>
-            <Link href="/join" className={styles.heroPrimary}>ابدأ مجاناً</Link>
-            <Link href="/login" className={styles.heroSecondary}>لديّ حساب</Link>
+        <div className={styles.heroBackdrop} aria-hidden="true">
+          <div className={styles.productMap}>
+            <div className={styles.mapHeader}>
+              <span>صندوق عائلة الهاشمي</span>
+              <strong>تشغيل موثّق</strong>
+            </div>
+            <div className={styles.mapGrid}>
+              <div className={styles.mapPanel}>
+                <span className={styles.panelLabel}>المحفظة</span>
+                <strong>طوارئ العائلة</strong>
+                <small>رصيد مفصول عن محفظة العمارة</small>
+              </div>
+              <div className={styles.mapPanel}>
+                <span className={styles.panelLabel}>المسار</span>
+                <strong>لجنة + تصويت</strong>
+                <small>أهلية التصويت حسب الاشتراك الفعال</small>
+              </div>
+              <div className={styles.mapPanel}>
+                <span className={styles.panelLabel}>طلب الصرف</span>
+                <strong>مراجعة علاج عاجل</strong>
+                <small>قرار قبل القيد الدفتري</small>
+              </div>
+              <div className={styles.mapPanel}>
+                <span className={styles.panelLabel}>التدقيق</span>
+                <strong>Timeline كامل</strong>
+                <small>actor, before, after, linked records</small>
+              </div>
+            </div>
+            <div className={styles.mapLedger}>
+              <span>مدفوعات هذا الشهر</span>
+              <strong>88%</strong>
+              <span>عجز متوقع</span>
+              <strong>1,200 ر.س</strong>
+            </div>
           </div>
         </div>
 
-        {/* معاينة المنتج */}
-        <div className={styles.heroVisual} aria-hidden="true">
-          <div className={styles.mockWindow}>
-            <div className={styles.mockBar}>
-              <span className={styles.mockDot} />
-              <span className={styles.mockDot} />
-              <span className={styles.mockDot} />
-            </div>
-            <div className={styles.mockBody}>
-              <div className={styles.mockSidebar}>
-                {['الرئيسية', 'الأعضاء', 'المالية', 'القرارات', 'التدقيق'].map(item => (
-                  <div key={item} className={styles.mockSideItem}>{item}</div>
-                ))}
-              </div>
-              <div className={styles.mockMain}>
-                <div className={styles.mockRow}>
-                  {['الرصيد الكلي', 'الأعضاء النشطون', 'القرارات'].map((label, i) => (
-                    <div key={label} className={`${styles.mockCard} ${i === 0 ? styles.mockCardAccent : ''}`}>
-                      <div className={styles.mockCardLabel}>{label}</div>
-                      <div className={styles.mockCardVal}>{['٢٤٥,٠٠٠', '٣٢', '١٢'][i]}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.mockTable}>
-                  {[
-                    ['أحمد الهاشمي', 'مدفوع', '+'],
-                    ['سارة العتيبي', 'مدفوع', '+'],
-                    ['ناصر القحطاني', 'متأخر', '!'],
-                    ['ليان الدوسري', 'مدفوع', '+'],
-                  ].map(([name, status, icon]) => (
-                    <div key={name} className={styles.mockTableRow}>
-                      <span className={styles.mockAvatar}>{icon}</span>
-                      <span className={styles.mockName}>{name}</span>
-                      <span className={`${styles.mockStatus} ${status === 'متأخر' ? styles.mockStatusLate : styles.mockStatusOk}`}>
-                        {status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className={styles.heroInner}>
+          <p className={styles.eyebrow}>نظام تشغيل للثقة الجماعية</p>
+          <h1 className={styles.heroTitle}>CollectiveTrustOS</h1>
+          <p className={styles.heroLead}>
+            منصة حوكمة ومال للصناديق الاجتماعية تجعل كل علاقة واضحة:
+            العضو، الكيان، المحفظة، مسار الحوكمة، الاشتراك، ثم الحقوق والالتزامات.
+          </p>
+          <div className={styles.heroActions}>
+            <Link href="/join" className={styles.primaryAction}>إنشاء حساب والبدء</Link>
+            <Link href="/login" className={styles.secondaryAction}>الدخول للتجربة</Link>
           </div>
+          <dl className={styles.heroSignals} aria-label="ما الذي يحميه النظام">
+            <div>
+              <dt>لا صرف بلا قرار</dt>
+              <dd>الحوكمة تسبق المال.</dd>
+            </div>
+            <div>
+              <dt>لا خلط أموال</dt>
+              <dd>الكيان والمحفظة والمسار مفصولون.</dd>
+            </div>
+            <div>
+              <dt>لا غموض للعضو</dt>
+              <dd>يعرف لماذا يدفع أو يصوت أو لا يستفيد.</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
-      {/* ── Entity types ───────────────────────────────────────────── */}
-      <section className={styles.entities}>
-        <p className={styles.entitiesLabel}>مصمَّم لإدارة</p>
-        <div className={styles.entitiesGrid}>
-          {ENTITY_TYPES.map(({ icon, label }) => (
-            <div key={label} className={styles.entityChip}>
-              <span>{icon}</span>
-              <span>{label}</span>
+      <section className={styles.trustStrip} aria-label="أسئلة الثقة التي يعالجها النظام">
+        {TRUST_PROBLEMS.map((problem) => (
+          <span key={problem}>{problem}</span>
+        ))}
+      </section>
+
+      <section className={styles.relationshipSection} id="model">
+        <div className={styles.sectionIntro}>
+          <p className={styles.sectionKicker}>الفكرة الأساسية</p>
+          <h2>الحقوق لا تأتي من العضوية العامة فقط.</h2>
+          <p>
+            CollectiveTrustOS يبني التجربة حول العلاقة الحقيقية بين الشخص والمال والقرار.
+            لذلك يرى كل عضو ما يخصه، وتبقى كل مطالبة أو صلاحية مرتبطة بسياقها.
+          </p>
+        </div>
+        <ol className={styles.chain} aria-label="سلسلة الحقوق والالتزامات">
+          {RELATIONSHIP_CHAIN.map((item, index) => (
+            <li key={item}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{item}</strong>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className={styles.layersSection}>
+        <div className={styles.sectionIntro}>
+          <p className={styles.sectionKicker}>ما الذي يديره المنتج؟</p>
+          <h2>ليس صندوقاً واحداً. بل نموذج تشغيل كامل.</h2>
+        </div>
+        <div className={styles.layersGrid}>
+          {OPERATING_LAYERS.map((layer) => (
+            <article key={layer.title} className={styles.layerCard}>
+              <span>{layer.label}</span>
+              <h3>{layer.title}</h3>
+              <p>{layer.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.storiesSection} id="stories">
+        <div className={styles.sectionIntro}>
+          <p className={styles.sectionKicker}>سيناريوهات من الواقع</p>
+          <h2>مصمم للعائلات والعمائر والأحياء والحملات المؤقتة.</h2>
+          <p>
+            الصفحة لا تعرض أرقاماً تجميلية فقط. هذه هي القصص التي يجب أن يستطيع المنتج تشغيلها
+            من البداية إلى النهاية.
+          </p>
+        </div>
+        <div className={styles.storyGrid}>
+          {PRODUCT_STORIES.map((story) => (
+            <article key={story.title} className={styles.storyCard}>
+              <h3>{story.title}</h3>
+              <p>{story.context}</p>
+              <strong>{story.outcome}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.governanceSection} id="governance">
+        <div className={styles.governanceCopy}>
+          <p className={styles.sectionKicker}>حوكمة قبل الأثر المالي</p>
+          <h2>رحلة الصرف يجب أن تكون مفهومة قبل أن تكون سريعة.</h2>
+          <p>
+            عندما يضغط المستخدم على اعتماد، يجب أن يعرف من يملك القرار، ومن يحق له الاعتراض،
+            وأي رصيد سيتغير، وأين سيظهر ذلك في سجل التدقيق.
+          </p>
+        </div>
+        <ol className={styles.flow}>
+          {GOVERNANCE_FLOW.map((step, index) => (
+            <li key={step}>
+              <span>{index + 1}</span>
+              <strong>{step}</strong>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className={styles.rolesSection}>
+        <div className={styles.sectionIntro}>
+          <p className={styles.sectionKicker}>تجربة مختلفة لكل دور</p>
+          <h2>كل مستخدم يرى ما يساعده على القرار، لا كل ما في النظام.</h2>
+        </div>
+        <div className={styles.rolesList}>
+          {ROLE_PROMISES.map(([role, promise]) => (
+            <div key={role} className={styles.roleRow}>
+              <strong>{role}</strong>
+              <span>{promise}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── How it works ───────────────────────────────────────────── */}
-      <section className={styles.how} id="how">
-        <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle}>كيف يعمل؟</h2>
-          <p className={styles.sectionSub}>ثلاث خطوات تكفي لتشغيل صندوقك كاملاً</p>
-          <div className={styles.steps}>
-            {STEPS.map((step, i) => (
-              <div key={step.n} className={styles.step}>
-                <div className={styles.stepNum}>{step.n}</div>
-                {i < STEPS.length - 1 && <div className={styles.stepLine} />}
-                <h3 className={styles.stepTitle}>{step.title}</h3>
-                <p className={styles.stepDesc}>{step.desc}</p>
-              </div>
-            ))}
-          </div>
+      <section className={styles.finalCta}>
+        <div>
+          <p className={styles.sectionKicker}>ابدأ من صندوق بسيط ثم افتح التعقيد عند الحاجة.</p>
+          <h2>حوّل الاتفاقات الاجتماعية والمالية إلى تشغيل واضح قابل للمراجعة.</h2>
+        </div>
+        <div className={styles.finalActions}>
+          <Link href="/join" className={styles.primaryAction}>إنشاء حساب</Link>
+          <Link href="/login" className={styles.secondaryAction}>تسجيل الدخول</Link>
         </div>
       </section>
 
-      {/* ── Features ───────────────────────────────────────────────── */}
-      <section className={styles.features} id="features">
-        <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle}>كل ما تحتاجه في مكان واحد</h2>
-          <p className={styles.sectionSub}>أدوات متكاملة تغطّي دورة الحياة الكاملة لصندوقك</p>
-          <div className={styles.featuresGrid}>
-            {FEATURES.map(({ icon, title, desc }) => (
-              <article key={title} className={styles.featureCard}>
-                <span className={styles.featureIcon}>{icon}</span>
-                <h3 className={styles.featureTitle}>{title}</h3>
-                <p className={styles.featureDesc}>{desc}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Final CTA ──────────────────────────────────────────────── */}
-      <section className={styles.cta}>
-        <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>جاهز لبدء تنظيم صندوقك؟</h2>
-          <p className={styles.ctaDesc}>
-            أنشئ كيانك في دقائق، وادعُ أعضاءك برابط واحد.
-          </p>
-          <div className={styles.ctaActions}>
-            <Link href="/join" className={styles.ctaPrimary}>أنشئ كيانك الآن</Link>
-            <Link href="/login" className={styles.ctaSecondary}>تسجيل الدخول</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────────────── */}
       <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}>
-            <span className={styles.brandMark}>◇</span>
-            <span>CollectiveTrustOS</span>
-          </div>
-          <div className={styles.footerLinks}>
-            <Link href="/privacy" className={styles.footerLink}>سياسة الخصوصية</Link>
-            <span className={styles.footerDot}>·</span>
-            <Link href="/terms" className={styles.footerLink}>شروط الاستخدام</Link>
-          </div>
-          <p className={styles.footerCopy}>© {new Date().getFullYear()} جميع الحقوق محفوظة</p>
+        <div className={styles.footerBrand}>
+          <span className={styles.brandMark}>CT</span>
+          <span>CollectiveTrustOS</span>
         </div>
+        <div className={styles.footerLinks}>
+          <Link href="/privacy">سياسة الخصوصية</Link>
+          <Link href="/terms">شروط الاستخدام</Link>
+        </div>
+        <p>© {new Date().getFullYear()} CollectiveTrustOS</p>
       </footer>
-
-    </div>
+    </main>
   );
 }
