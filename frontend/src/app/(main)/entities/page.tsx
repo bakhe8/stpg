@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { getEntities, Entity } from "../../../lib/api/entities";
+import { isReadableEntity } from "../../../lib/access";
 import styles from "./entities.module.css";
 
 export default function EntitiesPage() {
@@ -67,29 +68,55 @@ export default function EntitiesPage() {
         <div className={styles.empty}>{t("empty")}</div>
       ) : (
         <div className={styles.list}>
-          {entities.map((e) => (
-            <Link key={e.id} href={`/entities/${e.id}`} className={styles.row}>
-              <div className={styles.rowIcon}>⬡</div>
-              <div className={styles.rowInfo}>
-                <div className={styles.rowName}>{e.name}</div>
-                <div className={styles.rowType}>
-                  {ENTITY_TYPE_LABELS[e.type] ?? e.type}
-                  {e.myRole ? (
-                    <span className={styles.roleBadge}>
-                      {roleLabel(e.myRole)}
-                    </span>
-                  ) : null}
+          {entities.map((e) => {
+            const canOpenEntity = isReadableEntity(e);
+            const rowContent = (
+              <>
+                <div className={styles.rowIcon}>⬡</div>
+                <div className={styles.rowInfo}>
+                  <div className={styles.rowName}>{e.name}</div>
+                  <div className={styles.rowType}>
+                    {ENTITY_TYPE_LABELS[e.type] ?? e.type}
+                    {e.myRole ? (
+                      <span className={styles.roleBadge}>
+                        {roleLabel(e.myRole)}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-              {e.platformStatus && e.platformStatus !== 'ACTIVE' && (
-                <span className={styles.platformBadge} data-status={e.platformStatus}>
-                  {e.platformStatus === 'SUSPENDED' ? '🚫 معلّق' : e.platformStatus === 'READ_ONLY' ? '👁 قراءة فقط' : '⏳ قيد المراجعة'}
-                </span>
-              )}
-              <div className={`${styles.statusDot} ${e.isActive ? styles.statusActive : styles.statusInactive}`} />
-              <div className={styles.rowArrow}>←</div>
-            </Link>
-          ))}
+                {e.platformStatus && e.platformStatus !== "ACTIVE" && (
+                  <span className={styles.platformBadge} data-status={e.platformStatus}>
+                    {e.platformStatus === "SUSPENDED"
+                      ? "🚫 معلّق"
+                      : e.platformStatus === "READ_ONLY"
+                        ? "👁 قراءة فقط"
+                        : "⏳ قيد المراجعة"}
+                  </span>
+                )}
+                <div className={`${styles.statusDot} ${e.isActive ? styles.statusActive : styles.statusInactive}`} />
+                <div className={styles.rowArrow}>←</div>
+              </>
+            );
+
+            if (!canOpenEntity) {
+              return (
+                <div
+                  key={e.id}
+                  className={`${styles.row} ${styles.rowDisabled}`}
+                  aria-disabled="true"
+                  title="هذا الكيان معلّق حالياً"
+                >
+                  {rowContent}
+                </div>
+              );
+            }
+
+            return (
+              <Link key={e.id} href={`/entities/${e.id}`} className={styles.row}>
+                {rowContent}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

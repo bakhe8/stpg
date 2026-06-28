@@ -57,7 +57,7 @@
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 | P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
-| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed + 7 edge accounts + أدوار المنصة، role journeys، 234 حالة seed تفصيلية، وإصلاحات صلاحيات ولمس/موبايل |
+| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، سكربت قابل للإعادة يغطي 11 حساب seed + 7 edge accounts، 408 حالة واجهة، أدوار المنصة، role journeys، وإصلاحات صلاحيات ولمس/موبايل |
 
 ---
 
@@ -406,6 +406,11 @@
 44. تم إصلاح `/paths/:id` حتى لا يطلب `/subscriptions?pathId=...` إلا عند `FOUNDER/ADMIN`. الأدوار الأخرى ترى عداد الاشتراكات الآمن القادم مع المسار ولا يظهر لها تبويب الاشتراكات التفصيلي أو زر إنشاء بند صرف.
 45. تم إصلاح placeholder ظاهر في تبويب قرارات المسار: `القرارات ({count})` أصبح يستقبل `count` فعلياً، وأضيفت قاعدة فحص UX ترفض أي placeholder خام مثل `{count}` في النص الظاهر.
 46. نتيجة الجولة التفصيلية الأخيرة: كل الـ 11 حساب seed مرّت بـ `issueCount=0`: لا صفحات فارغة، لا Next.js overlay، لا failed API responses غير متوقعة، لا `MISSING_MESSAGE`، لا overflow أفقي، لا أهداف لمس صغيرة، ولا placeholders خام.
+47. تم تحويل تدقيق UX التفصيلي إلى سكربت رسمي قابل للإعادة: `frontend/scripts/ux-role-audit.spec.cjs`.
+48. تمت إضافة الأمر `npm run test:ux:roles` لتشغيل جولة `/login` الحقيقية عبر دخول المطورين على 18 حساباً: 11 حساب seed أساسي + 7 حسابات edge.
+49. السكربت يفحص desktop و mobile لكل مستخدم، ويجمع أخطاء console/pageerror، واستجابات HTTP غير المتوقعة، وNext.js overlay، والصفحات الفارغة، وraw placeholders مثل `{count}`، والـ horizontal overflow، وأهداف النقر الصغيرة.
+50. أثناء أول تشغيل كامل اكتشف السكربت خللاً حقيقياً في تجربة الكيان المعلّق: صفحة المحافظ كانت تطلب محافظ كيان `SUSPENDED` فتسجل 403، وقائمة الكيانات كانت تعرض الكيان المعلّق كرابط detail قابل للفتح رغم أن API يمنعه.
+51. تم إصلاح ذلك بجعل `/wallets` يحمّل المحافظ من الكيانات التشغيلية فقط، وجعل `/entities` يعرض الكيان المعلّق كصف حالة غير قابل للفتح مع شارة `معلّق`. آخر تشغيل كامل: 18/18 مستخدم، 408 حالة واجهة، 0 issues، و396 لقطة محفوظة خارج المستودع.
 
 ---
 
@@ -468,6 +473,7 @@ UX mobile login and role audit                                           PASS - 
 UX edge tenant audit                                                      PASS - 7 edge accounts, 147 desktop/mobile states, 0 real issues after fixes
 UX platform role audit                                                    PASS - OWNER/SUPER_ADMIN/SUPPORT/ANALYST + inactive account, 9 states, 0 issues
 UX detailed seed route audit                                               PASS - 11 seed accounts, 234 desktop/mobile states, 0 issues, raw placeholder check enabled
+frontend npm run test:ux:roles                                             PASS - 18 accounts, 408 desktop/mobile states, 0 issues, screenshots outside repo
 frontend npm run lint after detailed UX fixes                              PASS
 docker compose up -d --build frontend after detailed UX fixes              PASS
 GET http://localhost:3001/health after detailed UX fixes                   PASS - 200

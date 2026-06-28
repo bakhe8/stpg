@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:visual-identity": "node scripts/check-visual-identity.mjs",
+    "test:ux:roles": "playwright test scripts/ux-role-audit.spec.cjs --reporter=line --workers=1",
+    "test:ux:roles:install": "playwright install chromium",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -18,6 +20,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^20",

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getEntities, Entity } from '../../../lib/api/entities';
 import { getEntityWallets, getWalletPaths, Wallet, GovernancePath } from '../../../lib/api/wallets';
+import { isOperationalEntity } from '../../../lib/access';
 import styles from './wallets.module.css';
 
 interface WalletWithPaths extends Wallet {
@@ -26,11 +27,12 @@ export default function WalletsPage() {
     async function load() {
       try {
         const entityList = await getEntities();
-        setEntities(entityList);
+        const walletEntities = entityList.filter(isOperationalEntity);
+        setEntities(walletEntities);
 
         const walletsWithPaths = (
           await Promise.all(
-            entityList.map(async (entity) => {
+            walletEntities.map(async (entity) => {
               const ew = await getEntityWallets(entity.id).catch(() => [] as Wallet[]);
               return Promise.all(
                 ew.map(async (w) => ({

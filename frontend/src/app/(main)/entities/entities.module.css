@@ -129,6 +129,16 @@
   transform: translateX(-2px);
 }
 
+.rowDisabled {
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
+.rowDisabled:hover {
+  border-color: var(--glass-border);
+  transform: none;
+}
+
 .rowIcon {
   font-size: 1.3rem;
   color: var(--accent-primary);
@@ -187,6 +197,11 @@
 .row:hover .rowArrow {
   opacity: 1;
   transform: translateX(-4px);
+}
+
+.rowDisabled:hover .rowArrow {
+  opacity: 0;
+  transform: none;
 }
 
 /* States */
