@@ -271,7 +271,7 @@
 
 1. `Caddyfile` يستخدم الدومين الإنتاجي.
 2. `docker-compose.prod.yml` يفتح `80:80`, `443:443`, و `443:443/udp`.
-3. `NEXT_PUBLIC_API_URL` و `FRONTEND_PUBLIC_URL` موجودان في `.env.production.example`.
+3. `NEXT_PUBLIC_API_URL` و `FRONTEND_PUBLIC_URL` موجودان في إعدادات الإنتاج.
 
 ### BL-14 - تجربة حسابات الاختبار حسب الصلاحيات
 
@@ -345,7 +345,7 @@ RLS migration runtime smoke on PostgreSQL 16                         PASS
 
 1. تعبئة أسرار الإنتاج:
    - `JWT_SECRET`
-   - `REFRESH_TOKEN_SECRET`
+   - `JWT_REFRESH_SECRET`
    - `DB_PASSWORD`
    - `DB_APP_PASSWORD`
    - `GOOGLE_OAUTH_CLIENT_ID`
@@ -354,6 +354,8 @@ RLS migration runtime smoke on PostgreSQL 16                         PASS
    - `STRIPE_WEBHOOK_SECRET`
    - `MOYASAR_SECRET_KEY`
    - `MOYASAR_WEBHOOK_SECRET`
+   - `PAYMENT_CALLBACK_URL`
+   - `FRONTEND_PUBLIC_URL`
 2. ضبط DNS للدومين الإنتاجي على خادم Caddy.
 3. تشغيل `docker compose -f docker-compose.prod.yml config --quiet` بقيم production حقيقية.
 4. تشغيل `prisma migrate deploy` على قاعدة staging.
