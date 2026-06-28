@@ -35,7 +35,9 @@ services:
     restart: unless-stopped
     environment:
       - discovery.type=single-node
-      - plugins.security.disabled=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
       - OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
     volumes:
       - opensearch_data:/usr/share/opensearch/data
@@ -66,7 +68,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "temporal operator cluster health --address localhost:7233 >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "temporal operator cluster health --address temporal:7233 >/dev/null 2>&1 || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 20

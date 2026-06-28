@@ -99,7 +99,7 @@ if command -v docker >/dev/null && [ -f "${COMPOSE_DIR}/docker-compose.prod.yml"
 
   if docker compose "${COMPOSE_ENV_ARGS[@]}" -f "${COMPOSE_DIR}/docker-compose.prod.yml" ps --services --filter status=running | grep -qx temporal; then
     if docker compose "${COMPOSE_ENV_ARGS[@]}" -f "${COMPOSE_DIR}/docker-compose.prod.yml" exec -T temporal \
-      temporal operator cluster health --address localhost:7233 >/dev/null 2>&1; then
+      temporal operator cluster health --address temporal:7233 >/dev/null 2>&1; then
       pass "Temporal internal health"
     else
       fail "Temporal internal health"

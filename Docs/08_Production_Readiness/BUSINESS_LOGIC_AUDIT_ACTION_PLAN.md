@@ -314,6 +314,8 @@
 7. تمت إضافة `restore.sh` مع حماية `CONFIRM_RESTORE=stgp_prod` قبل أي عملية هدم/استعادة.
 8. تمت إضافة `production-smoke.sh` لفحص الواجهة، health، docs-json، تعطيل dev-login، OpenSearch، و Temporal.
 9. تم تحديث `deploy.sh` لتثبيت سكربتات backup/restore/smoke وتشغيل smoke بعد النشر.
+10. تم ضبط OpenSearch بـ `DISABLE_SECURITY_PLUGIN=true` حتى لا يفشل installer في OpenSearch 2.17 بسبب غياب كلمة مرور admin داخل خدمة داخلية غير مكشوفة للعامة.
+11. تم ضبط فحص Temporal على `temporal:7233` لأن الخدمة تستمع داخل الحاوية على عنوان الحاوية لا `localhost`.
 
 ---
 
@@ -359,8 +361,10 @@ docker compose --env-file .env.production.example -f docker-compose.prod.yml con
 Git Bash bash -n backup.sh restore.sh production-smoke.sh deploy.sh   PASS
 git diff --check                                                     PASS
 production-smoke.sh public frontend/health/docs/dev-login             PASS
-production-smoke.sh local backend/OpenSearch/Temporal                 BLOCKED - Docker daemon غير متاح محلياً
-docker compose ps                                                     BLOCKED - dockerDesktopLinuxEngine pipe missing
+production-smoke.sh full local/public                                 PASS - frontend, health, docs, dev-login, OpenSearch, Temporal
+docker compose ps                                                     PASS - backend/frontend/postgres/redis/opensearch/temporal healthy/up
+OpenSearch cluster health                                             PASS - yellow/green مقبول لعقدة واحدة
+Temporal cluster health                                               PASS - SERVING
 ```
 
 ---
