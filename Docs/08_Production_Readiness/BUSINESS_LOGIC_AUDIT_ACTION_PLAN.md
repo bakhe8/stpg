@@ -1,6 +1,7 @@
 # تقرير تنفيذ تدقيق منطق العمل وجاهزية الإنتاج
 
 **التاريخ:** 2026-06-27  
+**آخر تحديث:** 2026-06-28
 **النطاق:** `C:\Users\Bakheet\Projects\CollectiveTrustOS\STGP` على `main`  
 **حالة مجلد hotfix:** تم حذف `STGP-v1-hotfix` ولم يعد مرجع عمل.  
 **الغرض:** دمج تقريري التدقيق السابقين في سجل تنفيذ واحد، ثم توثيق ما تم إغلاقه وما بقي كتشغيل إنتاجي خارجي.
@@ -53,7 +54,7 @@
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 | P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
-| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، دخول مطورين، أدوار seed، وإصلاحات لمس/موبايل |
+| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed، دخول مطورين فعلي، role journeys، وإصلاحات لمس/موبايل |
 
 ---
 
@@ -343,6 +344,35 @@
 16. تم جعل نتائج البحث أزراراً قابلة للوصول بالكيبورد بدلاً من `div` قابلة للنقر فقط.
 17. تم إضافة fallback في backend search إلى Prisma عند فراغ/تعطل OpenSearch، مع بقاء فلترة العضوية النشطة قبل البحث.
 18. تم ترجمة نتيجة البحث من أكواد مثل `FAMILY · ACTIVE` إلى نص واجهة مثل `عائلة · نشط`.
+19. تم تنفيذ جولة role-based UX كاملة على 11 حساب seed عبر API والواجهة:
+    - أحمد: `FOUNDER` على صندوق العائلة والحملة والمبادرة.
+    - سارة: `ADMIN` على صندوق العائلة والمبادرة.
+    - ناصر: `TREASURER` مع عضوية `MEMBER` إضافية في صندوق قبيلة السهم.
+    - ليان: `AUDITOR`.
+    - د. ماجد ونورة: `COMMITTEE_MEMBER` مع حالات تعدد كيان مختلفة.
+    - فيصل: `MEMBER` في كيانين لاختبار التداخل.
+    - خالد: `MEMBER` مع حالة اشتراك تحتاج انتباه في البوابة.
+    - عبدالله: `FOUNDER` لكيانات العمارة.
+    - يحيى: `FOUNDER` لكيان حي مع عضويات إضافية.
+    - فهد: `MEMBER` في حملة علاج بحالة `READ_ONLY`.
+20. تم فحص المسارات المحمية مقابل الدور:
+    - `/review-center`, `/rules`, `/health` مسموحة فقط لـ `FOUNDER/ADMIN`.
+    - `/analytics` مسموحة لـ `FOUNDER/ADMIN/TREASURER/AUDITOR`.
+    - `/auditor` مسموحة لـ `FOUNDER/ADMIN/AUDITOR`.
+    - `/committees` مسموحة لـ `FOUNDER/ADMIN/COMMITTEE_MEMBER`.
+    - `/beneficiaries` مسموحة لـ `FOUNDER/ADMIN/TREASURER/AUDITOR/COMMITTEE_MEMBER`.
+    - `/disbursements` مسموحة لـ `FOUNDER/ADMIN/TREASURER`.
+21. نتيجة role-based UX: الأدوار غير المصرح لها تظهر لها رسالة منع واضحة، ولا تظهر صفحات الإدارة كواجهة قابلة للتشغيل.
+22. تم فحص `/entities/:id/members` لكل فئة؛ غير الإداريين لا تظهر لهم أدوات تغيير الدور أو إزالة العضوية.
+23. تم إصلاح أهداف لمس صغيرة إضافية في `/rules`:
+    - tabs مثل `قواعد المسار` و`مصمم السياسة`.
+    - أزرار القوالب مثل `إنشاء مباشر`, `تطبيق على النموذج`, `نسخة معدلة`.
+    - أزرار النماذج داخل modal ومصمم السياسة.
+24. تم إصلاح هدف لمس صغير في `/health` لقائمة اختيار الكيان.
+25. تم تشغيل دخول مطورين حقيقي من `/login` على الجوال، وليس فقط حقن جلسة عبر API.
+26. تم فحص الجوال بعرض 390px للحسابات: أحمد، ناصر، ليان، ماجد، فيصل، خالد، فهد، عبر `/dashboard`, `/portal`, `/review-center`, `/rules`, `/auditor`.
+27. نتيجة فحص الجوال: لا horizontal overflow، لا Next.js overlay، لا small visible interactive targets، وحالات المنع تظهر في المسارات المحمية.
+28. التحذير الوحيد المتبقي في console أثناء الجوال هو preload warning من Next.js لملف CSS، ولم يظهر معه فشل API أو كسر رحلة مستخدم.
 
 ---
 
@@ -399,6 +429,9 @@ UX interaction audit                                                    PASS - w
 Search API fallback                                                     PASS - `الهاشمي` returns allowed seeded entity without OpenSearch reindex
 Search UI translated result                                             PASS - `صندوق عائلة الهاشمي` shows `عائلة · نشط`
 Git Bash production-smoke.sh local stack                                PASS - frontend, health, docs-json, OpenSearch, Temporal
+UX role-based seed audit                                                 PASS - 11 accounts, protected-route matrix, members controls, no permission leakage found
+UX rules/health touch target retest                                      PASS - 8 focused checks, no small targets, no overflow
+UX mobile login and role audit                                           PASS - real /login dev flow + 7 accounts x 5 routes, no overlay/overflow/small targets
 ```
 
 ---
