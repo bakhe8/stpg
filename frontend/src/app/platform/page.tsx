@@ -31,6 +31,8 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 export default function PlatformDashboardPage() {
   const router = useRouter();
   const account = getPlatformAccount();
+  const canManageEntities =
+    account?.role === "OWNER" || account?.role === "SUPER_ADMIN";
 
   const [entities, setEntities] = useState<PlatformEntity[]>([]);
   const [total, setTotal] = useState(0);
@@ -127,7 +129,7 @@ export default function PlatformDashboardPage() {
               <th>الأعضاء</th>
               <th>الحالة</th>
               <th>تاريخ الإنشاء</th>
-              <th>إجراء</th>
+              <th>{canManageEntities ? "إجراء" : "الصلاحية"}</th>
             </tr>
           </thead>
           <tbody>
@@ -148,23 +150,27 @@ export default function PlatformDashboardPage() {
                   {new Date(entity.foundedAt).toLocaleDateString("ar-SA")}
                 </td>
                 <td>
-                  {entity.platformStatus === "ACTIVE" ||
-                  entity.platformStatus === "PENDING_REVIEW" ? (
-                    <button
-                      className={styles.actionBtnDanger}
-                      disabled={actionLoading === entity.id}
-                      onClick={() => void handleSuspend(entity)}
-                    >
-                      تعليق
-                    </button>
+                  {canManageEntities ? (
+                    entity.platformStatus === "ACTIVE" ||
+                    entity.platformStatus === "PENDING_REVIEW" ? (
+                      <button
+                        className={styles.actionBtnDanger}
+                        disabled={actionLoading === entity.id}
+                        onClick={() => void handleSuspend(entity)}
+                      >
+                        تعليق
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.actionBtnSafe}
+                        disabled={actionLoading === entity.id}
+                        onClick={() => void handleActivate(entity)}
+                      >
+                        تفعيل
+                      </button>
+                    )
                   ) : (
-                    <button
-                      className={styles.actionBtnSafe}
-                      disabled={actionLoading === entity.id}
-                      onClick={() => void handleActivate(entity)}
-                    >
-                      تفعيل
-                    </button>
+                    <span className={styles.readOnlyAction}>متابعة فقط</span>
                   )}
                 </td>
               </tr>

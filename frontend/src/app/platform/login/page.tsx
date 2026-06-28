@@ -60,7 +60,7 @@ export default function PlatformLoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
-            minLength={8}
+            minLength={6}
             autoComplete="current-password"
           />
 

@@ -40,6 +40,9 @@
 
 .stateBadge[data-state="CONDITIONAL"] { background: rgba(245,158,11,0.15); color: #b45309; }
 .stateBadge[data-state="SUSPENDED"] { background: rgba(239,68,68,0.15); color: #b91c1c; }
+.stateBadge[data-state="ENTITY_SUSPENDED"] { background: rgba(127,29,29,0.14); color: #991b1b; }
+.stateBadge[data-state="ENTITY_READ_ONLY"] { background: rgba(59,130,246,0.14); color: #1d4ed8; }
+.stateBadge[data-state="ENTITY_INACTIVE"] { background: rgba(100,116,139,0.14); color: #475569; }
 
 /* ── Wallet List ── */
 .walletList { display: flex; flex-direction: column; gap: 20px; }

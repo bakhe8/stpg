@@ -22,9 +22,12 @@
 8. تم جعل entity support يتطلب قراراً واتجاهاً صحيحاً لعلاقة الدعم المالي.
 9. تم تنظيف lint للواجهة والخلفية، وإضافة اختبارات regression و E2E للمخاطر الأمنية.
 10. تم تحديث Docker/Caddy/TLS وإضافة OpenSearch و Temporal وسكربتات restore و production smoke.
-11. تم تشغيل تجربة حسابات seed حسب الأدوار، وإغلاق تعارضين ظهرا أثناء الاختبار:
+11. تم تشغيل تجربة حسابات seed حسب الأدوار، ثم توسيعها بحسابات edge لأن الـ 11 حساباً الأصلية ليست تغطية كاملة لكل حالات النظام، وإغلاق تعارضات ظهرت أثناء الاختبار:
     - `SuspendedEntityGuard` كان لا يطبق حالة `READ_ONLY/SUSPENDED` على مسارات تبدأ بـ `/api`.
     - الواجهة كانت تعرض صفحة auditor لأمين الصندوق رغم أن API auditor يرفضه.
+    - الواجهة كانت تعتبر دور المستخدم داخل كيان `SUSPENDED/READ_ONLY` صلاحية تشغيلية كاملة.
+    - دخول المنصة كان يمنع كلمة مرور seed من الواجهة بسبب `minLength` غير مطابق للباك إند.
+    - واجهة المنصة كانت تعرض أزرار تعليق/تفعيل/رد لأدوار SUPPORT/ANALYST رغم أن API يرفض التنفيذ.
 
 **القرار النهائي:** من ناحية الكود والإعدادات، بنود التقرير مغلقة. من ناحية الإنتاج الفعلي، لا يزال يلزم إدخال أسرار الإنتاج وتشغيل اختبارات live مع Stripe/Moyasar و OAuth/DNS/TLS، ثم تشغيل smoke الإنتاجي بعد النشر قبل فتح النظام للعامة.
 
@@ -54,7 +57,7 @@
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 | P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
-| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed، دخول مطورين فعلي، role journeys، وإصلاحات لمس/موبايل |
+| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed + 7 edge accounts + أدوار المنصة، role journeys، وإصلاحات صلاحيات ولمس/موبايل |
 
 ---
 
@@ -373,6 +376,29 @@
 26. تم فحص الجوال بعرض 390px للحسابات: أحمد، ناصر، ليان، ماجد، فيصل، خالد، فهد، عبر `/dashboard`, `/portal`, `/review-center`, `/rules`, `/auditor`.
 27. نتيجة فحص الجوال: لا horizontal overflow، لا Next.js overlay، لا small visible interactive targets، وحالات المنع تظهر في المسارات المحمية.
 28. التحذير الوحيد المتبقي في console أثناء الجوال هو preload warning من Next.js لملف CSS، ولم يظهر معه فشل API أو كسر رحلة مستخدم.
+29. تم تحليل تغطية حسابات الاختبار الأصلية مقابل بيانات seed، وتبين أنها smoke جيدة لكنها لا تغطي كل الحالات؛ لا تغطي مثلاً `COMMUNITY`, `EntityPlatformStatus.SUSPENDED`, `SubscriptionState.EXITED`, `PaymentRecordStatus.PROCESSING`, `MOYASAR`, بعض حالات طلبات العضوية/الصرف، وبعض أنواع القرارات والتصويت، ولا تغطي أدوار المنصة.
+30. تمت إضافة جولة edge للحسابات:
+    - `seed.omar.youth`: كيان `COMMUNITY` معلّق ومنصة `SUSPENDED` مع دور إداري داخل كيان غير تشغيلي.
+    - `seed.huda.exited`: اشتراك `EXITED`.
+    - `seed.amal.conditional`: اشتراك `CONDITIONAL` وطلب صرف `PENDING`.
+    - `seed.mariam.family`: حساب غير verified مع كيان معلّق/قراءة فقط وحالة supporter.
+    - `seed.abdulrahman.tribe`: مؤسس قبيلة وقرارات `CREATE_WALLET/CREATE_PATH` وتصويت `TWO_THIRDS`.
+    - `seed.mona.building`: إدارة/مالية كيان عمارة وقرارات `MERGE_PATHS`.
+    - `seed.reem.overlap`: تداخل عضويات واسع وطلب عضوية `APPROVED`.
+31. نتيجة الجولة الحدّية: 147 حالة صفحة عبر desktop/mobile، وبعد الإصلاحات لا توجد failed API responses، ولا blank pages، ولا horizontal overflow، ولا small interactive targets. الملاحظات الوحيدة في أول مرور كانت false positive من sidebar المحمول المخفي خارج الشاشة.
+32. تم إصلاح `hasRole` في الواجهة ليشترط أن يكون الكيان تشغيلياً، وليس مجرد وجود دور على عضوية داخل كيان معلق أو قراءة فقط.
+33. تم فصل معنى القراءة عن التشغيل عبر `isReadableEntity` و `isOperationalEntity`، حتى تعرض الواجهة بيانات القراءة عندما يسمح بها النظام ولا تمنح صلاحيات تشغيلية خطأ.
+34. تم إصلاح `/portal` حتى لا يجلب محافظ كيان `SUSPENDED` فيسجل 403 صامتاً، بل يعرض الاشتراك ضمن لوحة الانتباه بحالة `الكيان معلّق` أو `قراءة فقط` أو `كيان غير نشط`.
+35. تم تكبير أهداف اللمس المتبقية في `/decisions` مثل فلاتر الحالة وزر `أُعلن تعارضاً`.
+36. تم اختبار أدوار المنصة عبر UI login نفسه:
+    - `owner@seed.collectivetrust.local` كـ OWNER.
+    - `operations.admin@seed.collectivetrust.local` كـ SUPER_ADMIN.
+    - `bader.support@seed.collectivetrust.local` كـ SUPPORT.
+    - `reem.analyst@seed.collectivetrust.local` كـ ANALYST.
+    - `former.support@seed.collectivetrust.local` كحساب SUPPORT غير نشط.
+37. تم إصلاح نموذج دخول المنصة من `minLength=8` إلى `minLength=6` ليتطابق مع DTO الخلفي وبيانات seed الافتراضية.
+38. تم إصلاح واجهة المنصة بحيث تظهر أزرار التعليق/التفعيل والرد على الاعتراضات فقط لـ `OWNER/SUPER_ADMIN`، بينما يرى `SUPPORT/ANALYST` حالة `متابعة فقط`.
+39. نتيجة فحص المنصة: 9 حالات عبر desktop/mobile والحساب المعطل، صفر مشاكل بعد الإصلاح، وتسجيل الدخول المعطل يبقى في `/platform/login` بلا token وبخطأ واضح.
 
 ---
 
@@ -432,6 +458,8 @@ Git Bash production-smoke.sh local stack                                PASS - f
 UX role-based seed audit                                                 PASS - 11 accounts, protected-route matrix, members controls, no permission leakage found
 UX rules/health touch target retest                                      PASS - 8 focused checks, no small targets, no overflow
 UX mobile login and role audit                                           PASS - real /login dev flow + 7 accounts x 5 routes, no overlay/overflow/small targets
+UX edge tenant audit                                                      PASS - 7 edge accounts, 147 desktop/mobile states, 0 real issues after fixes
+UX platform role audit                                                    PASS - OWNER/SUPER_ADMIN/SUPPORT/ANALYST + inactive account, 9 states, 0 issues
 ```
 
 ---

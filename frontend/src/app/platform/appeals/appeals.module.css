@@ -44,6 +44,7 @@
 }
 
 .filterBtn {
+  min-height: 40px;
   padding: 6px 16px;
   border-radius: 20px;
   border: 1.5px solid var(--border-strong);
@@ -53,6 +54,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filterBtn:hover {
@@ -235,6 +239,7 @@
 
 .btnReviewed,
 .btnResolved {
+  min-height: 40px;
   padding: 7px 18px;
   border-radius: 8px;
   font-size: 13px;
@@ -242,6 +247,18 @@
   cursor: pointer;
   border: none;
   transition: opacity 0.15s;
+}
+
+.readOnlyNotice {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 .btnReviewed {

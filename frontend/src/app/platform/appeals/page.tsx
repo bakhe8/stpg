@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   getAppeals,
+  getPlatformAccount,
   respondToAppeal,
   type PlatformSuspensionAppeal,
 } from "../../../lib/api/platform";
@@ -17,6 +18,9 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 export default function PlatformAppealsPage() {
   const router = useRouter();
+  const account = getPlatformAccount();
+  const canRespondToAppeals =
+    account?.role === "OWNER" || account?.role === "SUPER_ADMIN";
   const [appeals, setAppeals] = useState<PlatformSuspensionAppeal[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -154,7 +158,7 @@ export default function PlatformAppealsPage() {
                   </div>
                 )}
 
-                {appeal.status === "PENDING" && (
+                {appeal.status === "PENDING" && canRespondToAppeals && (
                   <div className={styles.respondArea}>
                     <textarea
                       className={styles.responseInput}
@@ -184,6 +188,12 @@ export default function PlatformAppealsPage() {
                         {responding === appeal.id ? "…" : "حسم الاعتراض"}
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {appeal.status === "PENDING" && !canRespondToAppeals && (
+                  <div className={styles.readOnlyNotice}>
+                    هذا الحساب يتابع الاعتراض فقط؛ الرد يتطلب OWNER أو SUPER_ADMIN.
                   </div>
                 )}
               </div>

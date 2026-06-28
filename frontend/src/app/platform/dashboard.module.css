@@ -115,7 +115,7 @@
 }
 
 .actionBtnDanger {
-  min-height: 38px;
+  min-height: 40px;
   padding: 5px 14px;
   background: transparent;
   border: 1px solid #ef4444;
@@ -130,7 +130,7 @@
 }
 
 .actionBtnSafe {
-  min-height: 38px;
+  min-height: 40px;
   padding: 5px 14px;
   background: transparent;
   border: 1px solid #22c55e;
@@ -154,6 +154,19 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.readOnlyAction {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 5px 12px;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {

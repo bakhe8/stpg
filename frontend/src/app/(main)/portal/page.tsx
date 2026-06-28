@@ -13,6 +13,7 @@ import {
 import { getPathSpendingItems, SpendingItem } from "@/lib/api/paths";
 import { getEntities, Entity } from "@/lib/api/entities";
 import { getEntityWallets, getWalletPaths, Wallet, GovernancePath } from "@/lib/api/wallets";
+import { isReadableEntity } from "@/lib/access";
 import styles from "./portal.module.css";
 import RuleSummaryPanel from "@/components/Governance/RuleSummaryPanel";
 import AccessReasonPanel from "@/components/shared/AccessReasonPanel";
@@ -32,7 +33,39 @@ interface AttentionItem {
   entityName: string;
   walletName: string;
   pathName: string;
-  state: "CONDITIONAL" | "SUSPENDED";
+  state:
+    | "CONDITIONAL"
+    | "SUSPENDED"
+    | "ENTITY_SUSPENDED"
+    | "ENTITY_READ_ONLY"
+    | "ENTITY_INACTIVE";
+}
+
+function getAttentionLabel(state: AttentionItem["state"]) {
+  switch (state) {
+    case "CONDITIONAL":
+      return "مشروط";
+    case "SUSPENDED":
+      return "موقوف";
+    case "ENTITY_SUSPENDED":
+      return "الكيان معلّق";
+    case "ENTITY_READ_ONLY":
+      return "قراءة فقط";
+    case "ENTITY_INACTIVE":
+      return "كيان غير نشط";
+  }
+}
+
+function getAttentionState(
+  subscription: Subscription,
+  entity?: Entity,
+): AttentionItem["state"] | null {
+  if (entity?.isActive === false) return "ENTITY_INACTIVE";
+  if (entity?.platformStatus === "SUSPENDED") return "ENTITY_SUSPENDED";
+  if (entity?.platformStatus === "READ_ONLY") return "ENTITY_READ_ONLY";
+  if (subscription.state === "CONDITIONAL") return "CONDITIONAL";
+  if (subscription.state === "SUSPENDED") return "SUSPENDED";
+  return null;
 }
 
 // ── مكوّن: ترويسة المحفظة السياقية ──────────────────────────────────
@@ -249,19 +282,26 @@ export default function PortalPage() {
           getMyPaymentRecords().catch(() => [] as PaymentRecord[]),
         ]);
 
-        // اشتراكات تحتاج انتباه
-        const problemSubs = subscriptions.filter(
-          (s) => s.state === "CONDITIONAL" || s.state === "SUSPENDED",
-        );
-
         // بناء خريطة الكيانات
         const entityMap = new Map(entities.map((e) => [e.id, e]));
 
         // الاشتراكات الفعّالة فقط
         const activeSubs = subscriptions.filter((s) => s.state === "ACTIVE" || s.state === "SUPPORTER_ONLY");
+        const readableActiveSubs = activeSubs.filter((s) => {
+          const entityId = s.membership?.entityId;
+          const entity = entityId ? entityMap.get(entityId) : undefined;
+          return entity ? isReadableEntity(entity) : false;
+        });
+
+        // اشتراكات تحتاج انتباه بسبب حالة الاشتراك أو حالة الكيان نفسه
+        const problemSubs = subscriptions.filter((s) => {
+          const entityId = s.membership?.entityId;
+          const entity = entityId ? entityMap.get(entityId) : undefined;
+          return getAttentionState(s, entity) !== null;
+        });
 
         // جلب المحافظ ومساراتها للاشتراكات الفعّالة
-        const uniqueEntityIds = [...new Set(activeSubs.map((s) => s.membership?.entityId).filter(Boolean) as string[])];
+        const uniqueEntityIds = [...new Set(readableActiveSubs.map((s) => s.membership?.entityId).filter(Boolean) as string[])];
 
         const walletsPerEntity = await Promise.all(
           uniqueEntityIds.map((eid) => getEntityWallets(eid).catch(() => [] as Wallet[])),
@@ -271,7 +311,7 @@ export default function PortalPage() {
         // بناء WalletContext لكل اشتراك فعّال
         const contexts: WalletContext[] = [];
 
-        for (const sub of activeSubs) {
+        for (const sub of readableActiveSubs) {
           const entityId = sub.membership?.entityId;
           if (!entityId) continue;
           const entity = entityMap.get(entityId);
@@ -327,6 +367,7 @@ export default function PortalPage() {
             const entityId = s.membership?.entityId ?? "";
             const entity = entityMap.get(entityId);
             const wallets = entityWalletMap.get(entityId) ?? [];
+            const state = getAttentionState(s, entity);
 
             let walletName = "—";
             for (const w of wallets) {
@@ -341,7 +382,7 @@ export default function PortalPage() {
               entityName: entity?.name ?? "—",
               walletName,
               pathName: s.governancePath?.name ?? "—",
-              state: s.state as "CONDITIONAL" | "SUSPENDED",
+              state: state ?? "SUSPENDED",
             };
           }),
         );
@@ -398,7 +439,7 @@ export default function PortalPage() {
                 className={styles.stateBadge}
                 data-state={item.state}
               >
-                {item.state === "CONDITIONAL" ? "مشروط" : "موقوف"}
+                {getAttentionLabel(item.state)}
               </span>
             </div>
           ))}

@@ -34,8 +34,25 @@ export const BENEFICIARY_ROLES: MemberRole[] = [
   "COMMITTEE_MEMBER",
 ];
 
+export function isReadableEntity(entity: Entity) {
+  return (
+    entity.isActive !== false &&
+    entity.platformStatus !== "SUSPENDED"
+  );
+}
+
+export function isOperationalEntity(entity: Entity) {
+  return (
+    isReadableEntity(entity) &&
+    entity.platformStatus !== "READ_ONLY"
+  );
+}
+
 export function hasRole(entity: Entity, roles: readonly MemberRole[]) {
-  return roles.includes(entity.myRole as MemberRole);
+  return (
+    isOperationalEntity(entity) &&
+    roles.includes(entity.myRole as MemberRole)
+  );
 }
 
 export function hasAnyRole(
