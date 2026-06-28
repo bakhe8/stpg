@@ -48,6 +48,84 @@
 /* Empty decision notice */
 .notice { padding: 14px 18px; border-radius: 10px; font-size: 0.88rem; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); }
 
+.previewPanel {
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.previewTitle {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.previewText {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  margin-top: 4px;
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.previewItem {
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.previewItem span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.previewItem strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.previewOutcome {
+  border: 1px solid rgba(245,158,11,0.24);
+  border-radius: 10px;
+  background: rgba(245,158,11,0.08);
+  color: #b45309;
+  padding: 11px 12px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.previewReady {
+  border-color: rgba(16,185,129,0.24);
+  background: rgba(16,185,129,0.1);
+  color: #047857;
+}
+
+.previewBlocked {
+  border-color: rgba(239,68,68,0.24);
+  background: rgba(239,68,68,0.1);
+  color: #b91c1c;
+}
+
 /* States */
 .centered { display: flex; justify-content: center; padding: 60px 0; }
 .spinner { width: 32px; height: 32px; border: 3px solid var(--glass-border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -63,4 +141,5 @@
   .submitBtn { width: 100%; }
   .formGrid { grid-template-columns: 1fr; }
   .fieldRow { grid-template-columns: 1fr; flex-direction: column; }
+  .previewGrid { grid-template-columns: 1fr; }
 }

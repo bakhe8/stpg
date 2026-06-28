@@ -15,6 +15,20 @@
 .cardTitle { font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; }
 
 .description { font-size: 0.95rem; color: var(--text-primary); line-height: 1.7; }
+.linkedAppeal {
+  align-items: center;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  color: var(--accent-strong);
+  display: flex;
+  font-size: 0.84rem;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+.linkedAppealLabel { color: var(--text-secondary); font-weight: 700; }
 .resolution { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.15); border-radius: 8px; padding: 12px; }
 .resolutionLabel { font-size: 0.8rem; font-weight: 600; color: #22c55e; margin-bottom: 6px; }
 

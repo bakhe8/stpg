@@ -32,8 +32,44 @@ interface ActionItem {
   icon: string;
   title: string;
   subtitle: string;
+  reason: string;
+  impact: string;
+  nextStep: string;
   href: string;
   ctaLabel: string;
+}
+
+interface SubscriptionSummary {
+  active: number;
+  conditional: number;
+  supporterOnly: number;
+  overdueAmount: number;
+  entityCount: number;
+}
+
+function buildSubscriptionSummary(
+  subscriptions: Subscription[],
+  paymentDues: PaymentDue[],
+): SubscriptionSummary {
+  return {
+    active: subscriptions.filter(
+      (subscription) => subscription.state === "ACTIVE",
+    ).length,
+    conditional: subscriptions.filter(
+      (subscription) => subscription.state === "CONDITIONAL",
+    ).length,
+    supporterOnly: subscriptions.filter(
+      (subscription) => subscription.state === "SUPPORTER_ONLY",
+    ).length,
+    overdueAmount: paymentDues
+      .filter((due) => due.status === "OVERDUE")
+      .reduce((sum, due) => sum + Number(due.amountDue), 0),
+    entityCount: new Set(
+      subscriptions
+        .map((subscription) => subscription.membership?.entityId)
+        .filter(Boolean),
+    ).size,
+  };
 }
 
 function buildActionItems(
@@ -67,6 +103,17 @@ function buildActionItems(
           : application.status === "UNDER_REVIEW"
             ? t("underReviewSubtitle")
             : t("pendingMembershipSubtitle"),
+        reason: rejected
+          ? t("membershipRejectedReason")
+          : application.status === "UNDER_REVIEW"
+            ? t("membershipUnderReviewReason")
+            : t("membershipPendingReason"),
+        impact: rejected
+          ? t("membershipRejectedImpact")
+          : t("membershipPendingImpact"),
+        nextStep: rejected
+          ? t("membershipRejectedNext")
+          : t("membershipPendingNext"),
         href: rejected ? "/entities" : "/dashboard",
         ctaLabel: rejected ? t("viewOptions") : t("continue"),
       });
@@ -86,6 +133,11 @@ function buildActionItems(
         amount: d.amountDue.toLocaleString("ar-SA"),
         period: d.periodLabel,
       }),
+      reason: t("overdueReason", {
+        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
+      }),
+      impact: t("overdueImpact"),
+      nextStep: t("overdueNext"),
       href: "/portal",
       ctaLabel: t("payNow"),
     });
@@ -105,6 +157,11 @@ function buildActionItems(
         amount: d.amountDue.toLocaleString("ar-SA"),
         date: new Date(d.dueDate).toLocaleDateString("ar-SA"),
       }),
+      reason: t("pendingDueReason", {
+        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
+      }),
+      impact: t("pendingDueImpact"),
+      nextStep: t("pendingDueNext"),
       href: "/portal",
       ctaLabel: t("pay"),
     });
@@ -124,12 +181,53 @@ function buildActionItems(
         amount: r.amount.toLocaleString("ar-SA"),
         period: r.paymentDue?.periodLabel ?? "",
       }),
+      reason: t("proofPendingReason"),
+      impact: t("proofPendingImpact"),
+      nextStep: t("proofPendingNext"),
       href: "/portal",
       ctaLabel: t("continue"),
     });
   });
 
   return items;
+}
+
+function ActionItemCard({
+  item,
+  urgent = false,
+}: {
+  item: ActionItem;
+  urgent?: boolean;
+}) {
+  const t = useTranslations("dashboard");
+
+  return (
+    <Link
+      href={item.href}
+      className={`${styles.actionItem} ${urgent ? styles.actionItemUrgent : ""}`}
+    >
+      <span className={styles.actionIcon}>{item.icon}</span>
+      <div className={styles.actionBody}>
+        <div className={styles.actionTitle}>{item.title}</div>
+        <div className={styles.actionSubtitle}>{item.subtitle}</div>
+        <div className={styles.actionReasonGrid}>
+          <span>
+            <strong>{t("actionWhy")}</strong>
+            {item.reason}
+          </span>
+          <span>
+            <strong>{t("actionImpact")}</strong>
+            {item.impact}
+          </span>
+          <span>
+            <strong>{t("actionNext")}</strong>
+            {item.nextStep}
+          </span>
+        </div>
+      </div>
+      <span className={styles.actionCta}>{item.ctaLabel}</span>
+    </Link>
+  );
 }
 
 // ── كرت الكيان المبسّط (بدون analytics) ─────────────────────────────
@@ -247,10 +345,20 @@ export default function DashboardPage() {
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [overlaps, setOverlaps] = useState<SubscriptionOverlap | null>(null);
   const [suspendedSubs, setSuspendedSubs] = useState<Subscription[]>([]);
+  const [subscriptionSummary, setSubscriptionSummary] =
+    useState<SubscriptionSummary>({
+      active: 0,
+      conditional: 0,
+      supporterOnly: 0,
+      overdueAmount: 0,
+      entityCount: 0,
+    });
   const [showAllItems, setShowAllItems] = useState(false);
   const ACTION_PAGE_SIZE = 8;
   const [personName, setPersonName] = useState("");
-  const [pendingApplications, setPendingApplications] = useState<MembershipApplication[]>([]);
+  const [pendingApplications, setPendingApplications] = useState<
+    MembershipApplication[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -276,8 +384,11 @@ export default function DashboardPage() {
         setActionItems(buildActionItems(dues, records, applications, t));
         setOverlaps(overlapData);
         setSuspendedSubs(allSubs.filter((s) => s.state === "SUSPENDED"));
+        setSubscriptionSummary(buildSubscriptionSummary(allSubs, dues));
         setPendingApplications(
-          applications.filter((a) => a.status === "PENDING" || a.status === "UNDER_REVIEW"),
+          applications.filter(
+            (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
+          ),
         );
       } catch (e) {
         setError(e instanceof Error ? e.message : t("generalError"));
@@ -315,28 +426,42 @@ export default function DashboardPage() {
 
   const urgentItems = actionItems.filter((i) => i.priority === "urgent");
   const normalItems = actionItems.filter((i) => i.priority === "normal");
-  const visibleNormalItems = showAllItems ? normalItems : normalItems.slice(0, Math.max(0, ACTION_PAGE_SIZE - urgentItems.length));
+  const visibleNormalItems = showAllItems
+    ? normalItems
+    : normalItems.slice(0, Math.max(0, ACTION_PAGE_SIZE - urgentItems.length));
   const hiddenCount = normalItems.length - visibleNormalItems.length;
 
   return (
     <div className={styles.page}>
-      
       <section className={styles.intro}>
         <div>
           <span className={styles.introEyebrow}>{t("personalWorkspace")}</span>
-          <h1>{personName ? t("welcomeName", { name: personName }) : t("myOverview")}</h1>
+          <h1>
+            {personName
+              ? t("welcomeName", { name: personName })
+              : t("myOverview")}
+          </h1>
         </div>
       </section>
 
-      
       {suspendedSubs.length > 0 && (
         <div className={styles.suspendedBanner}>
           <span className={styles.overlapIcon}>🔒</span>
           <div>
-            <strong>اشتراكاتك معلّقة في {suspendedSubs.length > 1 ? `${suspendedSubs.length} مسارات` : `مسار "${suspendedSubs[0]?.governancePath?.name ?? ""}"`}</strong>
-            <p className={styles.suspendedBannerNote}>لا يمكنك الاستفادة من هذه المسارات حتى تُعاد تفعيل اشتراكاتك. تواصل مع إدارة الكيان.</p>
+            <strong>
+              اشتراكاتك معلّقة في{" "}
+              {suspendedSubs.length > 1
+                ? `${suspendedSubs.length} مسارات`
+                : `مسار "${suspendedSubs[0]?.governancePath?.name ?? ""}"`}
+            </strong>
+            <p className={styles.suspendedBannerNote}>
+              لا يمكنك الاستفادة من هذه المسارات حتى تُعاد تفعيل اشتراكاتك.
+              تواصل مع إدارة الكيان.
+            </p>
           </div>
-          <Link href="/portal" className={styles.overlapLink}>عرض الاشتراكات</Link>
+          <Link href="/portal" className={styles.overlapLink}>
+            عرض الاشتراكات
+          </Link>
         </div>
       )}
 
@@ -352,10 +477,59 @@ export default function DashboardPage() {
         </div>
       )}
 
-      
+      <section className={styles.relationshipSummary}>
+        <div className={styles.relationshipSummaryText}>
+          <span className={styles.relationshipSummaryEyebrow}>
+            عضويتك التشغيلية
+          </span>
+          <strong>
+            تظهر لك الالتزامات والحقوق حسب الكيان والمحفظة والمسار وحالة
+            الاشتراك.
+          </strong>
+        </div>
+        <div className={styles.relationshipSummaryGrid}>
+          <Link href="/portal" className={styles.relationshipSummaryItem}>
+            <span>اشتراكات نشطة</span>
+            <strong>{subscriptionSummary.active}</strong>
+          </Link>
+          <Link
+            href="/subscriptions"
+            className={styles.relationshipSummaryItem}
+          >
+            <span>مشاركات مشروطة</span>
+            <strong>{subscriptionSummary.conditional}</strong>
+          </Link>
+          <Link
+            href="/subscriptions"
+            className={styles.relationshipSummaryItem}
+          >
+            <span>داعم فقط</span>
+            <strong>{subscriptionSummary.supporterOnly}</strong>
+          </Link>
+          <Link href="/portal" className={styles.relationshipSummaryItem}>
+            <span>متأخرات حالية</span>
+            <strong>
+              {new Intl.NumberFormat("ar-SA").format(
+                subscriptionSummary.overdueAmount,
+              )}{" "}
+              ر.س
+            </strong>
+          </Link>
+        </div>
+        {subscriptionSummary.supporterOnly > 0 && (
+          <div className={styles.supporterOnlyNote}>
+            لديك {subscriptionSummary.supporterOnly} اشتراك داعم فقط: تساهم
+            في الرصيد ولا تملك حق استفادة أو طلب صرف في هذه المسارات.
+          </div>
+        )}
+      </section>
+
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>{t("actionItemsTitle")}</h2>
+          <div>
+            <h2 className={styles.sectionTitle}>{t("actionItemsTitle")}</h2>
+            <p className={styles.sectionHint}>{t("actionItemsHint")}</p>
+          </div>
           {actionItems.length > 0 && (
             <span className={styles.actionCount}>{actionItems.length}</span>
           )}
@@ -368,40 +542,30 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className={styles.actionList}>
+            {urgentItems.length > 0 && (
+              <div className={styles.actionGroupLabel}>
+                <span>{t("actionGroupUrgent")}</span>
+                <strong>{urgentItems.length}</strong>
+              </div>
+            )}
             {urgentItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={`${styles.actionItem} ${styles.actionItemUrgent}`}
-              >
-                <span className={styles.actionIcon}>{item.icon}</span>
-                <div className={styles.actionBody}>
-                  <div className={styles.actionTitle}>{item.title}</div>
-                  <div className={styles.actionSubtitle}>{item.subtitle}</div>
-                </div>
-                <span className={styles.actionCta}>{item.ctaLabel}</span>
-              </Link>
+              <ActionItemCard key={item.id} item={item} urgent />
             ))}
+            {visibleNormalItems.length > 0 && (
+              <div className={styles.actionGroupLabel}>
+                <span>{t("actionGroupNormal")}</span>
+                <strong>{normalItems.length}</strong>
+              </div>
+            )}
             {visibleNormalItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={styles.actionItem}
-              >
-                <span className={styles.actionIcon}>{item.icon}</span>
-                <div className={styles.actionBody}>
-                  <div className={styles.actionTitle}>{item.title}</div>
-                  <div className={styles.actionSubtitle}>{item.subtitle}</div>
-                </div>
-                <span className={styles.actionCta}>{item.ctaLabel}</span>
-              </Link>
+              <ActionItemCard key={item.id} item={item} />
             ))}
             {hiddenCount > 0 && (
               <button
                 className={styles.showMoreBtn}
                 onClick={() => setShowAllItems(true)}
               >
-                عرض {hiddenCount} بند آخر
+                {t("showMoreItems", { count: hiddenCount })}
               </button>
             )}
             {showAllItems && normalItems.length > ACTION_PAGE_SIZE && (
@@ -409,14 +573,13 @@ export default function DashboardPage() {
                 className={styles.showMoreBtn}
                 onClick={() => setShowAllItems(false)}
               >
-                عرض أقل
+                {t("showLessItems")}
               </button>
             )}
           </div>
         )}
       </section>
 
-      
       {/* ── رحلة الانضمام — للطلبات المعلقة ── */}
       {pendingApplications.length > 0 && (
         <section className={styles.section}>
@@ -432,23 +595,37 @@ export default function DashboardPage() {
                     {app.entity?.name ?? t("entityFallback")}
                   </div>
                   <div className={styles.joinTimeline}>
-                    <div className={`${styles.joinStep} ${styles.joinStepDone}`}>
+                    <div
+                      className={`${styles.joinStep} ${styles.joinStepDone}`}
+                    >
                       <span className={styles.joinStepDot} />
-                      <span className={styles.joinStepLabel}>{t("joinStepSubmitted")}</span>
+                      <span className={styles.joinStepLabel}>
+                        {t("joinStepSubmitted")}
+                      </span>
                       <span className={styles.joinStepDate}>
                         {new Date(app.submittedAt).toLocaleDateString("ar-SA")}
                       </span>
                     </div>
-                    <div className={`${styles.joinStep} ${isUnderReview ? styles.joinStepActive : styles.joinStepPending}`}>
+                    <div
+                      className={`${styles.joinStep} ${isUnderReview ? styles.joinStepActive : styles.joinStepPending}`}
+                    >
                       <span className={styles.joinStepDot} />
-                      <span className={styles.joinStepLabel}>{t("joinStepReview")}</span>
+                      <span className={styles.joinStepLabel}>
+                        {t("joinStepReview")}
+                      </span>
                       {isUnderReview && (
-                        <span className={styles.joinStepBadge}>{t("joinStatusUnderReview")}</span>
+                        <span className={styles.joinStepBadge}>
+                          {t("joinStatusUnderReview")}
+                        </span>
                       )}
                     </div>
                     <div className={styles.joinStepPending}>
-                      <span className={`${styles.joinStep} ${styles.joinStepLast}`} />
-                      <span className={styles.joinStepLabel}>{t("joinStepActive")}</span>
+                      <span
+                        className={`${styles.joinStep} ${styles.joinStepLast}`}
+                      />
+                      <span className={styles.joinStepLabel}>
+                        {t("joinStepActive")}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -480,12 +657,26 @@ export default function DashboardPage() {
           <div className={styles.beneficiaryCard}>
             <div className={styles.beneficiaryIcon}>🎁</div>
             <div className={styles.beneficiaryBody}>
-              <div className={styles.beneficiaryTitle}>أنت مستفيد في {entities.filter((e) => e.myRole === "BENEFICIARY").length > 1 ? `${entities.filter((e) => e.myRole === "BENEFICIARY").length} كيانات` : `"${entities.find((e) => e.myRole === "BENEFICIARY")?.name ?? ""}"`}</div>
-              <div className={styles.beneficiaryDesc}>يمكنك تقديم طلبات صرف والاطلاع على حقوقك في المحافظ المخصصة لك.</div>
+              <div className={styles.beneficiaryTitle}>
+                أنت مستفيد في{" "}
+                {entities.filter((e) => e.myRole === "BENEFICIARY").length > 1
+                  ? `${entities.filter((e) => e.myRole === "BENEFICIARY").length} كيانات`
+                  : `"${entities.find((e) => e.myRole === "BENEFICIARY")?.name ?? ""}"`}
+              </div>
+              <div className={styles.beneficiaryDesc}>
+                يمكنك تقديم طلبات صرف والاطلاع على حقوقك في المحافظ المخصصة لك.
+              </div>
             </div>
             <div className={styles.beneficiaryActions}>
-              <Link href="/portal" className={styles.beneficiaryBtn}>محافظي وحقوقي</Link>
-              <Link href="/disbursement-requests" className={styles.beneficiaryBtnSecondary}>طلبات صرف</Link>
+              <Link href="/portal" className={styles.beneficiaryBtn}>
+                محافظي وحقوقي
+              </Link>
+              <Link
+                href="/disbursement-requests"
+                className={styles.beneficiaryBtnSecondary}
+              >
+                طلبات صرف
+              </Link>
             </div>
           </div>
         </section>

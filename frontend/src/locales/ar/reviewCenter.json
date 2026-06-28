@@ -47,6 +47,8 @@
     "member": "عضو",
     "disputeReviewTitle": "نزاع يحتاج إلى مراجعة",
     "disbursementApprovalTitle": "طلب صرف بانتظار الموافقة",
-    "disbursementApprovalSubtitle": "صرف إلى {name} بقيمة {amount} ر.س"
+    "disbursementApprovalSubtitle": "صرف إلى {name} بقيمة {amount} ر.س",
+    "disbursementDecisionRequired": "الاعتماد النهائي يتطلب ربط الطلب بقرار صرف مغلق وموافق عليه.",
+    "openDisbursementReview": "فتح المراجعة المحكومة"
   }
 }

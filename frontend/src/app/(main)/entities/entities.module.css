@@ -1,4 +1,10 @@
-.page { display: flex; flex-direction: column; gap: 24px; width: 100%; /* refresh linter */ }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  /* refresh linter */
+}
 
 .pageHeader {
   display: flex;
@@ -28,13 +34,12 @@
 
 .addBtn:hover {
   transform: translateY(-2px);
-  
 }
 
 /* Form Card */
 .formCard {
   background: var(--glass-bg);
-  
+
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 24px;
@@ -80,7 +85,6 @@
 
 .input:focus {
   border-color: var(--accent-primary);
-  
 }
 
 .submitBtn {
@@ -115,7 +119,6 @@
   align-items: center;
   gap: 16px;
   background: var(--glass-bg);
-  
   border: 1px solid var(--glass-border);
   border-radius: 14px;
   padding: 16px 20px;
@@ -154,12 +157,17 @@
 
 .rowInfo {
   flex: 1;
+  min-width: 0;
 }
 
 .rowName {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .rowType {
@@ -180,6 +188,45 @@
   font-weight: 800;
 }
 
+.operationalMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.operationalMetrics span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.operationalMetrics .metricAttention {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+}
+
+.operationalMetrics .metricDecision {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+.relationshipHint {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
 .statusDot {
   width: 8px;
   height: 8px;
@@ -189,7 +236,9 @@
 
 .rowArrow {
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
   opacity: 0;
   transition: var(--transition-fast);
 }
@@ -220,7 +269,11 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .empty {
   background: var(--glass-bg);
@@ -271,4 +324,32 @@
 .platformBadge[data-status="PENDING_REVIEW"] {
   background: rgba(234, 179, 8, 0.1);
   color: #92400e;
+}
+
+@media (max-width: 720px) {
+  .pageHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .addBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .row {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .rowArrow,
+  .statusDot {
+    display: none;
+  }
+
+  .platformBadge {
+    align-self: flex-start;
+  }
 }

@@ -44,11 +44,26 @@ import { SearchModule } from './search/search.module';
 import { TemporalModule } from './temporal/temporal.module';
 import { SupportModule } from './support/support.module';
 
+function parsePositiveInt(value: string | undefined, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
+const throttleTtlMs = parsePositiveInt(process.env.THROTTLE_TTL_MS, 60000);
+const throttleLimit = parsePositiveInt(
+  process.env.THROTTLE_LIMIT,
+  process.env.NODE_ENV === 'test' ? 1000 : 100,
+);
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: throttleTtlMs, limit: throttleLimit }]),
     ...(process.env.ENABLE_QUEUES === 'true' ? [QueueModule] : []),
     PrismaModule,
     IdentityModule,

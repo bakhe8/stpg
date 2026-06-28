@@ -16,6 +16,22 @@ function formatCurrency(n: number, currency = 'SAR') {
   return new Intl.NumberFormat('ar-SA', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n);
 }
 
+function walletBenefitCopy(benefitType: Wallet['benefitType']) {
+  if (benefitType === 'SHARED') {
+    return {
+      label: 'خدمة مشتركة',
+      short: 'تفيد الجميع حتى غير الدافعين، لذلك راقب التغطية والعجز.',
+      example: 'مثل الحارس، المصعد، الصيانة المشتركة.',
+    };
+  }
+
+  return {
+    label: 'مصلحة فردية',
+    short: 'الاستفادة تخص المشتركين أو المستحقين ويمكن فصلها عند عدم المشاركة.',
+    example: 'مثل العلاج، الزواج، أو دعم حالة محددة.',
+  };
+}
+
 export default function WalletsPage() {
   const [wallets, setWallets] = useState<WalletWithPaths[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +77,8 @@ export default function WalletsPage() {
 
   const totalBalance = filtered.reduce((sum, w) => sum + w.balance, 0);
   const activeCount = filtered.filter((w) => w.isActive).length;
+  const sharedCount = filtered.filter((w) => w.benefitType === 'SHARED').length;
+  const separableCount = filtered.filter((w) => w.benefitType === 'SEPARABLE').length;
 
   if (loading) {
     return (
@@ -84,7 +102,7 @@ export default function WalletsPage() {
         <div>
           <h1 className={styles.pageTitle}>المحافظ</h1>
           <p className={styles.pageSubtitle}>
-            {activeCount} محفظة نشطة · إجمالي {formatCurrency(totalBalance)}
+            {activeCount} محفظة نشطة · {separableCount} مصلحة فردية · {sharedCount} خدمة مشتركة · إجمالي {formatCurrency(totalBalance)}
           </p>
         </div>
         <select
@@ -99,6 +117,21 @@ export default function WalletsPage() {
         </select>
       </div>
 
+      <div className={styles.benefitGuide} aria-label="شرح أنواع المحافظ">
+        <div className={styles.benefitGuideItem}>
+          <span className={`${styles.benefitBadge} ${styles.benefitSeparable}`}>
+            مصلحة فردية
+          </span>
+          <p>حق أو منفعة يمكن ربطها بالمشترك أو المستفيد المحدد. عند التأخر أو عدم الأهلية، يمكن فصل الأثر غالباً.</p>
+        </div>
+        <div className={styles.benefitGuideItem}>
+          <span className={`${styles.benefitBadge} ${styles.benefitShared}`}>
+            خدمة مشتركة
+          </span>
+          <p>خدمة يستفيد منها الجميع مثل الحارس أو المصعد. هنا المهم إظهار نسبة التغطية والعجز، لا التعامل معها كحالة فردية.</p>
+        </div>
+      </div>
+
       {filtered.length === 0 ? (
         <div className={styles.empty}>
           <p>لا توجد محافظ بعد. أنشئ كياناً ثم أضف محفظة من صفحة الكيان.</p>
@@ -106,50 +139,67 @@ export default function WalletsPage() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {filtered.map((wallet) => (
-            <Link key={wallet.id} href={`/wallets/${wallet.id}`} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div className={styles.cardIcon}>⬡</div>
-                <div className={styles.cardMeta}>
-                  <div className={styles.cardName}>{wallet.name}</div>
-                  <div className={styles.cardEntity}>{wallet.entityName}</div>
+          {filtered.map((wallet) => {
+            const benefit = walletBenefitCopy(wallet.benefitType);
+            return (
+              <Link key={wallet.id} href={`/wallets/${wallet.id}`} className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.cardIcon}>⬡</div>
+                  <div className={styles.cardMeta}>
+                    <div className={styles.cardName}>{wallet.name}</div>
+                    <div className={styles.cardEntity}>{wallet.entityName}</div>
+                  </div>
+                  <div
+                    className={styles.statusDot}
+                    style={{ background: wallet.isActive ? '#22c55e' : '#ef4444' }}
+                    title={wallet.isActive ? 'نشطة' : 'مغلقة'}
+                  />
                 </div>
-                <div
-                  className={styles.statusDot}
-                  style={{ background: wallet.isActive ? '#22c55e' : '#ef4444' }}
-                  title={wallet.isActive ? 'نشطة' : 'مغلقة'}
-                />
-              </div>
 
-              <div className={styles.balanceRow}>
-                <span className={styles.balanceLabel}>الرصيد</span>
-                <span className={styles.balanceValue}>
-                  {formatCurrency(wallet.balance, wallet.currency)}
-                </span>
-              </div>
-
-              {wallet.paths.length > 0 && (
-                <div className={styles.pathsList}>
-                  {wallet.paths.slice(0, 3).map((path) => (
-                    <div key={path.id} className={styles.pathRow}>
-                      <span className={styles.pathDot}>◦</span>
-                      <span className={styles.pathName}>{path.name}</span>
-                      <span className={styles.pathBalance}>
-                        {formatCurrency(path.balance, path.currency)}
-                      </span>
-                    </div>
-                  ))}
-                  {wallet.paths.length > 3 && (
-                    <div className={styles.pathRow} style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                      +{wallet.paths.length - 3} مسارات أخرى
-                    </div>
-                  )}
+                <div className={styles.benefitSummary}>
+                  <span
+                    className={`${styles.benefitBadge} ${
+                      wallet.benefitType === 'SHARED'
+                        ? styles.benefitShared
+                        : styles.benefitSeparable
+                    }`}
+                  >
+                    {benefit.label}
+                  </span>
+                  <p>{benefit.short}</p>
+                  <span>{benefit.example}</span>
                 </div>
-              )}
 
-              <div className={styles.cardArrow}>←</div>
-            </Link>
-          ))}
+                <div className={styles.balanceRow}>
+                  <span className={styles.balanceLabel}>الرصيد</span>
+                  <span className={styles.balanceValue}>
+                    {formatCurrency(wallet.balance, wallet.currency)}
+                  </span>
+                </div>
+
+                {wallet.paths.length > 0 && (
+                  <div className={styles.pathsList}>
+                    {wallet.paths.slice(0, 3).map((path) => (
+                      <div key={path.id} className={styles.pathRow}>
+                        <span className={styles.pathDot}>◦</span>
+                        <span className={styles.pathName}>{path.name}</span>
+                        <span className={styles.pathBalance}>
+                          {formatCurrency(path.balance, path.currency)}
+                        </span>
+                      </div>
+                    ))}
+                    {wallet.paths.length > 3 && (
+                      <div className={styles.pathRow} style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        +{wallet.paths.length - 3} مسارات أخرى
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className={styles.cardArrow}>←</div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

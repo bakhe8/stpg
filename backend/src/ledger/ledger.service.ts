@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RulesService } from '../rules/rules.service';
 import {
@@ -234,6 +235,18 @@ export class LedgerService {
 
   // ── تسجيل صرف ────────────────────────────────────────────────────
   async recordDisbursement(adminId: string, dto: RecordDisbursementDto) {
+    try {
+      return await this.recordDisbursementCore(adminId, dto);
+    } catch (error) {
+      await this.auditFinancialValidationFailure(adminId, dto, error);
+      throw error;
+    }
+  }
+
+  private async recordDisbursementCore(
+    adminId: string,
+    dto: RecordDisbursementDto,
+  ) {
     const path = await this.prisma.governancePath.findUnique({
       where: { id: dto.pathId },
       include: {
@@ -250,12 +263,6 @@ export class LedgerService {
     const pathAccount = path.ledgerAccount;
     if (!pathAccount) {
       throw new BadRequestException('لا يوجد حساب دفتري لهذا المسار');
-    }
-
-    if (Number(pathAccount.balance) < dto.amount) {
-      throw new BadRequestException(
-        `الرصيد غير كافٍ — الرصيد الحالي: ${pathAccount.balance.toString()}`,
-      );
     }
 
     const spendingItem = await this.prisma.spendingItem.findUnique({
@@ -312,6 +319,12 @@ export class LedgerService {
       decision.attachments.length + (dto.attachments?.length ?? 0) === 0
     ) {
       throw new BadRequestException('مستندات الإثبات مطلوبة لهذا الصرف');
+    }
+
+    if (Number(pathAccount.balance) < dto.amount) {
+      throw new BadRequestException(
+        `الرصيد غير كافٍ — الرصيد الحالي: ${pathAccount.balance.toString()}`,
+      );
     }
 
     if (spendingItem.maxAmountPerYear) {
@@ -1232,6 +1245,45 @@ export class LedgerService {
       account.governancePath?.wallet.entityId ??
       account.spendingItem?.governancePath.wallet.entityId
     );
+  }
+
+  private async auditFinancialValidationFailure(
+    personId: string,
+    dto: RecordDisbursementDto,
+    error: unknown,
+  ) {
+    try {
+      const path = await this.prisma.governancePath.findUnique({
+        where: { id: dto.pathId },
+        select: { wallet: { select: { entityId: true } } },
+      });
+
+      await this.prisma.auditLog.create({
+        data: {
+          action: AuditAction.REJECT,
+          personId,
+          entityId: path?.wallet.entityId,
+          targetType: 'ledger_validation_failures',
+          targetId: randomUUID(),
+          newValue: {
+            type: 'DISBURSEMENT',
+            status: 'FAILED',
+            pathId: dto.pathId,
+            spendingItemId: dto.spendingItemId,
+            decisionId: dto.decisionId,
+            amount: dto.amount,
+            reason: this.auditFailureMessage(error),
+          },
+        },
+      });
+    } catch {
+      // Validation failure auditing must not hide the original financial error.
+    }
+  }
+
+  private auditFailureMessage(error: unknown) {
+    if (error instanceof Error && error.message) return error.message;
+    return 'Unknown validation failure';
   }
 
   private async requireTreasurerOrAdmin(

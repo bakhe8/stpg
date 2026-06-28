@@ -72,6 +72,73 @@
   background: var(--accent-soft);
 }
 
+.matrixCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.matrixHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrixTitle {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.matrixHint {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.matrixList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matrixRow {
+  display: grid;
+  grid-template-columns: 1.25fr 1.35fr 1.1fr 1fr 1.25fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.matrixRow > div {
+  min-width: 0;
+  background: var(--surface-muted);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrixLabel {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.matrixRow strong {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -170,6 +237,8 @@
 }
 
 @media (max-width: 620px) {
+  .actions { width: 100%; justify-content: space-between; }
+  .matrixRow { grid-template-columns: 1fr; }
   .notifAction {
     display: none;
   }

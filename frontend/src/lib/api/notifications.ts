@@ -11,6 +11,16 @@ export interface Notification {
   targetId?: string;
 }
 
+export interface NotificationRecipientMatrixRow {
+  id: string;
+  event: string;
+  notificationType: string;
+  targetType: string;
+  recipientRule: string;
+  source: string;
+  delivery: string;
+}
+
 interface NotificationResponse extends Omit<Notification, "createdAt"> {
   sentAt: string;
 }
@@ -38,4 +48,10 @@ export function markRead(id: string) {
 
 export function markAllRead() {
   return fetchApi("/notifications/read-all", { method: "PATCH" });
+}
+
+export function getNotificationRecipientMatrix(): Promise<
+  NotificationRecipientMatrixRow[]
+> {
+  return fetchApi("/notifications/recipient-matrix");
 }

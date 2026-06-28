@@ -241,6 +241,103 @@ describe('LedgerService', () => {
     expect(prisma.ledgerTransaction.create).not.toHaveBeenCalled();
   });
 
+  it('validates the governance decision before reporting insufficient balance', async () => {
+    prisma.governancePath.findUnique.mockResolvedValue({
+      id: 'path-id',
+      walletId: 'wallet-id',
+      wallet: { entityId: 'entity-id' },
+      ledgerAccount: { id: 'path-account', balance: 0 },
+      policy: { requiresDocuments: false },
+    });
+    prisma.spendingItem.findUnique.mockResolvedValue({
+      id: 'spending-item-id',
+      governancePathId: 'path-id',
+      isActive: true,
+      ledgerAccount: { id: 'spending-item-account' },
+      maxAmountPerRequest: null,
+      maxAmountPerYear: null,
+      requiresCommitteeApproval: false,
+      requiredDocuments: [],
+    });
+    prisma.decision.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.recordDisbursement('admin-id', {
+        pathId: 'path-id',
+        spendingItemId: 'spending-item-id',
+        decisionId: 'missing-decision-id',
+        amount: 30,
+        description: 'صرف بلا قرار صالح',
+      }),
+    ).rejects.toThrow(
+      'يتطلب الصرف قرار DISBURSE_FUNDS مغلقاً ومعتمداً ومطابقاً',
+    );
+
+    expect(prisma.ledgerTransaction.create).not.toHaveBeenCalled();
+    expect(rulesService.evaluateSpendingRules).not.toHaveBeenCalled();
+  });
+
+  it('records failed disbursement validation attempts in audit log', async () => {
+    prisma.governancePath.findUnique.mockResolvedValue({
+      id: 'path-id',
+      walletId: 'wallet-id',
+      wallet: { entityId: 'entity-id' },
+      ledgerAccount: { id: 'path-account', balance: 10 },
+      policy: { requiresDocuments: false },
+    });
+    prisma.spendingItem.findUnique.mockResolvedValue({
+      id: 'spending-item-id',
+      governancePathId: 'path-id',
+      isActive: true,
+      ledgerAccount: { id: 'spending-item-account' },
+      maxAmountPerRequest: null,
+      maxAmountPerYear: null,
+      requiresCommitteeApproval: false,
+      requiredDocuments: [],
+    });
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      decisionType: DecisionType.DISBURSE_FUNDS,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: 100,
+      votersScope: VotersScope.ALL_MEMBERS,
+      attachments: [],
+    });
+
+    await expect(
+      service.recordDisbursement('admin-id', {
+        pathId: 'path-id',
+        spendingItemId: 'spending-item-id',
+        decisionId: 'decision-id',
+        amount: 50,
+        description: 'صرف يتجاوز الرصيد',
+      }),
+    ).rejects.toThrow('الرصيد غير كافٍ');
+
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'REJECT',
+          personId: 'admin-id',
+          entityId: 'entity-id',
+          targetType: 'ledger_validation_failures',
+          newValue: expect.objectContaining({
+            type: 'DISBURSEMENT',
+            status: 'FAILED',
+            pathId: 'path-id',
+            spendingItemId: 'spending-item-id',
+            decisionId: 'decision-id',
+            amount: 50,
+          }),
+        }),
+      }),
+    );
+    expect(prisma.ledgerTransaction.create).not.toHaveBeenCalled();
+  });
+
   describe('recordEntitySupport', () => {
     const makeSourcePath = (sourceEntityId = 'entity-a') => ({
       id: 'source-path-id',

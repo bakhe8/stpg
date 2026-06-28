@@ -11,6 +11,7 @@ import {
   Subscription,
   approvePaymentRecord,
   cancelPaymentRecord,
+  getEntityPaymentDues,
   getEntityPaymentRecords,
   getMyPaymentDues,
   getMyPaymentRecords,
@@ -20,6 +21,7 @@ import {
 } from "../../../lib/api/subscriptions";
 import { fetchApi } from "../../../lib/api";
 import styles from "./finance.module.css";
+import Breadcrumbs from "../../../components/shared/Breadcrumbs";
 import RequestTimeline, { TimelineStep } from "../../../components/shared/RequestTimeline";
 import PaymentMatchPanel from "../../../components/shared/PaymentMatchPanel";
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
@@ -49,10 +51,36 @@ function formatCurrency(n: number, currency = "SAR") {
   );
 }
 
+function FinancialImpactPreview({
+  title,
+  rows,
+  outcome,
+}: {
+  title: string;
+  rows: Array<{ label: string; value: string }>;
+  outcome: string;
+}) {
+  return (
+    <div className={styles.impactPreview}>
+      <div className={styles.impactTitle}>{title}</div>
+      <div className={styles.impactGrid}>
+        {rows.map((row) => (
+          <div key={row.label}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+      <p>{outcome}</p>
+    </div>
+  );
+}
+
 type Tab = "overview" | "dues" | "payment" | "reviews";
 
 function FinanceContent() {
   const t = useTranslations("finance");
+  const nav = useTranslations("nav");
   const searchParams = useSearchParams();
   const [entities, setEntities] = useState<Entity[]>([]);
   const [selectedId, setSelectedId] = useState(
@@ -61,6 +89,7 @@ function FinanceContent() {
   const [summary, setSummary] = useState<EntitySummary | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [paymentDues, setPaymentDues] = useState<PaymentDue[]>([]);
+  const [entityPaymentDues, setEntityPaymentDues] = useState<PaymentDue[]>([]);
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [entityPaymentRecords, setEntityPaymentRecords] = useState<
     PaymentRecord[] | null
@@ -157,6 +186,7 @@ function FinanceContent() {
           nextDues,
           nextRecords,
           nextReviews,
+          nextEntityDues,
         ] = await Promise.all([
           getEntitySummary(entityId),
           getSubscriptions(canManageSubscriptions ? { entityId } : {}),
@@ -165,6 +195,9 @@ function FinanceContent() {
           canReviewPayments
             ? getEntityPaymentRecords(entityId)
             : Promise.resolve(null),
+          canReviewPayments
+            ? getEntityPaymentDues(entityId).catch(() => [] as PaymentDue[])
+            : Promise.resolve([] as PaymentDue[]),
         ]);
         setSummary(nextSummary);
         setSubscriptions(
@@ -173,6 +206,7 @@ function FinanceContent() {
           ),
         );
         setPaymentDues(nextDues);
+        setEntityPaymentDues(nextEntityDues);
         setPaymentRecords(nextRecords);
         setEntityPaymentRecords(nextReviews);
       } catch (e) {
@@ -290,9 +324,52 @@ function FinanceContent() {
   const totalBalance =
     summary?.wallets.reduce((sum, wallet) => sum + (wallet.balance ?? 0), 0) ??
     0;
+  const duesForExplanation = canReview ? entityPaymentDues : visibleDues;
+  const recordsForExplanation = canReview ? reviewRecords : myEntityRecords;
+  const confirmedRecords = recordsForExplanation.filter(
+    (record) => record.status === "CONFIRMED",
+  );
+  const pendingReviewRecords = recordsForExplanation.filter(
+    (record) => record.status === "SUBMITTED" || record.status === "PROCESSING",
+  );
+  const rejectedRecords = recordsForExplanation.filter(
+    (record) => record.status === "REJECTED",
+  );
+  const confirmedAmount = confirmedRecords.reduce(
+    (sum, record) => sum + Number(record.amount ?? 0),
+    0,
+  );
+  const pendingReviewAmount = pendingReviewRecords.reduce(
+    (sum, record) => sum + Number(record.amount ?? 0),
+    0,
+  );
+  const unsettledDuesAmount = duesForExplanation
+    .filter((due) => due.status === "PENDING" || due.status === "OVERDUE")
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const overdueDuesAmount = duesForExplanation
+    .filter((due) => due.status === "OVERDUE")
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const latestConfirmedRecord = [...confirmedRecords].sort(
+    (a, b) =>
+      new Date(
+        b.confirmedAt ?? b.reviewedAt ?? b.submittedAt,
+      ).getTime() -
+      new Date(a.confirmedAt ?? a.reviewedAt ?? a.submittedAt).getTime(),
+  )[0];
+  const latestReviewerText = latestConfirmedRecord?.reviewedById
+    ? t("balanceExplanationReviewerId", {
+        id: latestConfirmedRecord.reviewedById.slice(0, 8),
+      })
+    : t("balanceExplanationReviewerAudit");
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("finance") },
+        ]}
+      />
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t("title")}</h1>
         <select
@@ -307,6 +384,7 @@ function FinanceContent() {
             setSummary(null);
             setSubscriptions([]);
             setPaymentDues([]);
+            setEntityPaymentDues([]);
             setPaymentRecords([]);
             setEntityPaymentRecords(null);
             setPayForm({ paymentDueId: "", reference: "", description: "" });
@@ -369,6 +447,66 @@ function FinanceContent() {
               <div className={styles.kpiLabel}>{t("kpiActiveSubs")}</div>
             </div>
           </div>
+
+          <section className={styles.balanceExplanation}>
+            <div className={styles.balanceExplanationHeader}>
+              <div>
+                <h2 className={styles.balanceExplanationTitle}>
+                  {t("balanceExplanationTitle")}
+                </h2>
+                <p className={styles.balanceExplanationText}>
+                  {t("balanceExplanationText")}
+                </p>
+              </div>
+              <span className={styles.balanceExplanationScope}>
+                {canReview
+                  ? t("balanceExplanationScopeEntity")
+                  : t("balanceExplanationScopeMember")}
+              </span>
+            </div>
+            <div className={styles.balanceExplanationGrid}>
+              <div>
+                <span>{t("balanceExplanationCurrent")}</span>
+                <strong>{formatCurrency(totalBalance)}</strong>
+              </div>
+              <div>
+                <span>{t("balanceExplanationConfirmed")}</span>
+                <strong>{formatCurrency(confirmedAmount)}</strong>
+              </div>
+              <div>
+                <span>{t("balanceExplanationPending")}</span>
+                <strong>{formatCurrency(pendingReviewAmount)}</strong>
+              </div>
+              <div>
+                <span>{t("balanceExplanationUnsettled")}</span>
+                <strong>{formatCurrency(unsettledDuesAmount)}</strong>
+              </div>
+            </div>
+            <div className={styles.balanceExplanationNotes}>
+              <p>
+                {latestConfirmedRecord
+                  ? t("balanceExplanationLatest", {
+                      member:
+                        latestConfirmedRecord.subscription.membership.person
+                          .name,
+                      path: latestConfirmedRecord.subscription.governancePath
+                        .name,
+                      amount: formatCurrency(
+                        Number(latestConfirmedRecord.amount ?? 0),
+                      ),
+                    })
+                  : t("balanceExplanationNoLatest")}
+              </p>
+              <p>{latestReviewerText}</p>
+              <p>
+                {t("balanceExplanationDues", {
+                  overdue: formatCurrency(overdueDuesAmount),
+                  rejected: rejectedRecords.length,
+                })}
+              </p>
+              <p>{t("balanceExplanationAudit")}</p>
+            </div>
+          </section>
 
           <div className={styles.tabs}>
             <button
@@ -480,6 +618,29 @@ function FinanceContent() {
                             </span>
                           </div>
                         </div>
+                        <FinancialImpactPreview
+                          title={t("dueImpactTitle")}
+                          rows={[
+                            {
+                              label: t("impactSource"),
+                              value: t("impactSourceMember"),
+                            },
+                            {
+                              label: t("impactTarget"),
+                              value:
+                                due.subscription?.governancePath.name ?? "—",
+                            },
+                            {
+                              label: t("impactAmount"),
+                              value: formatCurrency(Number(due.amountDue)),
+                            },
+                            {
+                              label: t("impactDecision"),
+                              value: t("impactNoDecisionPayment"),
+                            },
+                          ]}
+                          outcome={t("dueImpactOutcome")}
+                        />
                         <div className={styles.actionRow}>
                           <button
                             type="button"
@@ -576,22 +737,34 @@ function FinanceContent() {
                   </div>
 
                   {selectedDue && (
-                    <div className={styles.infoBox}>
-                      <div>
-                        {t("infoPath")}{" "}
-                        {selectedDue.subscription?.governancePath.name ?? "—"}
-                      </div>
-                      <div>
-                        {t("infoAmount")}{" "}
-                        {formatCurrency(Number(selectedDue.amountDue))}
-                      </div>
-                      <div>
-                        {t("infoDueDate")}{" "}
-                        {new Date(selectedDue.dueDate).toLocaleDateString(
-                          "ar-SA",
-                        )}
-                      </div>
-                    </div>
+                    <FinancialImpactPreview
+                      title={t("paymentImpactTitle")}
+                      rows={[
+                        {
+                          label: t("impactSource"),
+                          value: t("impactSourceMember"),
+                        },
+                        {
+                          label: t("impactTarget"),
+                          value:
+                            selectedDue.subscription?.governancePath.name ??
+                            "—",
+                        },
+                        {
+                          label: t("impactAmount"),
+                          value: formatCurrency(
+                            Number(selectedDue.amountDue),
+                          ),
+                        },
+                        {
+                          label: t("impactDueDate"),
+                          value: new Date(
+                            selectedDue.dueDate,
+                          ).toLocaleDateString("ar-SA"),
+                        },
+                      ]}
+                      outcome={t("paymentImpactOutcome")}
+                    />
                   )}
 
                   <div className={styles.fieldRow}>
@@ -730,21 +903,48 @@ function FinanceContent() {
                               </button>
                             </div>
                           ) : (
-                            <div className={styles.actionRow}>
-                              <button
-                                type="button"
-                                className={styles.secondaryBtn}
-                                disabled={reviewingId === record.id}
-                                onClick={() =>
-                                  setPendingConfirm({
-                                    id: record.id,
-                                    action: "cancel",
-                                  })
-                                }
-                              >
-                                {t("cancelProof")}
-                              </button>
-                            </div>
+                            <>
+                              <FinancialImpactPreview
+                                title={t("cancelImpactTitle")}
+                                rows={[
+                                  {
+                                    label: t("impactSource"),
+                                    value: record.reference,
+                                  },
+                                  {
+                                    label: t("impactTarget"),
+                                    value:
+                                      record.subscription.governancePath.name,
+                                  },
+                                  {
+                                    label: t("impactAmount"),
+                                    value: formatCurrency(
+                                      Number(record.amount),
+                                    ),
+                                  },
+                                  {
+                                    label: t("impactDecision"),
+                                    value: t("impactNoDecisionPayment"),
+                                  },
+                                ]}
+                                outcome={t("cancelImpactOutcome")}
+                              />
+                              <div className={styles.actionRow}>
+                                <button
+                                  type="button"
+                                  className={styles.secondaryBtn}
+                                  disabled={reviewingId === record.id}
+                                  onClick={() =>
+                                    setPendingConfirm({
+                                      id: record.id,
+                                      action: "cancel",
+                                    })
+                                  }
+                                >
+                                  {t("cancelProof")}
+                                </button>
+                              </div>
+                            </>
                           ))}
                       </div>
                     ))}
@@ -810,6 +1010,28 @@ function FinanceContent() {
                         required={Number(record.paymentDue.amountDue)}
                         submitted={Number(record.amount)}
                         period={record.paymentDue.periodLabel}
+                      />
+                      <FinancialImpactPreview
+                        title={t("reviewImpactTitle")}
+                        rows={[
+                          {
+                            label: t("impactSource"),
+                            value: `${record.subscription.membership.person.name} · ${record.reference}`,
+                          },
+                          {
+                            label: t("impactTarget"),
+                            value: record.subscription.governancePath.name,
+                          },
+                          {
+                            label: t("impactAmount"),
+                            value: formatCurrency(Number(record.amount)),
+                          },
+                          {
+                            label: t("impactDecision"),
+                            value: t("impactNoDecisionReview"),
+                          },
+                        ]}
+                        outcome={t("reviewImpactOutcome")}
                       />
                       <RequestTimeline steps={buildPaymentTimeline(record, timelineLabels)} compact />
                       {record.description && (

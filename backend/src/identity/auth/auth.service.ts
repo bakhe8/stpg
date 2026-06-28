@@ -154,11 +154,13 @@ export class AuthService {
     });
 
     if (!person || !person.passwordHash) {
+      await this.auditFailedLogin(phoneNumber, 'NO_ACCOUNT_OR_PASSWORD');
       throw new BadRequestException('رقم الجوال أو كلمة المرور غير صحيحة');
     }
 
     const isMatch = await bcrypt.compare(password, person.passwordHash);
     if (!isMatch) {
+      await this.auditFailedLogin(phoneNumber, 'PASSWORD_MISMATCH', person.id);
       throw new BadRequestException('رقم الجوال أو كلمة المرور غير صحيحة');
     }
 
@@ -598,5 +600,35 @@ export class AuthService {
       refreshToken,
       person: { id: person.id, name: person.name, username: person.username },
     };
+  }
+
+  private async auditFailedLogin(
+    phoneNumber: string,
+    reason: string,
+    personId?: string,
+  ) {
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          action: AuditAction.LOGIN,
+          personId,
+          targetType: 'auth_attempts',
+          targetId: randomUUID(),
+          newValue: {
+            status: 'FAILED',
+            reason,
+            phoneHint: this.maskPhoneForAudit(phoneNumber),
+          },
+        },
+      });
+    } catch {
+      // Login failure auditing must not change the public auth response.
+    }
+  }
+
+  private maskPhoneForAudit(phoneNumber: string) {
+    const digits = phoneNumber.replace(/\D/g, '');
+    if (digits.length <= 4) return '****';
+    return `****${digits.slice(-4)}`;
   }
 }

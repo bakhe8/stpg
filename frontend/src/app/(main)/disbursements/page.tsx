@@ -20,6 +20,13 @@ import ConfirmActionDialog from "../../../components/shared/ConfirmActionDialog"
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
 import styles from "./disbursements.module.css";
 
+function formatCurrency(amount: number, currency = "SAR") {
+  return new Intl.NumberFormat("ar-SA", {
+    style: "currency",
+    currency,
+  }).format(amount);
+}
+
 export default function DisbursementsPage() {
   const t = useTranslations("disbursements");
   const tCommon = useTranslations("common");
@@ -51,6 +58,54 @@ export default function DisbursementsPage() {
       d.status === "CLOSED" &&
       d.result === "APPROVED",
   );
+  const selectedEntity = entities.find((entity) => entity.id === entityId);
+  const selectedWallet = wallets.find((wallet) => wallet.id === walletId);
+  const selectedPath = paths.find((path) => path.id === pathId);
+  const selectedSpendingItem = spendingItems.find(
+    (item) => item.id === form.spendingItemId,
+  );
+  const selectedDecision = approvedDecisions.find(
+    (decision) => decision.id === form.decisionId,
+  );
+  const amountValue = Number.parseFloat(form.amount);
+  const hasValidAmount = Number.isFinite(amountValue) && amountValue > 0;
+  const previewCurrency = selectedPath?.currency ?? "SAR";
+  const projectedBalance =
+    pathBalance !== null && hasValidAmount ? pathBalance - amountValue : null;
+  const amountExceedsBalance =
+    projectedBalance !== null && projectedBalance < 0;
+  const spendingCap = selectedSpendingItem?.maxAmountPerRequest;
+  const exceedsSpendingCap =
+    spendingCap !== undefined &&
+    spendingCap !== null &&
+    hasValidAmount &&
+    amountValue > Number(spendingCap);
+  const decisionCap = selectedDecision?.amount;
+  const exceedsDecisionCap =
+    decisionCap !== undefined &&
+    decisionCap !== null &&
+    hasValidAmount &&
+    amountValue > Number(decisionCap);
+  const previewBlocksSubmit =
+    amountExceedsBalance || exceedsSpendingCap || exceedsDecisionCap;
+  const previewReady =
+    Boolean(
+      selectedPath &&
+        selectedSpendingItem &&
+        selectedDecision &&
+        hasValidAmount,
+    ) &&
+    !previewBlocksSubmit;
+
+  function resetForm() {
+    setForm({
+      spendingItemId: "",
+      decisionId: "",
+      amount: "",
+      description: "",
+      reference: "",
+    });
+  }
 
   useEffect(() => {
     getEntities()
@@ -96,6 +151,7 @@ export default function DisbursementsPage() {
 
   function handleSubmitRequest(e: React.FormEvent) {
     e.preventDefault();
+    if (previewBlocksSubmit || !previewReady) return;
     setConfirmPending(true);
   }
 
@@ -131,7 +187,13 @@ export default function DisbursementsPage() {
           <select
             className={styles.select}
             value={entityId}
-            onChange={(e) => { setEntityId(e.target.value); setMsg(null); }}
+            onChange={(e) => {
+              setEntityId(e.target.value);
+              setWalletId("");
+              setPathId("");
+              resetForm();
+              setMsg(null);
+            }}
             title={tCommon('chooseEntity')}
           >
             <option value="">{tCommon('chooseEntity')}</option>
@@ -143,7 +205,12 @@ export default function DisbursementsPage() {
             <select
               className={styles.select}
               value={walletId}
-              onChange={(e) => setWalletId(e.target.value)}
+              onChange={(e) => {
+                setWalletId(e.target.value);
+                setPathId("");
+                resetForm();
+                setMsg(null);
+              }}
               title={tCommon('chooseWallet')}
             >
               <option value="">{tCommon('chooseWallet')}</option>
@@ -156,7 +223,11 @@ export default function DisbursementsPage() {
             <select
               className={styles.select}
               value={pathId}
-              onChange={(e) => { setPathId(e.target.value); setMsg(null); }}
+              onChange={(e) => {
+                setPathId(e.target.value);
+                resetForm();
+                setMsg(null);
+              }}
               title={tCommon('choosePath')}
             >
               <option value="">{tCommon('choosePath')}</option>
@@ -194,16 +265,24 @@ export default function DisbursementsPage() {
             <div className={styles.balanceStrip}>
               <span className={styles.balanceLabel}>{t('currentBalance')}</span>
               <span className={styles.balanceValue}>
-                {pathBalance.toLocaleString("ar-SA", { minimumFractionDigits: 2 })} {t('sar', { fallback: 'ر.س' })}
+                {formatCurrency(pathBalance, previewCurrency)}
               </span>
             </div>
           )}
 
           {confirmPending && (
             <ConfirmActionDialog
-              title={`تنفيذ صرف ${form.amount ? Number(form.amount).toLocaleString("ar-SA") : ""} ر.س`}
-              description="هذه العملية ستُسجَّل في دفتر الأستاذ المالي ولا يمكن التراجع عنها. تأكد أن القرار المرتبط صحيح."
-              confirmLabel="تأكيد الصرف"
+              title={t("confirmTitle", {
+                amount: hasValidAmount
+                  ? formatCurrency(amountValue, previewCurrency)
+                  : "—",
+              })}
+              description={t("confirmDescription", {
+                source: selectedPath?.name ?? "—",
+                target: selectedSpendingItem?.name ?? "—",
+                decision: selectedDecision?.title ?? "—",
+              })}
+              confirmLabel={t("confirmLabel")}
               danger={true}
               loading={submitting}
               onConfirm={() => void handleSubmit()}
@@ -285,6 +364,101 @@ export default function DisbursementsPage() {
                     placeholder={t('descriptionPlaceholder')}
                   />
                 </div>
+                <div className={styles.previewPanel}>
+                  <div className={styles.previewHeader}>
+                    <div>
+                      <div className={styles.previewTitle}>
+                        {t("previewTitle")}
+                      </div>
+                      <div className={styles.previewText}>
+                        {t("previewText")}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.previewGrid}>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewEntity")}</span>
+                      <strong>{selectedEntity?.name ?? "—"}</strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewSource")}</span>
+                      <strong>
+                        {selectedWallet && selectedPath
+                          ? `${selectedWallet.name} / ${selectedPath.name}`
+                          : "—"}
+                      </strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewDestination")}</span>
+                      <strong>{selectedSpendingItem?.name ?? "—"}</strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewDecision")}</span>
+                      <strong>{selectedDecision?.title ?? "—"}</strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewAmount")}</span>
+                      <strong>
+                        {hasValidAmount
+                          ? formatCurrency(amountValue, previewCurrency)
+                          : "—"}
+                      </strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewBalanceBefore")}</span>
+                      <strong>
+                        {pathBalance !== null
+                          ? formatCurrency(pathBalance, previewCurrency)
+                          : "—"}
+                      </strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewBalanceAfter")}</span>
+                      <strong>
+                        {projectedBalance !== null
+                          ? formatCurrency(projectedBalance, previewCurrency)
+                          : "—"}
+                      </strong>
+                    </div>
+                    <div className={styles.previewItem}>
+                      <span>{t("previewDecisionLimit")}</span>
+                      <strong>
+                        {decisionCap !== undefined && decisionCap !== null
+                          ? formatCurrency(Number(decisionCap), previewCurrency)
+                          : t("notLimited")}
+                      </strong>
+                    </div>
+                  </div>
+                  <div
+                    className={`${styles.previewOutcome} ${
+                      previewBlocksSubmit
+                        ? styles.previewBlocked
+                        : previewReady
+                          ? styles.previewReady
+                          : ""
+                    }`}
+                  >
+                    {amountExceedsBalance
+                      ? t("previewInsufficientBalance")
+                      : exceedsSpendingCap
+                        ? t("previewSpendingCap", {
+                            amount: formatCurrency(
+                              Number(spendingCap),
+                              previewCurrency,
+                            ),
+                          })
+                        : exceedsDecisionCap
+                          ? t("previewDecisionCap", {
+                              amount: formatCurrency(
+                                Number(decisionCap),
+                                previewCurrency,
+                              ),
+                            })
+                          : previewReady
+                            ? t("previewReady")
+                            : t("previewNeedsSelection")}
+                  </div>
+                </div>
                 <button
                   type="submit"
                   className={styles.submitBtn}
@@ -293,7 +467,8 @@ export default function DisbursementsPage() {
                     !form.spendingItemId ||
                     !form.decisionId ||
                     !form.amount ||
-                    !form.description
+                    !form.description ||
+                    previewBlocksSubmit
                   }
                 >
                   {submitting ? t('submitting') : t('submitBtn')}

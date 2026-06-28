@@ -1,0 +1,37 @@
+.breadcrumbs {
+  align-items: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  gap: 7px;
+}
+
+.item {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.link {
+  align-items: center;
+  color: var(--accent-primary);
+  display: inline-flex;
+  font-weight: 800;
+  min-height: 40px;
+  padding: 4px 2px;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.separator {
+  color: var(--text-muted);
+}
+
+.current {
+  color: var(--text-primary);
+  font-weight: 800;
+}

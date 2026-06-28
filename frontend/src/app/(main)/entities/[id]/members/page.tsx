@@ -19,6 +19,13 @@ import {
   rejectMembershipApplication,
   MembershipApplication,
 } from "../../../../../lib/api/membership-applications";
+import Breadcrumbs from "../../../../../components/shared/Breadcrumbs";
+import {
+  getEntityPaymentDues,
+  getSubscriptions,
+  PaymentDue,
+  Subscription,
+} from "../../../../../lib/api/subscriptions";
 import type { Translator } from "../../../../../lib/i18n";
 import styles from "./members.module.css";
 import RequestTimeline, {
@@ -66,6 +73,11 @@ const ROLES_ASSIGNABLE = [
   "COMMITTEE_MEMBER",
 ];
 
+function toNumber(value: unknown): number {
+  const numberValue = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
 function canManage(myRole: string | null | undefined) {
   return myRole === "FOUNDER" || myRole === "ADMIN";
 }
@@ -78,6 +90,7 @@ export default function MembersPage({
   const { id: entityId } = use(params);
   const t = useTranslations("entities");
   const tCommon = useTranslations("common");
+  const nav = useTranslations("nav");
 
   const getRoleLabel = (role: string) => {
     const key = `role${role
@@ -90,6 +103,8 @@ export default function MembersPage({
   const [entity, setEntity] = useState<Entity | null>(null);
   const [members, setMembers] = useState<EntityMember[]>([]);
   const [applications, setApplications] = useState<MembershipApplication[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [paymentDues, setPaymentDues] = useState<PaymentDue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -109,15 +124,19 @@ export default function MembersPage({
     setLoading(true);
     setError("");
     try {
-      const [ent, mems, apps] = await Promise.all([
+      const [ent, mems, apps, subs, dues] = await Promise.all([
         getEntity(entityId),
         getEntityMembers(entityId),
         getEntityMembershipApplications(entityId).catch(
           () => [] as MembershipApplication[],
         ),
+        getSubscriptions({ entityId }).catch(() => [] as Subscription[]),
+        getEntityPaymentDues(entityId).catch(() => [] as PaymentDue[]),
       ]);
       setEntity(ent);
       setMembers(mems);
+      setSubscriptions(subs);
+      setPaymentDues(dues);
       setApplications(
         apps.filter(
           (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
@@ -169,9 +188,173 @@ export default function MembersPage({
   const manage = canManage(entity.myRole);
   const activeMembers = members.filter((m) => m.isActive);
   const inactiveMembers = members.filter((m) => !m.isActive);
+  const formatMoney = (amount: number) =>
+    `${amount.toLocaleString("ar-SA", { maximumFractionDigits: 0 })} ر.س`;
+  const buildMemberDisputeHref = (member: EntityMember) => {
+    const params = new URLSearchParams({
+      entityId,
+      respondentId: member.person.id,
+      respondentName: member.person.name,
+    });
+    return `/disputes?${params.toString()}`;
+  };
+
+  const buildMemberOperationalSummary = (member: EntityMember) => {
+    const memberSubscriptions = subscriptions.filter(
+      (subscription) =>
+        subscription.state !== "EXITED" &&
+        (subscription.membershipId === member.id ||
+          subscription.membership?.id === member.id ||
+          subscription.membership?.person.id === member.person.id),
+    );
+    const memberDues = paymentDues.filter(
+      (due) =>
+        due.subscription?.membership?.id === member.id ||
+        due.subscription?.membership?.person?.id === member.person.id,
+    );
+    const overdueAmount = memberDues
+      .filter((due) => due.status === "OVERDUE")
+      .reduce((sum, due) => sum + toNumber(due.amountDue), 0);
+    const pendingAmount = memberDues
+      .filter((due) => due.status === "PENDING")
+      .reduce((sum, due) => sum + toNumber(due.amountDue), 0);
+    const activePathCount = memberSubscriptions.filter(
+      (subscription) => subscription.state === "ACTIVE",
+    ).length;
+    const conditionalPathCount = memberSubscriptions.filter(
+      (subscription) => subscription.state === "CONDITIONAL",
+    ).length;
+    const supporterOnlyPathCount = memberSubscriptions.filter(
+      (subscription) => subscription.state === "SUPPORTER_ONLY",
+    ).length;
+    const suspendedPathCount = memberSubscriptions.filter(
+      (subscription) => subscription.state === "SUSPENDED",
+    ).length;
+    const pathNames = Array.from(
+      new Set(
+        memberSubscriptions
+          .map((subscription) => subscription.governancePath?.name)
+          .filter(Boolean),
+      ),
+    ) as string[];
+
+    let rightsText = t("memberOpsRightsNoSubscription");
+    if (!member.isActive) {
+      rightsText = t("memberOpsRightsInactive");
+    } else if (supporterOnlyPathCount > 0 && activePathCount === 0) {
+      rightsText = t("memberOpsRightsSupporterOnly");
+    } else if (conditionalPathCount > 0) {
+      rightsText = t("memberOpsRightsConditional");
+    } else if (suspendedPathCount > 0 && activePathCount === 0) {
+      rightsText = t("memberOpsRightsSuspended");
+    } else if (activePathCount > 0) {
+      rightsText = t("memberOpsRightsActive", { count: activePathCount });
+    }
+
+    return {
+      activePathCount,
+      conditionalPathCount,
+      supporterOnlyPathCount,
+      suspendedPathCount,
+      pathNames,
+      overdueAmount,
+      pendingAmount,
+      rightsText,
+    };
+  };
+
+  const renderMemberOperationalSummary = (member: EntityMember) => {
+    const summary = buildMemberOperationalSummary(member);
+    const totalDue = summary.overdueAmount + summary.pendingAmount;
+    const dueLabel =
+      totalDue <= 0
+        ? t("memberOpsNoDue")
+        : summary.overdueAmount > 0
+          ? t("memberOpsDueOverdue", {
+              amount: formatMoney(summary.overdueAmount),
+            })
+          : t("memberOpsDuePending", {
+              amount: formatMoney(summary.pendingAmount),
+            });
+
+    return (
+      <div className={styles.memberOperational}>
+        <div className={styles.memberOperationalHeader}>
+          <span>{t("memberOpsTitle")}</span>
+          <span
+            className={
+              totalDue > 0 ? styles.memberDueWarning : styles.memberDueOk
+            }
+          >
+            {dueLabel}
+          </span>
+        </div>
+        <div className={styles.memberMetrics}>
+          <span>
+            {t("memberOpsActivePaths", {
+              count: summary.activePathCount,
+            })}
+          </span>
+          {summary.conditionalPathCount > 0 && (
+            <span>
+              {t("memberOpsConditionalPaths", {
+                count: summary.conditionalPathCount,
+              })}
+            </span>
+          )}
+          {summary.supporterOnlyPathCount > 0 && (
+            <span>
+              {t("memberOpsSupporterOnlyPaths", {
+                count: summary.supporterOnlyPathCount,
+              })}
+            </span>
+          )}
+          {summary.suspendedPathCount > 0 && (
+            <span>
+              {t("memberOpsSuspendedPaths", {
+                count: summary.suspendedPathCount,
+              })}
+            </span>
+          )}
+        </div>
+        <p className={styles.memberRightsText}>{summary.rightsText}</p>
+        {summary.pathNames.length > 0 ? (
+          <div className={styles.memberPathChips}>
+            <span className={styles.memberPathLabel}>
+              {t("memberOpsPathsLabel")}
+            </span>
+            {summary.pathNames.slice(0, 3).map((pathName) => (
+              <span key={pathName} className={styles.memberPathChip}>
+                {pathName}
+              </span>
+            ))}
+            {summary.pathNames.length > 3 && (
+              <span className={styles.memberPathChip}>
+                {t("memberOpsMorePaths", {
+                  count: summary.pathNames.length - 3,
+                })}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className={styles.memberNoPaths}>
+            {t("memberOpsNoPaths")}
+          </span>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("entities"), href: "/entities" },
+          { label: entity.name, href: `/entities/${entityId}` },
+          { label: t("membersTitle") },
+        ]}
+      />
       <header className={styles.pageHeader}>
         <div className={styles.breadcrumb}>
           <Link href={`/entities/${entityId}`} className={styles.backLink}>
@@ -327,6 +510,8 @@ export default function MembersPage({
                 </span>
               )}
 
+              {renderMemberOperationalSummary(m)}
+
               {manage && confirmRemoveId === m.id ? (
                 <div className={styles.confirmRow}>
                   <span className={styles.confirmText}>
@@ -350,6 +535,12 @@ export default function MembersPage({
                 </div>
               ) : manage && m.role !== "FOUNDER" ? (
                 <div className={styles.cardActions}>
+                  <Link
+                    href={buildMemberDisputeHref(m)}
+                    className={styles.ghostBtn}
+                  >
+                    {t("openMemberDispute")}
+                  </Link>
                   <button
                     className={styles.ghostBtn}
                     onClick={() => {
@@ -395,6 +586,7 @@ export default function MembersPage({
                 <span className={styles.roleBadge} data-role="INACTIVE">
                   {t("statusInactive")}
                 </span>
+                {renderMemberOperationalSummary(m)}
                 {manage && (
                   <button
                     className={styles.approveBtn}

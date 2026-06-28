@@ -26,6 +26,7 @@ export class DisputesService {
 
     let walletId = dto.walletId ?? null;
     let governancePathId = dto.governancePathId ?? null;
+    const disbursementRequestId = dto.disbursementRequestId ?? null;
 
     if (walletId) {
       const wallet = await this.prisma.wallet.findUnique({
@@ -127,6 +128,46 @@ export class DisputesService {
       }
     }
 
+    if (disbursementRequestId) {
+      const disbursementRequest =
+        await this.prisma.disbursementRequest.findUnique({
+          where: { id: disbursementRequestId },
+          select: {
+            id: true,
+            governancePathId: true,
+            governancePath: {
+              select: {
+                walletId: true,
+                wallet: { select: { entityId: true } },
+              },
+            },
+          },
+        });
+      if (!disbursementRequest) {
+        throw new NotFoundException('طلب الصرف المرتبط غير موجود');
+      }
+      if (disbursementRequest.governancePath.wallet.entityId !== dto.entityId) {
+        throw new BadRequestException(
+          'طلب الصرف المرتبط لا ينتمي إلى هذا الكيان',
+        );
+      }
+      if (
+        governancePathId &&
+        governancePathId !== disbursementRequest.governancePathId
+      ) {
+        throw new BadRequestException(
+          'طلب الصرف المرتبط لا ينتمي إلى مسار الحوكمة المحدد',
+        );
+      }
+      if (walletId && walletId !== disbursementRequest.governancePath.walletId) {
+        throw new BadRequestException(
+          'طلب الصرف المرتبط لا ينتمي إلى المحفظة المحددة',
+        );
+      }
+      governancePathId = disbursementRequest.governancePathId;
+      walletId = disbursementRequest.governancePath.walletId;
+    }
+
     const disputeRules = await this.rulesService.evaluateDisputeRules({
       entityId: dto.entityId,
       walletId,
@@ -162,10 +203,20 @@ export class DisputesService {
         deadline: dto.deadline ? new Date(dto.deadline) : undefined,
         status: DisputeStatus.OPEN,
         linkedAppealId: dto.linkedAppealId,
+        disbursementRequestId,
         policyVersionId,
       },
       include: {
         policyVersion: { select: { id: true, version: true, createdAt: true } },
+        disbursementRequest: {
+          select: {
+            id: true,
+            status: true,
+            amount: true,
+            beneficiaryName: true,
+            governancePathId: true,
+          },
+        },
       },
     });
 
@@ -182,6 +233,7 @@ export class DisputesService {
           walletId,
           governancePathId,
           linkedAppealId: dto.linkedAppealId,
+          disbursementRequestId,
           policyVersionId,
         },
       },
@@ -218,6 +270,15 @@ export class DisputesService {
       where: { entityId },
       include: {
         policyVersion: { select: { id: true, version: true, createdAt: true } },
+        disbursementRequest: {
+          select: {
+            id: true,
+            status: true,
+            amount: true,
+            beneficiaryName: true,
+            governancePathId: true,
+          },
+        },
       },
       orderBy: { openedAt: 'desc' },
     });
@@ -234,6 +295,15 @@ export class DisputesService {
       },
       include: {
         policyVersion: { select: { id: true, version: true, createdAt: true } },
+        disbursementRequest: {
+          select: {
+            id: true,
+            status: true,
+            amount: true,
+            beneficiaryName: true,
+            governancePathId: true,
+          },
+        },
       },
       orderBy: { openedAt: 'desc' },
     });

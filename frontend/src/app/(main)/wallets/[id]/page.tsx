@@ -20,10 +20,19 @@ import {
   LedgerEntry,
 } from "../../../../lib/api/ledger";
 import {
+  getEntityPaymentDues,
+  getMyPaymentDues,
+  getSubscriptions,
+  PaymentDue,
+  Subscription,
+} from "../../../../lib/api/subscriptions";
+import { getEntities } from "../../../../lib/api/entities";
+import {
   BalanceTransferRequest,
   createBalanceTransferRequest,
   getPathBalanceTransferRequests,
 } from "../../../../lib/api/balance-transfer-requests";
+import { Decision, getDecisions } from "../../../../lib/api/decisions";
 import { getRules, Rule } from "../../../../lib/api/rules";
 import RuleSummaryPanel from "../../../../components/Governance/RuleSummaryPanel";
 import ConfirmActionDialog from "../../../../components/shared/ConfirmActionDialog";
@@ -33,6 +42,86 @@ function formatCurrency(n: number, currency = "SAR") {
   return new Intl.NumberFormat("ar-SA", { style: "currency", currency }).format(
     n,
   );
+}
+
+function pathTypeLabel(
+  type: string | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "BOARD") return t("pathTypeBoard");
+  if (type === "COMMITTEE") return t("pathTypeCommittee");
+  if (type === "PUBLIC_VOTE") return t("pathTypePublicVote");
+  if (type === "INDIVIDUAL_WITH_CAP") return t("pathTypeIndividualWithCap");
+  if (type === "DONATION_ONLY") return t("pathTypeDonationOnly");
+  if (type === "EMERGENCY_FAST") return t("pathTypeEmergencyFast");
+  if (type === "INDIVIDUAL") return t("pathTypeIndividual");
+  if (type === "DONATION") return t("pathTypeDonation");
+  if (type === "EMERGENCY") return t("pathTypeEmergency");
+  return t("pathTypeGeneral");
+}
+
+function pathTypeImpact(
+  type: string | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "COMMITTEE") return t("pathImpactCommittee");
+  if (type === "PUBLIC_VOTE") return t("pathImpactPublicVote");
+  if (type === "INDIVIDUAL_WITH_CAP" || type === "INDIVIDUAL")
+    return t("pathImpactIndividual");
+  if (type === "DONATION_ONLY" || type === "DONATION")
+    return t("pathImpactDonation");
+  if (type === "EMERGENCY_FAST" || type === "EMERGENCY")
+    return t("pathImpactEmergency");
+  return t("pathImpactDefault");
+}
+
+function countOpenDecisions(decisions: Decision[]) {
+  const now = Date.now();
+  return decisions.filter(
+    (decision) =>
+      decision.status === "OPEN" &&
+      (!decision.closesAt || new Date(decision.closesAt).getTime() > now),
+  ).length;
+}
+
+function walletRelationshipTypeLabel(
+  type: string,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "SHARED") return t("walletRelTypeShared");
+  if (type === "SUPPORT") return t("walletRelTypeSupport");
+  if (type === "REPORT_ONLY") return t("walletRelTypeReportOnly");
+  return type;
+}
+
+function walletRelationshipDescription(
+  rel: WalletRelationship,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (rel.relationshipType === "SHARED") return t("walletRelDescShared");
+  if (rel.relationshipType === "SUPPORT") return t("walletRelDescSupport");
+  if (rel.relationshipType === "REPORT_ONLY")
+    return t("walletRelDescReportOnly");
+  return t("walletRelDescDefault");
+}
+
+function walletRelationshipRights(
+  rel: WalletRelationship,
+  t: ReturnType<typeof useTranslations>,
+) {
+  return [
+    rel.hasVotingRights ? t("walletRelVotingYes") : t("walletRelVotingNo"),
+    rel.hasOversightRights
+      ? t("walletRelOversightYes")
+      : t("walletRelOversightNo"),
+  ];
+}
+
+function defaultWalletRelationshipRights(type: string) {
+  if (type === "SHARED") {
+    return { hasVotingRights: true, hasOversightRights: true };
+  }
+  return { hasVotingRights: false, hasOversightRights: true };
 }
 
 export default function WalletDetailPage() {
@@ -53,10 +142,16 @@ export default function WalletDetailPage() {
   const [incomingRels, setIncomingRels] = useState<WalletRelationship[]>([]);
   const [outgoingRels, setOutgoingRels] = useState<WalletRelationship[]>([]);
   const [walletRules, setWalletRules] = useState<Rule[]>([]);
+  const [entitySubscriptions, setEntitySubscriptions] = useState<
+    Subscription[]
+  >([]);
+  const [entityPaymentDues, setEntityPaymentDues] = useState<PaymentDue[]>([]);
+  const [pathDecisionStats, setPathDecisionStats] = useState<
+    Record<string, { total: number; open: number }>
+  >({});
   const [loading, setLoading] = useState(true);
   const [txLoading, setTxLoading] = useState(false);
-  const [transferRequestsLoading, setTransferRequestsLoading] =
-    useState(false);
+  const [transferRequestsLoading, setTransferRequestsLoading] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [transferSubmitting, setTransferSubmitting] = useState(false);
   const [transferForm, setTransferForm] = useState({
@@ -65,12 +160,24 @@ export default function WalletDetailPage() {
     amount: "",
     reason: "",
   });
-  
+
   const [showRelForm, setShowRelForm] = useState(false);
-  const [newRel, setNewRel] = useState({ targetWalletId: '', relationshipType: 'FUNDING', contributionPercent: '' });
-  
-  const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'reject'; relId: string } | null>(null);
-  const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [newRel, setNewRel] = useState({
+    targetWalletId: "",
+    relationshipType: "SUPPORT",
+    contributionPercent: "",
+    hasVotingRights: false,
+    hasOversightRights: true,
+  });
+
+  const [confirmAction, setConfirmAction] = useState<{
+    type: "approve" | "reject";
+    relId: string;
+  } | null>(null);
+  const [statusMsg, setStatusMsg] = useState<{
+    text: string;
+    ok: boolean;
+  } | null>(null);
 
   async function loadData() {
     if (!id) return;
@@ -82,11 +189,42 @@ export default function WalletDetailPage() {
         getWalletRelationships(id),
         getRules("WALLET", id).catch(() => [] as Rule[]),
       ]);
+      const currentEntity = (await getEntities().catch(() => [])).find(
+        (entity) => entity.id === w.entityId,
+      );
+      const canReadEntitySubscriptions =
+        currentEntity?.myRole === "ADMIN" || currentEntity?.myRole === "FOUNDER";
+      const canReadEntityDues =
+        canReadEntitySubscriptions || currentEntity?.myRole === "TREASURER";
+      const [subscriptions, dues] = await Promise.all([
+        getSubscriptions(
+          canReadEntitySubscriptions ? { entityId: w.entityId } : {},
+        ).catch(() => [] as Subscription[]),
+        canReadEntityDues
+          ? getEntityPaymentDues(w.entityId).catch(() => [] as PaymentDue[])
+          : getMyPaymentDues().catch(() => [] as PaymentDue[]),
+      ]);
+      const decisionStats = Object.fromEntries(
+        await Promise.all(
+          ps.map(async (path) => {
+            const decisions = await getDecisions(path.id).catch(
+              () => [] as Decision[],
+            );
+            return [
+              path.id,
+              { total: decisions.length, open: countOpenDecisions(decisions) },
+            ] as const;
+          }),
+        ),
+      );
       setWallet(w);
       setPaths(ps);
+      setPathDecisionStats(decisionStats);
       setIncomingRels(rels.incoming);
       setOutgoingRels(rels.outgoing);
       setWalletRules(rules);
+      setEntitySubscriptions(subscriptions);
+      setEntityPaymentDues(dues);
     } catch (e) {
       console.error(e);
     } finally {
@@ -103,10 +241,10 @@ export default function WalletDetailPage() {
     if (!confirmAction) return;
     try {
       await approveWalletRelationship(confirmAction.relId);
-      setStatusMsg({ text: t('approveSuccess'), ok: true });
+      setStatusMsg({ text: t("approveSuccess"), ok: true });
       await loadData();
     } catch {
-      setStatusMsg({ text: t('approveFailed'), ok: false });
+      setStatusMsg({ text: t("approveFailed"), ok: false });
     } finally {
       setConfirmAction(null);
     }
@@ -115,11 +253,11 @@ export default function WalletDetailPage() {
   async function confirmRejectRel() {
     if (!confirmAction) return;
     try {
-      await rejectWalletRelationship(confirmAction.relId, t('relRejectedBy'));
-      setStatusMsg({ text: t('rejectSuccess'), ok: true });
+      await rejectWalletRelationship(confirmAction.relId, t("relRejectedBy"));
+      setStatusMsg({ text: t("rejectSuccess"), ok: true });
       await loadData();
     } catch {
-      setStatusMsg({ text: t('rejectFailed'), ok: false });
+      setStatusMsg({ text: t("rejectFailed"), ok: false });
     } finally {
       setConfirmAction(null);
     }
@@ -128,7 +266,7 @@ export default function WalletDetailPage() {
   async function handleCreateRel(e: React.FormEvent) {
     e.preventDefault();
     if (!newRel.targetWalletId) {
-      setStatusMsg({ text: t('targetRequired'), ok: false });
+      setStatusMsg({ text: t("targetRequired"), ok: false });
       return;
     }
     try {
@@ -136,14 +274,27 @@ export default function WalletDetailPage() {
         sourceWalletId: wallet!.id,
         targetWalletId: newRel.targetWalletId,
         relationshipType: newRel.relationshipType,
-        contributionPercent: newRel.contributionPercent ? parseFloat(newRel.contributionPercent) : undefined,
+        contributionPercent: newRel.contributionPercent
+          ? parseFloat(newRel.contributionPercent)
+          : undefined,
+        hasVotingRights: newRel.hasVotingRights,
+        hasOversightRights: newRel.hasOversightRights,
       });
       setShowRelForm(false);
-      setNewRel({ targetWalletId: '', relationshipType: 'FUNDING', contributionPercent: '' });
-      setStatusMsg({ text: t('requestSent'), ok: true });
+      setNewRel({
+        targetWalletId: "",
+        relationshipType: "SUPPORT",
+        contributionPercent: "",
+        hasVotingRights: false,
+        hasOversightRights: true,
+      });
+      setStatusMsg({ text: t("requestSent"), ok: true });
       await loadData();
     } catch (e: unknown) {
-      setStatusMsg({ text: e instanceof Error ? e.message : t('createRelFailed'), ok: false });
+      setStatusMsg({
+        text: e instanceof Error ? e.message : t("createRelFailed"),
+        ok: false,
+      });
     }
   }
 
@@ -204,12 +355,16 @@ export default function WalletDetailPage() {
       });
       if (selectedTransferPathId) {
         setTransferRequests(
-          await getPathBalanceTransferRequests(wallet.entityId, selectedTransferPathId),
+          await getPathBalanceTransferRequests(
+            wallet.entityId,
+            selectedTransferPathId,
+          ),
         );
       }
     } catch (e: unknown) {
       setStatusMsg({
-        text: e instanceof Error ? e.message : t("balanceTransferRequestFailed"),
+        text:
+          e instanceof Error ? e.message : t("balanceTransferRequestFailed"),
         ok: false,
       });
     } finally {
@@ -223,30 +378,101 @@ export default function WalletDetailPage() {
         <div className={styles.spinner} />
       </div>
     );
-  if (!wallet) return <div className={styles.error}>{t('notFound')}</div>;
+  if (!wallet) return <div className={styles.error}>{t("notFound")}</div>;
+  const activePaths = paths.filter((path) => path.isActive !== false);
+  const relationshipCount = incomingRels.length + outgoingRels.length;
+  const walletPathIds = new Set(paths.map((path) => path.id));
+  const walletSubscriptions = entitySubscriptions.filter((subscription) =>
+    walletPathIds.has(
+      subscription.governancePathId || subscription.governancePath?.id || "",
+    ),
+  );
+  const sharedActiveSubscriptions = walletSubscriptions.filter(
+    (subscription) => subscription.state === "ACTIVE",
+  );
+  const sharedConditionalSubscriptions = walletSubscriptions.filter(
+    (subscription) => subscription.state === "CONDITIONAL",
+  );
+  const sharedSupporterSubscriptions = walletSubscriptions.filter(
+    (subscription) => subscription.state === "SUPPORTER_ONLY",
+  );
+  const sharedInactiveSubscriptions = walletSubscriptions.filter(
+    (subscription) =>
+      subscription.state === "SUSPENDED" || subscription.state === "EXITED",
+  );
+  const sharedExpectedMonthlySupport = walletSubscriptions
+    .filter((subscription) =>
+      ["ACTIVE", "CONDITIONAL", "SUPPORTER_ONLY"].includes(subscription.state),
+    )
+    .reduce(
+      (sum, subscription) => sum + Number(subscription.agreedAmount ?? 0),
+      0,
+    );
+  const walletDues = entityPaymentDues.filter((due) =>
+    walletPathIds.has(due.subscription?.governancePath?.id || ""),
+  );
+  const sharedOverdueAmount = walletDues
+    .filter((due) => due.status === "OVERDUE")
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const sharedUnsettledAmount = walletDues
+    .filter((due) => due.status === "PENDING" || due.status === "OVERDUE")
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const sharedCoveragePercent =
+    sharedExpectedMonthlySupport > 0
+      ? Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              ((sharedExpectedMonthlySupport - sharedOverdueAmount) /
+                sharedExpectedMonthlySupport) *
+                100,
+            ),
+          ),
+        )
+      : null;
 
   return (
     <div className={styles.page}>
       {confirmAction && (
         <ConfirmActionDialog
-          title={confirmAction.type === 'approve' ? t('approveConfirm') : t('rejectConfirm')}
-          description={confirmAction.type === 'approve' ? t('approveConfirmDesc') : t('rejectConfirmDesc')}
-          confirmLabel={confirmAction.type === 'approve' ? t('confirmApproveBtn') : t('confirmRejectBtn')}
-          cancelLabel={t('cancelBtn')}
-          danger={confirmAction.type === 'reject'}
-          onConfirm={confirmAction.type === 'approve' ? confirmApproveRel : confirmRejectRel}
+          title={
+            confirmAction.type === "approve"
+              ? t("approveConfirm")
+              : t("rejectConfirm")
+          }
+          description={
+            confirmAction.type === "approve"
+              ? t("approveConfirmDesc")
+              : t("rejectConfirmDesc")
+          }
+          confirmLabel={
+            confirmAction.type === "approve"
+              ? t("confirmApproveBtn")
+              : t("confirmRejectBtn")
+          }
+          cancelLabel={t("cancelBtn")}
+          danger={confirmAction.type === "reject"}
+          onConfirm={
+            confirmAction.type === "approve"
+              ? confirmApproveRel
+              : confirmRejectRel
+          }
           onCancel={() => setConfirmAction(null)}
         />
       )}
 
       {statusMsg && (
-        <div className={`${styles.msg} ${statusMsg.ok ? styles.msgSuccess : styles.msgError}`}>
-          {statusMsg.ok ? '✓ ' : '⚠ '}{statusMsg.text}
+        <div
+          className={`${styles.msg} ${statusMsg.ok ? styles.msgSuccess : styles.msgError}`}
+        >
+          {statusMsg.ok ? "✓ " : "⚠ "}
+          {statusMsg.text}
         </div>
       )}
 
       <Link href={`/entities/${wallet.entityId}`} className={styles.back}>
-        {t('backToEntity')}
+        {t("backToEntity")}
       </Link>
 
       <div className={styles.header}>
@@ -273,30 +499,234 @@ export default function WalletDetailPage() {
         </div>
       </div>
 
+      <section className={styles.relationshipPanel}>
+        <div className={styles.relationshipHeader}>
+          <div>
+            <h2 className={styles.relationshipTitle}>
+              {t("walletRelationshipTitle")}
+            </h2>
+            <p className={styles.relationshipText}>
+              {t("walletRelationshipText", { count: activePaths.length })}
+            </p>
+          </div>
+          <Link
+            href={`/entities/${wallet.entityId}`}
+            className={styles.relationshipAction}
+          >
+            {t("walletRelationshipEntityAction")}
+          </Link>
+        </div>
+        <div className={styles.relationshipGrid}>
+          <div>
+            <span>{t("walletRelationshipBalance")}</span>
+            <strong>
+              {formatCurrency(wallet.balance ?? 0, wallet.currency)}
+            </strong>
+          </div>
+          <div>
+            <span>{t("walletRelationshipPaths")}</span>
+            <strong>
+              {t("walletRelationshipPathsValue", { count: activePaths.length })}
+            </strong>
+          </div>
+          <div>
+            <span>{t("walletRelationshipRelations")}</span>
+            <strong>
+              {t("walletRelationshipRelationsValue", {
+                count: relationshipCount,
+              })}
+            </strong>
+          </div>
+        </div>
+        {activePaths.length > 0 ? (
+          <div className={styles.pathMatrix}>
+            {activePaths.map((path) => {
+              const decisions = pathDecisionStats[path.id] ?? {
+                total: 0,
+                open: 0,
+              };
+              return (
+                <Link
+                  key={path.id}
+                  href={`/paths/${path.id}`}
+                  className={styles.pathMatrixItem}
+                >
+                  <div className={styles.pathMatrixHeader}>
+                    <span>{path.name}</span>
+                    <strong>{pathTypeLabel(path.type, t)}</strong>
+                  </div>
+                  <div className={styles.pathMatrixMetrics}>
+                    <div>
+                      <span>{t("pathMatrixBalance")}</span>
+                      <strong>
+                        {formatCurrency(path.balance, path.currency)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>{t("pathMatrixMembers")}</span>
+                      <strong>
+                        {t("pathMatrixMembersValue", {
+                          count: path._count?.subscriptions ?? 0,
+                        })}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>{t("pathMatrixRights")}</span>
+                      <strong>
+                        {t("pathMatrixRightsValue", {
+                          count: path._count?.spendingItems ?? 0,
+                        })}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>{t("pathMatrixDecisions")}</span>
+                      <strong>
+                        {decisions.open > 0
+                          ? t("pathMatrixOpenDecisions", {
+                              count: decisions.open,
+                            })
+                          : t("pathMatrixDecisionsValue", {
+                              count: decisions.total,
+                            })}
+                      </strong>
+                    </div>
+                  </div>
+                  <p className={styles.pathMatrixImpact}>
+                    {pathTypeImpact(path.type, t)}
+                  </p>
+                  <p className={styles.pathMatrixIsolation}>
+                    {t("pathMatrixIsolation")}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <p className={styles.relationshipOutcome}>
+            {t("walletRelationshipNoPaths")}
+          </p>
+        )}
+        {activePaths.length > 1 && (
+          <p className={styles.relationshipOutcome}>
+            {t("walletRelationshipMultiPath")}
+          </p>
+        )}
+      </section>
+
+      {wallet.benefitType === "SHARED" && (
+        <section className={styles.sharedBenefitPanel}>
+          <div className={styles.sharedBenefitHeader}>
+            <div>
+              <h2 className={styles.sharedBenefitTitle}>
+                {t("sharedBenefitTitle")}
+              </h2>
+              <p className={styles.sharedBenefitText}>
+                {t("sharedBenefitText")}
+              </p>
+            </div>
+            <span className={styles.sharedBenefitBadge}>
+              {t("sharedBenefitBadge")}
+            </span>
+          </div>
+          <div className={styles.sharedBenefitGrid}>
+            <div>
+              <span>{t("sharedBenefitCoverage")}</span>
+              <strong>
+                {sharedCoveragePercent === null
+                  ? t("sharedBenefitCoverageUnknown")
+                  : t("sharedBenefitCoverageValue", {
+                      percent: sharedCoveragePercent,
+                    })}
+              </strong>
+            </div>
+            <div>
+              <span>{t("sharedBenefitExpected")}</span>
+              <strong>
+                {formatCurrency(
+                  sharedExpectedMonthlySupport,
+                  wallet.currency,
+                )}
+              </strong>
+            </div>
+            <div>
+              <span>{t("sharedBenefitUnsettled")}</span>
+              <strong>
+                {formatCurrency(sharedUnsettledAmount, wallet.currency)}
+              </strong>
+            </div>
+            <div>
+              <span>{t("sharedBenefitOverdue")}</span>
+              <strong>
+                {formatCurrency(sharedOverdueAmount, wallet.currency)}
+              </strong>
+            </div>
+          </div>
+          <div className={styles.sharedBenefitSignals}>
+            <span>
+              {t("sharedBenefitActive", {
+                count: sharedActiveSubscriptions.length,
+              })}
+            </span>
+            <span>
+              {t("sharedBenefitSupporter", {
+                count: sharedSupporterSubscriptions.length,
+              })}
+            </span>
+            <span>
+              {t("sharedBenefitConditional", {
+                count: sharedConditionalSubscriptions.length,
+              })}
+            </span>
+            <span>
+              {t("sharedBenefitInactive", {
+                count: sharedInactiveSubscriptions.length,
+              })}
+            </span>
+          </div>
+          <p className={styles.sharedBenefitWarning}>
+            {sharedOverdueAmount > 0 || sharedInactiveSubscriptions.length > 0
+              ? t("sharedBenefitFreeRiderWarning")
+              : t("sharedBenefitHealthy")}
+          </p>
+        </section>
+      )}
+
       {/* ── سياق الحوكمة ── */}
       {paths.length > 0 && (
         <div className={styles.rulesSection}>
-          <div className={styles.rulesSectionTitle}>{t('governanceContextTitle')}</div>
+          <div className={styles.rulesSectionTitle}>
+            {t("governanceContextTitle")}
+          </div>
           <div className={styles.governanceContext}>
             <div className={styles.govContextItem}>
               <span className={styles.govContextIcon}>💳</span>
               <div>
-                <div className={styles.govContextLabel}>{t('whoContributes')}</div>
-                <div className={styles.govContextValue}>{t('whoContributesValue', { count: paths.length })}</div>
+                <div className={styles.govContextLabel}>
+                  {t("whoContributes")}
+                </div>
+                <div className={styles.govContextValue}>
+                  {t("whoContributesValue", { count: paths.length })}
+                </div>
               </div>
             </div>
             <div className={styles.govContextItem}>
               <span className={styles.govContextIcon}>◎</span>
               <div>
-                <div className={styles.govContextLabel}>{t('activePaths')}</div>
-                <div className={styles.govContextValue}>{paths.filter(p => p.isActive !== false).length}</div>
+                <div className={styles.govContextLabel}>{t("activePaths")}</div>
+                <div className={styles.govContextValue}>
+                  {paths.filter((p) => p.isActive !== false).length}
+                </div>
               </div>
             </div>
             <div className={styles.govContextItem}>
               <span className={styles.govContextIcon}>⚖</span>
               <div>
-                <div className={styles.govContextLabel}>{t('linkedRelationships')}</div>
-                <div className={styles.govContextValue}>{incomingRels.length + outgoingRels.length}</div>
+                <div className={styles.govContextLabel}>
+                  {t("linkedRelationships")}
+                </div>
+                <div className={styles.govContextValue}>
+                  {incomingRels.length + outgoingRels.length}
+                </div>
               </div>
             </div>
           </div>
@@ -305,16 +735,20 @@ export default function WalletDetailPage() {
 
       {walletRules.length > 0 && (
         <div className={styles.rulesSection}>
-          <div className={styles.rulesSectionTitle}>{t('walletRulesTitle')}</div>
+          <div className={styles.rulesSectionTitle}>
+            {t("walletRulesTitle")}
+          </div>
           <div className={styles.rulesList}>
-            {walletRules.filter((r) => r.isActive).map((rule) => (
-              <RuleSummaryPanel
-                key={rule.id}
-                title={rule.name}
-                summary={rule.description ?? ""}
-                icon="⚖"
-              />
-            ))}
+            {walletRules
+              .filter((r) => r.isActive)
+              .map((rule) => (
+                <RuleSummaryPanel
+                  key={rule.id}
+                  title={rule.name}
+                  summary={rule.description ?? ""}
+                  icon="⚖"
+                />
+              ))}
           </div>
         </div>
       )}
@@ -329,9 +763,7 @@ export default function WalletDetailPage() {
               <h2 className={styles.transferTitle}>
                 {t("balanceTransferTitle")}
               </h2>
-              <p className={styles.transferHint}>
-                {t("balanceTransferHint")}
-              </p>
+              <p className={styles.transferHint}>{t("balanceTransferHint")}</p>
             </div>
           </div>
           <div className={styles.transferFields}>
@@ -431,10 +863,19 @@ export default function WalletDetailPage() {
         {/* Paths */}
         <div className={styles.card}>
           <div className={styles.cardTitle}>
-            {t('pathsTitle', { count: paths.length })}
+            {t("pathsTitle", { count: paths.length })}
           </div>
           {paths.length === 0 ? (
-            <div className={styles.empty}>{t('noPaths')}</div>
+            <div className={styles.emptyStatePanel}>
+              <h3>{t("noPathsTitle")}</h3>
+              <p>{t("noPathsBody")}</p>
+              <Link
+                href={`/entities/${wallet.entityId}`}
+                className={styles.emptyStateAction}
+              >
+                {t("walletRelationshipEntityAction")}
+              </Link>
+            </div>
           ) : (
             <div className={styles.pathsList}>
               {paths.map((p) => (
@@ -452,7 +893,7 @@ export default function WalletDetailPage() {
                   <Link
                     href={`/paths/${p.id}`}
                     className={styles.pathLink}
-                    title={t('pathDetails')}
+                    title={t("pathDetails")}
                   >
                     →
                   </Link>
@@ -466,15 +907,15 @@ export default function WalletDetailPage() {
         <div className={styles.card}>
           <div className={styles.cardTitle}>
             {selectedPathAccountId
-              ? t('latestTransactions')
-              : t('choosePathForTx')}
+              ? t("latestTransactions")
+              : t("choosePathForTx")}
           </div>
           {txLoading ? (
             <div className={styles.centered}>
               <div className={styles.spinnerSm} />
             </div>
           ) : selectedPathAccountId && transactions.length === 0 ? (
-            <div className={styles.empty}>{t('noTransactions')}</div>
+            <div className={styles.empty}>{t("noTransactions")}</div>
           ) : (
             <div className={styles.txList}>
               {transactions.map((tx) => (
@@ -514,9 +955,7 @@ export default function WalletDetailPage() {
               <div className={styles.spinnerSm} />
             </div>
           ) : selectedTransferPathId && transferRequests.length === 0 ? (
-            <div className={styles.empty}>
-              {t("balanceTransferNoRequests")}
-            </div>
+            <div className={styles.empty}>{t("balanceTransferNoRequests")}</div>
           ) : (
             <div className={styles.transferRequestList}>
               {transferRequests.map((request) => (
@@ -541,96 +980,235 @@ export default function WalletDetailPage() {
         </div>
         {/* Wallet Relationships */}
         <div className={`${styles.card} ${styles.fullWidthCard}`}>
-          <div className={styles.cardTitle}>{t('relationsTitle')}</div>
+          <div className={styles.cardTitle}>{t("relationsTitle")}</div>
           <div className={styles.relationshipsGrid}>
             <div className={styles.relColumn}>
               <div className={styles.relHeader}>
-                <h3 className={`${styles.relTitle} ${styles.relTitleNoBorder}`}>{t('outgoingRels')}</h3>
-                <button onClick={() => setShowRelForm(!showRelForm)} className={styles.pathLink}>
-                  {t('linkWallet')}
+                <h3 className={`${styles.relTitle} ${styles.relTitleNoBorder}`}>
+                  {t("outgoingRels")}
+                </h3>
+                <button
+                  onClick={() => setShowRelForm(!showRelForm)}
+                  className={styles.pathLink}
+                >
+                  {t("linkWallet")}
                 </button>
               </div>
 
               {showRelForm && (
-                <form onSubmit={handleCreateRel} className={`${styles.relItem} ${styles.relFormItem}`}>
-                  <h4 className={styles.relFormTitle}>{t('createRelTitle')}</h4>
+                <form
+                  onSubmit={handleCreateRel}
+                  className={`${styles.relItem} ${styles.relFormItem}`}
+                >
+                  <h4 className={styles.relFormTitle}>{t("createRelTitle")}</h4>
                   <div className={styles.relFormGroup}>
-                    <input 
-                      placeholder={t('targetWalletPlaceholder')} 
+                    <input
+                      placeholder={t("targetWalletPlaceholder")}
                       required
                       value={newRel.targetWalletId}
-                      onChange={e => setNewRel({...newRel, targetWalletId: e.target.value})}
+                      onChange={(e) =>
+                        setNewRel({ ...newRel, targetWalletId: e.target.value })
+                      }
                       className={styles.relFormInput}
                     />
-                    <select 
+                    <select
                       value={newRel.relationshipType}
-                      onChange={e => setNewRel({...newRel, relationshipType: e.target.value})}
+                      onChange={(e) => {
+                        const relationshipType = e.target.value;
+                        setNewRel({
+                          ...newRel,
+                          relationshipType,
+                          ...(relationshipType === "REPORT_ONLY"
+                            ? { contributionPercent: "" }
+                            : {}),
+                          ...defaultWalletRelationshipRights(
+                            relationshipType,
+                          ),
+                        });
+                      }}
                       className={styles.relFormInput}
-                      aria-label={t('relTypeLabel')}
-                      title={t('relTypeLabel')}
+                      aria-label={t("relTypeLabel")}
+                      title={t("relTypeLabel")}
                     >
-                      <option value="FUNDING">تمويل (Funding)</option>
-                      <option value="SUPPORT">دعم (Support)</option>
-                      <option value="OVERSIGHT">إشراف (Oversight)</option>
+                      <option value="SUPPORT">
+                        {t("walletRelTypeSupport")}
+                      </option>
+                      <option value="SHARED">
+                        {t("walletRelTypeShared")}
+                      </option>
+                      <option value="REPORT_ONLY">
+                        {t("walletRelTypeReportOnly")}
+                      </option>
                     </select>
-                    <input 
-                      type="number" 
-                      placeholder={t('contributionPlaceholder')} 
-                      min="0" max="100"
+                    <input
+                      type="number"
+                      placeholder={t("contributionPlaceholder")}
+                      min="0"
+                      max="100"
+                      disabled={newRel.relationshipType === "REPORT_ONLY"}
                       value={newRel.contributionPercent}
-                      onChange={e => setNewRel({...newRel, contributionPercent: e.target.value})}
+                      onChange={(e) =>
+                        setNewRel({
+                          ...newRel,
+                          contributionPercent: e.target.value,
+                        })
+                      }
                       className={styles.relFormInput}
                     />
                   </div>
+                  <div className={styles.relRightsControls}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={newRel.hasVotingRights}
+                        disabled={newRel.relationshipType !== "SHARED"}
+                        onChange={(e) =>
+                          setNewRel({
+                            ...newRel,
+                            hasVotingRights: e.target.checked,
+                          })
+                        }
+                      />
+                      {t("walletRelVotingRight")}
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={newRel.hasOversightRights}
+                        onChange={(e) =>
+                          setNewRel({
+                            ...newRel,
+                            hasOversightRights: e.target.checked,
+                          })
+                        }
+                      />
+                      {t("walletRelOversightRight")}
+                    </label>
+                  </div>
+                  <p className={styles.relFormHint}>
+                    {newRel.relationshipType === "REPORT_ONLY"
+                      ? t("walletRelFormReportOnlyHint")
+                      : newRel.relationshipType === "SUPPORT"
+                        ? t("walletRelFormSupportHint")
+                        : t("walletRelFormSharedHint")}
+                  </p>
                   <div className={styles.relFormButtons}>
-                    <button type="submit" className={styles.btnApprove}>{t('sendRequest')}</button>
-                    <button type="button" onClick={() => setShowRelForm(false)} className={styles.btnReject}>{t('cancelBtn')}</button>
+                    <button type="submit" className={styles.btnApprove}>
+                      {t("sendRequest")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowRelForm(false)}
+                      className={styles.btnReject}
+                    >
+                      {t("cancelBtn")}
+                    </button>
                   </div>
                 </form>
               )}
 
               {outgoingRels.length === 0 ? (
-                <div className={styles.empty}>{t('noOutgoingRels')}</div>
+                <div className={styles.empty}>{t("noOutgoingRels")}</div>
               ) : (
                 <div className={styles.relList}>
-                  {outgoingRels.map(rel => (
+                  {outgoingRels.map((rel) => (
                     <div key={rel.id} className={styles.relItem}>
                       <div className={styles.relHeader}>
-                        <strong>{t('targetWallet')} {rel.targetWallet?.name}</strong>
-                        <span className={`${styles.badge} ${styles['badge' + rel.approvalStatus]}`}>
+                        <strong>
+                          {t("targetWallet")} {rel.targetWallet?.name}
+                        </strong>
+                        <span
+                          className={`${styles.badge} ${styles["badge" + rel.approvalStatus]}`}
+                        >
                           {rel.approvalStatus}
                         </span>
                       </div>
                       <div className={styles.relDetails}>
-                        {t('typeContribution', { type: rel.relationshipType, contribution: rel.contributionPercent ? `${rel.contributionPercent}%` : t('notSpecified') })}
+                        {t("typeContribution", {
+                          type: walletRelationshipTypeLabel(
+                            rel.relationshipType,
+                            t,
+                          ),
+                          contribution: rel.contributionPercent
+                            ? `${rel.contributionPercent}%`
+                            : t("notSpecified"),
+                        })}
+                      </div>
+                      <div className={styles.relMeaning}>
+                        <strong>{walletRelationshipDescription(rel, t)}</strong>
+                        <div className={styles.relRights}>
+                          {walletRelationshipRights(rel, t).map((right) => (
+                            <span key={right}>{right}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            
+
             <div className={styles.relColumn}>
-              <h3 className={styles.relTitle}>{t('incomingRels')}</h3>
+              <h3 className={styles.relTitle}>{t("incomingRels")}</h3>
               {incomingRels.length === 0 ? (
-                <div className={styles.empty}>{t('noIncomingRels')}</div>
+                <div className={styles.empty}>{t("noIncomingRels")}</div>
               ) : (
                 <div className={styles.relList}>
-                  {incomingRels.map(rel => (
+                  {incomingRels.map((rel) => (
                     <div key={rel.id} className={styles.relItem}>
                       <div className={styles.relHeader}>
-                        <strong>{t('sourceWallet')} {rel.sourceWallet?.name}</strong>
-                        <span className={`${styles.badge} ${styles['badge' + rel.approvalStatus]}`}>
+                        <strong>
+                          {t("sourceWallet")} {rel.sourceWallet?.name}
+                        </strong>
+                        <span
+                          className={`${styles.badge} ${styles["badge" + rel.approvalStatus]}`}
+                        >
                           {rel.approvalStatus}
                         </span>
                       </div>
                       <div className={styles.relDetails}>
-                        {t('typeContribution', { type: rel.relationshipType, contribution: rel.contributionPercent ? `${rel.contributionPercent}%` : t('notSpecified') })}
+                        {t("typeContribution", {
+                          type: walletRelationshipTypeLabel(
+                            rel.relationshipType,
+                            t,
+                          ),
+                          contribution: rel.contributionPercent
+                            ? `${rel.contributionPercent}%`
+                            : t("notSpecified"),
+                        })}
                       </div>
-                      {rel.approvalStatus === 'PENDING' && (
+                      <div className={styles.relMeaning}>
+                        <strong>{walletRelationshipDescription(rel, t)}</strong>
+                        <div className={styles.relRights}>
+                          {walletRelationshipRights(rel, t).map((right) => (
+                            <span key={right}>{right}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {rel.approvalStatus === "PENDING" && (
                         <div className={styles.relActions}>
-                          <button onClick={() => setConfirmAction({ type: 'approve', relId: rel.id })} className={styles.btnApprove}>{t('acceptBtn')}</button>
-                          <button onClick={() => setConfirmAction({ type: 'reject', relId: rel.id })} className={styles.btnReject}>{t('rejectBtn')}</button>
+                          <button
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "approve",
+                                relId: rel.id,
+                              })
+                            }
+                            className={styles.btnApprove}
+                          >
+                            {t("acceptBtn")}
+                          </button>
+                          <button
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "reject",
+                                relId: rel.id,
+                              })
+                            }
+                            className={styles.btnReject}
+                          >
+                            {t("rejectBtn")}
+                          </button>
                         </div>
                       )}
                     </div>

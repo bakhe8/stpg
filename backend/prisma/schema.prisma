@@ -850,17 +850,20 @@ model Dispute {
   deadline DateTime?
 
   // --- الاعتراض المرتبط (اختياري) ---
-  linkedAppealId  String? @db.Uuid
-  policyVersionId String? @db.Uuid
+  linkedAppealId        String? @db.Uuid
+  disbursementRequestId String? @db.Uuid
+  policyVersionId       String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  policyVersion PolicyVersion? @relation(fields: [policyVersionId], references: [id])
-  documents     Document[]
+  policyVersion        PolicyVersion?        @relation(fields: [policyVersionId], references: [id])
+  disbursementRequest DisbursementRequest? @relation(fields: [disbursementRequestId], references: [id])
+  documents            Document[]
 
   @@index([entityId])
   @@index([initiatorId])
+  @@index([disbursementRequestId])
   @@index([policyVersionId])
   @@map("disputes")
 }
@@ -1262,6 +1265,7 @@ model DisbursementRequest {
   spendingItem   SpendingItem   @relation(fields: [spendingItemId], references: [id])
   beneficiary    Beneficiary?   @relation(fields: [beneficiaryId], references: [id])
   documents      Document[]
+  disputes       Dispute[]
 
   @@index([governancePathId])
   @@index([requestedById])

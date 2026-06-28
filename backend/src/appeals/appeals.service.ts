@@ -45,8 +45,13 @@ export class AppealsService {
       },
     });
     if (!decision) throw new NotFoundException('القرار غير موجود');
-    if (decision.status !== DecisionStatus.CLOSED) {
-      throw new BadRequestException('يمكن الاعتراض فقط على القرارات المغلقة');
+    if (
+      decision.status !== DecisionStatus.CLOSED &&
+      decision.status !== DecisionStatus.APPEALED
+    ) {
+      throw new BadRequestException(
+        'يمكن الاعتراض فقط على القرارات المغلقة أو القرارات قيد الطعن',
+      );
     }
 
     const entityId = decision.governancePath?.wallet?.entityId;
@@ -119,20 +124,37 @@ export class AppealsService {
       },
     });
 
-    await this.prisma.auditLog.create({
+    const auditLog = this.prisma.auditLog.create({
       data: {
-        action: AuditAction.CREATE,
+        action: AuditAction.APPEAL,
         personId: appellantId,
         entityId,
         targetType: 'appeals',
         targetId: appeal.id,
+        oldValue: {
+          decisionStatus: decision.status,
+        },
         newValue: {
           type: dto.type,
           decisionId: dto.decisionId,
+          appealId: appeal.id,
           policyVersionId,
+          decisionStatus: DecisionStatus.APPEALED,
         },
       },
     });
+
+    if (decision.status !== DecisionStatus.APPEALED) {
+      await this.prisma.$transaction([
+        this.prisma.decision.update({
+          where: { id: dto.decisionId },
+          data: { status: DecisionStatus.APPEALED },
+        }),
+        auditLog,
+      ]);
+    } else {
+      await auditLog;
+    }
 
     return appeal;
   }
@@ -233,6 +255,10 @@ export class AppealsService {
       },
     });
 
+    if (dto.status === AppealStatus.CLOSED) {
+      await this.restoreDecisionStatusWhenAppealsClosed(appeal.decisionId);
+    }
+
     return updated;
   }
 
@@ -331,6 +357,27 @@ export class AppealsService {
     }
 
     return { escalatedCount };
+  }
+
+  private async restoreDecisionStatusWhenAppealsClosed(decisionId: string) {
+    const openAppeals = await this.prisma.appeal.count({
+      where: {
+        decisionId,
+        status: {
+          in: [
+            AppealStatus.OPEN,
+            AppealStatus.UNDER_REVIEW,
+            AppealStatus.ESCALATED,
+          ],
+        },
+      },
+    });
+    if (openAppeals > 0) return;
+
+    await this.prisma.decision.updateMany({
+      where: { id: decisionId, status: DecisionStatus.APPEALED },
+      data: { status: DecisionStatus.CLOSED },
+    });
   }
 
   private async resolvePolicyVersionId(

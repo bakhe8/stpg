@@ -110,6 +110,12 @@
   white-space: nowrap;
 }
 
+.cardHint {
+  flex-basis: 100%;
+  color: var(--warning-text);
+  font-size: 0.8rem;
+}
+
 .stateBadge {
   padding: 3px 10px;
   border-radius: 20px;

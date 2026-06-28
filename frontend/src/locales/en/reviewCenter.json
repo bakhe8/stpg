@@ -47,6 +47,8 @@
     "member": "Member",
     "disputeReviewTitle": "Dispute requiring review",
     "disbursementApprovalTitle": "Disbursement awaiting approval",
-    "disbursementApprovalSubtitle": "Disbursement to {name} for {amount} SAR"
+    "disbursementApprovalSubtitle": "Disbursement to {name} for {amount} SAR",
+    "disbursementDecisionRequired": "Final approval requires linking the request to a closed approved disbursement decision.",
+    "openDisbursementReview": "Open governed review"
   }
 }

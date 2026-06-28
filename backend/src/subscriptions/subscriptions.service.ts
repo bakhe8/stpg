@@ -189,7 +189,9 @@ export class SubscriptionsService {
         state: { not: SubscriptionState.EXITED },
       },
       include: {
-        governancePath: { select: { id: true, name: true, type: true } },
+        governancePath: {
+          select: { id: true, name: true, type: true, walletId: true },
+        },
         membership: {
           include: {
             person: { select: { id: true, name: true, username: true } },
@@ -481,6 +483,36 @@ export class SubscriptionsService {
               },
             },
             governancePath: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { dueDate: 'asc' },
+    });
+  }
+
+  async getEntityPaymentDues(entityId: string, requesterId: string) {
+    await this.requireAdminOrTreasurerOrFounder(entityId, requesterId);
+
+    return this.prisma.paymentDue.findMany({
+      where: {
+        subscription: {
+          membership: { entityId },
+        },
+        status: { in: ['PENDING', 'OVERDUE'] },
+      },
+      include: {
+        subscription: {
+          include: {
+            membership: {
+              select: {
+                id: true,
+                entityId: true,
+                person: { select: { id: true, name: true, username: true } },
+              },
+            },
+            governancePath: {
+              select: { id: true, name: true, type: true, walletId: true },
+            },
           },
         },
       },

@@ -85,6 +85,77 @@
   color: var(--danger);
 }
 
+.contextPanel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+}
+
+.contextHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.contextTitle {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.contextText {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  margin: 4px 0 0;
+}
+
+.contextGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.contextGrid div {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.contextGrid span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.contextGrid strong {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.contextOutcome {
+  border-right: 3px solid var(--accent-primary);
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  margin: 0;
+  padding-right: 10px;
+}
+
 .empty {
   padding: 24px 0;
   color: var(--text-muted);
@@ -137,6 +208,17 @@
   margin-bottom: 8px;
 }
 
+.governanceNote {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+}
+
 .reviewNotes {
   margin-bottom: 8px;
   padding: 7px 10px;
@@ -144,6 +226,55 @@
   background: var(--warning-bg);
   color: var(--warning-text);
   font-size: 0.84rem;
+}
+
+.rejectionPanel {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px 14px;
+}
+
+.rejectionTitle {
+  color: var(--danger);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.rejectionReason {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.rejectionNextStep {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 9px 11px;
+}
+
+.rejectionDisputeLink {
+  color: var(--danger);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.rejectionDisputeLink:hover {
+  text-decoration: underline;
 }
 
 .requestActions {
@@ -199,9 +330,19 @@
   background: var(--surface-muted);
 }
 
-.btnPrimary:disabled {
+.btnPrimary:disabled,
+.btnSuccess:disabled,
+.btnDanger:disabled,
+.btnGhost:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.inlineHint {
+  margin: -2px 0 2px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.6;
 }
 
 .reviewFormContainer {
@@ -232,4 +373,15 @@
   flex: 1;
   color: var(--text-primary);
   font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .contextGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rejectionNextStep {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }

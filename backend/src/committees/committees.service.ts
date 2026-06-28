@@ -44,6 +44,14 @@ export class CommitteesService {
       where: { entityId, isActive: true },
       include: {
         _count: { select: { members: true, paths: true } },
+        members: {
+          include: {
+            membership: {
+              include: { person: { select: { id: true, name: true } } },
+            },
+          },
+        },
+        paths: { select: { id: true, name: true, type: true, isActive: true } },
       },
       orderBy: { createdAt: 'asc' },
     });

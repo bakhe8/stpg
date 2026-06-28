@@ -116,6 +116,7 @@ export class SearchService implements OnModuleInit {
       (membership) => membership.entityId,
     );
     if (allowedEntityIds.length === 0) return [];
+    const allowedEntityIdSet = new Set(allowedEntityIds);
 
     try {
       const result = await this.client.search({
@@ -139,10 +140,13 @@ export class SearchService implements OnModuleInit {
       });
 
       const body: unknown = result.body;
-      const entities = this.extractHits<EntitySearchDocument>(body).map((hit) => ({
-        id: hit._id,
-        ...hit._source,
-      }));
+      const entities = this.extractHits<EntitySearchDocument>(body)
+        .map((hit) => ({
+          id: hit._id ?? hit._source?.id,
+          ...hit._source,
+        }))
+        .filter((entity) => entity.id && allowedEntityIdSet.has(entity.id))
+        .slice(0, 10);
       if (entities.length > 0) return entities;
 
       return this.searchEntitiesFromDatabase(query, allowedEntityIds);

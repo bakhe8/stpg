@@ -1,9 +1,15 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { getBeneficiaries, Beneficiary } from "../../../lib/api/beneficiaries";
 import { getEntities, Entity } from "../../../lib/api/entities";
-import { getEntityWallets, getWalletPaths, Wallet, GovernancePath } from "../../../lib/api/wallets";
+import {
+  getEntityWallets,
+  getWalletPaths,
+  Wallet,
+  GovernancePath,
+} from "../../../lib/api/wallets";
 import { getPathSpendingItems, SpendingItem } from "../../../lib/api/paths";
 import { getDecisions, type Decision } from "../../../lib/api/decisions";
 import { useTranslations } from "next-intl";
@@ -20,7 +26,9 @@ import {
 import type { Translator } from "../../../lib/i18n";
 import styles from "./disbursement-requests.module.css";
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
-import RequestTimeline, { TimelineStep } from "../../../components/shared/RequestTimeline";
+import RequestTimeline, {
+  TimelineStep,
+} from "../../../components/shared/RequestTimeline";
 import VisibilityNotice from "../../../components/shared/VisibilityNotice";
 import ConfirmActionDialog from "../../../components/shared/ConfirmActionDialog";
 
@@ -35,19 +43,24 @@ function buildDisbursementTimeline(
   };
 
   const reviewing: TimelineStep = {
-    label: r.status === "PENDING" ? t("timelineUnderReview") : t("timelineReviewed"),
+    label:
+      r.status === "PENDING" ? t("timelineUnderReview") : t("timelineReviewed"),
     done: r.status !== "PENDING",
     active: r.status === "PENDING",
   };
 
   const reviewed: TimelineStep =
-    r.status === "APPROVED" || r.status === "REJECTED" || r.status === "CANCELLED" || r.status === "EXECUTED"
+    r.status === "APPROVED" ||
+    r.status === "REJECTED" ||
+    r.status === "CANCELLED" ||
+    r.status === "EXECUTED"
       ? {
-          label: r.status === "REJECTED"
-            ? t("timelineRejected")
-            : r.status === "CANCELLED"
-            ? t("timelineCancelled")
-            : t("timelineApproved"),
+          label:
+            r.status === "REJECTED"
+              ? t("timelineRejected")
+              : r.status === "CANCELLED"
+                ? t("timelineCancelled")
+                : t("timelineApproved"),
           sublabel: r.reviewerNotes ?? undefined,
           at: r.reviewedAt ?? undefined,
           done: true,
@@ -57,8 +70,16 @@ function buildDisbursementTimeline(
 
   const executed: TimelineStep =
     r.status === "EXECUTED"
-      ? { label: t("timelineExecuted"), at: r.executedAt ?? undefined, done: true }
-      : { label: t("timelineExecute"), done: false, active: r.status === "APPROVED" };
+      ? {
+          label: t("timelineExecuted"),
+          at: r.executedAt ?? undefined,
+          done: true,
+        }
+      : {
+          label: t("timelineExecute"),
+          done: false,
+          active: r.status === "APPROVED",
+        };
 
   return [submitted, reviewing, reviewed, executed];
 }
@@ -68,11 +89,11 @@ export default function DisbursementRequestsPage() {
   const tCommon = useTranslations("common");
 
   const STATUS_LABELS: Record<string, string> = {
-    PENDING: t('statusPending'),
-    APPROVED: t('statusApproved'),
-    REJECTED: t('statusRejected'),
-    EXECUTED: t('statusExecuted'),
-    CANCELLED: t('statusCancelled'),
+    PENDING: t("statusPending"),
+    APPROVED: t("statusApproved"),
+    REJECTED: t("statusRejected"),
+    EXECUTED: t("statusExecuted"),
+    CANCELLED: t("statusCancelled"),
   };
 
   const [entities, setEntities] = useState<Entity[]>([]);
@@ -87,7 +108,10 @@ export default function DisbursementRequestsPage() {
   const [requests, setRequests] = useState<DisbursementRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [msg, setMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [msg, setMsg] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const [form, setForm] = useState({
     spendingItemId: "",
@@ -99,7 +123,7 @@ export default function DisbursementRequestsPage() {
   });
 
   const updateForm = (updates: Partial<typeof form>) => {
-    setForm(prev => ({ ...prev, ...updates }));
+    setForm((prev) => ({ ...prev, ...updates }));
     setMsg(null);
   };
 
@@ -111,57 +135,138 @@ export default function DisbursementRequestsPage() {
   const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [createConfirmPending, setCreateConfirmPending] = useState(false);
+  const [initialPathId, setInitialPathId] = useState<string | null>(null);
+  const [initialPathApplied, setInitialPathApplied] = useState(false);
   const selectedEntity = entities.find((entity) => entity.id === entityId);
+  const selectedWallet = wallets.find((wallet) => wallet.id === walletId);
+  const selectedPath = paths.find((path) => path.id === pathId);
   const canReview = selectedEntity
     ? hasRole(selectedEntity, FINANCE_ROLES)
     : false;
 
   const approvedDecisions = decisions.filter(
-    (d) => d.decisionType === "DISBURSE_FUNDS" && d.status === "CLOSED" && d.result === "APPROVED",
+    (d) =>
+      d.decisionType === "DISBURSE_FUNDS" &&
+      d.status === "CLOSED" &&
+      d.result === "APPROVED",
   );
 
+  function buildRejectedDisputeHref(request: DisbursementRequest) {
+    const requestTitle = `${request.beneficiary?.displayName ?? request.beneficiaryName} - ${Number(request.amount).toLocaleString("ar-SA")} ر.س`;
+    return `/disputes?entityId=${encodeURIComponent(entityId)}&disbursementRequestId=${encodeURIComponent(request.id)}&disbursementTitle=${encodeURIComponent(requestTitle)}`;
+  }
+
   useEffect(() => {
-    getEntities().then((fetched) => {
-      setEntities(fetched);
-      if (fetched.length === 1) setEntityId(fetched[0].id);
-    }).catch(() => {});
+    setInitialPathId(new URLSearchParams(window.location.search).get("pathId"));
   }, []);
 
   useEffect(() => {
-    if (!entityId) { setWallets([]); setWalletId(""); setBeneficiaries([]); return; }
+    getEntities()
+      .then((fetched) => {
+        setEntities(fetched);
+        if (fetched.length === 1) setEntityId(fetched[0].id);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!initialPathId || initialPathApplied || entities.length === 0) return;
+
+    let cancelled = false;
+
+    async function applyInitialPath() {
+      for (const entity of entities) {
+        const entityWallets = await getEntityWallets(entity.id).catch(
+          () => [] as Wallet[],
+        );
+        for (const wallet of entityWallets) {
+          const walletPaths = await getWalletPaths(wallet.id).catch(
+            () => [] as GovernancePath[],
+          );
+          const matchedPath = walletPaths.find(
+            (path) => path.id === initialPathId,
+          );
+          if (matchedPath && !cancelled) {
+            setEntityId(entity.id);
+            setWallets(entityWallets);
+            setWalletId(wallet.id);
+            setPaths(walletPaths);
+            setPathId(matchedPath.id);
+            setInitialPathApplied(true);
+            return;
+          }
+        }
+      }
+      if (!cancelled) setInitialPathApplied(true);
+    }
+
+    void applyInitialPath();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [entities, initialPathApplied, initialPathId]);
+
+  useEffect(() => {
+    if (!entityId) {
+      setWallets([]);
+      setWalletId("");
+      setBeneficiaries([]);
+      return;
+    }
     Promise.all([
       getEntityWallets(entityId).catch(() => []),
-      canReview ? getBeneficiaries(entityId).catch(() => []) : Promise.resolve([]),
-    ]).then(([nextWallets, nextBeneficiaries]) => {
-      setWallets(nextWallets as Wallet[]);
-      if (nextWallets.length === 1) setWalletId((nextWallets as Wallet[])[0].id);
-      setBeneficiaries(nextBeneficiaries as Beneficiary[]);
-    }).catch(() => {});
+      canReview
+        ? getBeneficiaries(entityId).catch(() => [])
+        : Promise.resolve([]),
+    ])
+      .then(([nextWallets, nextBeneficiaries]) => {
+        setWallets(nextWallets as Wallet[]);
+        if (nextWallets.length === 1)
+          setWalletId((nextWallets as Wallet[])[0].id);
+        setBeneficiaries(nextBeneficiaries as Beneficiary[]);
+      })
+      .catch(() => {});
   }, [canReview, entityId]);
 
   useEffect(() => {
-    if (!walletId) { setPaths([]); setPathId(""); return; }
-    getWalletPaths(walletId).then((fetched) => {
-      setPaths(fetched);
-      if (fetched.length === 1) setPathId(fetched[0].id);
-    }).catch(() => {});
+    if (!walletId) {
+      setPaths([]);
+      setPathId("");
+      return;
+    }
+    getWalletPaths(walletId)
+      .then((fetched) => {
+        setPaths(fetched);
+        if (fetched.length === 1) setPathId(fetched[0].id);
+      })
+      .catch(() => {});
   }, [walletId]);
 
   const loadPathData = useCallback(() => {
-    if (!pathId) { setSpendingItems([]); setDecisions([]); setRequests([]); return; }
+    if (!pathId) {
+      setSpendingItems([]);
+      setDecisions([]);
+      setRequests([]);
+      return;
+    }
     setLoading(true);
     Promise.all([
       getPathSpendingItems(pathId).catch(() => []),
       canReview ? getDecisions(pathId).catch(() => []) : Promise.resolve([]),
       getDisbursementRequests(pathId).catch(() => []),
-    ]).then(([items, decs, reqs]) => {
-      setSpendingItems(items as SpendingItem[]);
-      setDecisions(decs as Decision[]);
-      setRequests(reqs as DisbursementRequest[]);
-    }).finally(() => setLoading(false));
+    ])
+      .then(([items, decs, reqs]) => {
+        setSpendingItems(items as SpendingItem[]);
+        setDecisions(decs as Decision[]);
+        setRequests(reqs as DisbursementRequest[]);
+      })
+      .finally(() => setLoading(false));
   }, [canReview, pathId]);
 
-  useEffect(() => { loadPathData(); }, [loadPathData]);
+  useEffect(() => {
+    loadPathData();
+  }, [loadPathData]);
 
   const handleCreateRequest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +276,8 @@ export default function DisbursementRequestsPage() {
       (!form.beneficiaryId && !form.beneficiaryName) ||
       !form.amount ||
       !form.description
-    ) return;
+    )
+      return;
     setCreateConfirmPending(true);
   };
 
@@ -188,7 +294,7 @@ export default function DisbursementRequestsPage() {
         amount: parseFloat(form.amount),
         description: form.description,
       });
-      setMsg({ text: t('createSuccess'), type: "success" });
+      setMsg({ text: t("createSuccess"), type: "success" });
       setForm({
         spendingItemId: "",
         beneficiaryId: "",
@@ -206,10 +312,18 @@ export default function DisbursementRequestsPage() {
   };
 
   const handleApprove = async (id: string) => {
+    if (!reviewForm.decisionId) {
+      setMsg({ text: t("decisionRequiredForApproval"), type: "error" });
+      return;
+    }
     setMsg(null);
     try {
-      await approveDisbursementRequest(id, reviewForm.decisionId || undefined, reviewForm.reviewerNotes || undefined);
-      setMsg({ text: t('approveSuccess'), type: "success" });
+      await approveDisbursementRequest(
+        id,
+        reviewForm.decisionId,
+        reviewForm.reviewerNotes || undefined,
+      );
+      setMsg({ text: t("approveSuccess"), type: "success" });
       setActiveReviewId(null);
       loadPathData();
     } catch (err) {
@@ -219,13 +333,13 @@ export default function DisbursementRequestsPage() {
 
   const handleReject = async (id: string) => {
     if (!reviewForm.reviewerNotes) {
-      setMsg({ text: t('rejectNoteRequired'), type: "error" });
+      setMsg({ text: t("rejectNoteRequired"), type: "error" });
       return;
     }
     setMsg(null);
     try {
       await rejectDisbursementRequest(id, reviewForm.reviewerNotes);
-      setMsg({ text: t('rejectSuccess'), type: "success" });
+      setMsg({ text: t("rejectSuccess"), type: "success" });
       setActiveReviewId(null);
       loadPathData();
     } catch (err) {
@@ -237,7 +351,7 @@ export default function DisbursementRequestsPage() {
     setMsg(null);
     try {
       await executeDisbursementRequest(id, reviewForm.reference || undefined);
-      setMsg({ text: t('executeSuccess'), type: "success" });
+      setMsg({ text: t("executeSuccess"), type: "success" });
       setReviewForm({ decisionId: "", reviewerNotes: "", reference: "" });
       setActiveReviewId(null);
       loadPathData();
@@ -250,7 +364,7 @@ export default function DisbursementRequestsPage() {
     setMsg(null);
     try {
       await cancelDisbursementRequest(id);
-      setMsg({ text: t('cancelSuccess'), type: "success" });
+      setMsg({ text: t("cancelSuccess"), type: "success" });
       setCancelConfirmId(null);
       loadPathData();
     } catch (err) {
@@ -260,26 +374,56 @@ export default function DisbursementRequestsPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>{t('title')}</h1>
+      <h1 className={styles.title}>{t("title")}</h1>
 
-      
       <div className={styles.selectors}>
-        <select title={t('chooseEntity')} value={entityId} onChange={(e) => setEntityId(e.target.value)} className={styles.select}>
-          <option value="">{t('chooseEntity')}</option>
-          {entities.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+        <select
+          title={t("chooseEntity")}
+          value={entityId}
+          onChange={(e) => setEntityId(e.target.value)}
+          className={styles.select}
+        >
+          <option value="">{t("chooseEntity")}</option>
+          {entities.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.name}
+            </option>
+          ))}
         </select>
-        <select title={t('chooseWallet')} value={walletId} onChange={(e) => setWalletId(e.target.value)} className={styles.select} disabled={!entityId}>
-          <option value="">{t('chooseWallet')}</option>
-          {wallets.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+        <select
+          title={t("chooseWallet")}
+          value={walletId}
+          onChange={(e) => setWalletId(e.target.value)}
+          className={styles.select}
+          disabled={!entityId}
+        >
+          <option value="">{t("chooseWallet")}</option>
+          {wallets.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
         </select>
-        <select title={t('choosePath')} value={pathId} onChange={(e) => setPathId(e.target.value)} className={styles.select} disabled={!walletId}>
-          <option value="">{t('choosePath')}</option>
-          {paths.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        <select
+          title={t("choosePath")}
+          value={pathId}
+          onChange={(e) => setPathId(e.target.value)}
+          className={styles.select}
+          disabled={!walletId}
+        >
+          <option value="">{t("choosePath")}</option>
+          {paths.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
         </select>
       </div>
 
       {msg && (
-        <div className={`${styles.msg} ${msg.type === "error" ? styles.error : styles.success}`}>
+        <div
+          className={`${styles.msg} ${msg.type === "error" ? styles.error : styles.success}`}
+        >
           {msg.text}
         </div>
       )}
@@ -297,35 +441,82 @@ export default function DisbursementRequestsPage() {
 
       {pathId && (
         <>
+          <section className={styles.contextPanel}>
+            <div className={styles.contextHeader}>
+              <div>
+                <h2 className={styles.contextTitle}>{t("contextTitle")}</h2>
+                <p className={styles.contextText}>{t("contextText")}</p>
+              </div>
+            </div>
+            <div className={styles.contextGrid}>
+              <div>
+                <span>{t("contextEntity")}</span>
+                <strong>{selectedEntity?.name ?? "—"}</strong>
+              </div>
+              <div>
+                <span>{t("contextWallet")}</span>
+                <strong>{selectedWallet?.name ?? "—"}</strong>
+              </div>
+              <div>
+                <span>{t("contextPath")}</span>
+                <strong>{selectedPath?.name ?? "—"}</strong>
+              </div>
+              <div>
+                <span>{t("contextApprovedDecisions")}</span>
+                <strong>{approvedDecisions.length}</strong>
+              </div>
+            </div>
+            <p className={styles.contextOutcome}>
+              {canReview
+                ? t("contextReviewerOutcome")
+                : t("contextRequesterOutcome")}
+            </p>
+          </section>
 
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>{t('newRequestTitle')}</h2>
+            <h2 className={styles.cardTitle}>{t("newRequestTitle")}</h2>
             <form onSubmit={handleCreateRequest} className={styles.form}>
-              <select title={t('spendingItemOption')} value={form.spendingItemId} onChange={(e) => updateForm({ spendingItemId: e.target.value })} className={styles.input} required>
-                <option value="">{t('spendingItemOption')}</option>
-                {spendingItems.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              {canReview ? <select
-                title={t('savedBeneficiaryOption')}
-                value={form.beneficiaryId}
-                onChange={(e) =>
-                  updateForm({
-                    beneficiaryId: e.target.value,
-                    beneficiaryName: e.target.value ? "" : form.beneficiaryName,
-                  })
-                }
+              <select
+                title={t("spendingItemOption")}
+                value={form.spendingItemId}
+                onChange={(e) => updateForm({ spendingItemId: e.target.value })}
                 className={styles.input}
+                required
               >
-                <option value="">{t('savedBeneficiaryOption')}</option>
-                {beneficiaries.map((beneficiary) => (
-                  <option key={beneficiary.id} value={beneficiary.id}>
-                    {beneficiary.displayName}
-                    {beneficiary.annualCap ? ` — ${t('annualCap', { amount: Number(beneficiary.annualCap).toLocaleString("ar-SA") })}` : ""}
+                <option value="">{t("spendingItemOption")}</option>
+                {spendingItems.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
                   </option>
                 ))}
-              </select> : null}
+              </select>
+              {canReview ? (
+                <select
+                  title={t("savedBeneficiaryOption")}
+                  value={form.beneficiaryId}
+                  onChange={(e) =>
+                    updateForm({
+                      beneficiaryId: e.target.value,
+                      beneficiaryName: e.target.value
+                        ? ""
+                        : form.beneficiaryName,
+                    })
+                  }
+                  className={styles.input}
+                >
+                  <option value="">{t("savedBeneficiaryOption")}</option>
+                  {beneficiaries.map((beneficiary) => (
+                    <option key={beneficiary.id} value={beneficiary.id}>
+                      {beneficiary.displayName}
+                      {beneficiary.annualCap
+                        ? ` — ${t("annualCap", { amount: Number(beneficiary.annualCap).toLocaleString("ar-SA") })}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               <input
-                placeholder={t('externalBeneficiaryPlaceholder')}
+                placeholder={t("externalBeneficiaryPlaceholder")}
                 value={form.beneficiaryName}
                 onChange={(e) =>
                   updateForm({
@@ -337,22 +528,50 @@ export default function DisbursementRequestsPage() {
                 disabled={Boolean(form.beneficiaryId)}
                 required={!form.beneficiaryId}
               />
-              <input placeholder={t('beneficiaryNotesPlaceholder')} value={form.beneficiaryNotes} onChange={(e) => updateForm({ beneficiaryNotes: e.target.value })} className={styles.input} />
-              <input type="number" placeholder={t('amountPlaceholder')} value={form.amount} onChange={(e) => updateForm({ amount: e.target.value })} className={styles.input} min="1" step="0.01" required />
-              <textarea placeholder={t('descriptionPlaceholder')} value={form.description} onChange={(e) => updateForm({ description: e.target.value })} className={styles.textarea} required rows={3} />
-              <button type="submit" className={styles.btnPrimary} disabled={submitting}>
-                {submitting ? t('sending') : t('sendBtn')}
+              <input
+                placeholder={t("beneficiaryNotesPlaceholder")}
+                value={form.beneficiaryNotes}
+                onChange={(e) =>
+                  updateForm({ beneficiaryNotes: e.target.value })
+                }
+                className={styles.input}
+              />
+              <input
+                type="number"
+                placeholder={t("amountPlaceholder")}
+                value={form.amount}
+                onChange={(e) => updateForm({ amount: e.target.value })}
+                className={styles.input}
+                min="1"
+                step="0.01"
+                required
+              />
+              <textarea
+                placeholder={t("descriptionPlaceholder")}
+                value={form.description}
+                onChange={(e) => updateForm({ description: e.target.value })}
+                className={styles.textarea}
+                required
+                rows={3}
+              />
+              <button
+                type="submit"
+                className={styles.btnPrimary}
+                disabled={submitting}
+              >
+                {submitting ? t("sending") : t("sendBtn")}
               </button>
             </form>
           </div>
 
-          
-
-          
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>{t('requestsTitle', { count: requests.length })}</h2>
-            {loading ? <p className={styles.empty}>{t('loading')}</p> : requests.length === 0 ? (
-              <p className={styles.empty}>{t('noRequests')}</p>
+            <h2 className={styles.cardTitle}>
+              {t("requestsTitle", { count: requests.length })}
+            </h2>
+            {loading ? (
+              <p className={styles.empty}>{t("loading")}</p>
+            ) : requests.length === 0 ? (
+              <p className={styles.empty}>{t("noRequests")}</p>
             ) : (
               <div className={styles.list}>
                 {requests.map((r) => (
@@ -373,14 +592,55 @@ export default function DisbursementRequestsPage() {
                       </span>
                     </div>
                     <div className={styles.requestMeta}>
-                      <span>{t('currencySAR', { amount: Number(r.amount).toLocaleString("ar-SA") })}</span>
+                      <span>
+                        {t("currencySAR", {
+                          amount: Number(r.amount).toLocaleString("ar-SA"),
+                        })}
+                      </span>
                       <span>|</span>
                       <span>{r.spendingItem?.name}</span>
                       <span>|</span>
-                      <span>{new Date(r.requestedAt).toLocaleDateString("ar-SA")}</span>
+                      <span>
+                        {new Date(r.requestedAt).toLocaleDateString("ar-SA")}
+                      </span>
+                    </div>
+                    <div className={styles.governanceNote}>
+                      {r.decisionId
+                        ? t("requestLinkedDecision")
+                        : r.status === "PENDING"
+                          ? t("requestAwaitingDecision")
+                          : r.status === "REJECTED"
+                            ? t("requestRejectedOutcome")
+                            : t("requestNoDecision")}
                     </div>
                     <p className={styles.requestDesc}>{r.description}</p>
-                    <RequestTimeline steps={buildDisbursementTimeline(r, t)} compact />
+                    <RequestTimeline
+                      steps={buildDisbursementTimeline(r, t)}
+                      compact
+                    />
+                    {r.status === "REJECTED" && (
+                      <section className={styles.rejectionPanel}>
+                        <div>
+                          <h3 className={styles.rejectionTitle}>
+                            {t("rejectionTitle")}
+                          </h3>
+                          <p className={styles.rejectionReason}>
+                            {r.reviewerNotes || t("rejectionReasonFallback")}
+                          </p>
+                        </div>
+                        <div className={styles.rejectionNextStep}>
+                          <span>{t("rejectionNextStep")}</span>
+                          {entityId && (
+                            <Link
+                              href={buildRejectedDisputeHref(r)}
+                              className={styles.rejectionDisputeLink}
+                            >
+                              {t("rejectionOpenDispute")}
+                            </Link>
+                          )}
+                        </div>
+                      </section>
+                    )}
                     <div className={styles.requestActions}>
                       {r.status === "PENDING" && (
                         <>
@@ -388,50 +648,176 @@ export default function DisbursementRequestsPage() {
                             activeReviewId === r.id ? (
                               <div className={styles.reviewFormContainer}>
                                 <RuleSummaryPanel
-                                  title={t('ruleSummaryTitle')}
-                                  summary={t('ruleSummaryText')}
+                                  title={t("ruleSummaryTitle")}
+                                  summary={t("ruleSummaryText")}
                                   icon="⚠️"
                                 />
-                                <select title={t('linkDecisionOption')} value={reviewForm.decisionId} onChange={(e) => { setReviewForm({ ...reviewForm, decisionId: e.target.value }); setMsg(null); }} className={styles.input}>
-                                  <option value="">{t('linkDecisionOption')}</option>
-                                  {approvedDecisions.map((d) => <option key={d.id} value={d.id}>{d.title}</option>)}
+                                <select
+                                  title={t("linkDecisionOption")}
+                                  value={reviewForm.decisionId}
+                                  onChange={(e) => {
+                                    setReviewForm({
+                                      ...reviewForm,
+                                      decisionId: e.target.value,
+                                    });
+                                    setMsg(null);
+                                  }}
+                                  className={styles.input}
+                                >
+                                  <option value="">
+                                    {t("linkDecisionOption")}
+                                  </option>
+                                  {approvedDecisions.map((d) => (
+                                    <option key={d.id} value={d.id}>
+                                      {d.title}
+                                      {d.amount
+                                        ? ` — ${t("currencySAR", { amount: Number(d.amount).toLocaleString("ar-SA") })}`
+                                        : ""}
+                                    </option>
+                                  ))}
                                 </select>
-                                <input placeholder={t('reviewerNotesPlaceholder')} value={reviewForm.reviewerNotes} onChange={(e) => { setReviewForm({ ...reviewForm, reviewerNotes: e.target.value }); setMsg(null); }} className={styles.input} />
+                                <p className={styles.inlineHint}>
+                                  {approvedDecisions.length === 0
+                                    ? t("noApprovedDisbursementDecisions")
+                                    : t("decisionRequiredHint")}
+                                </p>
+                                <input
+                                  placeholder={t("reviewerNotesPlaceholder")}
+                                  value={reviewForm.reviewerNotes}
+                                  onChange={(e) => {
+                                    setReviewForm({
+                                      ...reviewForm,
+                                      reviewerNotes: e.target.value,
+                                    });
+                                    setMsg(null);
+                                  }}
+                                  className={styles.input}
+                                />
                                 <div className={styles.reviewActions}>
-                                  <button onClick={() => handleApprove(r.id)} className={styles.btnSuccess}>{t('approveBtn')}</button>
-                                  <button onClick={() => handleReject(r.id)} className={styles.btnDanger}>{t('rejectBtn')}</button>
-                                  <button onClick={() => { setActiveReviewId(null); setMsg(null); }} className={styles.btnGhost}>{t('cancelBtn')}</button>
+                                  <button
+                                    onClick={() => handleApprove(r.id)}
+                                    className={styles.btnSuccess}
+                                    disabled={!reviewForm.decisionId}
+                                    title={
+                                      !reviewForm.decisionId
+                                        ? t("decisionRequiredForApproval")
+                                        : undefined
+                                    }
+                                  >
+                                    {t("approveBtn")}
+                                  </button>
+                                  <button
+                                    onClick={() => handleReject(r.id)}
+                                    className={styles.btnDanger}
+                                  >
+                                    {t("rejectBtn")}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setActiveReviewId(null);
+                                      setMsg(null);
+                                    }}
+                                    className={styles.btnGhost}
+                                  >
+                                    {t("cancelBtn")}
+                                  </button>
                                 </div>
                               </div>
                             ) : (
-                              <button onClick={() => { setActiveReviewId(r.id); setReviewForm({ decisionId: "", reviewerNotes: "", reference: "" }); setMsg(null); }} className={styles.btnPrimary}>{t('reviewToolsTitle')}</button>
+                              <button
+                                onClick={() => {
+                                  setActiveReviewId(r.id);
+                                  setReviewForm({
+                                    decisionId: "",
+                                    reviewerNotes: "",
+                                    reference: "",
+                                  });
+                                  setMsg(null);
+                                }}
+                                className={styles.btnPrimary}
+                              >
+                                {t("reviewToolsTitle")}
+                              </button>
                             )
+                          ) : cancelConfirmId === r.id ? (
+                            <div className={styles.cancelConfirmPanel}>
+                              <span className={styles.cancelConfirmText}>
+                                {t("cancelConfirmPrompt")}
+                              </span>
+                              <button
+                                onClick={() => handleCancel(r.id)}
+                                className={styles.btnDanger}
+                                disabled={submitting}
+                              >
+                                {tCommon("yes")}
+                              </button>
+                              <button
+                                onClick={() => setCancelConfirmId(null)}
+                                className={styles.btnGhost}
+                              >
+                                {tCommon("no")}
+                              </button>
+                            </div>
                           ) : (
-                            cancelConfirmId === r.id ? (
-                                <div className={styles.cancelConfirmPanel}>
-                                  <span className={styles.cancelConfirmText}>{t('cancelConfirmPrompt')}</span>
-                                  <button onClick={() => handleCancel(r.id)} className={styles.btnDanger} disabled={submitting}>{tCommon('yes')}</button>
-                                  <button onClick={() => setCancelConfirmId(null)} className={styles.btnGhost}>{tCommon('no')}</button>
-                                </div>
-                              ) : (
-                                <button onClick={() => setCancelConfirmId(r.id)} className={styles.btnGhost}>{t('cancelBtn')}</button>
-                              )
+                            <button
+                              onClick={() => setCancelConfirmId(r.id)}
+                              className={styles.btnGhost}
+                            >
+                              {t("cancelBtn")}
+                            </button>
                           )}
                         </>
                       )}
-                      {r.status === "APPROVED" && canReview && (
-                        activeReviewId === r.id ? (
+                      {r.status === "APPROVED" &&
+                        canReview &&
+                        (activeReviewId === r.id ? (
                           <div className={styles.reviewFormContainer}>
-                            <input placeholder={t('referencePlaceholder')} value={reviewForm.reference} onChange={(e) => { setReviewForm({ ...reviewForm, reference: e.target.value }); setMsg(null); }} className={styles.input} />
+                            <input
+                              placeholder={t("referencePlaceholder")}
+                              value={reviewForm.reference}
+                              onChange={(e) => {
+                                setReviewForm({
+                                  ...reviewForm,
+                                  reference: e.target.value,
+                                });
+                                setMsg(null);
+                              }}
+                              className={styles.input}
+                            />
                             <div className={styles.reviewActions}>
-                              <button onClick={() => handleExecute(r.id)} className={styles.btnSuccess}>{t('executeBtn')}</button>
-                              <button onClick={() => { setActiveReviewId(null); setMsg(null); }} className={styles.btnGhost}>{t('cancelBtn')}</button>
+                              <button
+                                onClick={() => handleExecute(r.id)}
+                                className={styles.btnSuccess}
+                              >
+                                {t("executeBtn")}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActiveReviewId(null);
+                                  setMsg(null);
+                                }}
+                                className={styles.btnGhost}
+                              >
+                                {t("cancelBtn")}
+                              </button>
                             </div>
                           </div>
                         ) : (
-                          <button onClick={() => { setActiveReviewId(r.id); setReviewForm({ decisionId: "", reviewerNotes: "", reference: "" }); setMsg(null); }} className={styles.btnPrimary}>{t('executeBtn')}</button>
-                        )
-                      )}
+                          <button
+                            onClick={() => {
+                              setActiveReviewId(r.id);
+                              setReviewForm({
+                                decisionId: "",
+                                reviewerNotes: "",
+                                reference: "",
+                              });
+                              setMsg(null);
+                            }}
+                            className={styles.btnPrimary}
+                          >
+                            {t("executeBtn")}
+                          </button>
+                        ))}
                     </div>
                   </div>
                 ))}

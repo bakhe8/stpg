@@ -46,7 +46,26 @@ export interface AuditorAuditLog {
   action: string;
   targetType: string;
   targetId: string;
-  person: { id: string; firstName: string; lastName: string } | null;
+  person: { id: string; name: string } | null;
+  entity?: { id: string; name: string } | null;
+  actor?: { id: string | null; name: string };
+  title?: string;
+  context?: string;
+  effect?: string;
+  severity?: "LOW" | "MEDIUM" | "HIGH" | string;
+  linkedRecords?: Array<{
+    type: string;
+    id: string;
+    label: string;
+    shortId: string;
+  }>;
+  changes?: Array<{
+    field: string;
+    before: unknown;
+    after: unknown;
+  }>;
+  oldValue?: unknown;
+  newValue?: unknown;
   createdAt: string;
 }
 

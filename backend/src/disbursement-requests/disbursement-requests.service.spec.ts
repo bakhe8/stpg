@@ -1,5 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
-import { BeneficiaryType } from '@prisma/client';
+import {
+  BeneficiaryType,
+  DecisionResult,
+  DecisionStatus,
+  DecisionType,
+  DisbursementRequestStatus,
+  MemberRole,
+} from '@prisma/client';
 import { LedgerService } from '../ledger/ledger.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { DisbursementRequestsService } from './disbursement-requests.service';
@@ -14,7 +21,14 @@ describe('DisbursementRequestsService beneficiaries', () => {
       findUnique: jest.Mock;
       create: jest.Mock;
     };
-    disbursementRequest: { create: jest.Mock; aggregate: jest.Mock };
+    disbursementRequest: {
+      create: jest.Mock;
+      aggregate: jest.Mock;
+      findUnique: jest.Mock;
+      update: jest.Mock;
+    };
+    decision: { findUnique: jest.Mock };
+    ledgerAccount: { findUnique: jest.Mock };
     auditLog: { create: jest.Mock };
   };
   let ledgerService: { recordDisbursement: jest.Mock };
@@ -33,7 +47,11 @@ describe('DisbursementRequestsService beneficiaries', () => {
       disbursementRequest: {
         create: jest.fn(),
         aggregate: jest.fn().mockResolvedValue({ _sum: { amount: 0 } }),
+        findUnique: jest.fn(),
+        update: jest.fn(),
       },
+      decision: { findUnique: jest.fn() },
+      ledgerAccount: { findUnique: jest.fn() },
       auditLog: { create: jest.fn().mockResolvedValue({}) },
     };
     ledgerService = {
@@ -135,5 +153,165 @@ describe('DisbursementRequestsService beneficiaries', () => {
         description: 'طلب صرف علاجي',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('does not approve a disbursement request without a closed approved decision', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: { toString: () => '300.00' },
+      status: DisbursementRequestStatus.PENDING,
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+
+    await expect(
+      service.approveRequest('request-id', 'admin-id', {}),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.disbursementRequest.update).not.toHaveBeenCalled();
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'UPDATE',
+          targetId: 'request-id',
+          newValue: expect.objectContaining({
+            operation: 'APPROVE_DISBURSEMENT',
+            failed: true,
+          }),
+        }),
+      }),
+    );
+  });
+
+  it('approves a request only when the linked decision matches type, path, item, and amount', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: { toString: () => '300.00' },
+      status: DisbursementRequestStatus.PENDING,
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      decisionType: DecisionType.DISBURSE_FUNDS,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: { toString: () => '300.00' },
+    });
+    prisma.disbursementRequest.update.mockResolvedValue({
+      id: 'request-id',
+      status: DisbursementRequestStatus.APPROVED,
+      decisionId: 'decision-id',
+    });
+
+    await service.approveRequest('request-id', 'admin-id', {
+      decisionId: 'decision-id',
+      reviewerNotes: 'مطابق للقرار',
+    });
+
+    expect(prisma.disbursementRequest.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'request-id' },
+        data: expect.objectContaining({
+          status: DisbursementRequestStatus.APPROVED,
+          decisionId: 'decision-id',
+        }),
+      }),
+    );
+  });
+
+  it('checks the linked decision before checking balance during execution', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      beneficiaryId: 'beneficiary-id',
+      beneficiary: { annualCap: null },
+      amount: { toString: () => '300.00' },
+      description: 'صرف علاجي',
+      attachments: [],
+      status: DisbursementRequestStatus.APPROVED,
+      transactionId: null,
+      decisionId: null,
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+
+    await expect(
+      service.executeRequest('request-id', 'admin-id', {}),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.ledgerAccount.findUnique).not.toHaveBeenCalled();
+    expect(ledgerService.recordDisbursement).not.toHaveBeenCalled();
+  });
+
+  it('compares ledger balances as money values before execution', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      beneficiaryId: 'beneficiary-id',
+      beneficiary: { annualCap: null },
+      amount: { toString: () => '10.00' },
+      description: 'صرف علاجي',
+      attachments: [],
+      status: DisbursementRequestStatus.APPROVED,
+      transactionId: null,
+      decisionId: 'decision-id',
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      decisionType: DecisionType.DISBURSE_FUNDS,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: { toString: () => '10.00' },
+    });
+    prisma.ledgerAccount.findUnique.mockResolvedValue({
+      balance: { toString: () => '9.99' },
+    });
+
+    await expect(
+      service.executeRequest('request-id', 'admin-id', {}),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(ledgerService.recordDisbursement).not.toHaveBeenCalled();
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          newValue: expect.objectContaining({
+            operation: 'EXECUTE_DISBURSEMENT',
+            failed: true,
+            availableBalance: '9.99',
+            requestedAmount: '10.00',
+          }),
+        }),
+      }),
+    );
   });
 });

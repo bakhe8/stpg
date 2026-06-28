@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getEntity, Entity } from '../../../../../lib/api/entities';
+import Breadcrumbs from '../../../../../components/shared/Breadcrumbs';
 import {
   getEntityPaymentRecords,
   approvePaymentRecord,
@@ -18,7 +19,6 @@ import {
 } from '../../../../../lib/api/subscriptions';
 import {
   getDisbursementRequests,
-  approveDisbursementRequest,
   rejectDisbursementRequest,
   DisbursementRequest,
 } from '../../../../../lib/api/disbursement-requests';
@@ -391,17 +391,14 @@ function DisbursementsTab({
   onRefresh: () => void;
   t: Translator;
 }) {
+  const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
 
-  async function approve(id: string) {
-    setBusy(id);
-    try {
-      await approveDisbursementRequest(id);
-      onRefresh();
-    } finally {
-      setBusy(null);
-    }
+  function openGovernedReview(req: DisbursementRequest) {
+    router.push(
+      `/disbursement-requests?pathId=${encodeURIComponent(req.governancePathId)}&requestId=${encodeURIComponent(req.id)}`,
+    );
   }
 
   async function confirmReject(note: string) {
@@ -450,13 +447,16 @@ function DisbursementsTab({
             {req.description && (
               <div className={styles.cardRef}>{req.description}</div>
             )}
+            <div className={styles.cardHint}>
+              {t("disbursementDecisionRequired")}
+            </div>
             <div className={styles.cardActions}>
               <button
                 className={styles.approveBtn}
-                onClick={() => approve(req.id)}
+                onClick={() => openGovernedReview(req)}
                 disabled={busy === req.id}
               >
-                {busy === req.id ? '...' : 'موافقة'}
+                {t("openDisbursementReview")}
               </button>
               <button
                 className={styles.rejectBtn}
@@ -546,6 +546,7 @@ function DisputesTab({
 // ── الصفحة الرئيسية ───────────────────────────────────────────────────
 export default function ReviewCenterPage() {
   const t = useTranslations("reviewCenter");
+  const nav = useTranslations("nav");
   const { id: entityId } = useParams<{ id: string }>();
 
   const [entity, setEntity] = useState<Entity | null>(null);
@@ -650,6 +651,14 @@ export default function ReviewCenterPage() {
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("entities"), href: "/entities" },
+          { label: entity?.name ?? nav("entities"), href: `/entities/${entityId}` },
+          { label: nav("reviewCenter") },
+        ]}
+      />
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>{t("pageTitle")}</h1>

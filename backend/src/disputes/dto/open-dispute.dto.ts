@@ -29,6 +29,10 @@ export class OpenDisputeDto {
   @IsUUID()
   linkedAppealId?: string;
 
+  @IsOptional()
+  @IsUUID()
+  disbursementRequestId?: string;
+
   @IsString()
   @MinLength(5)
   title: string;

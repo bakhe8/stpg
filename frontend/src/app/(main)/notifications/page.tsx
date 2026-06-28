@@ -3,7 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { getMyNotifications, markAllRead, markRead, Notification } from '../../../lib/api/notifications';
+import {
+  getMyNotifications,
+  getNotificationRecipientMatrix,
+  markAllRead,
+  markRead,
+  Notification,
+  NotificationRecipientMatrixRow,
+} from '../../../lib/api/notifications';
 import styles from './notifications.module.css';
 
 const TYPE_ICONS: Record<string, string> = {
@@ -19,6 +26,37 @@ const TYPE_ICONS: Record<string, string> = {
   MEMBERSHIP_APPLICATION_REJECTED: '✗',
   PLATFORM_ACCESS: '🔒',
   GENERAL: '🔔',
+};
+
+const MATRIX_EVENT_KEYS: Record<string, string> = {
+  DECISION_CREATED: 'matrixEventDecisionCreated',
+  PAYMENT_CONFIRMED: 'matrixEventPaymentConfirmed',
+  PAYMENT_DUE: 'matrixEventPaymentDue',
+  APPEAL_FILED: 'matrixEventAppealFiled',
+  POLICY_CHANGED: 'matrixEventPolicyChanged',
+  GOVERNANCE_CHANGED: 'matrixEventGovernanceChanged',
+  RELATIONSHIP_REQUESTED: 'matrixEventRelationshipRequested',
+  RELATIONSHIP_APPROVED: 'matrixEventRelationshipApproved',
+  MEMBERSHIP_APPLICATION_APPROVED: 'matrixEventMembershipApproved',
+  MEMBERSHIP_APPLICATION_REJECTED: 'matrixEventMembershipRejected',
+  CAMPAIGN_EXPIRED: 'matrixEventCampaignExpired',
+  PLATFORM_ACCESS: 'matrixEventPlatformAccess',
+};
+
+const MATRIX_RECIPIENT_KEYS: Record<string, string> = {
+  DECISION_SCOPE: 'matrixRecipientsDecisionScope',
+  PAYMENT_OWNER: 'matrixRecipientsPaymentOwner',
+  ENTITY_ADMINS_FOUNDERS: 'matrixRecipientsEntityAdminsFounders',
+  ACTIVE_MEMBERS_EXCEPT_ACTOR: 'matrixRecipientsActiveMembersExceptActor',
+  AFFECTED_SUBSCRIBERS: 'matrixRecipientsAffectedSubscribers',
+  TARGET_ENTITY_ADMINS_FOUNDERS: 'matrixRecipientsTargetEntityAdminsFounders',
+  SOURCE_ENTITY_ADMINS_FOUNDERS: 'matrixRecipientsSourceEntityAdminsFounders',
+  APPLICANT: 'matrixRecipientsApplicant',
+};
+
+const MATRIX_DELIVERY_KEYS: Record<string, string> = {
+  IN_APP: 'matrixDeliveryInApp',
+  IN_APP_AND_ACTIVE_PUSH: 'matrixDeliveryInAppAndPush',
 };
 
 function getNotificationHref(notification: Notification): string | null {
@@ -42,12 +80,24 @@ function getNotificationHref(notification: Notification): string | null {
 export default function NotificationsPage() {
   const t = useTranslations('notifications');
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [recipientMatrix, setRecipientMatrix] = useState<
+    NotificationRecipientMatrixRow[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [onlyUnread, setOnlyUnread] = useState(false);
 
   async function load() {
     setLoading(true);
-    try { setNotifications(await getMyNotifications(onlyUnread)); }
+    try {
+      const [nextNotifications, nextMatrix] = await Promise.all([
+        getMyNotifications(onlyUnread),
+        getNotificationRecipientMatrix().catch(
+          () => [] as NotificationRecipientMatrixRow[],
+        ),
+      ]);
+      setNotifications(nextNotifications);
+      setRecipientMatrix(nextMatrix);
+    }
     catch { /* ignore */ }
     finally { setLoading(false); }
   }
@@ -94,6 +144,61 @@ export default function NotificationsPage() {
           )}
         </div>
       </div>
+
+      {recipientMatrix.length > 0 && (
+        <section className={styles.matrixCard}>
+          <div className={styles.matrixHeader}>
+            <h2 className={styles.matrixTitle}>{t('matrixTitle')}</h2>
+            <p className={styles.matrixHint}>{t('matrixHint')}</p>
+          </div>
+          <div className={styles.matrixList}>
+            {recipientMatrix.map((row) => (
+              <div key={row.id} className={styles.matrixRow}>
+                <div>
+                  <span className={styles.matrixLabel}>{t('matrixEvent')}</span>
+                  <strong>
+                    {t(MATRIX_EVENT_KEYS[row.event] ?? 'matrixEventFallback', {
+                      event: row.event,
+                    })}
+                  </strong>
+                </div>
+                <div>
+                  <span className={styles.matrixLabel}>
+                    {t('matrixRecipients')}
+                  </span>
+                  <strong>
+                    {t(
+                      MATRIX_RECIPIENT_KEYS[row.recipientRule] ??
+                        'matrixRecipientsFallback',
+                      { rule: row.recipientRule },
+                    )}
+                  </strong>
+                </div>
+                <div>
+                  <span className={styles.matrixLabel}>{t('matrixTarget')}</span>
+                  <strong>{row.notificationType} · {row.targetType}</strong>
+                </div>
+                <div>
+                  <span className={styles.matrixLabel}>
+                    {t('matrixDelivery')}
+                  </span>
+                  <strong>
+                    {t(
+                      MATRIX_DELIVERY_KEYS[row.delivery] ??
+                        'matrixDeliveryFallback',
+                      { delivery: row.delivery },
+                    )}
+                  </strong>
+                </div>
+                <div>
+                  <span className={styles.matrixLabel}>{t('matrixSource')}</span>
+                  <strong>{row.source}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {loading ? (
         <div className={styles.centered}><div className={styles.spinner} /></div>

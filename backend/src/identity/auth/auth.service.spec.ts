@@ -21,7 +21,7 @@ function unsignedIdToken(payload: Record<string, unknown>) {
 describe('AuthService OAuth', () => {
   let prisma: {
     oAuthAccount: { findUnique: jest.Mock };
-    person: { findUnique: jest.Mock; create: jest.Mock };
+    person: { findFirst: jest.Mock; findUnique: jest.Mock; create: jest.Mock };
     refreshToken: { create: jest.Mock };
     auditLog: { create: jest.Mock };
     $transaction: jest.Mock;
@@ -33,7 +33,7 @@ describe('AuthService OAuth', () => {
     delete process.env.GOOGLE_OAUTH_CLIENT_ID;
     prisma = {
       oAuthAccount: { findUnique: jest.fn() },
-      person: { findUnique: jest.fn(), create: jest.fn() },
+      person: { findFirst: jest.fn(), findUnique: jest.fn(), create: jest.fn() },
       refreshToken: { create: jest.fn() },
       auditLog: { create: jest.fn() },
       $transaction: jest.fn(),
@@ -55,6 +55,35 @@ describe('AuthService OAuth', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
 
     expect(prisma.oAuthAccount.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('records failed password login attempts without exposing the password', async () => {
+    prisma.person.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.login({
+        phoneNumber: '0501234567',
+        password: 'wrong-password',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'LOGIN',
+          targetType: 'auth_attempts',
+          personId: undefined,
+          newValue: expect.objectContaining({
+            status: 'FAILED',
+            reason: 'NO_ACCOUNT_OR_PASSWORD',
+            phoneHint: '****4567',
+          }),
+        }),
+      }),
+    );
+    expect(JSON.stringify(prisma.auditLog.create.mock.calls)).not.toContain(
+      'wrong-password',
+    );
   });
 
   it('requires an allowlisted OAuth audience before trusting the token body', async () => {

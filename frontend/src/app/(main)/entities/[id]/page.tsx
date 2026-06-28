@@ -1,17 +1,22 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
-  getEntity, getEntityMembers, getEntityRelationships,
-  approveEntityRelationship, rejectEntityRelationship,
-  Entity, EntityMember, EntityRelationship,
-} from '../../../../lib/api/entities';
-import { getActiveSessions, SupportSession } from '../../../../lib/api/support';
-import PlatformSupportBanner from '../../../../components/platform/PlatformSupportBanner';
-import { ENTITY_TYPE_KEYS } from '../../../../lib/enum-labels';
+  getEntity,
+  getEntityMembers,
+  getEntityRelationships,
+  approveEntityRelationship,
+  rejectEntityRelationship,
+  Entity,
+  EntityMember,
+  EntityRelationship,
+} from "../../../../lib/api/entities";
+import { getActiveSessions, SupportSession } from "../../../../lib/api/support";
+import PlatformSupportBanner from "../../../../components/platform/PlatformSupportBanner";
+import { ENTITY_TYPE_KEYS } from "../../../../lib/enum-labels";
 import {
   createWallet,
   getEntityWallets,
@@ -19,49 +24,157 @@ import {
   GovernancePath,
   Wallet,
   WalletBenefitType,
-} from '../../../../lib/api/wallets';
-import { getFundHealth, FundHealth } from '../../../../lib/api/analytics';
+} from "../../../../lib/api/wallets";
+import { getFundHealth, FundHealth } from "../../../../lib/api/analytics";
 import {
-  getSubscriptions, createSubscription, exitSubscription, Subscription,
-  getSubscriptionCompatibility, CompatibilityResult,
-} from '../../../../lib/api/subscriptions';
-import {
-  ADMIN_ROLES,
-  OVERSIGHT_ROLES,
-  hasRole,
-} from '../../../../lib/access';
-import { createInvitation } from '../../../../lib/api/invitations';
-import PlatformStatusBanner from '../../../../components/shared/PlatformStatusBanner';
-import styles from './entity-detail.module.css';
+  getSubscriptions,
+  createSubscription,
+  exitSubscription,
+  Subscription,
+  getSubscriptionCompatibility,
+  CompatibilityResult,
+  getMyPaymentDues,
+  PaymentDue,
+} from "../../../../lib/api/subscriptions";
+import { ADMIN_ROLES, OVERSIGHT_ROLES, hasRole } from "../../../../lib/access";
+import { createInvitation } from "../../../../lib/api/invitations";
+import PlatformStatusBanner from "../../../../components/shared/PlatformStatusBanner";
+import styles from "./entity-detail.module.css";
 
 const ROLE_MAP: Record<string, string> = {
-  FOUNDER: 'roleFounder',
-  ADMIN: 'roleAdmin',
-  TREASURER: 'roleTreasurer',
-  AUDITOR: 'roleAuditor',
-  COMMITTEE_MEMBER: 'roleCommitteeMember',
-  MEMBER: 'roleMember',
+  FOUNDER: "roleFounder",
+  ADMIN: "roleAdmin",
+  TREASURER: "roleTreasurer",
+  AUDITOR: "roleAuditor",
+  COMMITTEE_MEMBER: "roleCommitteeMember",
+  MEMBER: "roleMember",
 };
 
-function formatCurrency(amount: number, currency = 'SAR') {
-  return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(amount);
+function formatCurrency(amount: number, currency = "SAR") {
+  return new Intl.NumberFormat("ar-SA", { style: "currency", currency }).format(
+    amount,
+  );
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "غير محدد";
+  return new Date(value).toLocaleDateString("ar-SA");
+}
+
+function entityRelationshipLabel(
+  type: string,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const key = `relationType${type
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("")}`;
+  return t.has(key as Parameters<typeof t>[0])
+    ? t(key as Parameters<typeof t>[0])
+    : type;
+}
+
+function entityRelationshipDescription(
+  type: string,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const key = `relationDesc${type
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("")}`;
+  return t.has(key as Parameters<typeof t>[0])
+    ? t(key as Parameters<typeof t>[0])
+    : t("relationDescDefault");
+}
+
+function entityRelationshipTerms(
+  relationship: EntityRelationship,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const terms = relationship.terms ?? {};
+  const chips: string[] = [];
+
+  if (
+    relationship.type === "CONTRIBUTION_NO_VOTE" ||
+    terms.noVotingRights === true
+  ) {
+    chips.push(t("relationChipNoVote"));
+  }
+  if (
+    relationship.type === "CONTRIBUTION_WITH_OVERSIGHT" ||
+    terms.oversight
+  ) {
+    chips.push(t("relationChipOversight"));
+  }
+  if (relationship.type === "SHARED_WALLET" || terms.sharedWalletKey) {
+    chips.push(t("relationChipSharedWallet"));
+  }
+  if (relationship.type === "REPORT_SHARING" || terms.monthlySharedDashboard) {
+    chips.push(t("relationChipReportsOnly"));
+  }
+
+  return chips;
+}
+
+function subscriptionStateLabel(
+  state: Subscription["state"],
+  t: ReturnType<typeof useTranslations>,
+) {
+  const labels: Record<Subscription["state"], Parameters<typeof t>[0]> = {
+    ACTIVE: "relationshipStateActive",
+    CONDITIONAL: "relationshipStateConditional",
+    INTERESTED: "relationshipStateInterested",
+    SUSPENDED: "relationshipStateSuspended",
+    EXITED: "relationshipStateExited",
+    SUPPORTER_ONLY: "relationshipStateSupporterOnly",
+  };
+  return t(labels[state]);
+}
+
+function subscriptionRightsText(
+  state: Subscription["state"],
+  t: ReturnType<typeof useTranslations>,
+) {
+  const labels: Record<Subscription["state"], Parameters<typeof t>[0]> = {
+    ACTIVE: "relationshipRightsActive",
+    CONDITIONAL: "relationshipRightsConditional",
+    INTERESTED: "relationshipRightsInterested",
+    SUSPENDED: "relationshipRightsSuspended",
+    EXITED: "relationshipRightsExited",
+    SUPPORTER_ONLY: "relationshipRightsSupporterOnly",
+  };
+  return t(labels[state]);
 }
 
 export default function EntityDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const t = useTranslations('entities');
-  const tEnums = useTranslations('enums');
+  const t = useTranslations("entities");
+  const tEnums = useTranslations("enums");
   const [entity, setEntity] = useState<Entity | null>(null);
   const [members, setMembers] = useState<EntityMember[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [mySubscriptions, setMySubscriptions] = useState<Subscription[]>([]);
+  const [myPaymentDues, setMyPaymentDues] = useState<PaymentDue[]>([]);
   const [health, setHealth] = useState<FundHealth | null>(null);
   const [showHealthTooltip, setShowHealthTooltip] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'overview' | 'members' | 'wallets' | 'relations' | 'compatibility' | 'support'>('overview');
-  const [relationships, setRelationships] = useState<{ outgoing: EntityRelationship[]; incoming: EntityRelationship[] }>({ outgoing: [], incoming: [] });
+  const [tab, setTab] = useState<
+    | "overview"
+    | "members"
+    | "wallets"
+    | "relations"
+    | "compatibility"
+    | "support"
+  >("overview");
+  const [relationships, setRelationships] = useState<{
+    outgoing: EntityRelationship[];
+    incoming: EntityRelationship[];
+  }>({ outgoing: [], incoming: [] });
   const [relMsg, setRelMsg] = useState<string | null>(null);
-  
+
   const [supportSessions, setSupportSessions] = useState<SupportSession[]>([]);
   const [supportLoading, setSupportLoading] = useState(false);
 
@@ -71,15 +184,21 @@ export default function EntityDetailPage() {
     pathId: string;
     pathName: string;
     subscriberCount: number;
-    compatibilityList: Array<{ memberId: string; memberName: string; result: CompatibilityResult | null }>;
+    compatibilityList: Array<{
+      memberId: string;
+      memberName: string;
+      result: CompatibilityResult | null;
+    }>;
   }
   const [pathCompatData, setPathCompatData] = useState<PathCompat[]>([]);
   const [compatLoading, setCompatLoading] = useState(false);
-  const [transferMemberId, setTransferMemberId] = useState('');
-  const [transferFromPathId, setTransferFromPathId] = useState('');
-  const [transferToPathId, setTransferToPathId] = useState('');
+  const [transferMemberId, setTransferMemberId] = useState("");
+  const [transferFromPathId, setTransferFromPathId] = useState("");
+  const [transferToPathId, setTransferToPathId] = useState("");
   const [transferMsg, setTransferMsg] = useState<string | null>(null);
-  const [transferPaths, setTransferPaths] = useState<Array<GovernancePath & { walletName: string }>>([]);
+  const [transferPaths, setTransferPaths] = useState<
+    Array<GovernancePath & { walletName: string }>
+  >([]);
   const [transferPathsLoading, setTransferPathsLoading] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [showWalletForm, setShowWalletForm] = useState(false);
@@ -90,9 +209,9 @@ export default function EntityDetailPage() {
     description: string;
     benefitType: WalletBenefitType;
   }>({
-    name: '',
-    description: '',
-    benefitType: 'SEPARABLE',
+    name: "",
+    description: "",
+    benefitType: "SEPARABLE",
   });
 
   async function copyInviteLink() {
@@ -108,8 +227,8 @@ export default function EntityDetailPage() {
   }
 
   useEffect(() => {
-    const requestedTab = new URLSearchParams(window.location.search).get('tab');
-    if (requestedTab === 'wallets') setTab('wallets');
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab === "wallets") setTab("wallets");
   }, []);
 
   useEffect(() => {
@@ -119,7 +238,7 @@ export default function EntityDetailPage() {
         const ent = await getEntity(id);
         const canManageEntity = hasRole(ent, ADMIN_ROLES);
         const canViewHealth = hasRole(ent, OVERSIGHT_ROLES);
-        const [mems, wals, rels] = await Promise.all([
+        const [mems, wals, rels, ownSubs, ownDues] = await Promise.all([
           canManageEntity ? getEntityMembers(id) : Promise.resolve([]),
           getEntityWallets(id),
           canManageEntity
@@ -128,11 +247,23 @@ export default function EntityDetailPage() {
                 incoming: [],
               }))
             : Promise.resolve({ outgoing: [], incoming: [] }),
+          ent.myMembershipId
+            ? getSubscriptions({ membershipId: ent.myMembershipId }).catch(
+                () => [] as Subscription[],
+              )
+            : Promise.resolve([] as Subscription[]),
+          getMyPaymentDues().catch(() => [] as PaymentDue[]),
         ]);
         setRelationships(rels);
         setEntity(ent);
         setMembers(mems);
         setWallets(wals as Wallet[]);
+        setMySubscriptions(ownSubs);
+        setMyPaymentDues(
+          ownDues.filter(
+            (due) => due.subscription?.membership?.entityId === ent.id,
+          ),
+        );
         if (canViewHealth) {
           try {
             setHealth(await getFundHealth(id));
@@ -142,14 +273,16 @@ export default function EntityDetailPage() {
         }
 
         // تحميل جلسات الدعم النشطة عند تحميل الصفحة لإظهار البانر التحذيري
-        getActiveSessions(id).then(setSupportSessions).catch(() => {});
+        getActiveSessions(id)
+          .then(setSupportSessions)
+          .catch(() => {});
 
         // Ensure RLS takes this entity context
         if (typeof window !== "undefined") {
           localStorage.setItem("currentEntityId", id);
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : t('generalError'));
+        setError(e instanceof Error ? e.message : t("generalError"));
       } finally {
         setLoading(false);
       }
@@ -198,13 +331,15 @@ export default function EntityDetailPage() {
               const pathSubs = allSubs.filter(
                 (subscription: Subscription) =>
                   subscription.governancePathId === path.id &&
-                  subscription.state === 'ACTIVE',
+                  subscription.state === "ACTIVE",
               );
               const compatibilityList = await Promise.all(
                 pathSubs.map(async (subscription: Subscription) => {
                   let result: CompatibilityResult | null = null;
                   try {
-                    result = await getSubscriptionCompatibility(subscription.id);
+                    result = await getSubscriptionCompatibility(
+                      subscription.id,
+                    );
                   } catch {
                     // Keep the remaining members visible if one check fails.
                   }
@@ -239,18 +374,26 @@ export default function EntityDetailPage() {
     setTransferMsg(null);
     try {
       const subs = await getSubscriptions({ membershipId: transferMemberId });
-      const fromSub = subs.find((s: Subscription) => s.governancePathId === transferFromPathId && s.state === 'ACTIVE');
-      if (!fromSub) { setTransferMsg(t('transferNoSub')); return; }
+      const fromSub = subs.find(
+        (s: Subscription) =>
+          s.governancePathId === transferFromPathId && s.state === "ACTIVE",
+      );
+      if (!fromSub) {
+        setTransferMsg(t("transferNoSub"));
+        return;
+      }
       await exitSubscription(fromSub.id);
-      await createSubscription(transferToPathId, { membershipId: transferMemberId });
-      setTransferMsg(t('transferSuccess'));
-      setTransferMemberId('');
-      setTransferFromPathId('');
-      setTransferToPathId('');
+      await createSubscription(transferToPathId, {
+        membershipId: transferMemberId,
+      });
+      setTransferMsg(t("transferSuccess"));
+      setTransferMemberId("");
+      setTransferFromPathId("");
+      setTransferToPathId("");
       await loadTransferPaths();
       if (pathCompatData.length > 0) await loadCompatibility();
     } catch (e) {
-      setTransferMsg(e instanceof Error ? e.message : t('transferFailed'));
+      setTransferMsg(e instanceof Error ? e.message : t("transferFailed"));
     }
   }
 
@@ -279,47 +422,151 @@ export default function EntityDetailPage() {
       });
       setWallets(await getEntityWallets(id));
       setWalletForm({
-        name: '',
-        description: '',
-        benefitType: 'SEPARABLE',
+        name: "",
+        description: "",
+        benefitType: "SEPARABLE",
       });
       setShowWalletForm(false);
-      setWalletMsg(t('walletCreateSuccess'));
+      setWalletMsg(t("walletCreateSuccess"));
     } catch (e) {
-      setWalletMsg(e instanceof Error ? e.message : t('walletCreateFailed'));
+      setWalletMsg(e instanceof Error ? e.message : t("walletCreateFailed"));
     } finally {
       setWalletCreating(false);
     }
   }
 
-  if (loading) return <div className={styles.centered}><div className={styles.spinner} /></div>;
+  if (loading)
+    return (
+      <div className={styles.centered}>
+        <div className={styles.spinner} />
+      </div>
+    );
   if (error) return <div className={styles.errorBox}>{error}</div>;
   if (!entity) return null;
 
   const totalBalance = wallets.reduce((s, w) => s + (w.balance ?? 0), 0);
   const healthPct = health ? Math.round(health.healthScore * 100) : null;
   const canManage = hasRole(entity, ADMIN_ROLES);
+  const roleKey = entity.myRole ? ROLE_MAP[entity.myRole] : null;
+  const roleText = roleKey
+    ? t(roleKey as Parameters<typeof t>[0])
+    : (entity.myRole ?? t("roleMember"));
+  const activeOwnSubscriptions = mySubscriptions.filter(
+    (subscription) => subscription.state === "ACTIVE",
+  );
+  const conditionalOwnSubscriptions = mySubscriptions.filter(
+    (subscription) => subscription.state === "CONDITIONAL",
+  );
+  const supporterOnlyOwnSubscriptions = mySubscriptions.filter(
+    (subscription) => subscription.state === "SUPPORTER_ONLY",
+  );
+  const operationalSubscriptions =
+    activeOwnSubscriptions.length +
+    conditionalOwnSubscriptions.length +
+    supporterOnlyOwnSubscriptions.length;
+  const monthlyObligation = mySubscriptions
+    .filter((subscription) =>
+      ["ACTIVE", "CONDITIONAL"].includes(subscription.state),
+    )
+    .reduce(
+      (sum, subscription) => sum + Number(subscription.agreedAmount ?? 0),
+      0,
+    );
+  const currentDueAmount = myPaymentDues
+    .filter((due) => ["PENDING", "OVERDUE"].includes(due.status))
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const overdueAmount = myPaymentDues
+    .filter((due) => due.status === "OVERDUE")
+    .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const primaryRelationshipText =
+    overdueAmount > 0
+      ? t("relationshipOverdue", { amount: formatCurrency(overdueAmount) })
+      : conditionalOwnSubscriptions.length > 0
+        ? t("relationshipConditional")
+        : supporterOnlyOwnSubscriptions.length > 0 &&
+            activeOwnSubscriptions.length === 0
+          ? t("relationshipSupporterOnly")
+          : activeOwnSubscriptions.length > 0
+            ? t("relationshipActive", {
+                count: activeOwnSubscriptions.length,
+              })
+            : t("relationshipNoSubscription");
   const visibleTabs = [
-    'overview',
-    'wallets',
-    ...(canManage ? ['members', 'relations', 'compatibility', 'support'] : []),
-  ] as Array<'overview' | 'members' | 'wallets' | 'relations' | 'compatibility' | 'support'>;
+    "overview",
+    "wallets",
+    ...(canManage ? ["members", "relations", "compatibility", "support"] : []),
+  ] as Array<
+    | "overview"
+    | "members"
+    | "wallets"
+    | "relations"
+    | "compatibility"
+    | "support"
+  >;
 
   const isActionDisabled =
-    entity.platformStatus === 'SUSPENDED' || entity.platformStatus === 'READ_ONLY';
+    entity.platformStatus === "SUSPENDED" ||
+    entity.platformStatus === "READ_ONLY";
+  const isCampaignEntity = entity.isCampaign || entity.type === "CAMPAIGN";
+  const campaignEnded =
+    !!entity.campaignEndsAt && new Date(entity.campaignEndsAt) <= new Date();
+  const showCampaignClosedPanel =
+    isCampaignEntity && (entity.platformStatus === "READ_ONLY" || campaignEnded);
+  const showPendingReviewPanel = entity.platformStatus === "PENDING_REVIEW";
+  const pendingReviewItems = [
+    {
+      label: t("pendingReviewReasonLabel"),
+      value: entity.suspendedReason ?? t("pendingReviewReasonFallback"),
+      state: "attention",
+    },
+    {
+      label: t("pendingReviewBankLabel"),
+      value:
+        entity.bankAccountNumber && entity.bankName
+          ? t("pendingReviewBankReady", { bank: entity.bankName })
+          : t("pendingReviewBankMissing"),
+      state: entity.bankAccountNumber && entity.bankName ? "ready" : "missing",
+    },
+    {
+      label: t("pendingReviewWalletsLabel"),
+      value:
+        wallets.length > 0
+          ? t("pendingReviewWalletsReady", { count: wallets.length })
+          : t("pendingReviewWalletsMissing"),
+      state: wallets.length > 0 ? "ready" : "missing",
+    },
+    {
+      label: t("pendingReviewMembersLabel"),
+      value:
+        (entity._count?.memberships ?? 0) > 0
+          ? t("pendingReviewMembersReady", {
+              count: entity._count?.memberships ?? 0,
+            })
+          : t("pendingReviewMembersMissing"),
+      state: (entity._count?.memberships ?? 0) > 0 ? "ready" : "missing",
+    },
+  ];
+  const walletNameById = new Map(wallets.map((wallet) => [wallet.id, wallet.name]));
+  const relationshipSubscriptions = mySubscriptions.filter(
+    (subscription) => subscription.state !== "EXITED",
+  );
 
   return (
     <div className={styles.page}>
-      <Link href="/entities" className={styles.back}>{t('backToEntities')}</Link>
+      <Link href="/entities" className={styles.back}>
+        {t("backToEntities")}
+      </Link>
 
       {supportSessions.length > 0 && (
         <PlatformSupportBanner
-          operatorName={supportSessions[0].platformAccount?.name ?? t('supportTeam')}
-          operatorRole={t('supportRoleLabel')}
+          operatorName={
+            supportSessions[0].platformAccount?.name ?? t("supportTeam")
+          }
+          operatorRole={t("supportRoleLabel")}
         />
       )}
 
-      {entity.platformStatus && entity.platformStatus !== 'ACTIVE' && (
+      {entity.platformStatus && entity.platformStatus !== "ACTIVE" && (
         <PlatformStatusBanner
           entityId={id}
           status={entity.platformStatus}
@@ -328,13 +575,108 @@ export default function EntityDetailPage() {
         />
       )}
 
+      {showPendingReviewPanel && (
+        <section className={styles.pendingReviewPanel}>
+          <div className={styles.pendingReviewHeader}>
+            <div>
+              <span className={styles.pendingReviewEyebrow}>
+                {t("pendingReviewEyebrow")}
+              </span>
+              <h2 className={styles.pendingReviewTitle}>
+                {t("pendingReviewTitle")}
+              </h2>
+              <p className={styles.pendingReviewText}>
+                {t("pendingReviewBody")}
+              </p>
+            </div>
+            <span className={styles.pendingReviewBadge}>
+              {t("pendingReviewBadge")}
+            </span>
+          </div>
+
+          <div className={styles.pendingReviewChecklist}>
+            {pendingReviewItems.map((item) => (
+              <div
+                key={item.label}
+                className={styles.pendingReviewItem}
+                data-state={item.state}
+              >
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.pendingReviewActions}>
+            <button
+              type="button"
+              className={styles.pendingReviewAction}
+              onClick={() => setTab("wallets")}
+            >
+              {t("pendingReviewOpenWallets")}
+            </button>
+            {canManage && (
+              <Link
+                href={`/entities/${entity.id}/review`}
+                className={styles.pendingReviewAction}
+              >
+                {t("pendingReviewOpenReviewCenter")}
+              </Link>
+            )}
+            {(entity.myRole === "FOUNDER" || entity.myRole === "ADMIN") && (
+              <Link
+                href={`/entities/${entity.id}/settings`}
+                className={styles.pendingReviewAction}
+              >
+                {t("pendingReviewOpenSettings")}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
+
+      {showCampaignClosedPanel && (
+        <section className={styles.campaignClosurePanel}>
+          <div>
+            <span className={styles.campaignClosureEyebrow}>
+              {t("campaignClosedEyebrow")}
+            </span>
+            <h2 className={styles.campaignClosureTitle}>
+              {t("campaignClosedTitle")}
+            </h2>
+            <p className={styles.campaignClosureText}>
+              {t("campaignClosedBody")}
+            </p>
+          </div>
+          <div className={styles.campaignClosureGrid}>
+            <div>
+              <span>{t("campaignClosedDateLabel")}</span>
+              <strong>{formatDate(entity.campaignEndsAt)}</strong>
+            </div>
+            <div>
+              <span>{t("campaignClosedStatusLabel")}</span>
+              <strong>{t("campaignClosedStatusReadOnly")}</strong>
+            </div>
+            <div>
+              <span>{t("campaignClosedNextReview")}</span>
+              <strong>{t("campaignClosedNextReviewValue")}</strong>
+            </div>
+          </div>
+          <p className={styles.campaignClosureFootnote}>
+            {t("campaignClosedFootnote")}
+          </p>
+        </section>
+      )}
+
       <div className={styles.entityHeader}>
         <div className={styles.entityIcon}>⬡</div>
         <div className={styles.entityMeta}>
           <h1 className={styles.entityName}>{entity.name}</h1>
           <div className={styles.entityType}>
             {ENTITY_TYPE_KEYS[entity.type]
-              ? tEnums(ENTITY_TYPE_KEYS[entity.type] as Parameters<typeof tEnums>[0])
+              ? tEnums(
+                  ENTITY_TYPE_KEYS[entity.type] as Parameters<typeof tEnums>[0],
+                )
               : entity.type}
           </div>
         </div>
@@ -350,16 +692,30 @@ export default function EntityDetailPage() {
             <div
               className={styles.healthBadge}
               style={{
-                background: healthPct >= 70 ? 'rgba(34,197,94,0.15)' : healthPct >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                color: healthPct >= 70 ? '#22c55e' : healthPct >= 40 ? '#f59e0b' : '#ef4444',
+                background:
+                  healthPct >= 70
+                    ? "rgba(34,197,94,0.15)"
+                    : healthPct >= 40
+                      ? "rgba(245,158,11,0.15)"
+                      : "rgba(239,68,68,0.15)",
+                color:
+                  healthPct >= 70
+                    ? "#22c55e"
+                    : healthPct >= 40
+                      ? "#f59e0b"
+                      : "#ef4444",
               }}
             >
-              {t('health', { pct: healthPct })}
+              {t("health", { pct: healthPct })}
               <span className={styles.healthInfoIcon}>ⓘ</span>
             </div>
             {health && (
-              <div className={`${styles.healthTooltip} ${showHealthTooltip ? styles.healthTooltipOpen : ''}`}>
-                <div className={styles.healthTooltipTitle}>مكونات مؤشر الصحة</div>
+              <div
+                className={`${styles.healthTooltip} ${showHealthTooltip ? styles.healthTooltipOpen : ""}`}
+              >
+                <div className={styles.healthTooltipTitle}>
+                  مكونات مؤشر الصحة
+                </div>
                 <div className={styles.healthTooltipRow}>
                   <span>الالتزام بالمدفوعات</span>
                   <span>{Math.round(health.paymentCompliance * 100)}%</span>
@@ -375,8 +731,8 @@ export default function EntityDetailPage() {
                 {healthPct < 70 && (
                   <div className={styles.healthTooltipHint}>
                     {healthPct < 40
-                      ? 'الكيان بحاجة إلى اهتمام عاجل — راجع المدفوعات والاشتراكات'
-                      : 'يمكن تحسين الصحة بتسوية المدفوعات المعلقة'}
+                      ? "الكيان بحاجة إلى اهتمام عاجل — راجع المدفوعات والاشتراكات"
+                      : "يمكن تحسين الصحة بتسوية المدفوعات المعلقة"}
                   </div>
                 )}
               </div>
@@ -397,7 +753,7 @@ export default function EntityDetailPage() {
             >
               مركز المراجعات
             </Link>
-            {(entity.myRole === 'FOUNDER' || entity.myRole === 'ADMIN') && (
+            {(entity.myRole === "FOUNDER" || entity.myRole === "ADMIN") && (
               <Link
                 href={`/entities/${entity.id}/settings`}
                 className={styles.manageLink}
@@ -408,9 +764,9 @@ export default function EntityDetailPage() {
             <button
               onClick={copyInviteLink}
               disabled={isActionDisabled}
-              className={`${styles.inviteButton} ${inviteCopied ? styles.inviteButtonCopied : ''}`}
+              className={`${styles.inviteButton} ${inviteCopied ? styles.inviteButtonCopied : ""}`}
             >
-              {inviteCopied ? '✓ تم النسخ' : '🔗 رابط الدعوة'}
+              {inviteCopied ? "✓ تم النسخ" : "🔗 رابط الدعوة"}
             </button>
           </div>
         )}
@@ -419,28 +775,133 @@ export default function EntityDetailPage() {
       {health && health.alerts.length > 0 && (
         <div className={styles.alertsBox}>
           {health.alerts.map((a, i) => (
-            <div key={i} className={styles.alertItem}>⚠ {a}</div>
+            <div key={i} className={styles.alertItem}>
+              ⚠ {a}
+            </div>
           ))}
         </div>
       )}
 
+      <section className={styles.relationshipPanel}>
+        <div className={styles.relationshipHeader}>
+          <div>
+            <h2 className={styles.relationshipTitle}>
+              {t("relationshipTitle")}
+            </h2>
+            <p className={styles.relationshipText}>
+              {t("relationshipWhyText", { role: roleText })}
+            </p>
+          </div>
+          <Link href="/portal" className={styles.relationshipAction}>
+            {t("relationshipPortalAction")}
+          </Link>
+        </div>
+        <div className={styles.relationshipGrid}>
+          <div>
+            <span>{t("relationshipRole")}</span>
+            <strong>{roleText}</strong>
+          </div>
+          <div>
+            <span>{t("relationshipPaths")}</span>
+            <strong>
+              {t("relationshipPathsValue", {
+                count: operationalSubscriptions,
+              })}
+            </strong>
+          </div>
+          <div>
+            <span>{t("relationshipMonthly")}</span>
+            <strong>
+              {monthlyObligation > 0
+                ? formatCurrency(monthlyObligation)
+                : t("relationshipNone")}
+            </strong>
+          </div>
+          <div>
+            <span>{t("relationshipDue")}</span>
+            <strong>
+              {currentDueAmount > 0
+                ? formatCurrency(currentDueAmount)
+                : t("relationshipNoDue")}
+            </strong>
+          </div>
+        </div>
+        {relationshipSubscriptions.length > 0 ? (
+          <div className={styles.relationshipPathList}>
+            <div className={styles.relationshipPathListHeader}>
+              <strong>{t("relationshipMapTitle")}</strong>
+              <span>{t("relationshipMapHint")}</span>
+            </div>
+            {relationshipSubscriptions.map((subscription) => {
+              const walletName =
+                subscription.governancePath?.walletId &&
+                walletNameById.get(subscription.governancePath.walletId)
+                  ? walletNameById.get(subscription.governancePath.walletId)
+                  : t("relationshipWalletFallback");
+              return (
+                <div
+                  key={subscription.id}
+                  className={styles.relationshipPathCard}
+                  data-state={subscription.state}
+                >
+                  <div>
+                    <span>{t("relationshipWallet")}</span>
+                    <strong>{walletName}</strong>
+                  </div>
+                  <div>
+                    <span>{t("relationshipPath")}</span>
+                    <strong>
+                      {subscription.governancePath?.name ??
+                        t("relationshipPathFallback")}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>{t("relationshipSubscriptionState")}</span>
+                    <strong>{subscriptionStateLabel(subscription.state, t)}</strong>
+                  </div>
+                  <div>
+                    <span>{t("relationshipSubscriptionAmount")}</span>
+                    <strong>
+                      {subscription.agreedAmount
+                        ? formatCurrency(Number(subscription.agreedAmount))
+                        : t("relationshipNone")}
+                    </strong>
+                  </div>
+                  <p>{subscriptionRightsText(subscription.state, t)}</p>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className={styles.relationshipMapEmpty}>
+            {t("relationshipMapEmpty")}
+          </div>
+        )}
+        <p className={styles.relationshipOutcome}>{primaryRelationshipText}</p>
+      </section>
+
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
-          <div className={styles.statValue}>{entity._count?.memberships ?? 0}</div>
-          <div className={styles.statLabel}>{t('activeMembers')}</div>
+          <div className={styles.statValue}>
+            {entity._count?.memberships ?? 0}
+          </div>
+          <div className={styles.statLabel}>{t("activeMembers")}</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statValue}>{wallets.length}</div>
-          <div className={styles.statLabel}>{t('walletsCount')}</div>
+          <div className={styles.statLabel}>{t("walletsCount")}</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statValue}>{formatCurrency(totalBalance)}</div>
-          <div className={styles.statLabel}>{t('totalBalances')}</div>
+          <div className={styles.statLabel}>{t("totalBalances")}</div>
         </div>
       </div>
       <div className={styles.entityActions}>
-        <Link href={`/decisions?entityId=${id}`} className={styles.decisionLink}>
-          {t('viewDecisions')}
+        <Link
+          href={`/decisions?entityId=${id}`}
+          className={styles.decisionLink}
+        >
+          {t("viewDecisions")}
         </Link>
       </div>
 
@@ -448,37 +909,65 @@ export default function EntityDetailPage() {
         {visibleTabs.map((tabKey) => (
           <button
             key={tabKey}
-            className={`${styles.tab} ${tab === tabKey ? styles.tabActive : ''}`}
+            className={`${styles.tab} ${tab === tabKey ? styles.tabActive : ""}`}
             onClick={() => {
               setTab(tabKey);
-              if (tabKey === 'members' && transferPaths.length === 0) {
+              if (tabKey === "members" && transferPaths.length === 0) {
                 void loadTransferPaths();
               }
-              if (tabKey === 'compatibility' && pathCompatData.length === 0) loadCompatibility();
-              if (tabKey === 'support' && supportSessions.length === 0) loadSupport();
+              if (tabKey === "compatibility" && pathCompatData.length === 0)
+                loadCompatibility();
+              if (tabKey === "support" && supportSessions.length === 0)
+                loadSupport();
             }}
           >
-            {tabKey === 'overview' ? t('tabOverview')
-              : tabKey === 'members' ? t('tabMembers', { count: members.length })
-              : tabKey === 'wallets' ? t('tabWallets', { count: wallets.length })
-              : tabKey === 'relations' ? t('tabRelations', { count: relationships.outgoing.length + relationships.incoming.length })
-              : tabKey === 'compatibility' ? t('tabCompatibility')
-              : t('tabSupport')}
+            {tabKey === "overview"
+              ? t("tabOverview")
+              : tabKey === "members"
+                ? t("tabMembers", { count: members.length })
+                : tabKey === "wallets"
+                  ? t("tabWallets", { count: wallets.length })
+                  : tabKey === "relations"
+                    ? t("tabRelations", {
+                        count:
+                          relationships.outgoing.length +
+                          relationships.incoming.length,
+                      })
+                    : tabKey === "compatibility"
+                      ? t("tabCompatibility")
+                      : t("tabSupport")}
           </button>
         ))}
       </div>
 
-      {tab === 'overview' && (
+      {tab === "overview" && (
         <div className={styles.overviewGrid}>
           <div className={styles.infoCard}>
-            <h3 className={styles.cardTitle}>{t('infoCardTitle')}</h3>
-            <div className={styles.infoRow}><span>{t('infoStatus')}</span><span>{entity.isActive ? t('active') : t('inactive')}</span></div>
-            <div className={styles.infoRow}><span>{t('infoCreatedAt')}</span><span>{new Date(entity.createdAt).toLocaleDateString('ar-SA')}</span></div>
+            <h3 className={styles.cardTitle}>{t("infoCardTitle")}</h3>
+            <div className={styles.infoRow}>
+              <span>{t("infoStatus")}</span>
+              <span>{entity.isActive ? t("active") : t("inactive")}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span>{t("infoCreatedAt")}</span>
+              <span>
+                {new Date(entity.createdAt).toLocaleDateString("ar-SA")}
+              </span>
+            </div>
             {health && (
               <>
-                <div className={styles.infoRow}><span>{t('infoPaymentCompliance')}</span><span>{Math.round(health.paymentCompliance * 100)}%</span></div>
-                <div className={styles.infoRow}><span>{t('infoSubscriptionHealth')}</span><span>{Math.round(health.subscriptionHealth * 100)}%</span></div>
-                <div className={styles.infoRow}><span>{t('infoActiveMemberRate')}</span><span>{Math.round(health.activeMemberRate * 100)}%</span></div>
+                <div className={styles.infoRow}>
+                  <span>{t("infoPaymentCompliance")}</span>
+                  <span>{Math.round(health.paymentCompliance * 100)}%</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>{t("infoSubscriptionHealth")}</span>
+                  <span>{Math.round(health.subscriptionHealth * 100)}%</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>{t("infoActiveMemberRate")}</span>
+                  <span>{Math.round(health.activeMemberRate * 100)}%</span>
+                </div>
               </>
             )}
             {entity.bankAccountNumber && (
@@ -490,7 +979,11 @@ export default function EntityDetailPage() {
                     className={styles.copyButton}
                     aria-label="نسخ رقم الحساب"
                     title="نسخ رقم الحساب"
-                    onClick={() => void navigator.clipboard.writeText(entity.bankAccountNumber!)}
+                    onClick={() =>
+                      void navigator.clipboard.writeText(
+                        entity.bankAccountNumber!,
+                      )
+                    }
                   >
                     ⎘
                   </button>
@@ -498,28 +991,39 @@ export default function EntityDetailPage() {
               </div>
             )}
             {entity.bankName && (
-              <div className={styles.infoRow}><span>البنك</span><span>{entity.bankName}</span></div>
+              <div className={styles.infoRow}>
+                <span>البنك</span>
+                <span>{entity.bankName}</span>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {tab === 'members' && (
+      {tab === "members" && (
         <div className={styles.tabStack}>
           <div className={styles.membersList}>
             {members.map((m) => (
               <div key={m.id} className={styles.memberRow}>
-                <div className={styles.memberAvatar}>{m.person.name.charAt(0)}</div>
+                <div className={styles.memberAvatar}>
+                  {m.person.name.charAt(0)}
+                </div>
                 <div className={styles.memberInfo}>
                   <div className={styles.memberName}>{m.person.name}</div>
-                  <div className={styles.memberUsername}>@{m.person.username}</div>
+                  <div className={styles.memberUsername}>
+                    @{m.person.username}
+                  </div>
                 </div>
-                <div className={styles.memberRole}>{ROLE_MAP[m.role] ? t(ROLE_MAP[m.role] as Parameters<typeof t>[0]) : m.role}</div>
+                <div className={styles.memberRole}>
+                  {ROLE_MAP[m.role]
+                    ? t(ROLE_MAP[m.role] as Parameters<typeof t>[0])
+                    : m.role}
+                </div>
                 <div
                   className={styles.memberStatus}
-                  style={{ color: m.isActive ? '#22c55e' : '#ef4444' }}
+                  style={{ color: m.isActive ? "#22c55e" : "#ef4444" }}
                 >
-                  {m.isActive ? t('active') : t('inactive')}
+                  {m.isActive ? t("active") : t("inactive")}
                 </div>
               </div>
             ))}
@@ -528,69 +1032,93 @@ export default function EntityDetailPage() {
           <section className={styles.operationPanel}>
             <div className={styles.operationHeader}>
               <div>
-                <h3 className={styles.operationTitle}>{t('transferTitle')}</h3>
-                <p className={styles.operationHint}>{t('transferHint')}</p>
+                <h3 className={styles.operationTitle}>{t("transferTitle")}</h3>
+                <p className={styles.operationHint}>{t("transferHint")}</p>
               </div>
-              <span className={styles.operationTag}>{t('membersOperation')}</span>
+              <span className={styles.operationTag}>
+                {t("membersOperation")}
+              </span>
             </div>
             {transferMsg && (
-              <div className={transferMsg.startsWith('✓') ? styles.successMessage : styles.errorMessage}>
+              <div
+                className={
+                  transferMsg.startsWith("✓")
+                    ? styles.successMessage
+                    : styles.errorMessage
+                }
+              >
                 {transferMsg}
               </div>
             )}
             {transferPathsLoading ? (
-              <div className={styles.inlineLoading}>{t('transferLoadingPaths')}</div>
+              <div className={styles.inlineLoading}>
+                {t("transferLoadingPaths")}
+              </div>
             ) : transferPaths.length < 2 ? (
-              <div className={styles.inlineEmpty}>{t('transferNeedsPaths')}</div>
+              <div className={styles.inlineEmpty}>
+                {t("transferNeedsPaths")}
+              </div>
             ) : (
               <div className={styles.transferGrid}>
                 <div className={styles.formField}>
-                  <label htmlFor="transfer-member">{t('transferMember')}</label>
+                  <label htmlFor="transfer-member">{t("transferMember")}</label>
                   <select
                     id="transfer-member"
                     value={transferMemberId}
                     onChange={(e) => setTransferMemberId(e.target.value)}
                   >
-                    <option value="">{t('transferChooseMember')}</option>
-                    {members.filter((m) => m.isActive).map((m) => (
-                      <option key={m.id} value={m.id}>{m.person.name}</option>
-                    ))}
+                    <option value="">{t("transferChooseMember")}</option>
+                    {members
+                      .filter((m) => m.isActive)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.person.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className={styles.formField}>
-                  <label htmlFor="transfer-from">{t('transferFrom')}</label>
+                  <label htmlFor="transfer-from">{t("transferFrom")}</label>
                   <select
                     id="transfer-from"
                     value={transferFromPathId}
                     onChange={(e) => setTransferFromPathId(e.target.value)}
                   >
-                    <option value="">{t('transferChoosePath')}</option>
+                    <option value="">{t("transferChoosePath")}</option>
                     {transferPaths.map((path) => (
-                      <option key={path.id} value={path.id}>{path.walletName} / {path.name}</option>
+                      <option key={path.id} value={path.id}>
+                        {path.walletName} / {path.name}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div className={styles.formField}>
-                  <label htmlFor="transfer-to">{t('transferTo')}</label>
+                  <label htmlFor="transfer-to">{t("transferTo")}</label>
                   <select
                     id="transfer-to"
                     value={transferToPathId}
                     onChange={(e) => setTransferToPathId(e.target.value)}
                   >
-                    <option value="">{t('transferChoosePath')}</option>
+                    <option value="">{t("transferChoosePath")}</option>
                     {transferPaths
                       .filter((path) => path.id !== transferFromPathId)
                       .map((path) => (
-                        <option key={path.id} value={path.id}>{path.walletName} / {path.name}</option>
+                        <option key={path.id} value={path.id}>
+                          {path.walletName} / {path.name}
+                        </option>
                       ))}
                   </select>
                 </div>
                 <button
                   className={styles.primaryAction}
-                  disabled={!transferMemberId || !transferFromPathId || !transferToPathId}
+                  disabled={
+                    !transferMemberId ||
+                    !transferFromPathId ||
+                    !transferToPathId
+                  }
                   onClick={handleMemberTransfer}
                 >
-                  {t('transferBtn')}
+                  {t("transferBtn")}
                 </button>
               </div>
             )}
@@ -598,12 +1126,12 @@ export default function EntityDetailPage() {
         </div>
       )}
 
-      {tab === 'wallets' && (
+      {tab === "wallets" && (
         <div className={styles.tabStack}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle}>{t('walletSectionTitle')}</h2>
-              <p className={styles.sectionHint}>{t('walletSectionHint')}</p>
+              <h2 className={styles.sectionTitle}>{t("walletSectionTitle")}</h2>
+              <p className={styles.sectionHint}>{t("walletSectionHint")}</p>
             </div>
             {canManage && !isActionDisabled && (
               <button
@@ -613,13 +1141,19 @@ export default function EntityDetailPage() {
                   setWalletMsg(null);
                 }}
               >
-                {showWalletForm ? t('walletCancelCreate') : t('walletNew')}
+                {showWalletForm ? t("walletCancelCreate") : t("walletNew")}
               </button>
             )}
           </div>
 
           {walletMsg && (
-            <div className={walletMsg.startsWith('✓') ? styles.successMessage : styles.errorMessage}>
+            <div
+              className={
+                walletMsg.startsWith("✓")
+                  ? styles.successMessage
+                  : styles.errorMessage
+              }
+            >
               {walletMsg}
             </div>
           )}
@@ -627,12 +1161,14 @@ export default function EntityDetailPage() {
           {showWalletForm && canManage && (
             <form className={styles.walletForm} onSubmit={handleCreateWallet}>
               <div className={styles.formField}>
-                <label htmlFor="wallet-name">{t('walletNameLabel')}</label>
+                <label htmlFor="wallet-name">{t("walletNameLabel")}</label>
                 <input
                   id="wallet-name"
                   value={walletForm.name}
-                  onChange={(e) => setWalletForm({ ...walletForm, name: e.target.value })}
-                  placeholder={t('walletNamePlaceholder')}
+                  onChange={(e) =>
+                    setWalletForm({ ...walletForm, name: e.target.value })
+                  }
+                  placeholder={t("walletNamePlaceholder")}
                   minLength={2}
                   maxLength={100}
                   required
@@ -640,26 +1176,39 @@ export default function EntityDetailPage() {
                 />
               </div>
               <div className={styles.formField}>
-                <label htmlFor="wallet-benefit">{t('walletBenefitLabel')}</label>
+                <label htmlFor="wallet-benefit">
+                  {t("walletBenefitLabel")}
+                </label>
                 <select
                   id="wallet-benefit"
                   value={walletForm.benefitType}
-                  onChange={(e) => setWalletForm({
-                    ...walletForm,
-                    benefitType: e.target.value as WalletBenefitType,
-                  })}
+                  onChange={(e) =>
+                    setWalletForm({
+                      ...walletForm,
+                      benefitType: e.target.value as WalletBenefitType,
+                    })
+                  }
                 >
-                  <option value="SEPARABLE">{t('walletBenefitSeparable')}</option>
-                  <option value="SHARED">{t('walletBenefitShared')}</option>
+                  <option value="SEPARABLE">
+                    {t("walletBenefitSeparable")}
+                  </option>
+                  <option value="SHARED">{t("walletBenefitShared")}</option>
                 </select>
               </div>
               <div className={`${styles.formField} ${styles.formFieldWide}`}>
-                <label htmlFor="wallet-description">{t('walletDescriptionLabel')}</label>
+                <label htmlFor="wallet-description">
+                  {t("walletDescriptionLabel")}
+                </label>
                 <textarea
                   id="wallet-description"
                   value={walletForm.description}
-                  onChange={(e) => setWalletForm({ ...walletForm, description: e.target.value })}
-                  placeholder={t('walletDescriptionPlaceholder')}
+                  onChange={(e) =>
+                    setWalletForm({
+                      ...walletForm,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder={t("walletDescriptionPlaceholder")}
                   maxLength={500}
                   rows={3}
                 />
@@ -670,14 +1219,14 @@ export default function EntityDetailPage() {
                   className={styles.primaryAction}
                   disabled={walletCreating || walletForm.name.trim().length < 2}
                 >
-                  {walletCreating ? t('walletCreating') : t('walletCreateBtn')}
+                  {walletCreating ? t("walletCreating") : t("walletCreateBtn")}
                 </button>
                 <button
                   type="button"
                   className={styles.secondaryAction}
                   onClick={() => setShowWalletForm(false)}
                 >
-                  {t('walletCancel')}
+                  {t("walletCancel")}
                 </button>
               </div>
             </form>
@@ -685,66 +1234,206 @@ export default function EntityDetailPage() {
 
           <div className={styles.walletsList}>
             {wallets.map((w) => (
-              <Link key={w.id} href={`/wallets/${w.id}`} className={styles.walletRow}>
+              <Link
+                key={w.id}
+                href={`/wallets/${w.id}`}
+                className={styles.walletRow}
+              >
                 <div className={styles.walletIcon}>⬡</div>
                 <div className={styles.walletInfo}>
                   <div className={styles.walletName}>{w.name}</div>
                   <div className={styles.walletCurrency}>{w.currency}</div>
                 </div>
-                <div className={styles.walletBalance}>{formatCurrency(w.balance ?? 0, w.currency || 'SAR')}</div>
+                <div className={styles.walletBalance}>
+                  {formatCurrency(w.balance ?? 0, w.currency || "SAR")}
+                </div>
                 <div className={styles.walletArrow}>›</div>
               </Link>
             ))}
             {wallets.length === 0 && (
-              <div className={styles.empty}>{t('noWallets')}</div>
+              <div className={styles.emptyStatePanel}>
+                <h3>{t("noWalletsTitle")}</h3>
+                <p>{t("noWalletsBody")}</p>
+                {canManage && !isActionDisabled && (
+                  <button
+                    type="button"
+                    className={styles.emptyStateAction}
+                    onClick={() => setShowWalletForm(true)}
+                  >
+                    {t("walletNew")}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {tab === 'relations' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {tab === "relations" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {relMsg && (
-            <div style={{ padding: '0.7rem 1rem', borderRadius: '8px', background: relMsg.startsWith('✓') ? '#ecfdf5' : '#fef2f2', color: relMsg.startsWith('✓') ? '#065f46' : '#991b1b', border: `1px solid ${relMsg.startsWith('✓') ? '#a7f3d0' : '#fca5a5'}`, fontSize: '0.9rem' }}>{relMsg}</div>
+            <div
+              style={{
+                padding: "0.7rem 1rem",
+                borderRadius: "8px",
+                background: relMsg.startsWith("✓") ? "#ecfdf5" : "#fef2f2",
+                color: relMsg.startsWith("✓") ? "#065f46" : "#991b1b",
+                border: `1px solid ${relMsg.startsWith("✓") ? "#a7f3d0" : "#fca5a5"}`,
+                fontSize: "0.9rem",
+              }}
+            >
+              {relMsg}
+            </div>
           )}
 
           {relationships.incoming.length > 0 && (
             <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>{t('incomingRelations', { count: relationships.incoming.length })}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+              <h3
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  marginBottom: "0.75rem",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {t("incomingRelations", {
+                  count: relationships.incoming.length,
+                })}
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.7rem",
+                }}
+              >
                 {relationships.incoming.map((r) => (
-                  <div key={r.id} style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem', background: r.approvalStatus === 'PENDING' ? 'var(--warning-bg)' : 'var(--surface-muted)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <span style={{ fontWeight: 600 }}>{r.sourceEntity?.name ?? r.sourceEntityId}</span>
-                      <span style={{ padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: r.approvalStatus === 'PENDING' ? '#fef3c7' : r.approvalStatus === 'ACTIVE' ? '#dcfce7' : '#fee2e2', color: r.approvalStatus === 'PENDING' ? '#92400e' : r.approvalStatus === 'ACTIVE' ? '#166534' : '#991b1b' }}>
-                        {r.approvalStatus === 'PENDING' ? t('approvalPending') : r.approvalStatus === 'ACTIVE' ? t('approvalActive') : t('approvalRejected')}
+                  <div
+                    key={r.id}
+                    style={{
+                      border: "1px solid var(--border)",
+                      borderRadius: "10px",
+                      padding: "1rem",
+                      background:
+                        r.approvalStatus === "PENDING"
+                          ? "var(--warning-bg)"
+                          : "var(--surface-muted)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>
+                        {r.sourceEntity?.name ?? r.sourceEntityId}
+                      </span>
+                      <span
+                        style={{
+                          padding: "0.2rem 0.6rem",
+                          borderRadius: "999px",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          background:
+                            r.approvalStatus === "PENDING"
+                              ? "#fef3c7"
+                              : r.approvalStatus === "ACTIVE"
+                                ? "#dcfce7"
+                                : "#fee2e2",
+                          color:
+                            r.approvalStatus === "PENDING"
+                              ? "#92400e"
+                              : r.approvalStatus === "ACTIVE"
+                                ? "#166534"
+                                : "#991b1b",
+                        }}
+                      >
+                        {r.approvalStatus === "PENDING"
+                          ? t("approvalPending")
+                          : r.approvalStatus === "ACTIVE"
+                            ? t("approvalActive")
+                            : t("approvalRejected")}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('relationType')} {r.type} · {t('relationSince')} {new Date(r.startedAt).toLocaleDateString('ar-SA')}</div>
-                    {r.approvalStatus === 'PENDING' && (
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-secondary)",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      {t("relationType")} {entityRelationshipLabel(r.type, t)} ·{" "}
+                      {t("relationSince")}{" "}
+                      {new Date(r.startedAt).toLocaleDateString("ar-SA")}
+                    </div>
+                    <div className={styles.relationMeaning}>
+                      <strong>{entityRelationshipLabel(r.type, t)}</strong>
+                      <span>{entityRelationshipDescription(r.type, t)}</span>
+                      {entityRelationshipTerms(r, t).length > 0 && (
+                        <div className={styles.relationChips}>
+                          {entityRelationshipTerms(r, t).map((chip) => (
+                            <span key={chip}>{chip}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {r.approvalStatus === "PENDING" && (
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
                         <button
-                          style={{ padding: '0.4rem 0.9rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+                          style={{
+                            padding: "0.4rem 0.9rem",
+                            background: "#10b981",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "7px",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            fontWeight: 500,
+                          }}
                           onClick={async () => {
                             try {
                               await approveEntityRelationship(r.id);
-                              setRelMsg(t('approveSuccess'));
+                              setRelMsg(t("approveSuccess"));
                               const rels = await getEntityRelationships(id);
                               setRelationships(rels);
-                            } catch (e) { setRelMsg(e instanceof Error ? e.message : t('relFailed')); }
+                            } catch (e) {
+                              setRelMsg(
+                                e instanceof Error ? e.message : t("relFailed"),
+                              );
+                            }
                           }}
-                        >{t('approveRelation')}</button>
+                        >
+                          {t("approveRelation")}
+                        </button>
                         <button
-                          style={{ padding: '0.4rem 0.9rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+                          style={{
+                            padding: "0.4rem 0.9rem",
+                            background: "#ef4444",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "7px",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            fontWeight: 500,
+                          }}
                           onClick={async () => {
                             try {
                               await rejectEntityRelationship(r.id);
-                              setRelMsg(t('rejectSuccess'));
+                              setRelMsg(t("rejectSuccess"));
                               const rels = await getEntityRelationships(id);
                               setRelationships(rels);
-                            } catch (e) { setRelMsg(e instanceof Error ? e.message : t('relFailed')); }
+                            } catch (e) {
+                              setRelMsg(
+                                e instanceof Error ? e.message : t("relFailed"),
+                              );
+                            }
                           }}
-                        >{t('rejectRelation')}</button>
+                        >
+                          {t("rejectRelation")}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -755,72 +1444,295 @@ export default function EntityDetailPage() {
 
           {relationships.outgoing.length > 0 && (
             <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>{t('outgoingRelations', { count: relationships.outgoing.length })}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+              <h3
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  marginBottom: "0.75rem",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {t("outgoingRelations", {
+                  count: relationships.outgoing.length,
+                })}
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.7rem",
+                }}
+              >
                 {relationships.outgoing.map((r) => (
-                  <div key={r.id} style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem', background: 'var(--surface-muted)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 600 }}>{r.targetEntity?.name ?? r.targetEntityId}</span>
-                      <span style={{ padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: r.approvalStatus === 'PENDING' ? '#fef3c7' : r.approvalStatus === 'ACTIVE' ? '#dcfce7' : '#fee2e2', color: r.approvalStatus === 'PENDING' ? '#92400e' : r.approvalStatus === 'ACTIVE' ? '#166534' : '#991b1b' }}>
-                        {r.approvalStatus === 'PENDING' ? t('outgoingPending') : r.approvalStatus === 'ACTIVE' ? t('approvalActive') : t('approvalRejected')}
+                  <div
+                    key={r.id}
+                    style={{
+                      border: "1px solid var(--border)",
+                      borderRadius: "10px",
+                      padding: "1rem",
+                      background: "var(--surface-muted)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>
+                        {r.targetEntity?.name ?? r.targetEntityId}
+                      </span>
+                      <span
+                        style={{
+                          padding: "0.2rem 0.6rem",
+                          borderRadius: "999px",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          background:
+                            r.approvalStatus === "PENDING"
+                              ? "#fef3c7"
+                              : r.approvalStatus === "ACTIVE"
+                                ? "#dcfce7"
+                                : "#fee2e2",
+                          color:
+                            r.approvalStatus === "PENDING"
+                              ? "#92400e"
+                              : r.approvalStatus === "ACTIVE"
+                                ? "#166534"
+                                : "#991b1b",
+                        }}
+                      >
+                        {r.approvalStatus === "PENDING"
+                          ? t("outgoingPending")
+                          : r.approvalStatus === "ACTIVE"
+                            ? t("approvalActive")
+                            : t("approvalRejected")}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>{t('relationType')} {r.type} · {t('relationSince')} {new Date(r.startedAt).toLocaleDateString('ar-SA')}</div>
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-secondary)",
+                        marginTop: "0.3rem",
+                      }}
+                    >
+                      {t("relationType")} {entityRelationshipLabel(r.type, t)} ·{" "}
+                      {t("relationSince")}{" "}
+                      {new Date(r.startedAt).toLocaleDateString("ar-SA")}
+                    </div>
+                    <div className={styles.relationMeaning}>
+                      <strong>{entityRelationshipLabel(r.type, t)}</strong>
+                      <span>{entityRelationshipDescription(r.type, t)}</span>
+                      {entityRelationshipTerms(r, t).length > 0 && (
+                        <div className={styles.relationChips}>
+                          {entityRelationshipTerms(r, t).map((chip) => (
+                            <span key={chip}>{chip}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {relationships.outgoing.length === 0 && relationships.incoming.length === 0 && (
-            <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem 0', fontSize: '0.9rem' }}>{t('noRelations')}</div>
-          )}
+          {relationships.outgoing.length === 0 &&
+            relationships.incoming.length === 0 && (
+              <div
+                style={{
+                  color: "var(--text-secondary)",
+                  textAlign: "center",
+                  padding: "2rem 0",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {t("noRelations")}
+              </div>
+            )}
         </div>
       )}
 
-      {tab === 'compatibility' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {tab === "compatibility" && (
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+        >
           {compatLoading ? (
-            <div className={styles.centered}><div className={styles.spinner} /></div>
+            <div className={styles.centered}>
+              <div className={styles.spinner} />
+            </div>
           ) : (
             <>
               {pathCompatData.length === 0 && (
-                <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem', fontSize: '0.9rem', background: 'var(--surface-muted)', borderRadius: '12px', border: '1px dashed var(--border-strong)' }}>
-                  {t('compatNoActive')}
+                <div
+                  style={{
+                    color: "var(--text-secondary)",
+                    textAlign: "center",
+                    padding: "2rem",
+                    fontSize: "0.9rem",
+                    background: "var(--surface-muted)",
+                    borderRadius: "12px",
+                    border: "1px dashed var(--border-strong)",
+                  }}
+                >
+                  {t("compatNoActive")}
                 </div>
               )}
               {pathCompatData.map((pc) => (
-                <div key={pc.pathId} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem 1.5rem', boxShadow: 'var(--shadow-sm)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{pc.walletName}</span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', background: 'var(--accent-soft)', padding: '2px 10px', borderRadius: '20px' }}>{pc.pathName}</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginRight: 'auto' }}>{t('compatSubscribers', { count: pc.subscriberCount })}</span>
+                <div
+                  key={pc.pathId}
+                  style={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "14px",
+                    padding: "1.25rem 1.5rem",
+                    boxShadow: "var(--shadow-sm)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span
+                      style={{ fontWeight: 700, color: "var(--text-primary)" }}
+                    >
+                      {pc.walletName}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--accent-primary)",
+                        background: "var(--accent-soft)",
+                        padding: "2px 10px",
+                        borderRadius: "20px",
+                      }}
+                    >
+                      {pc.pathName}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--text-secondary)",
+                        marginRight: "auto",
+                      }}
+                    >
+                      {t("compatSubscribers", { count: pc.subscriberCount })}
+                    </span>
                   </div>
                   {pc.compatibilityList.length === 0 && (
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('compatNoSubs')}</div>
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      {t("compatNoSubs")}
+                    </div>
                   )}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px",
+                    }}
+                  >
                     {pc.compatibilityList.map((item) => {
                       const score = item.result?.score ?? 0;
-                      const scoreColor = score >= 0.7 ? '#22c55e' : score >= 0.4 ? '#f59e0b' : '#ef4444';
+                      const scoreColor =
+                        score >= 0.7
+                          ? "#22c55e"
+                          : score >= 0.4
+                            ? "#f59e0b"
+                            : "#ef4444";
                       return (
-                        <div key={item.memberId} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'var(--surface-muted)', borderRadius: '8px' }}>
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-strong)', flexShrink: 0 }}>
+                        <div
+                          key={item.memberId}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            padding: "8px 12px",
+                            background: "var(--surface-muted)",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: "50%",
+                              background: "var(--accent-soft)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "0.85rem",
+                              fontWeight: 700,
+                              color: "var(--accent-strong)",
+                              flexShrink: 0,
+                            }}
+                          >
                             {item.memberName.charAt(0)}
                           </div>
-                          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1 }}>{item.memberName}</span>
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              fontSize: "0.9rem",
+                              color: "var(--text-primary)",
+                              flex: 1,
+                            }}
+                          >
+                            {item.memberName}
+                          </span>
                           {item.result ? (
                             <>
-                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: scoreColor }}>{Math.round(score * 100)}%</span>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.result.recommendedState}</span>
+                              <span
+                                style={{
+                                  fontSize: "0.8rem",
+                                  fontWeight: 700,
+                                  color: scoreColor,
+                                }}
+                              >
+                                {Math.round(score * 100)}%
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "0.75rem",
+                                  color: "var(--text-secondary)",
+                                }}
+                              >
+                                {item.result.recommendedState}
+                              </span>
                               {item.result.conflicts.length > 0 && (
-                                <span title={item.result.conflicts.map((c) => c.description).join(' | ')} style={{ fontSize: '0.75rem', color: '#ef4444', cursor: 'help' }}>
-                                  {t('compatConflicts', { count: item.result.conflicts.length })}
+                                <span
+                                  title={item.result.conflicts
+                                    .map((c) => c.description)
+                                    .join(" | ")}
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "#ef4444",
+                                    cursor: "help",
+                                  }}
+                                >
+                                  {t("compatConflicts", {
+                                    count: item.result.conflicts.length,
+                                  })}
                                 </span>
                               )}
                             </>
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('compatUnavailable')}</span>
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "var(--text-muted)",
+                              }}
+                            >
+                              {t("compatUnavailable")}
+                            </span>
                           )}
                         </div>
                       );
@@ -828,36 +1740,96 @@ export default function EntityDetailPage() {
                   </div>
                 </div>
               ))}
-
             </>
           )}
         </div>
       )}
-      {tab === 'support' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+      {tab === "support" && (
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "var(--surface)",
+              padding: "1.25rem",
+              borderRadius: "12px",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
             <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>{t('supportTitle')}</h3>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('supportDesc')}</p>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>
+                {t("supportTitle")}
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.85rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {t("supportDesc")}
+              </p>
             </div>
           </div>
 
           {supportLoading ? (
-            <div className={styles.centered}><div className={styles.spinner} /></div>
+            <div className={styles.centered}>
+              <div className={styles.spinner} />
+            </div>
           ) : supportSessions.length === 0 ? (
-            <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem', fontSize: '0.9rem', background: 'var(--surface-muted)', borderRadius: '12px', border: '1px dashed var(--border-strong)' }}>
-              {t('noSupportSessions')}
+            <div
+              style={{
+                color: "var(--text-secondary)",
+                textAlign: "center",
+                padding: "2rem",
+                fontSize: "0.9rem",
+                background: "var(--surface-muted)",
+                borderRadius: "12px",
+                border: "1px dashed var(--border-strong)",
+              }}
+            >
+              {t("noSupportSessions")}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+            >
               {supportSessions.map((s) => (
-                <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                <div
+                  key={s.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    background: "var(--surface)",
+                    padding: "1rem",
+                    borderRadius: "10px",
+                    border: "1px solid var(--border)",
+                  }}
+                >
                   <div>
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        marginBottom: "4px",
+                      }}
+                    >
                       {s.platformAccount?.name ?? s.platformAccountId}
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {t('sessionExpiresAt', { date: new Date(s.expiresAt).toLocaleString('ar-SA') })}
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {t("sessionExpiresAt", {
+                        date: new Date(s.expiresAt).toLocaleString("ar-SA"),
+                      })}
                     </div>
                   </div>
                 </div>

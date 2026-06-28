@@ -1,4 +1,8 @@
 import {
+  AppealStatus,
+  DecisionType,
+  DisbursementRequestStatus,
+  DisputeStatus,
   EntityPlatformStatus,
   MembershipApplicationStatus,
   PaymentRecordStatus,
@@ -9,10 +13,17 @@ import {
   VoteType,
 } from '@prisma/client';
 import {
+  compareExpectedDbIdentity,
   createSeedDb,
   formatSeedDate,
+  readSeedDbIdentity,
   resolveSeedRuntimeOptions,
+  summarizeConnectionString,
 } from './seed-runtime';
+import {
+  seedStoryDefinitions,
+  type SeedStoryRequirements,
+} from './seed-stories';
 
 type ValidationFinding = {
   severity: 'error' | 'warning';
@@ -41,6 +52,29 @@ const countBy = <T>(items: T[], selector: (item: T) => string) => {
 
 const sampleList = (items: string[], limit = 3) =>
   items.slice(0, limit).join(' | ');
+const requiredCoverageKeys: Array<keyof SeedStoryRequirements> = [
+  'usernames',
+  'entityNames',
+  'entityTypes',
+  'platformStatuses',
+  'walletNames',
+  'walletBenefitTypes',
+  'governancePathTypes',
+  'subscriptionStates',
+  'paymentDueStatuses',
+  'paymentRecordStatuses',
+  'decisionTypes',
+  'decisionStatuses',
+  'decisionResults',
+  'disbursementStatuses',
+  'appealStatuses',
+  'disputeStatuses',
+  'documentPrivacyLevels',
+  'entityRelationshipTypes',
+  'walletRelationshipTypes',
+  'relationshipApprovalStatuses',
+  'walletRelationshipRights',
+];
 
 function pushFinding(
   findings: ValidationFinding[],
@@ -53,13 +87,84 @@ function pushFinding(
   findings.push({ severity, code, message, count, sample });
 }
 
+function toCoverageSet(values: Array<string | null | undefined>) {
+  return new Set(
+    values
+      .filter((value): value is string => typeof value === 'string')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+}
+
+function pushSeedStoryCoverageFindings(
+  findings: ValidationFinding[],
+  coverage: Record<keyof SeedStoryRequirements, Set<string>>,
+) {
+  for (const story of seedStoryDefinitions) {
+    const missing: string[] = [];
+
+    for (const key of requiredCoverageKeys) {
+      const expected = story.requirements[key];
+      if (!expected?.length) {
+        continue;
+      }
+
+      const missingValues = expected.filter(
+        (value) => !coverage[key].has(value),
+      );
+      if (missingValues.length > 0) {
+        missing.push(`${key}: ${missingValues.join(', ')}`);
+      }
+    }
+
+    if (missing.length > 0) {
+      pushFinding(
+        findings,
+        'error',
+        'SEED_STORY_COVERAGE_MISSING',
+        `${story.id} ${story.name} is no longer fully represented in seed data.`,
+        missing.length,
+        sampleList(missing, 5),
+      );
+    }
+  }
+}
+
 async function main() {
   console.log(
     `Validating STGP seed dataset (profile=${seedRuntime.profile}, referenceDate=${formatSeedDate(seedRuntime.referenceDate)})...`,
   );
 
+  const findings: ValidationFinding[] = [];
+  const connectionSummary = summarizeConnectionString(
+    seedRuntime.connectionString,
+  );
+  const dbIdentity = await readSeedDbIdentity(pool);
+
+  if (seedRuntime.printDbIdentity) {
+    console.log('Database target and server identity:');
+    console.table({
+      targetHost: connectionSummary.host,
+      targetPort: connectionSummary.port,
+      targetDatabase: connectionSummary.database,
+      targetUser: connectionSummary.username,
+      targetSslMode: connectionSummary.sslmode ?? '(default)',
+      actualDatabase: dbIdentity.currentDatabase,
+      actualUser: dbIdentity.currentUser,
+      serverAddress: dbIdentity.serverAddress ?? '(local socket/unknown)',
+      serverPort: dbIdentity.serverPort ?? '(unknown)',
+      postmasterStartedAt: formatSeedDate(dbIdentity.postmasterStartedAt),
+      serverVersion: dbIdentity.serverVersion,
+    });
+  }
+
+  for (const mismatch of compareExpectedDbIdentity(dbIdentity, seedRuntime)) {
+    pushFinding(findings, 'error', 'DB_IDENTITY_MISMATCH', mismatch);
+  }
+
   const [
     personsCount,
+    persons,
     membershipsCount,
     entities,
     activeMemberships,
@@ -75,6 +180,7 @@ async function main() {
     votes,
     documents,
     walletCount,
+    governancePaths,
     pathCount,
     notifications,
     loginAuditLogs,
@@ -89,13 +195,23 @@ async function main() {
     wallets,
     memberPreferences,
     entityPolicies,
+    approvedDisbursementRequests,
+    allDisbursementRequests,
+    appeals,
+    disputes,
+    entityRelationships,
+    walletRelationships,
   ] = await Promise.all([
     prisma.person.count(),
+    prisma.person.findMany({
+      select: { username: true, name: true },
+    }),
     prisma.membership.count(),
     prisma.entity.findMany({
       select: {
         id: true,
         name: true,
+        type: true,
         isCampaign: true,
         isActive: true,
         platformStatus: true,
@@ -242,7 +358,17 @@ async function main() {
       },
     }),
     prisma.decision.findMany({
-      select: { id: true, title: true, voteType: true },
+      select: {
+        id: true,
+        title: true,
+        voteType: true,
+        decisionType: true,
+        status: true,
+        result: true,
+        governancePathId: true,
+        spendingItemId: true,
+        amount: true,
+      },
     }),
     prisma.vote.findMany({
       include: {
@@ -259,6 +385,14 @@ async function main() {
       select: { name: true, privacyLevel: true, uploadedById: true },
     }),
     prisma.wallet.count(),
+    prisma.governancePath.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        wallet: { select: { name: true, entity: { select: { name: true } } } },
+      },
+    }),
     prisma.governancePath.count(),
     prisma.notification.findMany({
       select: {
@@ -370,6 +504,7 @@ async function main() {
         id: true,
         name: true,
         entityId: true,
+        benefitType: true,
         isActive: true,
         ledgerAccount: { select: { balance: true } },
       },
@@ -389,9 +524,70 @@ async function main() {
         appealTimeoutDays: true,
       },
     }),
+    prisma.disbursementRequest.findMany({
+      where: {
+        status: 'APPROVED',
+      },
+      select: {
+        id: true,
+        beneficiaryName: true,
+        amount: true,
+        decisionId: true,
+        governancePathId: true,
+        spendingItemId: true,
+        governancePath: {
+          select: {
+            name: true,
+            wallet: {
+              select: {
+                entity: { select: { name: true } },
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.disbursementRequest.findMany({
+      select: {
+        id: true,
+        status: true,
+        beneficiaryName: true,
+        governancePathId: true,
+        spendingItem: { select: { name: true } },
+      },
+    }),
+    prisma.appeal.findMany({
+      select: {
+        id: true,
+        status: true,
+        decision: { select: { title: true, governancePathId: true } },
+      },
+    }),
+    prisma.dispute.findMany({
+      select: {
+        id: true,
+        status: true,
+        entityId: true,
+        title: true,
+      },
+    }),
+    prisma.entityRelationship.findMany({
+      select: {
+        type: true,
+        approvalStatus: true,
+      },
+    }),
+    prisma.walletRelationship.findMany({
+      select: {
+        relationshipType: true,
+        approvalStatus: true,
+        contributionPercent: true,
+        hasVotingRights: true,
+        hasOversightRights: true,
+      },
+    }),
   ]);
 
-  const findings: ValidationFinding[] = [];
   const pendingClosureEntities = entities.filter(
     (entity) => entity.closureStatus === 'PENDING_CLOSURE',
   );
@@ -433,6 +629,68 @@ async function main() {
     wallets.filter((wallet) => wallet.isActive),
     (wallet) => wallet.entityId,
   );
+  const seedStoryCoverage: Record<keyof SeedStoryRequirements, Set<string>> = {
+    usernames: toCoverageSet(persons.map((person) => person.username)),
+    entityNames: toCoverageSet(entities.map((entity) => entity.name)),
+    entityTypes: toCoverageSet(entities.map((entity) => entity.type)),
+    platformStatuses: toCoverageSet(
+      entities.map((entity) => entity.platformStatus),
+    ),
+    walletNames: toCoverageSet(wallets.map((wallet) => wallet.name)),
+    walletBenefitTypes: toCoverageSet(
+      wallets.map((wallet) => wallet.benefitType),
+    ),
+    governancePathTypes: toCoverageSet(
+      governancePaths.map((path) => path.type),
+    ),
+    subscriptionStates: toCoverageSet(
+      subscriptions.map((subscription) => subscription.state),
+    ),
+    paymentDueStatuses: toCoverageSet(paymentDues.map((due) => due.status)),
+    paymentRecordStatuses: toCoverageSet(
+      paymentRecords.map((record) => record.status),
+    ),
+    decisionTypes: toCoverageSet(
+      decisions.map((decision) => decision.decisionType),
+    ),
+    decisionStatuses: toCoverageSet(
+      decisions.map((decision) => decision.status),
+    ),
+    decisionResults: toCoverageSet(
+      decisions.map((decision) => decision.result),
+    ),
+    disbursementStatuses: toCoverageSet(
+      allDisbursementRequests.map((request) => request.status),
+    ),
+    appealStatuses: toCoverageSet(appeals.map((appeal) => appeal.status)),
+    disputeStatuses: toCoverageSet(disputes.map((dispute) => dispute.status)),
+    documentPrivacyLevels: toCoverageSet(
+      documents.map((document) => document.privacyLevel),
+    ),
+    entityRelationshipTypes: toCoverageSet(
+      entityRelationships.map((relationship) => relationship.type),
+    ),
+    walletRelationshipTypes: toCoverageSet(
+      walletRelationships.map((relationship) => relationship.relationshipType),
+    ),
+    relationshipApprovalStatuses: toCoverageSet([
+      ...entityRelationships.map((relationship) => relationship.approvalStatus),
+      ...walletRelationships.map((relationship) => relationship.approvalStatus),
+    ]),
+    walletRelationshipRights: toCoverageSet(
+      walletRelationships.flatMap((relationship) => [
+        relationship.hasOversightRights && !relationship.hasVotingRights
+          ? 'OVERSIGHT_WITHOUT_VOTE'
+          : null,
+        relationship.hasVotingRights && relationship.hasOversightRights
+          ? 'VOTING_AND_OVERSIGHT'
+          : null,
+        Number(relationship.contributionPercent ?? 0) > 0
+          ? 'CONTRIBUTION_PERCENT'
+          : null,
+      ]),
+    ),
+  };
   const expectedMinPersons =
     BASE_PERSON_COUNT +
     seedRuntime.profileConfig.familyExtraCount +
@@ -447,6 +705,64 @@ async function main() {
     seedRuntime.profileConfig.neighborhoodExtraCount +
     seedRuntime.profileConfig.campaignExtraCount +
     seedRuntime.profileConfig.youthExtraCount * 2;
+
+  pushSeedStoryCoverageFindings(findings, seedStoryCoverage);
+
+  const tribeEntity = entities.find(
+    (entity) => entity.name === 'صندوق قبيلة السهم',
+  );
+  const tribePathIds = new Set(
+    governancePaths
+      .filter((path) => path.wallet.entity.name === 'صندوق قبيلة السهم')
+      .map((path) => path.id),
+  );
+  const hasTribeDeathDecision = decisions.some(
+    (decision) =>
+      decision.decisionType === DecisionType.DISBURSE_FUNDS &&
+      decision.title.includes('وفاة') &&
+      !!decision.governancePathId &&
+      tribePathIds.has(decision.governancePathId),
+  );
+  const hasTribeDeathExecutedRequest = allDisbursementRequests.some(
+    (request) =>
+      request.status === DisbursementRequestStatus.EXECUTED &&
+      !!request.governancePathId &&
+      tribePathIds.has(request.governancePathId) &&
+      request.spendingItem?.name.includes('وفاة'),
+  );
+  const hasTribeDeathAppeal = appeals.some(
+    (appeal) =>
+      appeal.status === AppealStatus.UNDER_REVIEW &&
+      appeal.decision.title.includes('وفاة') &&
+      !!appeal.decision.governancePathId &&
+      tribePathIds.has(appeal.decision.governancePathId),
+  );
+  const hasTribeDeathDispute =
+    !!tribeEntity &&
+    disputes.some(
+      (dispute) =>
+        dispute.entityId === tribeEntity.id &&
+        dispute.status === DisputeStatus.UNDER_MEDIATION &&
+        dispute.title.includes('وفاة'),
+    );
+  const missingTribeDeathStoryParts = [
+    ['death decision', hasTribeDeathDecision],
+    ['executed death disbursement request', hasTribeDeathExecutedRequest],
+    ['formal death appeal', hasTribeDeathAppeal],
+    ['mediated death dispute', hasTribeDeathDispute],
+  ]
+    .filter(([, ok]) => !ok)
+    .map(([label]) => String(label));
+  if (missingTribeDeathStoryParts.length > 0) {
+    pushFinding(
+      findings,
+      'error',
+      'TRIBE_DEATH_SUPPORT_STORY_MISSING',
+      'S-06 must include a tribe death support decision, executed request, formal appeal, and mediated dispute.',
+      missingTribeDeathStoryParts.length,
+      sampleList(missingTribeDeathStoryParts),
+    );
+  }
 
   if (personsCount < expectedMinPersons) {
     pushFinding(
@@ -465,6 +781,48 @@ async function main() {
       'MEMBERSHIP_COUNT_TOO_LOW',
       `Expected at least ${expectedMinMemberships} memberships for profile "${seedRuntime.profile}".`,
       membershipsCount,
+    );
+  }
+
+  const decisionsById = new Map(
+    decisions.map((decision) => [decision.id, decision]),
+  );
+  const invalidApprovedDisbursements = approvedDisbursementRequests.filter(
+    (request) => {
+      if (!request.decisionId) return true;
+      const decision = decisionsById.get(request.decisionId);
+      if (!decision) return true;
+      return (
+        decision.decisionType !== 'DISBURSE_FUNDS' ||
+        decision.status !== 'CLOSED' ||
+        decision.result !== 'APPROVED' ||
+        decision.governancePathId !== request.governancePathId ||
+        decision.spendingItemId !== request.spendingItemId ||
+        decision.amount === null ||
+        Math.round(Number(decision.amount) * 100) !==
+          Math.round(Number(request.amount) * 100)
+      );
+    },
+  );
+
+  if (invalidApprovedDisbursements.length > 0) {
+    pushFinding(
+      findings,
+      'error',
+      'APPROVED_DISBURSEMENT_WITHOUT_VALID_DECISION',
+      'Approved disbursement requests must always be linked to a closed approved DISBURSE_FUNDS decision.',
+      invalidApprovedDisbursements.length,
+      sampleList(
+        invalidApprovedDisbursements.map((request) => {
+          const decision = request.decisionId
+            ? decisionsById.get(request.decisionId)
+            : null;
+          const decisionState = decision
+            ? `${decision.decisionType}/${decision.status}/${decision.result}/${decision.amount?.toString() ?? 'no-amount'}`
+            : 'missing-decision';
+          return `${request.id}:${request.governancePath.wallet.entity.name}/${request.governancePath.name}/${request.beneficiaryName}/${request.amount.toString()}/${decisionState}`;
+        }),
+      ),
     );
   }
 
@@ -1695,6 +2053,10 @@ async function main() {
   const summary = {
     profile: seedRuntime.profile,
     referenceDate: formatSeedDate(seedRuntime.referenceDate),
+    database: dbIdentity.currentDatabase,
+    dbTarget: `${connectionSummary.host}:${connectionSummary.port}/${connectionSummary.database}`,
+    dbServer: `${dbIdentity.serverAddress ?? 'unknown'}:${dbIdentity.serverPort ?? 'unknown'}`,
+    seedStories: seedStoryDefinitions.length,
     persons: personsCount,
     memberships: membershipsCount,
     memberPreferences: memberPreferences.length,
@@ -1752,8 +2114,7 @@ async function main() {
   if (errors.length > 0) {
     console.error('Seed validation failed.');
     console.table(errors);
-    process.exitCode = 1;
-    return;
+    throw new Error(`Seed validation failed with ${errors.length} error(s).`);
   }
 
   console.log('Seed validation passed.');

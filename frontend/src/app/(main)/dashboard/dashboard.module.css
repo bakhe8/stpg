@@ -1,4 +1,9 @@
-.page { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
 
 .intro {
   display: flex;
@@ -9,7 +14,11 @@
   border: 1px solid var(--accent-border);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.9), transparent 18rem),
+    radial-gradient(
+      circle at 12% 20%,
+      rgba(255, 255, 255, 0.9),
+      transparent 18rem
+    ),
     var(--accent-soft);
 }
 
@@ -31,6 +40,72 @@
   font-weight: 800;
 }
 
+.relationshipSummary {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(0, 2fr);
+  gap: 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.relationshipSummaryText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.relationshipSummaryEyebrow {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+}
+
+.relationshipSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.relationshipSummaryItem {
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.relationshipSummaryItem span {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.relationshipSummaryItem strong {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.supporterOnlyNote {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  border: 1px solid rgba(217, 119, 6, 0.28);
+  border-radius: 8px;
+  background: rgba(251, 191, 36, 0.12);
+  color: #92400e;
+  font-size: 0.86rem;
+  line-height: 1.8;
+}
+
 /* Stats */
 .statsRow {
   display: grid;
@@ -40,7 +115,7 @@
 
 .statCard {
   background: var(--glass-bg);
-  
+
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 20px 24px;
@@ -53,7 +128,6 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  
 }
 
 .statValue {
@@ -86,6 +160,13 @@
   color: var(--text-primary);
 }
 
+.sectionHint {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
 .seeAll {
   min-height: 40px;
   display: inline-flex;
@@ -109,7 +190,7 @@
 /* Entity Card */
 .entityCard {
   background: var(--glass-bg);
-  
+
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 20px;
@@ -126,7 +207,7 @@
 
 .entityCard:hover {
   transform: translateY(-3px);
-  
+
   border-color: var(--accent-border);
 }
 
@@ -283,7 +364,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .errorText {
@@ -331,7 +414,11 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.06));
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.08),
+    rgba(59, 130, 246, 0.06)
+  );
   border: 1.5px solid rgba(139, 92, 246, 0.25);
   border-radius: 14px;
   padding: 1.1rem 1.25rem;
@@ -505,6 +592,7 @@
     padding: 13px 14px;
     gap: 10px;
     border-radius: 12px;
+    flex-wrap: wrap;
   }
 
   .actionIcon {
@@ -520,8 +608,17 @@
     font-size: 0.75rem;
   }
 
+  .actionReasonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionReasonGrid span {
+    min-height: 0;
+  }
+
   .actionCta {
     font-size: 0.78rem;
+    margin-inline-start: 38px;
   }
 
   .sectionTitle {
@@ -738,9 +835,42 @@
   gap: 10px;
 }
 
-.actionItem {
+.actionGroupLabel {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.actionGroupLabel span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionGroupLabel span::after {
+  content: "";
+  width: 42px;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.actionGroupLabel strong {
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.actionItem {
+  display: flex;
+  align-items: flex-start;
   gap: 14px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -809,12 +939,39 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
   margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.6;
+}
+
+.actionReasonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.actionReasonGrid span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 62px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.actionReasonGrid strong {
+  color: var(--text-primary);
+  font-size: 0.72rem;
 }
 
 .actionCta {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--accent-primary);
@@ -879,7 +1036,7 @@
 }
 
 .joinStep:not(:last-child)::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -20%;
   width: 40%;
@@ -909,9 +1066,17 @@
   box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb, 99, 102, 241), 0.2);
 }
 
-.joinStepDone .joinStepLabel { color: #16a34a; font-weight: 600; }
-.joinStepActive .joinStepLabel { color: var(--accent-primary); font-weight: 700; }
-.joinStepLast { display: none; }
+.joinStepDone .joinStepLabel {
+  color: #16a34a;
+  font-weight: 600;
+}
+.joinStepActive .joinStepLabel {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+.joinStepLast {
+  display: none;
+}
 
 .joinStepDate {
   font-size: 10px;
@@ -926,4 +1091,14 @@
   padding: 1px 8px;
   font-size: 10px;
   font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .relationshipSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .relationshipSummaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }

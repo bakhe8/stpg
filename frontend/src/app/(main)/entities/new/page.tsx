@@ -315,6 +315,43 @@ export default function EntityWizardPage() {
       <h2 className={styles.successTitle}>{t("successTitle")}</h2>
       <p className={styles.successDesc}>{t("successDesc")}</p>
 
+      <div className={styles.setupMap}>
+        <div className={styles.setupMapHeader}>
+          <strong>{t("setupMapTitle")}</strong>
+          <span>{t("setupMapSubtitle")}</span>
+        </div>
+        <div className={styles.setupMapGrid}>
+          <div>
+            <span>{t("setupMapEntity")}</span>
+            <strong>{state.name}</strong>
+          </div>
+          <div>
+            <span>{t("setupMapWallet")}</span>
+            <strong>
+              {state.templateId
+                ? t("setupMapWalletTemplate")
+                : t("setupMapWalletManual")}
+            </strong>
+          </div>
+          <div>
+            <span>{t("setupMapGovernance")}</span>
+            <strong>
+              {GOVERNANCE_TYPES.find((g) => g.value === state.governanceType)
+                ?.label ?? state.governanceType}
+            </strong>
+          </div>
+          <div>
+            <span>{t("setupMapPaths")}</span>
+            <strong>
+              {state.allowMultiplePaths
+                ? t("setupMapMultiPath")
+                : t("setupMapSinglePath")}
+            </strong>
+          </div>
+        </div>
+        <p className={styles.setupMapOutcome}>{t("setupMapOutcome")}</p>
+      </div>
+
       <div className={styles.nextSteps}>
         <h3 className={styles.nextStepsTitle}>{t("nextStepsTitle")}</h3>
 
@@ -335,14 +372,22 @@ export default function EntityWizardPage() {
         <div className={styles.nextStep}>
           <span className={styles.nextStepNum}>2</span>
           <div className={styles.nextStepBody}>
-            <strong>{t("nextStep2Title")}</strong>
-            <p>{t("nextStep2Desc")}</p>
+            <strong>
+              {state.templateId
+                ? t("nextStep2TitleTemplate")
+                : t("nextStep2Title")}
+            </strong>
+            <p>
+              {state.templateId
+                ? t("nextStep2DescTemplate")
+                : t("nextStep2Desc")}
+            </p>
           </div>
           <button
             className={styles.nextStepBtn}
             onClick={() => router.push(createdEntityId ? `/entities/${createdEntityId}?tab=wallets` : '/entities')}
           >
-            {t("createBtnInline")}
+            {state.templateId ? t("reviewBtnInline") : t("createBtnInline")}
           </button>
         </div>
 
@@ -357,6 +402,34 @@ export default function EntityWizardPage() {
             onClick={() => router.push(createdEntityId ? `/rules?entityId=${createdEntityId}` : '/rules')}
           >
             {t("setupBtnInline")}
+          </button>
+        </div>
+
+        <div className={styles.nextStep}>
+          <span className={styles.nextStepNum}>4</span>
+          <div className={styles.nextStepBody}>
+            <strong>{t("nextStep4Title")}</strong>
+            <p>{t("nextStep4Desc")}</p>
+          </div>
+          <button
+            className={styles.nextStepBtn}
+            onClick={() => router.push(createdEntityId ? `/entities/${createdEntityId}?tab=members` : "/entities")}
+          >
+            {t("membersBtnInline")}
+          </button>
+        </div>
+
+        <div className={styles.nextStep}>
+          <span className={styles.nextStepNum}>5</span>
+          <div className={styles.nextStepBody}>
+            <strong>{t("nextStep5Title")}</strong>
+            <p>{t("nextStep5Desc")}</p>
+          </div>
+          <button
+            className={styles.nextStepBtn}
+            onClick={() => router.push(createdEntityId ? `/finance?entityId=${createdEntityId}` : "/finance")}
+          >
+            {t("financeBtnInline")}
           </button>
         </div>
       </div>

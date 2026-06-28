@@ -164,6 +164,19 @@ export class SubscriptionsController {
     return this.subscriptionsService.getMyPaymentDues(user.id);
   }
 
+  @ApiOperation({ summary: 'استرجاع الدفعات المستحقة لكيان معين' })
+  @ApiResponse({ status: 200, description: 'قائمة الدفعات المستحقة للكيان' })
+  @ApiResponse({ status: 401, description: 'غير مصادق' })
+  @ApiResponse({ status: 403, description: 'غير مصرح' })
+  @ApiResponse({ status: 404, description: 'الكيان غير موجود' })
+  @Get('payment-dues')
+  getEntityPaymentDues(
+    @CurrentUser() user: Person,
+    @Query('entityId', ParseUUIDPipe) entityId: string,
+  ) {
+    return this.subscriptionsService.getEntityPaymentDues(entityId, user.id);
+  }
+
   @ApiOperation({ summary: 'استرجاع سجلات الدفع الخاصة بالمستخدم الحالي' })
   @ApiResponse({ status: 200, description: 'قائمة سجلات الدفع' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })

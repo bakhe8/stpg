@@ -102,6 +102,82 @@
   color: var(--text-secondary);
 }
 
+.memberOperational {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.memberOperationalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.memberDueOk,
+.memberDueWarning {
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.memberDueOk { color: #166534; }
+.memberDueWarning { color: #b45309; }
+
+.memberMetrics,
+.memberPathChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.memberMetrics span,
+.memberPathChip,
+.memberPathLabel,
+.memberNoPaths {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.memberMetrics span {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}
+
+.memberRightsText {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.memberPathLabel {
+  padding-inline-start: 0;
+  color: var(--text-muted);
+}
+
+.memberPathChip {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.memberNoPaths {
+  justify-self: start;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-secondary);
+}
+
 /* ── Role Badge ── */
 .roleBadge {
   padding: 3px 12px;
@@ -297,3 +373,38 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .inactiveSectionTitle { color: var(--text-muted); }
+
+@media (max-width: 640px) {
+  .page { max-width: 100%; }
+
+  .memberCard,
+  .memberOperationalHeader,
+  .cardActions,
+  .confirmRow,
+  .roleEditRow {
+    align-items: stretch;
+  }
+
+  .memberOperationalHeader {
+    flex-direction: column;
+  }
+
+  .memberDueOk,
+  .memberDueWarning {
+    white-space: normal;
+  }
+
+  .cardActions,
+  .confirmRow,
+  .roleEditRow {
+    width: 100%;
+  }
+
+  .approveBtn,
+  .rejectBtn,
+  .dangerBtn,
+  .ghostBtn,
+  .roleSelect {
+    flex: 1 1 140px;
+  }
+}

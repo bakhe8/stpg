@@ -29,6 +29,54 @@ function formatCurrency(n: number, currency = "SAR") {
   );
 }
 
+function getPathTypeLabel(
+  type: string | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "BOARD") return t("typeBoard");
+  if (type === "COMMITTEE") return t("typeCommittee");
+  if (type === "PUBLIC_VOTE") return t("typePublicVote");
+  if (type === "INDIVIDUAL_WITH_CAP") return t("typeIndividual");
+  if (type === "DONATION_ONLY") return t("typeDonation");
+  if (type === "EMERGENCY_FAST") return t("typeEmergency");
+  if (type === "INDIVIDUAL") return t("typeIndividual");
+  if (type === "DONATION") return t("typeDonation");
+  if (type === "EMERGENCY") return t("typeEmergency");
+  return t("typeGeneral");
+}
+
+function getPathContextText(
+  type: string | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "BOARD") return t("contextBoard");
+  if (type === "COMMITTEE") return t("contextCommittee");
+  if (type === "PUBLIC_VOTE") return t("contextPublicVote");
+  if (type === "INDIVIDUAL_WITH_CAP" || type === "INDIVIDUAL")
+    return t("contextIndividual");
+  if (type === "DONATION_ONLY" || type === "DONATION")
+    return t("contextDonation");
+  if (type === "EMERGENCY_FAST" || type === "EMERGENCY")
+    return t("contextEmergency");
+  return t("contextGeneral");
+}
+
+function getPathRuleText(
+  type: string | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "BOARD") return t("ruleBoard");
+  if (type === "COMMITTEE") return t("ruleCommittee");
+  if (type === "PUBLIC_VOTE") return t("rulePublicVote");
+  if (type === "INDIVIDUAL_WITH_CAP" || type === "INDIVIDUAL")
+    return t("ruleIndividual");
+  if (type === "DONATION_ONLY" || type === "DONATION")
+    return t("ruleDonation");
+  if (type === "EMERGENCY_FAST" || type === "EMERGENCY")
+    return t("ruleEmergency");
+  return t("ruleGeneral");
+}
+
 type Tab = "items" | "subscriptions" | "decisions";
 
 export default function PathDetailPage() {
@@ -62,11 +110,12 @@ export default function PathDetailPage() {
 
     async function load() {
       setLoading(true);
-      const [pathResult, itemsResult, decisionsResult] = await Promise.allSettled([
-        getPath(id),
-        getPathSpendingItems(id),
-        getDecisions(id),
-      ]);
+      const [pathResult, itemsResult, decisionsResult] =
+        await Promise.allSettled([
+          getPath(id),
+          getPathSpendingItems(id),
+          getDecisions(id),
+        ]);
 
       if (cancelled) return;
 
@@ -75,10 +124,13 @@ export default function PathDetailPage() {
         setPath(loadedPath);
 
         const entityId = loadedPath.wallet?.entityId;
-        const entity = entityId ? await getEntity(entityId).catch(() => null) : null;
+        const entity = entityId
+          ? await getEntity(entityId).catch(() => null)
+          : null;
         if (cancelled) return;
 
-        const canManage = entity?.myRole === "FOUNDER" || entity?.myRole === "ADMIN";
+        const canManage =
+          entity?.myRole === "FOUNDER" || entity?.myRole === "ADMIN";
         setCanManagePath(canManage);
         setCanViewSubscriptions(canManage);
 
@@ -91,7 +143,8 @@ export default function PathDetailPage() {
       }
 
       if (itemsResult.status === "fulfilled") setItems(itemsResult.value);
-      if (decisionsResult.status === "fulfilled") setDecisions(decisionsResult.value);
+      if (decisionsResult.status === "fulfilled")
+        setDecisions(decisionsResult.value);
       setLoading(false);
     }
 
@@ -118,7 +171,7 @@ export default function PathDetailPage() {
         requiresCommitteeApproval: form.requiresCommitteeApproval,
         privacyLevel: form.privacyLevel,
       });
-      setMsg(t('createSuccess'));
+      setMsg(t("createSuccess"));
       setShowForm(false);
       setForm({
         name: "",
@@ -131,7 +184,7 @@ export default function PathDetailPage() {
       const its = await getPathSpendingItems(id);
       setItems(its);
     } catch (err) {
-      setMsg(`⚠ ${err instanceof Error ? err.message : tCommon('failed')}`);
+      setMsg(`⚠ ${err instanceof Error ? err.message : tCommon("failed")}`);
     } finally {
       setCreating(false);
     }
@@ -143,7 +196,7 @@ export default function PathDetailPage() {
         <div className={styles.spinner} />
       </div>
     );
-  if (!path) return <div className={styles.errorBox}>{t('notFound')}</div>;
+  if (!path) return <div className={styles.errorBox}>{t("notFound")}</div>;
 
   const walletId = path.walletId ?? path.wallet?.id;
   const currency = path.currency;
@@ -156,8 +209,15 @@ export default function PathDetailPage() {
     ? subscriptions.filter((s) => s.state === "ACTIVE").length
     : (path._count?.subscriptions ?? 0);
   const openDecs = decisions.filter((d) => d.status === "OPEN").length;
+  const pathTypeText = getPathTypeLabel(path.type, t);
+  const walletName = path.wallet?.name ?? t("walletFallback");
+  const pathContextText = getPathContextText(path.type, t);
+  const pathRuleText = getPathRuleText(path.type, t);
 
-  const PRIVACY_LEVEL_MAP: Record<string, "PublicToMembers" | "VisibleToCommittee" | "HiddenSensitive"> = {
+  const PRIVACY_LEVEL_MAP: Record<
+    string,
+    "PublicToMembers" | "VisibleToCommittee" | "HiddenSensitive"
+  > = {
     PUBLIC_TO_MEMBERS: "PublicToMembers",
     VISIBLE_TO_COMMITTEE: "VisibleToCommittee",
     HIDDEN_SENSITIVE: "HiddenSensitive",
@@ -177,40 +237,76 @@ export default function PathDetailPage() {
         <div className={styles.headerIcon}>◎</div>
         <div className={styles.headerInfo}>
           <h1 className={styles.title}>{path.name}</h1>
-          {path.description && <p className={styles.desc}>{path.description}</p>}
-          <span className={styles.type}>{path.type}</span>
+          {path.description && (
+            <p className={styles.desc}>{path.description}</p>
+          )}
+          <span className={styles.type}>{pathTypeText}</span>
         </div>
-        <span className={`${styles.statusBadge} ${path.isActive !== false ? styles.active : styles.inactive}`}>
-          {path.isActive !== false ? t('active') : t('inactive')}
+        <span
+          className={`${styles.statusBadge} ${path.isActive !== false ? styles.active : styles.inactive}`}
+        >
+          {path.isActive !== false ? t("active") : t("inactive")}
         </span>
       </div>
+
+      <section className={styles.contextPanel}>
+        <div className={styles.contextHeader}>
+          <div>
+            <h2 className={styles.contextTitle}>{t("contextTitle")}</h2>
+            <p className={styles.contextText}>
+              {t("contextText", { wallet: walletName, type: pathTypeText })}
+            </p>
+          </div>
+          <Link
+            href={walletId ? `/wallets/${walletId}` : "#"}
+            className={styles.contextAction}
+          >
+            {t("contextWalletAction")}
+          </Link>
+        </div>
+        <div className={styles.contextGrid}>
+          <div>
+            <span>{t("contextType")}</span>
+            <strong>{pathTypeText}</strong>
+          </div>
+          <div>
+            <span>{t("contextPathBalance")}</span>
+            <strong>{formatCurrency(path.balance, currency)}</strong>
+          </div>
+          <div>
+            <span>{t("contextSubscribers")}</span>
+            <strong>{activeSubs}</strong>
+          </div>
+          <div>
+            <span>{t("contextOpenDecisions")}</span>
+            <strong>{openDecs}</strong>
+          </div>
+        </div>
+        <p className={styles.contextOutcome}>{pathContextText}</p>
+      </section>
 
       {/* ── مؤشرات ── */}
       <div className={styles.kpiRow}>
         <div className={styles.kpiCard}>
-          <span className={styles.kpiValue}>{formatCurrency(totalBalance, currency)}</span>
-          <span className={styles.kpiLabel}>{t('kpiBalance')}</span>
+          <span className={styles.kpiValue}>
+            {formatCurrency(totalBalance, currency)}
+          </span>
+          <span className={styles.kpiLabel}>{t("kpiBalance")}</span>
         </div>
         <div className={styles.kpiCard}>
           <span className={styles.kpiValue}>{activeSubs}</span>
-          <span className={styles.kpiLabel}>{t('kpiActiveSubs')}</span>
+          <span className={styles.kpiLabel}>{t("kpiActiveSubs")}</span>
         </div>
         <div className={styles.kpiCard}>
           <span className={styles.kpiValue}>{openDecs}</span>
-          <span className={styles.kpiLabel}>{t('kpiOpenDecisions')}</span>
+          <span className={styles.kpiLabel}>{t("kpiOpenDecisions")}</span>
         </div>
       </div>
 
       {/* ── سياق الحوكمة ── */}
       <RuleSummaryPanel
         icon="⚖"
-        summary={
-          path.type === 'COMMITTEE'
-            ? t('ruleCommittee')
-            : path.type === 'INDIVIDUAL'
-            ? t('ruleIndividual')
-            : t('ruleGeneral')
-        }
+        summary={pathRuleText}
       />
 
       {msg && (
@@ -223,16 +319,25 @@ export default function PathDetailPage() {
 
       {/* ── تبويبات ── */}
       <div className={styles.tabs}>
-        <button className={`${styles.tab} ${tab === 'items' ? styles.tabActive : ''}`} onClick={() => setTab('items')}>
-          {t('tabItems')} {items.length > 0 && `(${items.length})`}
+        <button
+          className={`${styles.tab} ${tab === "items" ? styles.tabActive : ""}`}
+          onClick={() => setTab("items")}
+        >
+          {t("tabItems")} {items.length > 0 && `(${items.length})`}
         </button>
         {canViewSubscriptions && (
-          <button className={`${styles.tab} ${tab === 'subscriptions' ? styles.tabActive : ''}`} onClick={() => setTab('subscriptions')}>
-            {t('tabSubscriptions', { count: subscriptions.length })}
+          <button
+            className={`${styles.tab} ${tab === "subscriptions" ? styles.tabActive : ""}`}
+            onClick={() => setTab("subscriptions")}
+          >
+            {t("tabSubscriptions", { count: subscriptions.length })}
           </button>
         )}
-        <button className={`${styles.tab} ${tab === 'decisions' ? styles.tabActive : ''}`} onClick={() => setTab('decisions')}>
-          {t('tabDecisions', { count: openDecs })}
+        <button
+          className={`${styles.tab} ${tab === "decisions" ? styles.tabActive : ""}`}
+          onClick={() => setTab("decisions")}
+        >
+          {t("tabDecisions", { count: openDecs })}
         </button>
       </div>
 
@@ -244,39 +349,39 @@ export default function PathDetailPage() {
                 className={styles.addBtn}
                 onClick={() => setShowForm(!showForm)}
               >
-                {showForm ? t('cancelCreate') : t('newItem')}
+                {showForm ? t("cancelCreate") : t("newItem")}
               </button>
             </div>
           )}
 
           {canManagePath && showForm && (
             <div className={styles.formCard}>
-              <h3 className={styles.formTitle}>{t('createItemTitle')}</h3>
+              <h3 className={styles.formTitle}>{t("createItemTitle")}</h3>
               <form onSubmit={handleCreate} className={styles.form}>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>{t('itemNameLabel')}</label>
+                  <label className={styles.label}>{t("itemNameLabel")}</label>
                   <input
                     className={styles.input}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder={t('itemNamePlaceholder')}
+                    placeholder={t("itemNamePlaceholder")}
                     required
                   />
                 </div>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>{t('itemDescLabel')}</label>
+                  <label className={styles.label}>{t("itemDescLabel")}</label>
                   <input
                     className={styles.input}
                     value={form.description}
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    placeholder={t('itemDescPlaceholder')}
+                    placeholder={t("itemDescPlaceholder")}
                   />
                 </div>
                 <div className={styles.fieldRow}>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.label}>{t('maxPerRequest')}</label>
+                    <label className={styles.label}>{t("maxPerRequest")}</label>
                     <input
                       className={styles.input}
                       type="number"
@@ -294,7 +399,7 @@ export default function PathDetailPage() {
                     />
                   </div>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.label}>{t('maxPerYear')}</label>
+                    <label className={styles.label}>{t("maxPerYear")}</label>
                     <input
                       className={styles.input}
                       type="number"
@@ -311,7 +416,7 @@ export default function PathDetailPage() {
                 </div>
                 <div className={styles.fieldRow}>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.label}>{t('privacyLabel')}</label>
+                    <label className={styles.label}>{t("privacyLabel")}</label>
                     <select
                       className={styles.input}
                       value={form.privacyLevel}
@@ -319,13 +424,21 @@ export default function PathDetailPage() {
                         setForm({ ...form, privacyLevel: e.target.value })
                       }
                     >
-                      <option value="PUBLIC_TO_MEMBERS">{t('privacyMembers')}</option>
-                      <option value="VISIBLE_TO_COMMITTEE">{t('privacyCommittee')}</option>
-                      <option value="HIDDEN_SENSITIVE">{t('privacyHidden')}</option>
+                      <option value="PUBLIC_TO_MEMBERS">
+                        {t("privacyMembers")}
+                      </option>
+                      <option value="VISIBLE_TO_COMMITTEE">
+                        {t("privacyCommittee")}
+                      </option>
+                      <option value="HIDDEN_SENSITIVE">
+                        {t("privacyHidden")}
+                      </option>
                     </select>
                   </div>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.label}>{t('requiresCommitteeLabel')}</label>
+                    <label className={styles.label}>
+                      {t("requiresCommitteeLabel")}
+                    </label>
                     <label className={styles.checkRow}>
                       <input
                         type="checkbox"
@@ -337,7 +450,7 @@ export default function PathDetailPage() {
                           })
                         }
                       />
-                      <span>{tCommon('yes')}</span>
+                      <span>{tCommon("yes")}</span>
                     </label>
                   </div>
                 </div>
@@ -346,14 +459,14 @@ export default function PathDetailPage() {
                   className={styles.submitBtn}
                   disabled={creating || !form.name}
                 >
-                  {creating ? t('creating') : t('createBtn')}
+                  {creating ? t("creating") : t("createBtn")}
                 </button>
               </form>
             </div>
           )}
 
           {items.length === 0 ? (
-            <div className={styles.empty}>{t('noItems')}</div>
+            <div className={styles.empty}>{t("noItems")}</div>
           ) : (
             <div className={styles.itemsGrid}>
               {items.map((item) => (
@@ -362,13 +475,19 @@ export default function PathDetailPage() {
                   {item.description && (
                     <div className={styles.itemDesc}>{item.description}</div>
                   )}
-                  {item.privacyLevel && PRIVACY_LEVEL_MAP[item.privacyLevel] && (
-                    <VisibilityNotice level={PRIVACY_LEVEL_MAP[item.privacyLevel]!} compact />
-                  )}
+                  {item.privacyLevel &&
+                    PRIVACY_LEVEL_MAP[item.privacyLevel] && (
+                      <VisibilityNotice
+                        level={PRIVACY_LEVEL_MAP[item.privacyLevel]!}
+                        compact
+                      />
+                    )}
                   <div className={styles.itemStats}>
                     {item.ledgerAccount && (
                       <div className={styles.itemStat}>
-                        <span className={styles.statLabel}>{t('balanceLabel')}</span>
+                        <span className={styles.statLabel}>
+                          {t("balanceLabel")}
+                        </span>
                         <span className={styles.statVal}>
                           {formatCurrency(item.ledgerAccount.balance)}
                         </span>
@@ -376,7 +495,9 @@ export default function PathDetailPage() {
                     )}
                     {item.maxAmountPerRequest && (
                       <div className={styles.itemStat}>
-                        <span className={styles.statLabel}>{t('limitLabel')}</span>
+                        <span className={styles.statLabel}>
+                          {t("limitLabel")}
+                        </span>
                         <span className={styles.statVal}>
                           {formatCurrency(item.maxAmountPerRequest)}
                         </span>
@@ -384,7 +505,9 @@ export default function PathDetailPage() {
                     )}
                     {item.maxAmountPerYear && (
                       <div className={styles.itemStat}>
-                        <span className={styles.statLabel}>{t('maxPerYear')}</span>
+                        <span className={styles.statLabel}>
+                          {t("maxPerYear")}
+                        </span>
                         <span className={styles.statVal}>
                           {formatCurrency(item.maxAmountPerYear)}
                         </span>
@@ -393,10 +516,14 @@ export default function PathDetailPage() {
                   </div>
                   <div className={styles.itemTags}>
                     {item.requiresCommitteeApproval && (
-                      <span className={styles.tag}>{t('requiresCommitteeTag')}</span>
+                      <span className={styles.tag}>
+                        {t("requiresCommitteeTag")}
+                      </span>
                     )}
                     {item.allowsException && (
-                      <span className={styles.tagGreen}>{t('allowsExceptionTag')}</span>
+                      <span className={styles.tagGreen}>
+                        {t("allowsExceptionTag")}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -406,11 +533,21 @@ export default function PathDetailPage() {
         </>
       )}
 
-      
       {tab === "subscriptions" && (
         <div className={styles.list}>
           {subscriptions.length === 0 ? (
-            <div className={styles.empty}>{t('noSubscriptions')}</div>
+            <div className={styles.emptyStatePanel}>
+              <h3>{t("noSubscriptionsTitle")}</h3>
+              <p>{t("noSubscriptionsBody")}</p>
+              {canManagePath && path.wallet?.entityId && (
+                <Link
+                  href={`/entities/${path.wallet.entityId}/members`}
+                  className={styles.emptyStateAction}
+                >
+                  {t("noSubscriptionsAction")}
+                </Link>
+              )}
+            </div>
           ) : (
             subscriptions.map((s) => (
               <div key={s.id} className={styles.subRow}>
@@ -422,7 +559,7 @@ export default function PathDetailPage() {
                     {s.membership?.person.name ?? "—"}
                   </div>
                   <div className={styles.subFreq}>
-                    {s.governancePath?.type ?? "—"}
+                    {getPathTypeLabel(s.governancePath?.type ?? path.type, t)}
                   </div>
                 </div>
                 {s.agreedAmount != null && (
@@ -431,7 +568,15 @@ export default function PathDetailPage() {
                   </div>
                 )}
                 <StatusBadge
-                  status={s.state === "ACTIVE" ? "active" : s.state === "SUSPENDED" ? "suspended" : s.state === "INTERESTED" ? "pending" : "inactive"}
+                  status={
+                    s.state === "ACTIVE"
+                      ? "active"
+                      : s.state === "SUSPENDED"
+                        ? "suspended"
+                        : s.state === "INTERESTED"
+                          ? "pending"
+                          : "inactive"
+                  }
                   size="sm"
                 />
               </div>
@@ -440,11 +585,10 @@ export default function PathDetailPage() {
         </div>
       )}
 
-      
       {tab === "decisions" && (
         <div className={styles.list}>
           {decisions.length === 0 ? (
-            <div className={styles.empty}>{t('noDecisions')}</div>
+            <div className={styles.empty}>{t("noDecisions")}</div>
           ) : (
             decisions.map((d) => (
               <div key={d.id} className={styles.decRow}>
@@ -452,16 +596,23 @@ export default function PathDetailPage() {
                   <div className={styles.decTitle}>{d.title}</div>
                   <div className={styles.decMeta}>
                     {DECISION_TYPE_KEYS[d.decisionType]
-                      ? tEnums(DECISION_TYPE_KEYS[d.decisionType] as Parameters<typeof tEnums>[0])
-                      : d.decisionType} ·{" "}
-                    {new Date(d.createdAt).toLocaleDateString("ar-SA")}
+                      ? tEnums(
+                          DECISION_TYPE_KEYS[d.decisionType] as Parameters<
+                            typeof tEnums
+                          >[0],
+                        )
+                      : d.decisionType}{" "}
+                    · {new Date(d.createdAt).toLocaleDateString("ar-SA")}
                   </div>
                 </div>
                 <div
                   className={styles.decStatus}
-                  style={{ color: d.status === "OPEN" ? "#f59e0b" : "var(--text-secondary)" }}
+                  style={{
+                    color:
+                      d.status === "OPEN" ? "#f59e0b" : "var(--text-secondary)",
+                  }}
                 >
-                  {d.status === "OPEN" ? t('decisionOpen') : t('closed')}
+                  {d.status === "OPEN" ? t("decisionOpen") : t("closed")}
                 </div>
                 <Link href="/decisions" className={styles.decLink}>
                   تصويت

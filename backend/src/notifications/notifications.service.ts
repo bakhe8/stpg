@@ -4,7 +4,9 @@ import {
   ForbiddenException,
   Inject,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import {
+  AuditAction,
   MemberRole,
   NotificationType,
   NotificationTargetType,
@@ -21,6 +23,16 @@ export interface CreateNotificationInput {
   body: string;
   targetType?: NotificationTargetType;
   targetId?: string;
+}
+
+export interface NotificationRecipientMatrixRow {
+  id: string;
+  event: string;
+  notificationType: NotificationType;
+  targetType: NotificationTargetType;
+  recipientRule: string;
+  source: string;
+  delivery: string;
 }
 
 @Injectable()
@@ -87,14 +99,30 @@ export class NotificationsService {
   // ── إنشاء إشعار (تُستدعى داخلياً من الوحدات الأخرى) ────────────
   async create(input: CreateNotificationInput) {
     const notif = await this.prisma.notification.create({ data: input });
-    await this.dispatchPushNotifications([input]);
+    await this.auditNotificationEvent('CREATED', [input], notif.id);
+    try {
+      const delivery = await this.dispatchPushNotifications([input]);
+      await this.auditNotificationEvent('PUSH_DISPATCHED', [input], notif.id, {
+        attemptedDevices: delivery.attemptedDevices,
+      });
+    } catch (error) {
+      await this.auditNotificationFailure([input], error, notif.id);
+    }
     return notif;
   }
 
   // ── إنشاء إشعارات جماعية لمجموعة أشخاص ─────────────────────────
   async createBulk(inputs: CreateNotificationInput[]) {
     const notifs = await this.prisma.notification.createMany({ data: inputs });
-    await this.dispatchPushNotifications(inputs);
+    await this.auditNotificationEvent('CREATED_BULK', inputs);
+    try {
+      const delivery = await this.dispatchPushNotifications(inputs);
+      await this.auditNotificationEvent('PUSH_DISPATCHED', inputs, undefined, {
+        attemptedDevices: delivery.attemptedDevices,
+      });
+    } catch (error) {
+      await this.auditNotificationFailure(inputs, error);
+    }
     return notifs;
   }
 
@@ -109,14 +137,14 @@ export class NotificationsService {
     }
 
     const personIds = Array.from(personMap.keys());
-    if (personIds.length === 0) return;
+    if (personIds.length === 0) return { attemptedDevices: 0 };
 
     // Get device tokens
     const deviceTokens = await this.prisma.deviceToken.findMany({
       where: { personId: { in: personIds }, isActive: true },
     });
 
-    if (deviceTokens.length === 0) return;
+    if (deviceTokens.length === 0) return { attemptedDevices: 0 };
 
     // Dispatch
     const promises = deviceTokens.map((device) => {
@@ -134,7 +162,66 @@ export class NotificationsService {
       );
     });
 
-    await Promise.all(promises.flat());
+    const jobs = promises.flat();
+    await Promise.all(jobs);
+    return { attemptedDevices: jobs.length };
+  }
+
+  private async auditNotificationEvent(
+    status: 'CREATED' | 'CREATED_BULK' | 'PUSH_DISPATCHED',
+    inputs: CreateNotificationInput[],
+    notificationId?: string,
+    extra?: Record<string, unknown>,
+  ) {
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          action: AuditAction.CREATE,
+          personId: inputs.length === 1 ? inputs[0]?.personId : undefined,
+          targetType: notificationId ? 'notifications' : 'notification_dispatches',
+          targetId: notificationId ?? randomUUID(),
+          newValue: {
+            status,
+            count: inputs.length,
+            types: [...new Set(inputs.map((input) => input.type))],
+            recipientIds: inputs.map((input) => input.personId),
+            targetType: inputs[0]?.targetType ?? null,
+            targetId: inputs[0]?.targetId ?? null,
+            ...extra,
+          },
+        },
+      });
+    } catch {
+      // Notification audit should never block the notification itself.
+    }
+  }
+
+  private async auditNotificationFailure(
+    inputs: CreateNotificationInput[],
+    error: unknown,
+    notificationId?: string,
+  ) {
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          action: AuditAction.REJECT,
+          personId: inputs.length === 1 ? inputs[0]?.personId : undefined,
+          targetType: notificationId ? 'notifications' : 'notification_dispatches',
+          targetId: notificationId ?? randomUUID(),
+          newValue: {
+            status: 'PUSH_FAILED',
+            count: inputs.length,
+            types: [...new Set(inputs.map((input) => input.type))],
+            recipientIds: inputs.map((input) => input.personId),
+            targetType: inputs[0]?.targetType ?? null,
+            targetId: inputs[0]?.targetId ?? null,
+            reason: error instanceof Error ? error.message : 'Unknown push failure',
+          },
+        },
+      });
+    } catch {
+      // Preserve the original notification workflow even if failure auditing fails.
+    }
   }
 
   // ── إشعارات المستخدم ─────────────────────────────────────────────
@@ -154,6 +241,119 @@ export class NotificationsService {
       where: { personId, isRead: false },
     });
     return { unread: count };
+  }
+
+  getRecipientMatrix(): NotificationRecipientMatrixRow[] {
+    return [
+      {
+        id: 'decision-created',
+        event: 'DECISION_CREATED',
+        notificationType: NotificationType.VOTE_REQUIRED,
+        targetType: NotificationTargetType.DECISION,
+        recipientRule: 'DECISION_SCOPE',
+        source: 'NotificationsService.notifyDecisionCreated',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'payment-confirmed',
+        event: 'PAYMENT_CONFIRMED',
+        notificationType: NotificationType.PAYMENT_CONFIRMED,
+        targetType: NotificationTargetType.SUBSCRIPTION,
+        recipientRule: 'PAYMENT_OWNER',
+        source: 'NotificationsService.notifyPaymentRecorded',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'payment-due',
+        event: 'PAYMENT_DUE',
+        notificationType: NotificationType.PAYMENT_DUE,
+        targetType: NotificationTargetType.SUBSCRIPTION,
+        recipientRule: 'PAYMENT_OWNER',
+        source: 'SubscriptionProcessor.notifyDuePayments',
+        delivery: 'IN_APP',
+      },
+      {
+        id: 'appeal-filed',
+        event: 'APPEAL_FILED',
+        notificationType: NotificationType.APPEAL_UPDATE,
+        targetType: NotificationTargetType.APPEAL,
+        recipientRule: 'ENTITY_ADMINS_FOUNDERS',
+        source: 'NotificationsService.notifyAppealFiled',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'policy-changed',
+        event: 'POLICY_CHANGED',
+        notificationType: NotificationType.POLICY_CHANGED,
+        targetType: NotificationTargetType.ENTITY,
+        recipientRule: 'ACTIVE_MEMBERS_EXCEPT_ACTOR',
+        source: 'NotificationsService.notifyPolicyChanged',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'governance-changed',
+        event: 'GOVERNANCE_CHANGED',
+        notificationType: NotificationType.GOVERNANCE_CHANGED,
+        targetType: NotificationTargetType.GOVERNANCE_PATH,
+        recipientRule: 'AFFECTED_SUBSCRIBERS',
+        source: 'NotificationsService.notifyGovernanceChanged',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'relationship-request',
+        event: 'RELATIONSHIP_REQUESTED',
+        notificationType: NotificationType.RELATIONSHIP_REQUEST,
+        targetType: NotificationTargetType.ENTITY_RELATIONSHIP,
+        recipientRule: 'TARGET_ENTITY_ADMINS_FOUNDERS',
+        source: 'NotificationsService.notifyRelationshipRequest',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'relationship-approved',
+        event: 'RELATIONSHIP_APPROVED',
+        notificationType: NotificationType.RELATIONSHIP_REQUEST,
+        targetType: NotificationTargetType.ENTITY_RELATIONSHIP,
+        recipientRule: 'SOURCE_ENTITY_ADMINS_FOUNDERS',
+        source: 'NotificationsService.notifyRelationshipApproved',
+        delivery: 'IN_APP_AND_ACTIVE_PUSH',
+      },
+      {
+        id: 'membership-approved',
+        event: 'MEMBERSHIP_APPLICATION_APPROVED',
+        notificationType: NotificationType.MEMBERSHIP_APPLICATION_APPROVED,
+        targetType: NotificationTargetType.ENTITY,
+        recipientRule: 'APPLICANT',
+        source: 'MembershipApplicationsService.approve',
+        delivery: 'IN_APP',
+      },
+      {
+        id: 'membership-rejected',
+        event: 'MEMBERSHIP_APPLICATION_REJECTED',
+        notificationType: NotificationType.MEMBERSHIP_APPLICATION_REJECTED,
+        targetType: NotificationTargetType.ENTITY,
+        recipientRule: 'APPLICANT',
+        source: 'MembershipApplicationsService.reject',
+        delivery: 'IN_APP',
+      },
+      {
+        id: 'campaign-expired',
+        event: 'CAMPAIGN_EXPIRED',
+        notificationType: NotificationType.CAMPAIGN_EXPIRED,
+        targetType: NotificationTargetType.ENTITY,
+        recipientRule: 'ENTITY_ADMINS_FOUNDERS',
+        source: 'Campaign expiry job',
+        delivery: 'IN_APP',
+      },
+      {
+        id: 'platform-access',
+        event: 'PLATFORM_ACCESS',
+        notificationType: NotificationType.PLATFORM_ACCESS,
+        targetType: NotificationTargetType.ENTITY,
+        recipientRule: 'ENTITY_ADMINS_FOUNDERS',
+        source: 'PlatformAccessLogService',
+        delivery: 'IN_APP',
+      },
+    ];
   }
 
   async markRead(id: string, personId: string) {

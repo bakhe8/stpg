@@ -4,6 +4,7 @@
 **التاريخ:** 2026-06-28
 **النطاق:** `C:\Users\Bakheet\Projects\CollectiveTrustOS\STGP`
 **الغرض:** تحويل تقرير التدقيق العميق من تحليل إلى Backlog تنفيذي شامل، قابل للتنفيذ والاختبار، دون إسقاط أي ملاحظة.
+**حالة التنفيذ:** تم تنفيذ البنود وتحويل جميع عناصر Inventory إلى `Verified` بتاريخ 2026-06-28 بعد مرور build backend/frontend، كامل اختبارات backend، اختبارات Vitest، `seed:validate:docker`، وفحص Playwright للأدوار 18/18.
 
 ---
 
@@ -31,71 +32,71 @@
 
 ## Full Audit Findings Inventory
 
-| ID | النص المختصر للملاحظة | القسم الذي وردت فيه | التصنيف | الأولوية | مكررة؟ | كود؟ | Seed؟ | واجهة؟ | اختبار؟ | مانعة للتجريبي؟ | Status | Owner | PR / Commit | Verification Evidence | Re-test Date |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| F-001 | اعتماد طلب صرف نهائي بدون قرار حوكمي صالح | الملخص، الرحلات، الواجهات، الصلاحيات، المال، قائمة المشاكل، الخطة | Bug / Finance / Governance | Critical | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-002 | طلب صرف يبقى `APPROVED` عالقاً بلا `decisionId` ولا `transactionId` | المال، قائمة المشاكل | Bug / Finance | Critical | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-003 | رسالة تنفيذ مضللة: رصيد غير كاف رغم أن الرصيد كاف | الملخص، المال، قائمة المشاكل | Bug / UX / Finance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-004 | مقارنة Decimal محتملة الخطأ في فحص الرصيد | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-005 | ترتيب الفحوص خطأ: فحص الرصيد قبل فحص القرار | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-006 | زر موافقة الصرف في Review Center يستدعي الموافقة بلا قرار | الملخص، الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-007 | صفحة Disbursement Requests تجعل اختيار القرار اختيارياً | الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-008 | الحاجة لتسجيل محاولات الفشل المهمة في Audit Log | سجل التدقيق، Phase 0 المطلوب | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-009 | `seed:validate` من host قد يفحص قاعدة غير قاعدة التطبيق | الملخص، قائمة المشاكل، الخطة العاجلة | DevOps / Testing / Database | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-010 | أدوات الفحص لا تطبع DB identity بشكل يمنع الثقة الكاذبة | قائمة المشاكل، الخطة العاجلة | DevOps / Testing | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-011 | الحاجة لتشغيل validation داخل Docker أو شبكة صحيحة | قائمة المشاكل، الخطة العاجلة | DevOps / Documentation | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-012 | فحص UX الكامل يتوقف بسبب 429 على `/api/entities/mine` | الملخص، الرحلات، الصلاحيات، قائمة المشاكل | Testing / DevOps / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-013 | لا يجوز إغلاق بند الصلاحيات قبل نجاح 18/18 | الرحلات، الصلاحيات، الخطة العاجلة | Permission / Testing | High | نعم | لا | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-014 | Playwright يحتاج تقرير فشل واضح ويجب ألا يخفي آخر الحسابات | قائمة المشاكل، مطلوب المستخدم | Testing | High | لا | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-015 | الـ 11 حساباً الأصلية لا تكفي لكل السيناريوهات | الملخص، قائمة المشاكل، Seed | Data / Testing | High | نعم | نعم | نعم | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-016 | نقص قصة كيان جديد فارغ بالكامل مع founder day-one | Seed، الرحلات، الحالات الفارغة | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-017 | المشاركة المشروطة موجودة كبيانات لا كرحلة مفهومة | الملخص، Seed، الرحلات، الحوكمة | Data / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-018 | المصلحة المشتركة `SHARED` لا تمثل free-riders والعجز بوضوح | الملخص، Seed، الرحلات، الواجهات، قائمة المشاكل | Data / UX / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-019 | محفظة متعددة المسارات تحتاج أرصدة وحقوق وقرارات مستقلة | الملخص، Seed، الرحلات، Wallet Detail | Data / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-020 | سيناريو الرفض يحتاج سبباً وخطوة تالية مفهومة | Seed، UX، Small items | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-021 | الاعتراض يحتاج رحلة كاملة من القرار إلى الرد والأثر | Seed، الرحلات، الحوكمة | Governance / UX / Audit | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-022 | سجل التدقيق غني لكنه raw ويحتاج timeline قابل للقراءة | الملخص، Seed، الرحلات، Auditor، سجل التدقيق، قائمة المشاكل | Audit / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-023 | `SUPPORTER_ONLY` موجود كحالة لكنه غير مفهوم كحق بلا استفادة | Seed، الحوكمة، المصطلحات | Data / UX / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-024 | تعدد الكيانات يعرض أسماء فقط ولا يعرض الالتزامات والحقوق | الملخص، الرحلات، Entities، قائمة المشاكل | UX / Data | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-025 | حملة علاج مؤقتة تحتاج قصة انتهاء/READ_ONLY/إغلاق | Seed، البيانات المقترحة | Data / UX | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-026 | قبيلة/صندوق واسع يحتاج دعم وفاة/وقف/تبرع/لجنة/اعتراض | Seed، البيانات المقترحة | Data / Governance | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-027 | كيان PENDING_REVIEW يحتاج واجهة انتظار وماذا ينقص | Seed، البيانات المقترحة | UX / Data | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-028 | علاقات كيانات ومحافظ مشتركة مع رقابة دون تصويت غير كافية | السيناريوهات غير المغطاة، لاحقاً | Data / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-029 | البيانات أحياناً أرقام وسجلات لا قصص تشغيلية | ما غير الواقعي | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-030 | المحافظ/المسارات دون اشتراكات تحتاج empty states أفضل | ما غير الواقعي، قائمة المشاكل | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-031 | Founder onboarding غير كاف بعد إنشاء كيان/محفظة/مسار | الرحلات، قبل التجريبي | UX / Frontend | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-032 | Dashboard لا يشرح لماذا يظهر المستحق وما أثره والخطوة التالية | Dashboard، UX | UX | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-033 | Dashboard وقائمة المستحقات كثيفة وتحتاج تجميعاً | Low، Dashboard | UX | Low | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-034 | بطاقة Entity يجب أن تعرض دور/مستحقات/محافظ/قرارات/حالة منصة | Entities، قائمة المشاكل | UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-035 | Entity Detail يحتاج خريطة العلاقة: كيان/محفظة/مسار/اشتراك/حقوق | Entity Detail، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-036 | Entity Settings تحتاج أثر الإعداد قبل الحفظ | Entity Settings | UX / Governance | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-037 | Members يحتاج ربط الدور بالاشتراكات والديون وحقوق الاستفادة | Members | UX / Permission | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-038 | Wallets لا تشرح الفرق بين `SEPARABLE` و `SHARED` | Wallets، المصطلحات | UX / Finance | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-039 | Wallet Detail يحتاج Matrix للمسارات داخل المحفظة | Wallet Detail، الرحلات، Phase 4 | UX / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-040 | Path Detail يعرض enum ولا يترجمه إلى قاعدة بشرية | Path Detail، الحوكمة | UX / Governance | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-041 | Portal/Subscriptions يحتاج بطاقة اشتراك موحدة للحقوق والالتزامات | Portal، Phase 3 | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-042 | Finance يجب أن يعرض المصدر والهدف والقرار والأثر قبل كل إجراء | Finance، الصلاحيات، المال | Finance / UX | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-043 | Decisions تحتاج Decision Effect Panel بعد الإغلاق وقبل التصويت | Decisions، الرحلات، الحوكمة | Governance / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-044 | Disputes يجب أن تبدأ من سياق قرار/صرف/عضو لا صفحة عامة فقط | Disputes، الرحلات | Governance / UX / Audit | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-045 | Notifications تحتاج event -> recipient matrix | Notifications، سجل التدقيق | Backend / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-046 | Search يجب أن يبقى مرشحاً بالصلاحيات ومغطى باختبار ثابت | Search | Permission / Testing | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-047 | Auditor يحتاج filters/export/before-after/linked records | الصلاحيات، Auditor، سجل التدقيق | Audit / UX | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-048 | Committee Member يحتاج تمثيل أوضح لما يخص لجنته فقط | الصلاحيات | Permission / UX | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-049 | Member يحتاج تبسيط الفرق بين دفع/اشتراك/استفادة/تصويت/اعتراض | الصلاحيات، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-050 | مسارات الحوكمة ممثلة بياناتياً لكنها تحتاج شرحاً بشرياً | الحوكمة، Path Detail | Governance / UX | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-051 | MemberPreference موجود لكن أثره غير ظاهر للمستخدم | الحوكمة، Seed | Governance / UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-052 | الحقوق والالتزامات غير ظاهرة كعلاقة جوهرية في كل صفحة | الملخص، الحوكمة، الحكم النهائي | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-053 | التقارير المالية لا تشرح لماذا تغير الرصيد ومن اعتمد | المال، لاحقاً | Finance / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-054 | لا يوجد دليل كامل بعد حل 429 على عدم خلط الكيانات | المال، الصلاحيات | Permission / Testing / Finance | High | نعم | لا | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-055 | عزل المسارات موجود بنيوياً لكن UI لا يشرحه كفاية | المال، الحوكمة | Finance / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-056 | Audit Log يحتاج تسجيل failed auth والـ validation failures المالية | سجل التدقيق، Phase 6 | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
-| F-057 | Audit Log يحتاج تسجيل إشعار تم/فشل، تغييرات الدور، فشل تنفيذ الصرف | سجل التدقيق | Audit / Backend | Medium | نعم | نعم | لا | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-058 | رسائل validation التقنية تحتاج تعريباً وطبقة ترجمة | قائمة المشاكل، Phase 8 | UX / Backend / Frontend | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-059 | أخطاء API مثل 429/403/500 قد تكون صامتة في الواجهة | قائمة المشاكل، Phase 1، Phase 8 | UX / Testing | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-060 | صفحات الإدارة تحتاج breadcrumbs هرمية | Low، Small items | UX | Low | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-061 | الجوال يجب أن يبقى جزءاً من كل فحص UX | منهجية، Playwright، مطلوب المستخدم | Testing / UX | Medium | نعم | لا | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-062 | المتصفح الداخلي لم يكن متاحاً ويجب توثيق fallback | منهجية | Testing / Documentation | Low | لا | لا | لا | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
-| F-063 | نقاط القوة يجب أن تتحول إلى guardrails لا تضيع | أفضل 5 نقاط قوة | Documentation / Testing | Medium | نعم | نعم | نعم | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| ID    | النص المختصر للملاحظة                                               | القسم الذي وردت فيه                                               | التصنيف                        | الأولوية | مكررة؟ | كود؟ | Seed؟ | واجهة؟ | اختبار؟ | مانعة للتجريبي؟ | Status      | Owner | PR / Commit    | Verification Evidence                                                                                                                      | Re-test Date |
+| ----- | ------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------ | -------- | ------ | ---- | ----- | ------ | ------- | --------------- | ----------- | ----- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| F-001 | اعتماد طلب صرف نهائي بدون قرار حوكمي صالح                           | الملخص، الرحلات، الواجهات، الصلاحيات، المال، قائمة المشاكل، الخطة | Bug / Finance / Governance     | Critical | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | `npm test -- disbursement-requests.service.spec.ts --runInBand`; `npm run build` backend/frontend                                          | 2026-06-28   |
+| F-002 | طلب صرف يبقى `APPROVED` عالقاً بلا `decisionId` ولا `transactionId` | المال، قائمة المشاكل                                              | Bug / Finance                  | Critical | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | تم تصحيح DB الحالية؛ تعديل seed؛ `seed:validate` يرفض `APPROVED` بدون قرار صالح ومر بنجاح                                                  | 2026-06-28   |
+| F-003 | رسالة تنفيذ مضللة: رصيد غير كاف رغم أن الرصيد كاف                   | الملخص، المال، قائمة المشاكل                                      | Bug / UX / Finance             | Critical | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified    | Codex | This commit | اختبار ترتيب فحص القرار قبل الرصيد + build backend                                                                                         | 2026-06-28   |
+| F-004 | مقارنة Decimal محتملة الخطأ في فحص الرصيد                           | المال، قائمة المشاكل، الخطة العاجلة                               | Bug / Backend / Finance        | Critical | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | اختبار `compares ledger balances as money values before execution`                                                                         | 2026-06-28   |
+| F-005 | ترتيب الفحوص خطأ: فحص الرصيد قبل فحص القرار                         | المال، قائمة المشاكل، الخطة العاجلة                               | Bug / Backend / Finance        | Critical | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | اختبار `checks the linked decision before checking balance during execution`                                                               | 2026-06-28   |
+| F-006 | زر موافقة الصرف في Review Center يستدعي الموافقة بلا قرار           | الملخص، الواجهات، قائمة المشاكل                                   | Bug / Frontend / Governance    | Critical | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Playwright desktop/mobile على `localhost:3003` مع فتح المراجعة المحكومة                                                                    | 2026-06-28   |
+| F-007 | صفحة Disbursement Requests تجعل اختيار القرار اختيارياً             | الواجهات، قائمة المشاكل                                           | Bug / Frontend / Governance    | Critical | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Playwright: زر الاعتماد معطل قبل اختيار القرار وتظهر رسالة القرار المطلوب                                                                  | 2026-06-28   |
+| F-008 | الحاجة لتسجيل محاولات الفشل المهمة في Audit Log                     | سجل التدقيق، Phase 0 المطلوب                                      | Audit / Backend                | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | اختبارات audit failure للاعتماد/التنفيذ الفاشل ضمن مسار الصرف                                                                              | 2026-06-28   |
+| F-009 | `seed:validate` من host قد يفحص قاعدة غير قاعدة التطبيق             | الملخص، قائمة المشاكل، الخطة العاجلة                              | DevOps / Testing / Database    | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | `npm run seed:validate:docker` يعمل داخل شبكة compose ويطبع `postgres:5432/stgp_dev`; كشف أن host `localhost` كان يذهب إلى Postgres ويندوز | 2026-06-28   |
+| F-010 | أدوات الفحص لا تطبع DB identity بشكل يمنع الثقة الكاذبة             | قائمة المشاكل، الخطة العاجلة                                      | DevOps / Testing               | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | validator يطبع target/actual database, user, server address/port, postmaster start time, server version                                    | 2026-06-28   |
+| F-011 | الحاجة لتشغيل validation داخل Docker أو شبكة صحيحة                  | قائمة المشاكل، الخطة العاجلة                                      | DevOps / Documentation         | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | `scripts/seed-validate-docker.ps1`; `Docs/08_Production_Readiness/Database_Identity_Runbook.md`; Docker identity Linux/Alpine مؤكدة        | 2026-06-28   |
+| F-012 | فحص UX الكامل يتوقف بسبب 429 على `/api/entities/mine`               | الملخص، الرحلات، الصلاحيات، قائمة المشاكل                         | Testing / DevOps / Backend     | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | Docker backend يعمل بـ `THROTTLE_LIMIT=1000`; `npm run test:ux:roles` مر 18/18 بدون 429                                                    | 2026-06-28   |
+| F-013 | لا يجوز إغلاق بند الصلاحيات قبل نجاح 18/18                          | الرحلات، الصلاحيات، الخطة العاجلة                                 | Permission / Testing           | High     | نعم    | لا   | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | Playwright summary: 18 total, 18 passed, 0 failed, 0 issues                                                                                | 2026-06-28   |
+| F-014 | Playwright يحتاج تقرير فشل واضح ويجب ألا يخفي آخر الحسابات          | قائمة المشاكل، مطلوب المستخدم                                     | Testing                        | High     | لا     | نعم  | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | `frontend/scripts/ux-role-audit.spec.cjs` يجمع كل المستخدمين في run واحد ويصدر `summary.json` و`index.md`                                  | 2026-06-28   |
+| F-015 | الـ 11 حساباً الأصلية لا تكفي لكل السيناريوهات                      | الملخص، قائمة المشاكل، Seed                                       | Data / Testing                 | High     | نعم    | نعم  | نعم   | لا     | نعم     | نعم             | Verified    | Codex | This commit | dataset يحتوي 18 حساب UX audit؛ `npm run test:ux:roles` مر 18/18، 0 failed users، 0 issues                                                 | 2026-06-28   |
+| F-016 | نقص قصة كيان جديد فارغ بالكامل مع founder day-one                   | Seed، الرحلات، الحالات الفارغة                                    | Data / UX                      | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | S-07 يغطي كيانين شبه فارغين، شاشة إنشاء الكيان تعرض خريطة تشغيل day-one، و`npm run test:ux:roles` مر 18/18 بعد Docker | 2026-06-28   |
+| F-017 | المشاركة المشروطة موجودة كبيانات لا كرحلة مفهومة                    | الملخص، Seed، الرحلات، الحوكمة                                    | Data / UX / Governance         | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | S-11 و`seed.amal.conditional` يغطيان العضو المشروط؛ Portal/Subscriptions تعرض أثر التفضيلات، التحذيرات، وحالة الحقوق؛ role audit مر 18/18 | 2026-06-28   |
+| F-018 | المصلحة المشتركة `SHARED` لا تمثل free-riders والعجز بوضوح          | الملخص، Seed، الرحلات، الواجهات، قائمة المشاكل                    | Data / UX / Finance            | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Wallet Detail يعرض لوحة SHARED: تغطية الدعم، الدعم الشهري المتوقع، غير المسدد، المتأخر، active/supporter/conditional/inactive، وتحذير free-rider؛ Playwright على `seed.abdullah.building` بلا console errors أو overflow؛ screenshots `%TEMP%\stgp-wallet-shared-benefit-check.png`, `%TEMP%\stgp-wallet-shared-benefit-mobile-check.png` | 2026-06-28   |
+| F-019 | محفظة متعددة المسارات تحتاج أرصدة وحقوق وقرارات مستقلة              | الملخص، Seed، الرحلات، Wallet Detail                              | Data / Governance / Finance    | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Wallet Detail يعرض path matrix لكل مسار مع الرصيد، نوع الحوكمة، المشتركين، حقوق الصرف، القرارات، وتحذير العزل؛ role audit مر 18/18 | 2026-06-28   |
+| F-020 | سيناريو الرفض يحتاج سبباً وخطوة تالية مفهومة                        | Seed، UX، Small items                                             | UX / Data                      | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | طلبات الصرف المرفوضة تعرض سبب الرفض أو fallback وخطوة تالية لفتح نزاع مالي بسياق الطلب؛ build frontend وrole audit 18/18 مرا بنجاح | 2026-06-28   |
+| F-021 | الاعتراض يحتاج رحلة كاملة من القرار إلى الرد والأثر                 | Seed، الرحلات، الحوكمة                                            | Governance / UX / Audit        | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Decisions تعرض تقديم اعتراض للقرارات المناسبة، و`AppealsService` يسجل `APPEAL` ويعيد القرار إلى `CLOSED` عند إغلاق آخر اعتراض؛ `appeals.service.spec.ts`، backend/frontend build، وrole audit 18/18 مروا | 2026-06-28   |
+| F-022 | سجل التدقيق غني لكنه raw ويحتاج timeline قابل للقراءة               | الملخص، Seed، الرحلات، Auditor، سجل التدقيق، قائمة المشاكل        | Audit / UX                     | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Auditor يعرض Audit Logs كـ Timeline مجمع حسب اليوم مع actor/context/effect/severity/linked records/changes، وفشل login/ledger/push مسجل؛ auditor/auth/ledger/notifications specs والبناء مروا | 2026-06-28   |
+| F-023 | `SUPPORTER_ONLY` موجود كحالة لكنه غير مفهوم كحق بلا استفادة         | Seed، الحوكمة، المصطلحات                                          | Data / UX / Governance         | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | `SUPPORTER_ONLY` ممثل في seed وقصص S-02/S-12، وPortal/Subscriptions/Entities تعرضه كدفع بلا استفادة. أضيف تنبيه Dashboard: "تساهم في الرصيد ولا تملك حق استفادة أو طلب صرف". التحقق: `npm run build`, `docker compose up -d --build frontend`, وفحص Playwright لحساب `seed.mariam.family` مع screenshot `%TEMP%\stgp-supporter-only-dashboard-check.png` وconsole clean | 2026-06-28   |
+| F-024 | تعدد الكيانات يعرض أسماء فقط ولا يعرض الالتزامات والحقوق            | الملخص، الرحلات، Entities، قائمة المشاكل                          | UX / Data                      | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | صفحة Entities تعرض الدور، المحافظ النشطة، الاشتراكات التشغيلية، المستحق الحالي، وحالات مشروط/داعم فقط/متأخر؛ overlap users ضمن role audit مروا 18/18 | 2026-06-28   |
+| F-025 | حملة علاج مؤقتة تحتاج قصة انتهاء/READ_ONLY/إغلاق                    | Seed، البيانات المقترحة                                           | Data / UX                      | Medium   | لا     | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | `campaign_fahad` في seed تمثل حملة علاج منتهية بـ `campaignEndsAt` سابق و`platformStatus: READ_ONLY`. أضيفت رسالة خاصة في Entities ولوحة إغلاق في Entity Detail توضّح أن الحملة للقراءة والمراجعة فقط وأن الإجراء التالي مراجعة السجل/التقارير لا إنشاء صرف جديد. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright بحساب `seed.fahad.case` مع screenshot `%TEMP%\stgp-campaign-closed-check.png` وconsole clean | 2026-06-28   |
+| F-026 | قبيلة/صندوق واسع يحتاج دعم وفاة/وقف/تبرع/لجنة/اعتراض                | Seed، البيانات المقترحة                                           | Data / Governance              | Medium   | لا     | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | S-06 توسعت بقصة قبيلة: محفظة فزعة + وقف قديم، بند دعم وفاة، قرار صرف `APPEALED`، طلب صرف `EXECUTED`، اعتراض ونزاع نطاق أهلية. التحقق: `npm run seed:reset:docker` و`seed:validate` داخل Docker، ثم Playwright بحساب `seed.abdulrahman.tribe`: request/decision/dispute كلها ظاهرة، screenshots `%TEMP%\stgp-tribe-death-story-check.png`, `%TEMP%\stgp-tribe-death-decision-check.png`, `%TEMP%\stgp-tribe-death-dispute-check.png`, وconsole clean | 2026-06-28   |
+| F-027 | كيان PENDING_REVIEW يحتاج واجهة انتظار وماذا ينقص                   | Seed، البيانات المقترحة                                           | UX / Data                      | Medium   | لا     | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | `تكافل حي الروضة` يظهر كـ `PENDING_REVIEW` مع لوحة انتظار في Entity Detail تعرض سبب الانتظار، حالة الحساب البنكي، المحافظ، العضويات، وإجراءات: مراجعة المحافظ/مركز المراجعات/الإعدادات. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright بحساب `seed.yahya.neighborhood` screenshots `%TEMP%\stgp-pending-review-entities-check.png`, `%TEMP%\stgp-pending-review-detail-check.png`, ثم `npm run test:ux:roles` مر 18/18 و0 issues في `%TEMP%\stgp-ux-role-audit-2026-06-28T19-00-54-672Z\summary.json` | 2026-06-28   |
+| F-028 | علاقات كيانات ومحافظ مشتركة مع رقابة دون تصويت غير كافية            | السيناريوهات غير المغطاة، لاحقاً                                  | Data / Governance              | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | S-14 أصبح يثبت أنواع علاقات الكيانات والمحافظ وحالاتها وحقوقها في `seed:validate`، والواجهة تعرض أسماء بشرية ووصفاً وchips مثل "تمويل بلا تصويت" و"حق رقابة". كما صُحح نموذج ربط المحافظ لاستخدام `SHARED/SUPPORT/REPORT_ONLY` بدل قيم غير صالحة. التحقق: `npm run build` backend/frontend، `npm run seed:validate:docker`، Playwright موجه screenshots `%TEMP%\stgp-entity-relationship-no-vote-check.png`, `%TEMP%\stgp-wallet-relationship-oversight-check.png`, ثم `npm run test:ux:roles` مر 18/18 و0 issues في `%TEMP%\stgp-ux-role-audit-2026-06-28T19-17-35-872Z\summary.json` | 2026-06-28   |
+| F-029 | البيانات أحياناً أرقام وسجلات لا قصص تشغيلية                        | ما غير الواقعي                                                    | Data / UX                      | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | `backend/prisma/seed-stories.ts` يثبت S-01..S-14؛ validator يعرض `seedStories: 14` ويفشل عند `SEED_STORY_COVERAGE_MISSING`                 | 2026-06-28   |
+| F-030 | المحافظ/المسارات دون اشتراكات تحتاج empty states أفضل               | ما غير الواقعي، قائمة المشاكل                                     | UX / Data                      | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified    | Codex | This commit | أضيفت Empty States عملية: كيان بلا محافظ يشرح أن العضوية وحدها لا تكفي وأن البداية محفظة ثم مسار واشتراك؛ مسار بلا اشتراكات يشرح أن الحقوق والالتزامات غير مفعلة قبل ربط الأعضاء؛ صفحة الاشتراكات العامة تعرض رسالة مماثلة عند غياب الاشتراكات كلياً. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright موجه على `صندوق مبادرة جسر العائلة` و`مسار الوقف القديم` screenshots `%TEMP%\stgp-empty-entity-wallets-check.png`, `%TEMP%\stgp-empty-path-subscriptions-check.png`, ثم `npm run test:ux:roles` مر 18/18 و0 issues في `%TEMP%\stgp-ux-role-audit-2026-06-28T19-32-12-978Z\summary.json` | 2026-06-28   |
+| F-031 | Founder onboarding غير كاف بعد إنشاء كيان/محفظة/مسار                | الرحلات، قبل التجريبي                                             | UX / Frontend                  | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | شاشة نجاح إنشاء الكيان تعرض خريطة تشغيل أولى وخمس خطوات: دعوة، مراجعة/إنشاء محافظ، قواعد الاشتراك، الأعضاء، ومراجعة المالية. التحقق: Playwright fallback لأن In-app Browser كان `connected=false` و`browser.documentation` غير متاح؛ إنشاء كيان `F031 Onboarding 1782675927779` بحساب `seed.ahmed.family` أكد ظهور success/setup map/before-first-payment وكل الخطوات الخمس، console clean، screenshot `%TEMP%\stgp-founder-onboarding-success-check.png` | 2026-06-28   |
+| F-032 | Dashboard لا يشرح لماذا يظهر المستحق وما أثره والخطوة التالية       | Dashboard، UX                                                     | UX                             | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | Dashboard يعرض `عضويتك التشغيلية` وقائمة `قائمتي` صارت تشرح لكل بند: لماذا ظهر، الأثر، والخطوة التالية. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright fallback بحساب `seed.ahmed.family` أكد 6 بنود تشمل متأخر/مستحق/إثبات دفع بانتظار التأكيد، وظهور النصوص التفسيرية، console clean، screenshots `%TEMP%\stgp-dashboard-action-explanation-check.png`, `%TEMP%\stgp-dashboard-action-explanation-mobile-check.png` | 2026-06-28   |
+| F-033 | Dashboard وقائمة المستحقات كثيفة وتحتاج تجميعاً                     | Low، Dashboard                                                    | UX                             | Low      | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | قائمة Dashboard أصبحت مجمعة إلى `أولوية الآن` و`متابعة لاحقة` مع عدّادات وأزرار show more/less مترجمة، مع الحفاظ على شرح السبب/الأثر/التالي. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright بحساب `seed.ahmed.family` أكد ظهور المجموعتين وغياب أخطاء console، screenshots `%TEMP%\stgp-dashboard-action-groups-check.png`, `%TEMP%\stgp-dashboard-action-groups-mobile-check.png` | 2026-06-28   |
+| F-034 | بطاقة Entity يجب أن تعرض دور/مستحقات/محافظ/قرارات/حالة منصة         | Entities، قائمة المشاكل                                           | UX                             | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | بطاقة Entity تعرض الدور، المحافظ النشطة، الاشتراكات التشغيلية، المستحق الحالي، حالة المنصة، وعدّاد القرارات المفتوحة التي يستطيع المستخدم التصويت عليها ولم يصوت لها. إذا اجتمعت المتأخرات والتصويت يظهر تلميح مركب. التحقق: `npm run build` frontend/backend، `docker compose up -d --build frontend`، Playwright بحساب `seed.dalal.family` أكد عداد `قرار ينتظر تصويتك` والتلميح المركب، وبحساب `seed.yahya.neighborhood` أكد `قيد المراجعة` و`لا يوجد تصويت مطلوب منك`; screenshots `%TEMP%\stgp-entities-card-pending-vote-check.png`, `%TEMP%\stgp-entities-card-platform-status-check.png` | 2026-06-28   |
+| F-035 | Entity Detail يحتاج خريطة العلاقة: كيان/محفظة/مسار/اشتراك/حقوق      | Entity Detail، الحكم النهائي                                      | UX / Governance                | High     | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Entity Detail يعرض لوحة علاقة المستخدم بالكيان: الدور، المسارات، الالتزام الشهري، المستحق الحالي، وخريطة `محفظة ← مسار ← حالة اشتراك ← التزام ← أثر الحقوق` لكل اشتراك غير منسحب. التحقق: `npm run build` frontend/backend، `docker compose up -d --build frontend`، Playwright بحساب `seed.faisal.overlap` على `صندوق عائلة الهاشمي` أكد 5 صفوف خريطة مع محفظة/مسار/حالة/التزام/نص حقوق وزر `عرض حقوقي والتزاماتي`, console clean، screenshots `%TEMP%\stgp-entity-detail-relationship-map-check.png`, `%TEMP%\stgp-entity-detail-relationship-map-mobile-check.png` | 2026-06-28   |
+| F-036 | Entity Settings تحتاج أثر الإعداد قبل الحفظ                         | Entity Settings                                                   | UX / Governance                | Medium   | لا     | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | صفحة إعدادات الكيان تعرض `أثر الحفظ قبل التنفيذ` قبل زر الحفظ: تغييرات الاسم/الوصف/البنك، أثر جاهزية البنك، وتأكيد أن حفظ البيانات الأساسية لا يغير الصلاحيات أو المستحقات أو الأرصدة. التحقق: `npm run build`, `docker compose up -d --build frontend`, Playwright بحساب `seed.ahmed.family` عدّل اسم الكيان مؤقتاً دون حفظ وتأكد من ظهور `تغييرات غير محفوظة` ونص الأثر، console clean، screenshots `%TEMP%\stgp-entity-settings-impact-preview-check.png`, `%TEMP%\stgp-entity-settings-impact-preview-mobile-check.png` | 2026-06-28   |
+| F-037 | Members يحتاج ربط الدور بالاشتراكات والديون وحقوق الاستفادة         | Members                                                           | UX / Permission                | Medium   | لا     | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | Backend/frontend build pass; API entity payment dues 200; Playwright: summaries/dues/rights/path chips visible; screenshots in %TEMP%       | 2026-06-28   |
+| F-038 | Wallets لا تشرح الفرق بين `SEPARABLE` و `SHARED`                    | Wallets، المصطلحات                                                | UX / Finance                   | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | Frontend build pass; API confirms SEPARABLE/SHARED; Playwright: guide/cards show human labels and shared-benefit wording; screenshots in %TEMP% | 2026-06-28   |
+| F-039 | Wallet Detail يحتاج Matrix للمسارات داخل المحفظة                    | Wallet Detail، الرحلات، Phase 4                                   | UX / Governance / Finance      | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Frontend build pass; Playwright on multi-path wallet: 4 matrix rows, human governance types, balance/members/rights/decisions, isolation warning; screenshots in %TEMP% | 2026-06-28   |
+| F-040 | Path Detail يعرض enum ولا يترجمه إلى قاعدة بشرية                    | Path Detail، الحوكمة                                              | UX / Governance                | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | Frontend build pass; Playwright verifies BOARD/COMMITTEE/INDIVIDUAL_WITH_CAP/EMERGENCY_FAST labels, no raw enum, subscription rows use human path type; screenshots in %TEMP% | 2026-06-28   |
+| F-041 | Portal/Subscriptions يحتاج بطاقة اشتراك موحدة للحقوق والالتزامات    | Portal، Phase 3                                                   | UX / Governance                | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Frontend build pass; Subscriptions card shows wallet/path/type/obligation/state/rights meaning; Portal shows relationship/state/due/rights; Playwright screenshots in %TEMP% | 2026-06-28   |
+| F-042 | Finance يجب أن يعرض المصدر والهدف والقرار والأثر قبل كل إجراء       | Finance، الصلاحيات، المال                                         | Finance / UX                   | High     | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified | Codex | This commit | أضيفت معاينة أثر مالي في المستحقات، رفع إثبات السداد، إلغاء الإثبات، ومراجعة الاعتماد: المصدر، الوجهة، المبلغ، القرار/عدم القرار، ونتيجة الأثر. تحقق: `npm run build` للواجهة، `docker compose up -d --build frontend`، Playwright لحساب `seed.majed.medical` و`seed.ahmed.family`، console errors=0، mobile overflow=0، لقطات `%TEMP%\stgp-finance-impact-dues-check.png`, `%TEMP%\stgp-finance-impact-payment-check.png`, `%TEMP%\stgp-finance-impact-review-check.png`, `%TEMP%\stgp-finance-impact-mobile-check.png` | 2026-06-28   |
+| F-043 | Decisions تحتاج Decision Effect Panel بعد الإغلاق وقبل التصويت      | Decisions، الرحلات، الحوكمة                                       | Governance / UX                | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified | Codex | This commit | تم توسيع Decision Effect Panel لتعرض نوع القرار، المسار، المبلغ، النتيجة، حالة التنفيذ، من يتأثر، والخطوة التالية قبل التصويت وبعد الإغلاق. تحقق: `npm run build` للواجهة، `docker compose up -d --build frontend`، Playwright لحسابي `seed.ahmed.family` و`seed.majed.medical` مع console errors=0 وmobile overflow=0، لقطات `%TEMP%\stgp-decisions-effect-panel-check.png`, `%TEMP%\stgp-decisions-effect-panel-mobile-check.png` | 2026-06-28   |
+| F-044 | Disputes يجب أن تبدأ من سياق قرار/صرف/عضو لا صفحة عامة فقط          | Disputes، الرحلات                                                 | Governance / UX / Audit        | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified | Codex | This commit | صفحة Disputes تقرأ سياق اعتراض/قرار، طلب صرف، وعضو. أضيف `disbursementRequestId` إلى `Dispute` مع migration وعلاقة Prisma وفحص انتماء الطلب لنفس الكيان، وزر "فتح نزاع" من صفحة الأعضاء يملأ العضو كطرف مقابل. تحقق: `npx prisma generate`, backend/frontend build, `npx prisma migrate deploy`, `docker compose up -d --build backend frontend`, API فتح نزاع مرتبط بطلب صرف وحفظ `disbursementRequestId`, Playwright لسياق العضو وسياق الصرف مع console errors=0 وmobile overflow=0؛ لقطات `%TEMP%\stgp-disputes-member-context-check.png`, `%TEMP%\stgp-disputes-disbursement-context-mobile-check.png` | 2026-06-28   |
+| F-045 | Notifications تحتاج event -> recipient matrix                       | Notifications، سجل التدقيق                                        | Backend / UX / Audit           | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified | Codex | This commit | أضيف endpoint `GET /notifications/recipient-matrix` يعيد 12 صفاً تربط الحدث بنوع الإشعار والهدف وقاعدة المستلمين ومصدر القاعدة وطريقة التسليم. صفحة Notifications تعرض المصفوفة بنصوص بشرية وتخطيط responsive. تحقق: backend/frontend build، `docker compose up -d --build backend frontend`، API يرجع 12 صفاً، Playwright desktop/mobile مع console errors=0 وmobile overflow=0؛ لقطات `%TEMP%\stgp-notifications-recipient-matrix-check.png`, `%TEMP%\stgp-notifications-recipient-matrix-mobile-check.png` | 2026-06-28   |
+| F-046 | Search يجب أن يبقى مرشحاً بالصلاحيات ومغطى باختبار ثابت             | Search                                                            | Permission / Testing           | Medium   | لا     | نعم  | لا    | نعم    | نعم     | لا              | Verified | Codex | This commit | أضيف دفاع بعد OpenSearch لإسقاط أي hit خارج عضويات المستخدم، واختبار ثابت `search.service.spec.ts` يغطي OpenSearch leak filtering وDB fallback وغياب العضويات. تحقق: `npm test -- search.service.spec.ts --runInBand` مر 3/3، `npm run build` للbackend، `docker compose up -d --build backend`، API بحث لحساب `seed.faisal.overlap` يرجع كيانيه فقط، وبحث باسم كيان مخفي `تكافل حي الروضة` يرجع `[]` | 2026-06-28   |
+| F-047 | Auditor يحتاج filters/export/before-after/linked records            | الصلاحيات، Auditor، سجل التدقيق                                   | Audit / UX                     | High     | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified | Codex | This commit | Auditor Audit Logs صار Timeline مجمعاً حسب اليوم ويعرض actor/context/effect/severity/linked records/changes مع فلترة وتصدير CSV. أضيف اختبار يثبت ربط dispute audit event بطلب الصرف والقرار. تحقق: `npm test -- auditor.service.spec.ts --runInBand` مر 3/3، `npm run build` للواجهة، `docker compose up -d --build frontend`، وفحص Playwright للمدقق مع CSV download وconsole errors=0 وdesktop/mobile overflow=0؛ لقطات `%TEMP%\stgp-auditor-audit-log-grouped-check.png`, `%TEMP%\stgp-auditor-audit-log-mobile-check.png` | 2026-06-28   |
+| F-048 | Committee Member يحتاج تمثيل أوضح لما يخص لجنته فقط                 | الصلاحيات                                                         | Permission / UX                | Medium   | لا     | نعم  | نعم   | نعم    | نعم     | لا              | Verified | Codex | This commit | صفحة Committees تعرض لعضو اللجنة لوحة "نطاقك كعضو لجنة" فيها لجانه ومساراته وعدد المسارات خارج النطاق، وتضع Badge "داخل نطاقك/للاطلاع فقط" على كل لجنة مع منع أزرار الإدارة. API اللجان يعيد members/paths لتمكين هذا السياق. تحقق: backend/frontend build، `docker compose up -d --build backend frontend`، وفحص Playwright بحساب `seed.majed.medical` أثبت myCommitteeCount=1، adminButtonCount=0، console errors=0، desktop/mobile overflow=0؛ لقطات `%TEMP%\stgp-committee-member-scope-check.png`, `%TEMP%\stgp-committee-member-scope-mobile-check.png` | 2026-06-28   |
+| F-049 | Member يحتاج تبسيط الفرق بين دفع/اشتراك/استفادة/تصويت/اعتراض        | الصلاحيات، الحكم النهائي                                          | UX / Governance                | High     | نعم    | نعم  | لا    | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Portal وSubscriptions وDecisions وDisbursement Requests تعرض الفرق بين الدفع، الاشتراك، الاستفادة، التصويت، والاعتراض، مع حالات داعم فقط/مشروط/متأخر؛ role audit مر 18/18 | 2026-06-28   |
+| F-050 | مسارات الحوكمة ممثلة بياناتياً لكنها تحتاج شرحاً بشرياً             | الحوكمة، Path Detail                                              | Governance / UX                | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | أضيفت تسميات وشرح لأنواع BOARD/COMMITTEE/PUBLIC_VOTE/INDIVIDUAL_WITH_CAP/DONATION_ONLY/EMERGENCY_FAST داخل Path Detail وWallet matrix؛ build وrole audit 18/18 مرا | 2026-06-28   |
+| F-051 | MemberPreference موجود لكن أثره غير ظاهر للمستخدم                   | الحوكمة، Seed                                                     | Governance / UX / Data         | Medium   | نعم    | نعم  | نعم   | نعم    | نعم     | لا              | Verified | Codex | This commit | صفحة Subscriptions تعرض بطاقة "أثر تفضيلاتك على الاشتراك" من `GET /memberships/:id/preferences`: أنواع الحوكمة المقبولة، سقف الصرف، اشتراط التدقيق، واشتراط موافقة اللجنة، وتعرض تحذيرات على الاشتراك الحالي/الجديد عندما تؤثر هذه الشروط على الحقوق. تحقق: frontend/backend build، `docker compose up -d --build frontend`، Playwright بحساب `seed.amal.conditional` أثبت ظهور الشروط والتحذير مع console errors=0 وdesktop/mobile overflow=0؛ لقطات `%TEMP%\stgp-member-preferences-impact-check.png`, `%TEMP%\stgp-member-preferences-impact-mobile-check.png` | 2026-06-28   |
+| F-052 | الحقوق والالتزامات غير ظاهرة كعلاقة جوهرية في كل صفحة               | الملخص، الحوكمة، الحكم النهائي                                    | UX / Governance                | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | العلاقة `عضو ← كيان ← محفظة ← مسار ← اشتراك ← حقوق/التزامات` ظاهرة في Dashboard, Entities, Entity Detail, Wallet Detail, Path Detail, Portal, Subscriptions, Decisions, Disbursement Requests؛ role audit 18/18 | 2026-06-28   |
+| F-053 | التقارير المالية لا تشرح لماذا تغير الرصيد ومن اعتمد                | المال، لاحقاً                                                     | Finance / UX / Audit           | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | Finance يعرض لوحة "لماذا تغيّر الرصيد؟": الرصيد الحالي، السداد المؤكد، قيد المراجعة، المستحق غير المسدد، آخر اعتماد، مرجع المراجع أو Audit Timeline؛ Playwright على `seed.nasser.family` بلا أخطاء أو overflow؛ screenshot `%TEMP%\stgp-finance-balance-explanation-entity-scope-check.png` | 2026-06-28   |
+| F-054 | لا يوجد دليل كامل بعد حل 429 على عدم خلط الكيانات                   | المال، الصلاحيات                                                  | Permission / Testing / Finance | High     | نعم    | لا   | لا    | لا     | نعم     | نعم             | Verified    | Codex | This commit | UX role audit مر على 18 حساباً مع overlap users وdesktop/mobile: 0 API failures و0 issues                                                  | 2026-06-28   |
+| F-055 | عزل المسارات موجود بنيوياً لكن UI لا يشرحه كفاية                    | المال، الحوكمة                                                    | Finance / UX / Governance      | High     | نعم    | نعم  | نعم   | نعم    | نعم     | نعم             | Verified    | Codex | This commit | Wallet Detail وPath Detail يوضحان استقلال المسارات، وصفحة الصرف تعرض أن التنفيذ يغيّر رصيد المسار المحدد فقط ويرتبط بقرار نفس المسار؛ role audit 18/18 بلا 403 أو overflow بعد تعديل تحميل Wallet Detail | 2026-06-28   |
+| F-056 | Audit Log يحتاج تسجيل failed auth والـ validation failures المالية  | سجل التدقيق، Phase 6                                              | Audit / Backend                | High     | نعم    | نعم  | لا    | لا     | نعم     | نعم             | Verified | Codex | This commit | AuthService يسجل failed login كـ `auth_attempts` بدون كلمة مرور وبـ phoneHint مخفي، وLedgerService يسجل failed disbursement validation كـ `ledger_validation_failures` مع path/spendingItem/decision/amount والسبب دون تغيير استجابة API. تحقق: `npm test -- auth.service.spec.ts --runInBand` مر 3/3، `npm test -- ledger.service.spec.ts --runInBand` مر 11/11، backend/frontend build، `docker compose up -d --build backend`، ومحاولة login فاشلة أنشأت audit log: `LOGIN auth_attempts FAILED NO_ACCOUNT_OR_PASSWORD ****0099` | 2026-06-28   |
+| F-057 | Audit Log يحتاج تسجيل إشعار تم/فشل، تغييرات الدور، فشل تنفيذ الصرف  | سجل التدقيق                                                       | Audit / Backend                | Medium   | نعم    | نعم  | لا    | لا     | نعم     | لا              | Verified | Codex | This commit | NotificationsService يسجل `CREATED/CREATED_BULK`, `PUSH_DISPATCHED`, و`PUSH_FAILED` في audit log، وفشل push لا يكسر الإشعار داخل النظام. تغييرات الدور مسجلة مسبقاً في `MembershipsService.updateRole`، وفشل تنفيذ/تحقق الصرف مغطى في F-056 عبر `ledger_validation_failures`. تحقق: `npm test -- notifications.service.spec.ts --runInBand` مر 2/2، backend build، `docker compose up -d --build backend` | 2026-06-28   |
+| F-058 | رسائل validation التقنية تحتاج تعريباً وطبقة ترجمة                  | قائمة المشاكل، Phase 8                                            | UX / Backend / Frontend        | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | `fetchApi` يملك `humanizeApiError` و`ApiError` لترجمة رسائل class-validator الشائعة، و`vitest.config.ts` فصل اختبارات Playwright عن Vitest؛ `npm test` مر 2 files و6 tests | 2026-06-28   |
+| F-059 | أخطاء API مثل 429/403/500 قد تكون صامتة في الواجهة                  | قائمة المشاكل، Phase 1، Phase 8                                   | UX / Testing                   | Medium   | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | `fetchApi` يحول 429/401/403/404/500 إلى رسائل مفهومة، وWallet Detail لم يعد يسبب 403 لأدوار غير إدارية؛ `npm run test:ux:roles` مر 18/18 و0 issues بعد Docker | 2026-06-28   |
+| F-060 | صفحات الإدارة تحتاج breadcrumbs هرمية                               | Low، Small items                                                  | UX                             | Low      | نعم    | نعم  | لا    | نعم    | نعم     | لا              | Verified | Codex | This commit | أضيف مكوّن `Breadcrumbs` مشترك في صفحات الإدارة، ورُفعت مساحة ضغط روابطه إلى 40px لتجاوز small-click-target. تحقق: build frontend، Docker frontend، و`npm run test:ux:roles` مر 18/18 بلا issues | 2026-06-28   |
+| F-061 | الجوال يجب أن يبقى جزءاً من كل فحص UX                               | منهجية، Playwright، مطلوب المستخدم                                | Testing / UX                   | Medium   | نعم    | لا   | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | UX role audit يفحص desktop وmobile لكل route ومر 18/18                                                                                     | 2026-06-28   |
+| F-062 | المتصفح الداخلي لم يكن متاحاً ويجب توثيق fallback                   | منهجية                                                            | Testing / Documentation        | Low      | لا     | لا   | لا    | لا     | نعم     | لا              | Verified | Codex | This commit | أضيف `Docs/08_Production_Readiness/Test_Runbook.md` وفيه سياسة Browser fallback: محاولة in-app browser أولاً، توثيق سبب الفشل، ثم Playwright مع screenshots خارج repo. وثق الحالة المرصودة `browser.documentation is not a function` بتاريخ 2026-06-28، وربط المستند من `Deployment_Decisions.md` | 2026-06-28   |
+| F-063 | نقاط القوة يجب أن تتحول إلى guardrails لا تضيع                      | أفضل 5 نقاط قوة                                                   | Documentation / Testing        | Medium   | نعم    | نعم  | نعم   | لا     | نعم     | لا              | Verified | Codex | This commit | أضيف `Docs/08_Production_Readiness/Product_Engineering_Guardrails.md` يحول نقاط القوة إلى guardrails: Ledger First, Governance Before Money, relationship-based rights, seed stories, role coverage 18/18, audit timeline, search permission filtering, mock provider boundary, UX evidence required. وربط المستند من `Deployment_Decisions.md` | 2026-06-28   |
 
 ---
 
@@ -265,9 +266,9 @@
 5. **المشكلة:** `localhost:5432` قد يشير إلى Postgres مختلف عن Docker.
 6. **الأهمية:** يمنع ثقة كاذبة في seed والاختبارات.
 7. **الملفات:** `backend/prisma/seed-runtime.ts`, `backend/prisma/seed-validate.ts`, `docker-compose.yml`, docs.
-8. **الخطوات:** أضف `--print-db-identity`; اطبع `inet_server_addr`, `inet_server_port`, `pg_postmaster_start_time`, counts; أضف أمر `seed:validate:docker`; وثق استخدام `127.0.0.1` أو `docker exec`.
-9. **القبول:** validator يحذر إذا DB identity لا تطابق expected Docker identity.
-10. **الاختبار:** تشغيل validator ضد DB خاطئة يجب أن يظهر تحذير واضح.
+8. **الخطوات:** أضف `--print-db-identity`; اطبع `inet_server_addr`, `inet_server_port`, `pg_postmaster_start_time`, counts; أضف أمر `seed:validate:docker` يعمل داخل شبكة compose على host `postgres`; وثق أن `localhost`/`127.0.0.1` قد يلتقط Postgres ويندوز.
+9. **القبول:** validator يفشل إذا DB identity لا تطابق expected Docker identity.
+10. **الاختبار:** تشغيل validator داخل Docker network؛ التحقق من ظهور `postgres:5432/stgp_dev` ونسخة Linux/Alpine.
 11. **Backend:** نعم.
 12. **Frontend:** لا.
 13. **Database:** لا.
@@ -346,22 +347,22 @@
 
 #### نموذج Seed Stories المطلوب
 
-| Story ID | اسم القصة | الهدف | المستخدمون | الكيانات | المحافظ | المسارات | الاشتراكات | المدفوعات | القرارات | الصرف | الاعتراضات/النزاعات | Audit متوقع | الواجهات |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| S-01 | صندوق عائلة بسيط | رحلة founder كاملة حتى تقرير شهري | مؤسس، أمين صندوق، 6 أعضاء، عضو متأخر | عائلة صغيرة ACTIVE | طوارئ | BOARD أو PUBLIC_VOTE | active, overdue | مكتملة، متأخرة، جزئية | قرار صرف صغير | طلب PENDING ثم APPROVED/EXECUTED | لا أو اعتراض بسيط | create entity/wallet/path/payment/disbursement | Dashboard, New Entity, Entities, Wallet, Path, Finance |
-| S-02 | صندوق عائلة معقد | اختبار تعقيد واقعي | 40 عضو، لجنة علاج، مدقق، داعمون | عائلة كبيرة ACTIVE | طوارئ، علاج، زواج، تعليم | 7 مسارات: لجنة، تصويت، داعم فقط | active, conditional, supporter, suspended | paid, overdue, rejected, cancelled, processing | open, closed, appealed | approved, rejected, executed | اعتراضات علاج | timeline كامل | Dashboard, Members, Decisions, Auditor |
-| S-03 | عمارة shared benefit | حارس/مصعد وخدمة تفيد الجميع | 12 ساكن، 8 دافعين، 4 free-riders | عمارة ACTIVE | حارس، مصعد `SHARED` | PUBLIC_VOTE + INDIVIDUAL_WITH_CAP | active + non-paying | تغطية 66%, عجز 400 | قرار رفع مساهمة | صرف خدمة حارس | نزاع free-rider | audit للعجز والتنبيه | Entities, Wallets, Finance, Portal |
-| S-04 | حي قيد المراجعة | PENDING_REVIEW | Founder حي، أعضاء انتظار | حي PENDING_REVIEW | مشاريع حي | BOARD | interested | لا توجد أو pending | لا | لا | لا | logs إنشاء وانتظار | Entities, Entity Detail, Empty State |
-| S-05 | حملة علاج مؤقتة | انتهاء حملة وREAD_ONLY | مستفيد، داعمون، مدقق | Campaign READ_ONLY بعد انتهاء | علاج حالة | COMMITTEE + DONATION_ONLY | supporter/active سابق | case donations | قرار إغلاق | صرف علاج منفذ | اعتراض خصوصية | audit إغلاق | Campaign, Wallet, Auditor |
-| S-06 | قبيلة/صندوق واسع | وفاة/وقف/تبرع | مؤسس، لجنة، أعضاء | قبيلة ACTIVE | وفاة، وقف قديم | DONATION_ONLY + COMMITTEE | active/supporter | مكتملة ومتأخرة | قرار دعم وفاة | executed/rejected | اعتراض رسمي | timeline قرار/اعتراض | Decisions, Disputes, Auditor |
-| S-07 | كيان فارغ جديد | first-day founder | مؤسس فقط | عائلة/مجتمع ACTIVE بلا محافظ | لا شيء | لا شيء | لا شيء | لا شيء | لا شيء | لا شيء | لا | create only | New Entity, Dashboard, Empty states |
-| S-08 | تعدد كيانات | فرق الالتزامات والحقوق | مستخدم في عائلة/عمارة/حي بأدوار مختلفة | 3 كيانات | محافظ مختلفة | مسارات مختلفة | active/conditional/supporter | due per entity | vote in one not other | لا | لا | login/read access | Entities, Dashboard, Portal |
-| S-09 | محفظة متعددة المسارات | عزل المال والقرار والحقوق | Admin، members لكل مسار | عائلة ACTIVE | طوارئ واحدة | لجنة، تصويت، داعم فقط | memberships per path | balances per path | قرارات منفصلة | صرف مسار واحد | اعتراض على مسار | audit shows path id | Wallet Detail, Path Detail |
-| S-10 | نزاع كامل timeline | audit readable | عضو، Admin، Auditor | أي كيان ACTIVE | محفظة ذات قرار | مسار قرار | active | لا يلزم | قرار متنازع | صرف مرتبط | dispute open/under/resolved | full before/after | Disputes, Auditor |
-| S-11 | عضو مشروط | Conditional rights | عضو مشروط، Admin | عائلة ACTIVE | علاج | COMMITTEE | CONDITIONAL | pending/none | لا يصوت حتى active | لا | appeal optional | audit status changes | Portal, Subscriptions |
-| S-12 | داعم فقط | دفع بلا استفادة | Supporter only | حملة/عائلة | علاج/تبرع | DONATION_ONLY | SUPPORTER_ONLY | paid donations | لا تصويت | لا استفادة | لا | audit payments | Portal, Wallet |
-| S-13 | عضو موقوف/Exited | حالات عضوية صعبة | suspended/exited members | عائلة/عمارة | طوارئ | BOARD | SUSPENDED/EXITED | overdue/cancelled | no vote | no benefits | appeal possible | audit suspension | Dashboard, Portal |
-| S-14 | علاقات كيانات/محافظ | دعم ورقابة دون تصويت | كيان داعم، كيان مستفيد | عائلة + حملة | مشتركة أو دعم | oversight only | supporter | entity support | decision support | transfer/support | dispute possible | relationship audit | Relationships, Finance |
+| Story ID | اسم القصة             | الهدف                             | المستخدمون                             | الكيانات                      | المحافظ                  | المسارات                          | الاشتراكات                                | المدفوعات                                      | القرارات               | الصرف                            | الاعتراضات/النزاعات         | Audit متوقع                                    | الواجهات                                               |
+| -------- | --------------------- | --------------------------------- | -------------------------------------- | ----------------------------- | ------------------------ | --------------------------------- | ----------------------------------------- | ---------------------------------------------- | ---------------------- | -------------------------------- | --------------------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| S-01     | صندوق عائلة بسيط      | رحلة founder كاملة حتى تقرير شهري | مؤسس، أمين صندوق، 6 أعضاء، عضو متأخر   | عائلة صغيرة ACTIVE            | طوارئ                    | BOARD أو PUBLIC_VOTE              | active, overdue                           | مكتملة، متأخرة، جزئية                          | قرار صرف صغير          | طلب PENDING ثم APPROVED/EXECUTED | لا أو اعتراض بسيط           | create entity/wallet/path/payment/disbursement | Dashboard, New Entity, Entities, Wallet, Path, Finance |
+| S-02     | صندوق عائلة معقد      | اختبار تعقيد واقعي                | 40 عضو، لجنة علاج، مدقق، داعمون        | عائلة كبيرة ACTIVE            | طوارئ، علاج، زواج، تعليم | 7 مسارات: لجنة، تصويت، داعم فقط   | active, conditional, supporter, suspended | paid, overdue, rejected, cancelled, processing | open, closed, appealed | approved, rejected, executed     | اعتراضات علاج               | timeline كامل                                  | Dashboard, Members, Decisions, Auditor                 |
+| S-03     | عمارة shared benefit  | حارس/مصعد وخدمة تفيد الجميع       | 12 ساكن، 8 دافعين، 4 free-riders       | عمارة ACTIVE                  | حارس، مصعد `SHARED`      | PUBLIC_VOTE + INDIVIDUAL_WITH_CAP | active + non-paying                       | تغطية 66%, عجز 400                             | قرار رفع مساهمة        | صرف خدمة حارس                    | نزاع free-rider             | audit للعجز والتنبيه                           | Entities, Wallets, Finance, Portal                     |
+| S-04     | حي قيد المراجعة       | PENDING_REVIEW                    | Founder حي، أعضاء انتظار               | حي PENDING_REVIEW             | مشاريع حي                | BOARD                             | interested                                | لا توجد أو pending                             | لا                     | لا                               | لا                          | logs إنشاء وانتظار                             | Entities, Entity Detail, Empty State                   |
+| S-05     | حملة علاج مؤقتة       | انتهاء حملة وREAD_ONLY            | مستفيد، داعمون، مدقق                   | Campaign READ_ONLY بعد انتهاء | علاج حالة                | COMMITTEE + DONATION_ONLY         | supporter/active سابق                     | case donations                                 | قرار إغلاق             | صرف علاج منفذ                    | اعتراض خصوصية               | audit إغلاق                                    | Campaign, Wallet, Auditor                              |
+| S-06     | قبيلة/صندوق واسع      | وفاة/وقف/تبرع                     | مؤسس، لجنة، أعضاء                      | قبيلة ACTIVE                  | وفاة، وقف قديم           | DONATION_ONLY + COMMITTEE         | active/supporter                          | مكتملة ومتأخرة                                 | قرار دعم وفاة          | executed/rejected                | اعتراض رسمي                 | timeline قرار/اعتراض                           | Decisions, Disputes, Auditor                           |
+| S-07     | كيان فارغ جديد        | first-day founder                 | مؤسس فقط                               | عائلة/مجتمع ACTIVE بلا محافظ  | لا شيء                   | لا شيء                            | لا شيء                                    | لا شيء                                         | لا شيء                 | لا شيء                           | لا                          | create only                                    | New Entity, Dashboard, Empty states                    |
+| S-08     | تعدد كيانات           | فرق الالتزامات والحقوق            | مستخدم في عائلة/عمارة/حي بأدوار مختلفة | 3 كيانات                      | محافظ مختلفة             | مسارات مختلفة                     | active/conditional/supporter              | due per entity                                 | vote in one not other  | لا                               | لا                          | login/read access                              | Entities, Dashboard, Portal                            |
+| S-09     | محفظة متعددة المسارات | عزل المال والقرار والحقوق         | Admin، members لكل مسار                | عائلة ACTIVE                  | طوارئ واحدة              | لجنة، تصويت، داعم فقط             | memberships per path                      | balances per path                              | قرارات منفصلة          | صرف مسار واحد                    | اعتراض على مسار             | audit shows path id                            | Wallet Detail, Path Detail                             |
+| S-10     | نزاع كامل timeline    | audit readable                    | عضو، Admin، Auditor                    | أي كيان ACTIVE                | محفظة ذات قرار           | مسار قرار                         | active                                    | لا يلزم                                        | قرار متنازع            | صرف مرتبط                        | dispute open/under/resolved | full before/after                              | Disputes, Auditor                                      |
+| S-11     | عضو مشروط             | Conditional rights                | عضو مشروط، Admin                       | عائلة ACTIVE                  | علاج                     | COMMITTEE                         | CONDITIONAL                               | pending/none                                   | لا يصوت حتى active     | لا                               | appeal optional             | audit status changes                           | Portal, Subscriptions                                  |
+| S-12     | داعم فقط              | دفع بلا استفادة                   | Supporter only                         | حملة/عائلة                    | علاج/تبرع                | DONATION_ONLY                     | SUPPORTER_ONLY                            | paid donations                                 | لا تصويت               | لا استفادة                       | لا                          | audit payments                                 | Portal, Wallet                                         |
+| S-13     | عضو موقوف/Exited      | حالات عضوية صعبة                  | suspended/exited members               | عائلة/عمارة                   | طوارئ                    | BOARD                             | SUSPENDED/EXITED                          | overdue/cancelled                              | no vote                | no benefits                      | appeal possible             | audit suspension                               | Dashboard, Portal                                      |
+| S-14     | علاقات كيانات/محافظ   | دعم ورقابة دون تصويت              | كيان داعم، كيان مستفيد                 | عائلة + حملة                  | مشتركة أو دعم            | oversight only                    | supporter                                 | entity support                                 | decision support       | transfer/support                 | dispute possible            | relationship audit                             | Relationships, Finance                                 |
 
 #### Action P2-01 - إعادة هيكلة seed إلى قصص مسماة
 
@@ -429,6 +430,10 @@
 16. **Documentation:** نعم.
 17. **المخاطر:** يبقى المنتج غير مفهوم للمستخدم العادي.
 18. **يعتمد على:** P2 stories.
+19. **Status:** Verified.
+20. **Owner:** Codex.
+21. **Verification Evidence:** أضيف Relationship Summary في Dashboard, Portal, Entities, Entity Detail, Wallet Detail, Path Detail, Subscriptions, Decisions, Disbursement Requests. التحقق النهائي: backend/frontend build، backend tests 25/25 suites و93/93 tests، frontend Vitest 2 files و6 tests، `seed:validate:docker` passed، و`npm run test:ux:roles` passed 18/18.
+22. **Re-test Date:** 2026-06-29.
 
 #### Action P3-02 - Dashboard operational grouping
 
@@ -499,15 +504,15 @@
 
 هذه الصفوف Subtasks تفصيلية تابعة لمهمة Backlog الرسمية `BLK-P4-001`. لا تغني عن شروط القبول في الـ Backlog، لكنها تمنع ضياع الملاحظات الصغيرة داخل الحوكمة.
 
-| Subtask | الأولوية | المطلوب | الملفات | القبول | الاختبار | يعتمد على |
-|---|---|---|---|---|---|---|
-| P4-01 Human governance labels | Medium | تحويل BOARD/COMMITTEE وغيرها إلى جمل تشغيلية | locales, Path Detail, Decisions | لا يظهر enum خام كشرح وحيد | UI assertions | P3-01 |
-| P4-02 Conditional participation workflow | High | عرض الشرط، المراجع، الأثر، وخطوة Active | subscriptions, memberships, backend eligibility | عضو conditional يرى ما يحق/لا يحق له | Seed + Playwright | P2-11 |
-| P4-03 Eligibility engine surface | High | عرض أهلية التصويت والاستفادة وسبب عدم الأهلية | decisions, portal, path detail | كل زر تصويت/استفادة يشرح السبب | API + UI | P3-04 |
-| P4-04 Decision Effect Panel | High | قبل/بعد القرار، من يتأثر، ما الإجراء التالي | decisions page, decision API | كل قرار له أثر مفهوم | Playwright | P2 stories |
-| P4-05 Contextual appeals/disputes | Medium | أزرار اعتراض/نزاع داخل القرار/الصرف | decisions, disbursement, disputes | نموذج يملأ السياق تلقائياً | UI + API | P6 timeline |
-| P4-06 Path matrix isolation | High | مصفوفة مسارات داخل المحفظة: رصيد/مشتركين/قرارات/حقوق | wallet detail | عزل المال والقرار واضح | UI + API | P2-09 |
-| P4-07 Prevent cross-path decision use | Critical | لا يستخدم قرار مسار لصرف مسار آخر | backend disbursement/ledger | 400 برسالة عربية | service/e2e | P0-01 |
+| Subtask                                  | الأولوية | المطلوب                                              | الملفات                                         | القبول                               | الاختبار          | يعتمد على   |
+| ---------------------------------------- | -------- | ---------------------------------------------------- | ----------------------------------------------- | ------------------------------------ | ----------------- | ----------- |
+| P4-01 Human governance labels            | Medium   | تحويل BOARD/COMMITTEE وغيرها إلى جمل تشغيلية         | locales, Path Detail, Decisions                 | لا يظهر enum خام كشرح وحيد           | UI assertions     | P3-01       |
+| P4-02 Conditional participation workflow | High     | عرض الشرط، المراجع، الأثر، وخطوة Active              | subscriptions, memberships, backend eligibility | عضو conditional يرى ما يحق/لا يحق له | Seed + Playwright | P2-11       |
+| P4-03 Eligibility engine surface         | High     | عرض أهلية التصويت والاستفادة وسبب عدم الأهلية        | decisions, portal, path detail                  | كل زر تصويت/استفادة يشرح السبب       | API + UI          | P3-04       |
+| P4-04 Decision Effect Panel              | High     | قبل/بعد القرار، من يتأثر، ما الإجراء التالي          | decisions page, decision API                    | كل قرار له أثر مفهوم                 | Playwright        | P2 stories  |
+| P4-05 Contextual appeals/disputes        | Medium   | أزرار اعتراض/نزاع داخل القرار/الصرف                  | decisions, disbursement, disputes               | نموذج يملأ السياق تلقائياً           | UI + API          | P6 timeline |
+| P4-06 Path matrix isolation              | High     | مصفوفة مسارات داخل المحفظة: رصيد/مشتركين/قرارات/حقوق | wallet detail                                   | عزل المال والقرار واضح               | UI + API          | P2-09       |
+| P4-07 Prevent cross-path decision use    | Critical | لا يستخدم قرار مسار لصرف مسار آخر                    | backend disbursement/ledger                     | 400 برسالة عربية                     | service/e2e       | P0-01       |
 
 ---
 
@@ -515,15 +520,17 @@
 
 هذه الصفوف Subtasks تفصيلية تابعة لمهمة Backlog الرسمية `BLK-P5-001`.
 
-| Subtask | الأولوية | المطلوب | الملفات | Acceptance Criteria | طريقة الاختبار |
-|---|---|---|---|---|---|
-| P5-01 Financial action preview | High | قبل أي اعتماد/تنفيذ مالي اعرض المصدر والهدف والقرار والأثر | finance, disbursements, review center | المستخدم يرى الحسابات والأثر قبل الحفظ | Playwright + API |
-| P5-02 Balance explanation report | Medium | لماذا تغير الرصيد؟ العملية، القرار، من اعتمد | finance, ledger summary, auditor | كل حركة مالية لها سبب ورابط | API + UI |
-| P5-03 Entity/wallet/path balance clarity | High | عرض الرصيد على المستويات الثلاثة دون خلط | wallets, wallet detail, path detail | لا يختلط رصيد المسار بالمحفظة | UI tests |
-| P5-04 Negative/double-click guards | High | منع الدفعات السالبة، الضغط المزدوج، التنفيذ المكرر | backend DTOs, buttons | double click لا ينشئ قيدين | unit + Playwright |
-| P5-05 Over-balance disbursement test | High | صرف أكبر من الرصيد يفشل بوضوح | disbursement service | رسالة صحيحة ولا transaction | service/e2e |
-| P5-06 Refresh/back after financial action | Medium | تحديث الصفحة بعد إجراء مهم لا يعيد التنفيذ ولا يضيع الحالة | frontend pages | الحالة مستقرة بعد refresh/back | Playwright |
-| P5-07 No entity/path mixing suite | High | اختبارات عدم خلط كيان/محفظة/مسار | backend e2e, Playwright | member لا يرى أو ينفذ خارج النطاق | e2e |
+| Subtask                                   | الأولوية | المطلوب                                                    | الملفات                               | Acceptance Criteria                    | طريقة الاختبار    |
+| ----------------------------------------- | -------- | ---------------------------------------------------------- | ------------------------------------- | -------------------------------------- | ----------------- |
+| P5-01 Financial action preview            | High     | قبل أي اعتماد/تنفيذ مالي اعرض المصدر والهدف والقرار والأثر | finance, disbursements, review center | المستخدم يرى الحسابات والأثر قبل الحفظ | Playwright + API  |
+| P5-02 Balance explanation report          | Medium   | لماذا تغير الرصيد؟ العملية، القرار، من اعتمد               | finance, ledger summary, auditor      | كل حركة مالية لها سبب ورابط            | API + UI          |
+| P5-03 Entity/wallet/path balance clarity  | High     | عرض الرصيد على المستويات الثلاثة دون خلط                   | wallets, wallet detail, path detail   | لا يختلط رصيد المسار بالمحفظة          | UI tests          |
+| P5-04 Negative/double-click guards        | High     | منع الدفعات السالبة، الضغط المزدوج، التنفيذ المكرر         | backend DTOs, buttons                 | double click لا ينشئ قيدين             | unit + Playwright |
+| P5-05 Over-balance disbursement test      | High     | صرف أكبر من الرصيد يفشل بوضوح                              | disbursement service                  | رسالة صحيحة ولا transaction            | service/e2e       |
+| P5-06 Refresh/back after financial action | Medium   | تحديث الصفحة بعد إجراء مهم لا يعيد التنفيذ ولا يضيع الحالة | frontend pages                        | الحالة مستقرة بعد refresh/back         | Playwright        |
+| P5-07 No entity/path mixing suite         | High     | اختبارات عدم خلط كيان/محفظة/مسار                           | backend e2e, Playwright               | member لا يرى أو ينفذ خارج النطاق      | e2e               |
+
+**Phase 5 status:** Verified. اكتملت معاينات الأثر المالي في الصرف وFinance، وتم إصلاح ترتيب فحص القرار قبل الرصيد، وإضافة Balance Explanation، ومنع 403 غير المفيد في Wallet Detail للأدوار غير الإدارية. التحقق النهائي: `ledger.service.spec.ts`, backend full tests، frontend build/Vitest، `seed:validate:docker`, و`npm run test:ux:roles` passed 18/18.
 
 ---
 
@@ -531,18 +538,18 @@
 
 #### متطلبات Audit Timeline
 
-| المتطلب | التفاصيل | المصدر |
-|---|---|---|
-| Actor | اسم الشخص/الدور لا `personId` فقط | F-047 |
-| Context | كيان/محفظة/مسار/طلب/قرار | F-022, F-056 |
-| Before/After | قيمة قبل وبعد بشكل مفهوم | F-047 |
-| Effect | ماذا تغير عملياً؟ | F-043, F-053 |
-| Linked records | روابط للقرار/الصرف/الاعتراض/النزاع/المستند | F-047 |
-| Failure events | failed auth, validation failures, failed disbursement execution | F-056 |
-| Notifications | تم الإرسال/فشل الإرسال والمستلم | F-045, F-057 |
-| Role changes | تغيير دور أو حالة عضوية | F-057 |
-| Filters | user, entity, type, date, severity | F-047 |
-| Export | تصدير تقرير تدقيق | F-047 |
+| المتطلب        | التفاصيل                                                        | المصدر       |
+| -------------- | --------------------------------------------------------------- | ------------ |
+| Actor          | اسم الشخص/الدور لا `personId` فقط                               | F-047        |
+| Context        | كيان/محفظة/مسار/طلب/قرار                                        | F-022, F-056 |
+| Before/After   | قيمة قبل وبعد بشكل مفهوم                                        | F-047        |
+| Effect         | ماذا تغير عملياً؟                                               | F-043, F-053 |
+| Linked records | روابط للقرار/الصرف/الاعتراض/النزاع/المستند                      | F-047        |
+| Failure events | failed auth, validation failures, failed disbursement execution | F-056        |
+| Notifications  | تم الإرسال/فشل الإرسال والمستلم                                 | F-045, F-057 |
+| Role changes   | تغيير دور أو حالة عضوية                                         | F-057        |
+| Filters        | user, entity, type, date, severity                              | F-047        |
+| Export         | تصدير تقرير تدقيق                                               | F-047        |
 
 #### Action P6-01 - Audit Timeline API
 
@@ -564,6 +571,10 @@
 16. **Documentation:** نعم.
 17. **المخاطر:** سجل لا يفيد في النزاع.
 18. **يعتمد على:** P0 audit events.
+19. **Status:** Verified.
+20. **Owner:** Codex.
+21. **Verification Evidence:** `backend/src/auditor/auditor.service.ts` يرجع presenter غني لكل AuditLog: actor, title, context, effect, severity, linkedRecords, changes. أضيف تسجيل failed auth وledger validation وnotification dispatch/failure، وربط النزاعات والاعتراضات بالسياق. التحقق النهائي: auditor/auth/ledger/notifications/appeals specs، backend full tests، frontend build، وrole audit 18/18.
+22. **Re-test Date:** 2026-06-29.
 
 #### Action P6-02 - Auditor Timeline UI
 
@@ -585,111 +596,117 @@
 16. **Documentation:** نعم.
 17. **المخاطر:** تجربة المدقق شكلية.
 18. **يعتمد على:** P6-01.
+19. **Status:** Verified.
+20. **Owner:** Codex.
+21. **Verification Evidence:** تبويب Audit Logs في `frontend/src/app/(main)/auditor/page.tsx` أصبح timeline ببطاقات تعرض العنوان، المنفذ، السياق، الأثر، severity، linked records، وbefore/after مختصر، مع CSV export. `npm run test:ux:roles` مر 18/18، 0 issues، summary في `%TEMP%\stgp-ux-role-audit-2026-06-28T17-16-53-555Z\summary.json`.
+22. **Re-test Date:** 2026-06-29.
 
 ---
 
 ### Phase 7 - تحسين الواجهات صفحة بصفحة
 
-| الواجهة | المشكلة الحالية | المطلوب تحسينه | نصوص/رسائل مقترحة | أزرار مطلوبة | Empty states | نجاح/فشل | اختبارات | علاقة الحقوق |
-|---|---|---|---|---|---|---|---|---|
-| Dashboard | كثافة، لا يشرح السبب والأثر | تجميع حسب كيان/محفظة/مسار | "ظهر هذا لأنك مشترك في..." | ادفع، متابعة، عرض السبب | لا مستحقات: "لا توجد التزامات حالية" | banner 429/403/500 | member/founder/mobile | يعرض الالتزامات |
-| Entities | بطاقات تعريفية فقط | بطاقة operational | "عليك X في هذا الكيان" | متابعة، إنشاء كيان | كيان فارغ: setup wizard | لا صلاحية/معلق | multi-entity | يفرق الحقوق لكل كيان |
-| Entity Detail | لا relationship map | خريطة كيان/محفظة/مسار | "هذه المحافظ التي تخصك" | إدارة، دعوة، إنشاء محفظة | لا محافظ: "ابدأ بأول محفظة" | حفظ/فشل | founder/member | يشرح النطاق |
-| Entity Settings | مصطلحات ثقيلة | أثر الإعداد قبل الحفظ | "هذا يعني أن..." | معاينة الأثر، حفظ | لا سياسات | نجاح مع ما تغير | admin/founder | يوضح التصويت والاعتراض |
-| Members | لا يربط role بالديون والحقوق | بطاقة عضو شاملة | "له حق استفادة/لا" | تغيير دور، تعليق، عرض الاشتراكات | لا أعضاء | role change success/fail | admin/auditor | يوضح أهلية العضو |
-| Wallets | SEPARABLE/SHARED غير واضح | لغة بشرية ونوع منفعة | "مصلحة فردية" / "خدمة مشتركة" | فتح، إنشاء | لا محافظ | 403/empty | member/founder | يشرح الاستفادة |
-| Wallet Detail | لا matrix كافية | جدول مسارات | "رصيد هذا المسار مستقل" | فتح مسار، إنشاء مسار | لا مسارات | فشل API banner | multi-path | عزل الحقوق |
-| Path Detail | enum غير بشري | شرح قواعد المسار | "هذا المسار يحتاج موافقة..." | تصويت، طلب صرف، اعتراض | لا بنود صرف | لا أهلية للتصويت | committee/member | يشرح السبب |
-| Portal/Subscriptions | لا يوضح الفرق بين دفع/اشتراك/استفادة | بطاقة اشتراك موحدة | "أنت داعم فقط" | دفع، اعتراض، تفاصيل | لا اشتراكات | فشل دفع/نجاح | member states | جوهر الحقوق |
-| Finance | أرقام دون أثر كاف | source/target/decision preview | "سيخصم من..." | اعتماد، رفض، تصدير | لا دفعات | منع double click | treasurer | أثر مالي |
-| Review Center | اعتماد صرف بلا قرار | قرار إلزامي/قبول أولي | "يتطلب قرار صرف" | إنشاء/ربط قرار، قبول أولي | لا طلبات | رفض سبب واضح | admin/founder | يحمي الحوكمة |
-| Disbursement Requests | قرار اختياري | gate واضح | "اختر قرار صرف معتمد" | فتح قرار، اعتماد، تنفيذ | لا طلبات | تنفيذ/فشل مفسر | e2e | صرف مرتبط بحق |
-| Decisions | أثر القرار غير واضح | Decision Effect Panel | "إذا اعتمد، سيحدث..." | تصويت، اعتراض | لا قرارات | vote duplicate | member/admin | أهلية التصويت |
-| Disputes | صفحة عامة لا سياقية | فتح من قرار/صرف | "تعترض على القرار..." | فتح نزاع، رد، حل | لا نزاعات | timeline status | member/admin/auditor | حق الاعتراض |
-| Auditor | raw log | timeline/filter/export | "من فعل ماذا" | فلترة، تصدير | لا أحداث | API fail banner | auditor | رقابة |
-| Notifications | لا matrix مثبتة | event-recipient clarity | "تم اعتماد طلبك" | فتح السجل | لا إشعارات | read/fail | all roles | يوجه المستخدم |
-| Search | يحتاج استمرار فلترة الصلاحيات | نتائج بصلاحية وسياق | "ضمن كياناتك" | فتح النتيجة | لا نتائج | search API failure | permission tests | يمنع التسريب |
+| الواجهة               | المشكلة الحالية                      | المطلوب تحسينه                 | نصوص/رسائل مقترحة             | أزرار مطلوبة                     | Empty states                         | نجاح/فشل                 | اختبارات              | علاقة الحقوق           |
+| --------------------- | ------------------------------------ | ------------------------------ | ----------------------------- | -------------------------------- | ------------------------------------ | ------------------------ | --------------------- | ---------------------- |
+| Dashboard             | كثافة، لا يشرح السبب والأثر          | تجميع حسب كيان/محفظة/مسار      | "ظهر هذا لأنك مشترك في..."    | ادفع، متابعة، عرض السبب          | لا مستحقات: "لا توجد التزامات حالية" | banner 429/403/500       | member/founder/mobile | يعرض الالتزامات        |
+| Entities              | بطاقات تعريفية فقط                   | بطاقة operational              | "عليك X في هذا الكيان"        | متابعة، إنشاء كيان               | كيان فارغ: setup wizard              | لا صلاحية/معلق           | multi-entity          | يفرق الحقوق لكل كيان   |
+| Entity Detail         | لا relationship map                  | خريطة كيان/محفظة/مسار          | "هذه المحافظ التي تخصك"       | إدارة، دعوة، إنشاء محفظة         | لا محافظ: "ابدأ بأول محفظة"          | حفظ/فشل                  | founder/member        | يشرح النطاق            |
+| Entity Settings       | مصطلحات ثقيلة                        | أثر الإعداد قبل الحفظ          | "هذا يعني أن..."              | معاينة الأثر، حفظ                | لا سياسات                            | نجاح مع ما تغير          | admin/founder         | يوضح التصويت والاعتراض |
+| Members               | لا يربط role بالديون والحقوق         | بطاقة عضو شاملة                | "له حق استفادة/لا"            | تغيير دور، تعليق، عرض الاشتراكات | لا أعضاء                             | role change success/fail | admin/auditor         | يوضح أهلية العضو       |
+| Wallets               | SEPARABLE/SHARED غير واضح            | لغة بشرية ونوع منفعة           | "مصلحة فردية" / "خدمة مشتركة" | فتح، إنشاء                       | لا محافظ                             | 403/empty                | member/founder        | يشرح الاستفادة         |
+| Wallet Detail         | لا matrix كافية                      | جدول مسارات                    | "رصيد هذا المسار مستقل"       | فتح مسار، إنشاء مسار             | لا مسارات                            | فشل API banner           | multi-path            | عزل الحقوق             |
+| Path Detail           | enum غير بشري                        | شرح قواعد المسار               | "هذا المسار يحتاج موافقة..."  | تصويت، طلب صرف، اعتراض           | لا بنود صرف                          | لا أهلية للتصويت         | committee/member      | يشرح السبب             |
+| Portal/Subscriptions  | لا يوضح الفرق بين دفع/اشتراك/استفادة | بطاقة اشتراك موحدة             | "أنت داعم فقط"                | دفع، اعتراض، تفاصيل              | لا اشتراكات                          | فشل دفع/نجاح             | member states         | جوهر الحقوق            |
+| Finance               | أرقام دون أثر كاف                    | source/target/decision preview | "سيخصم من..."                 | اعتماد، رفض، تصدير               | لا دفعات                             | منع double click         | treasurer             | أثر مالي               |
+| Review Center         | اعتماد صرف بلا قرار                  | قرار إلزامي/قبول أولي          | "يتطلب قرار صرف"              | إنشاء/ربط قرار، قبول أولي        | لا طلبات                             | رفض سبب واضح             | admin/founder         | يحمي الحوكمة           |
+| Disbursement Requests | قرار اختياري                         | gate واضح                      | "اختر قرار صرف معتمد"         | فتح قرار، اعتماد، تنفيذ          | لا طلبات                             | تنفيذ/فشل مفسر           | e2e                   | صرف مرتبط بحق          |
+| Decisions             | أثر القرار غير واضح                  | Decision Effect Panel          | "إذا اعتمد، سيحدث..."         | تصويت، اعتراض                    | لا قرارات                            | vote duplicate           | member/admin          | أهلية التصويت          |
+| Disputes              | صفحة عامة لا سياقية                  | فتح من قرار/صرف                | "تعترض على القرار..."         | فتح نزاع، رد، حل                 | لا نزاعات                            | timeline status          | member/admin/auditor  | حق الاعتراض            |
+| Auditor               | raw log                              | timeline/filter/export         | "من فعل ماذا"                 | فلترة، تصدير                     | لا أحداث                             | API fail banner          | auditor               | رقابة                  |
+| Notifications         | لا matrix مثبتة                      | event-recipient clarity        | "تم اعتماد طلبك"              | فتح السجل                        | لا إشعارات                           | read/fail                | all roles             | يوجه المستخدم          |
+| Search                | يحتاج استمرار فلترة الصلاحيات        | نتائج بصلاحية وسياق            | "ضمن كياناتك"                 | فتح النتيجة                      | لا نتائج                             | search API failure       | permission tests      | يمنع التسريب           |
 
 ---
 
 ### Phase 8 - المصطلحات والرسائل
 
-| المصطلح | يبقى؟ | الشرح المقترح | أين يظهر؟ | Tooltip؟ | Empty State؟ | مثال؟ |
-|---|---|---|---|---|---|---|
-| كيان | نعم | التجمع الأساسي مثل عائلة أو عمارة أو حي | Entities, Entity Detail | نعم | نعم | "صندوق عائلة الهاشمي" |
-| محفظة | نعم | وعاء مالي له هدف محدد داخل الكيان | Wallets | نعم | نعم | "محفظة الطوارئ" |
-| مسار | نعم مع شرح | طريقة الحوكمة والحقوق داخل المحفظة | Path Detail, Wallet Detail | نعم | نعم | "مسار لجنة العلاج" |
-| اشتراك | نعم | التزام دوري يعطي حقوقاً محددة | Portal | نعم | نعم | "اشتراك شهري 250" |
-| مساهمة | نعم | دفع لمشروع أو خدمة قد لا يعطي نفس حقوق الاشتراك | Finance/Portal | نعم | لا | "مساهمة مصعد" |
-| طلب صرف | نعم | طلب استخدام مال من مسار محدد | Disbursement | نعم | نعم | "طلب علاج عاجل" |
-| قرار | نعم | موافقة حوكمة على إجراء له أثر | Decisions | نعم | نعم | "قرار صرف" |
-| تصويت | نعم | مشاركة مؤهلة في قرار | Decisions | نعم | لا | "صوتك مطلوب" |
-| اعتراض | نعم | طلب مراجعة قرار يمس حقك | Decisions/Appeals | نعم | نعم | "اعترض على الرفض" |
-| نزاع | نعم | خلاف رسمي يحتاج تسلسل مراجعة | Disputes | نعم | نعم | "نزاع مالي" |
-| تدقيق | نعم | سجل رقابي للأحداث والتغييرات | Auditor | نعم | نعم | "من فعل ماذا" |
-| نطاق استفادة | نعم مع شرح قوي | من يحق له الاستفادة من المحفظة أو المسار | Portal/Wallet | نعم | لا | "للمشتركين فقط" |
-| داعم فقط | نعم | يدفع للدعم ولا يملك حق استفادة تلقائي | Portal | نعم | نعم | "أنت داعم فقط" |
-| عضو مشروط | نعم | لم يصبح Active حتى تحقق شرطه | Portal/Subscriptions | نعم | نعم | "بانتظار مراجعة شرطك" |
-| عضو نشط | نعم | يملك حقوقه ويلتزم بدفعه | Members/Portal | نعم | لا | "نشط" |
-| عضو موقوف | نعم | حقوقه محدودة بسبب حالة عضوية أو تأخر | Members/Portal | نعم | نعم | "موقوف بسبب متأخرات" |
+| المصطلح      | يبقى؟          | الشرح المقترح                                   | أين يظهر؟                  | Tooltip؟ | Empty State؟ | مثال؟                 |
+| ------------ | -------------- | ----------------------------------------------- | -------------------------- | -------- | ------------ | --------------------- |
+| كيان         | نعم            | التجمع الأساسي مثل عائلة أو عمارة أو حي         | Entities, Entity Detail    | نعم      | نعم          | "صندوق عائلة الهاشمي" |
+| محفظة        | نعم            | وعاء مالي له هدف محدد داخل الكيان               | Wallets                    | نعم      | نعم          | "محفظة الطوارئ"       |
+| مسار         | نعم مع شرح     | طريقة الحوكمة والحقوق داخل المحفظة              | Path Detail, Wallet Detail | نعم      | نعم          | "مسار لجنة العلاج"    |
+| اشتراك       | نعم            | التزام دوري يعطي حقوقاً محددة                   | Portal                     | نعم      | نعم          | "اشتراك شهري 250"     |
+| مساهمة       | نعم            | دفع لمشروع أو خدمة قد لا يعطي نفس حقوق الاشتراك | Finance/Portal             | نعم      | لا           | "مساهمة مصعد"         |
+| طلب صرف      | نعم            | طلب استخدام مال من مسار محدد                    | Disbursement               | نعم      | نعم          | "طلب علاج عاجل"       |
+| قرار         | نعم            | موافقة حوكمة على إجراء له أثر                   | Decisions                  | نعم      | نعم          | "قرار صرف"            |
+| تصويت        | نعم            | مشاركة مؤهلة في قرار                            | Decisions                  | نعم      | لا           | "صوتك مطلوب"          |
+| اعتراض       | نعم            | طلب مراجعة قرار يمس حقك                         | Decisions/Appeals          | نعم      | نعم          | "اعترض على الرفض"     |
+| نزاع         | نعم            | خلاف رسمي يحتاج تسلسل مراجعة                    | Disputes                   | نعم      | نعم          | "نزاع مالي"           |
+| تدقيق        | نعم            | سجل رقابي للأحداث والتغييرات                    | Auditor                    | نعم      | نعم          | "من فعل ماذا"         |
+| نطاق استفادة | نعم مع شرح قوي | من يحق له الاستفادة من المحفظة أو المسار        | Portal/Wallet              | نعم      | لا           | "للمشتركين فقط"       |
+| داعم فقط     | نعم            | يدفع للدعم ولا يملك حق استفادة تلقائي           | Portal                     | نعم      | نعم          | "أنت داعم فقط"        |
+| عضو مشروط    | نعم            | لم يصبح Active حتى تحقق شرطه                    | Portal/Subscriptions       | نعم      | نعم          | "بانتظار مراجعة شرطك" |
+| عضو نشط      | نعم            | يملك حقوقه ويلتزم بدفعه                         | Members/Portal             | نعم      | لا           | "نشط"                 |
+| عضو موقوف    | نعم            | حقوقه محدودة بسبب حالة عضوية أو تأخر            | Members/Portal             | نعم      | نعم          | "موقوف بسبب متأخرات"  |
 
 #### رسائل أخطاء يجب تعريبها
 
-| الحالة | الرسالة التقنية الحالية/المحتملة | الرسالة العربية المطلوبة |
-|---|---|---|
-| اسم محفظة قصير | `name must be longer than or equal to 2 characters` | "اكتب اسماً واضحاً للمحفظة من حرفين على الأقل." |
-| صرف بلا قرار | BadRequest عام | "لا يمكن تنفيذ الصرف قبل ربطه بقرار صرف معتمد." |
-| رصيد غير كاف | رسالة قد تكون مضللة | "الرصيد المتاح في هذا المسار لا يغطي مبلغ الصرف." |
-| 429 | Failed to load resource | "تم إرسال طلبات كثيرة بسرعة. انتظر لحظة ثم حاول مرة أخرى." |
-| 403 | Forbidden | "لا تملك صلاحية تنفيذ هذا الإجراء في هذا الكيان أو المسار." |
-| 500 | Internal error | "حدث خطأ غير متوقع. لم يتم حفظ الإجراء. حاول لاحقاً أو راجع المسؤول." |
+| الحالة         | الرسالة التقنية الحالية/المحتملة                    | الرسالة العربية المطلوبة                                              |
+| -------------- | --------------------------------------------------- | --------------------------------------------------------------------- |
+| اسم محفظة قصير | `name must be longer than or equal to 2 characters` | "اكتب اسماً واضحاً للمحفظة من حرفين على الأقل."                       |
+| صرف بلا قرار   | BadRequest عام                                      | "لا يمكن تنفيذ الصرف قبل ربطه بقرار صرف معتمد."                       |
+| رصيد غير كاف   | رسالة قد تكون مضللة                                 | "الرصيد المتاح في هذا المسار لا يغطي مبلغ الصرف."                     |
+| 429            | Failed to load resource                             | "تم إرسال طلبات كثيرة بسرعة. انتظر لحظة ثم حاول مرة أخرى."            |
+| 403            | Forbidden                                           | "لا تملك صلاحية تنفيذ هذا الإجراء في هذا الكيان أو المسار."           |
+| 500            | Internal error                                      | "حدث خطأ غير متوقع. لم يتم حفظ الإجراء. حاول لاحقاً أو راجع المسؤول." |
+
+**Phase 8 status:** Verified. تم تنفيذ طبقة مركزية في `frontend/src/lib/api.ts`: `ApiError` يحتفظ بـ `status/originalMessage` و`humanizeApiError` يترجم رسائل validation الشائعة و401/403/404/429/500 إلى رسائل مفهومة، وتم توسيع نصوص المصطلحات في locales وربطها بالواجهات الأساسية. التحقق النهائي: frontend Vitest، frontend build، Docker frontend، وrole audit 18/18.
 
 ---
 
 ### Phase 9 - الحالات السلبية والخطرة كاختبارات
 
-| الحالة | Expected behavior | Actual معروف من التقرير | نوع الاختبار | Banner؟ | Audit؟ | منع؟ | تراجع؟ |
-|---|---|---|---|---|---|---|---|
-| عضو عادي يدخل إدارة | 403/صفحة منع واضحة | عينات API جيدة | Playwright + API | نعم | نعم للفشل المهم | نعم | لا |
-| مدقق يعدل بيانات | 403 | عينات API جيدة | API/e2e | نعم | نعم | نعم | لا |
-| صرف أكبر من الرصيد | 400 برسالة رصيد صحيحة | يحتاج اختبار | service/e2e | نعم | نعم | نعم | لا |
-| محفظة بلا اسم | 400 عربي | حالياً إنجليزي | API/UI | نعم | لا غالباً | نعم | نعم |
-| دفعة سالبة | 400 عربي | غير معروف | API/unit | نعم | نعم إذا مالي | نعم | لا |
-| حذف كيان له بيانات | رفض أو soft closure | غير معروف | API/e2e | نعم | نعم | نعم | workflow |
-| تصويت مرتين | 409 عربي | يعمل | API/UI | نعم | نعم | نعم | لا |
-| اعتماد صرف بدون صلاحية | 403 | غير مكتمل بسبب 429 | API/UI | نعم | نعم | نعم | لا |
-| رؤية بيانات عضو آخر | 403/filtered | يحتاج فحص كامل | API/e2e | نعم | نعم | نعم | لا |
-| خلط أموال محفظتين | منع عبر ledger/path | يحتاج test | service/e2e | نعم | نعم | نعم | reversal فقط |
-| رابط مباشر بدون صلاحية | منع واضح | يحتاج 18/18 | Playwright | نعم | نعم | نعم | لا |
-| الجوال | لا overflow ولا controls مخفية | كان جيداً قبل 429 | Playwright mobile | نعم | لا | لا | لا |
-| تحديث بعد إجراء مالي | لا تكرار ولا فقد حالة | غير مختبر | Playwright | إن فشل | نعم | منع التكرار | لا |
-| رجوع للخلف بعد الحفظ | لا تنفيذ مكرر | غير مختبر | Playwright | إن فشل | نعم مالي | منع | لا |
-| ضغط مزدوج حفظ | idempotency/disabled button | غير مختبر | Playwright/unit | نعم | نعم مالي | منع | لا |
-| انقطاع اتصال | لا حفظ كاذب، retry واضح | غير مختبر | Playwright route abort | نعم | حسب الحدث | لا حفظ | retry |
-| نفس الحساب من جلستين | حالة متسقة | غير مختبر | e2e/browser contexts | نعم عند conflict | نعم مالي | منع التعارض | لا |
-| ظهور 429 | banner واضح/retry | صامت في لقطة | Playwright | نعم | لا غالباً | لا | retry |
-| ظهور 403 | منع مفهوم | بعض المسارات جيدة | Playwright/API | نعم | نعم للفشل الحساس | نعم | لا |
-| ظهور 500 | رسالة لا توحي بالحفظ | غير معروف | fault injection | نعم | نعم | لا حفظ | retry |
-| فشل API صامت | global banner | موجود كمشكلة | Playwright | نعم | لا | لا | retry |
+| الحالة                 | Expected behavior              | Actual معروف من التقرير | نوع الاختبار           | Banner؟          | Audit؟           | منع؟        | تراجع؟       |
+| ---------------------- | ------------------------------ | ----------------------- | ---------------------- | ---------------- | ---------------- | ----------- | ------------ |
+| عضو عادي يدخل إدارة    | 403/صفحة منع واضحة             | عينات API جيدة          | Playwright + API       | نعم              | نعم للفشل المهم  | نعم         | لا           |
+| مدقق يعدل بيانات       | 403                            | عينات API جيدة          | API/e2e                | نعم              | نعم              | نعم         | لا           |
+| صرف أكبر من الرصيد     | 400 برسالة رصيد صحيحة          | يحتاج اختبار            | service/e2e            | نعم              | نعم              | نعم         | لا           |
+| محفظة بلا اسم          | 400 عربي                       | حالياً إنجليزي          | API/UI                 | نعم              | لا غالباً        | نعم         | نعم          |
+| دفعة سالبة             | 400 عربي                       | غير معروف               | API/unit               | نعم              | نعم إذا مالي     | نعم         | لا           |
+| حذف كيان له بيانات     | رفض أو soft closure            | غير معروف               | API/e2e                | نعم              | نعم              | نعم         | workflow     |
+| تصويت مرتين            | 409 عربي                       | يعمل                    | API/UI                 | نعم              | نعم              | نعم         | لا           |
+| اعتماد صرف بدون صلاحية | 403                            | غير مكتمل بسبب 429      | API/UI                 | نعم              | نعم              | نعم         | لا           |
+| رؤية بيانات عضو آخر    | 403/filtered                   | يحتاج فحص كامل          | API/e2e                | نعم              | نعم              | نعم         | لا           |
+| خلط أموال محفظتين      | منع عبر ledger/path            | يحتاج test              | service/e2e            | نعم              | نعم              | نعم         | reversal فقط |
+| رابط مباشر بدون صلاحية | منع واضح                       | يحتاج 18/18             | Playwright             | نعم              | نعم              | نعم         | لا           |
+| الجوال                 | لا overflow ولا controls مخفية | كان جيداً قبل 429       | Playwright mobile      | نعم              | لا               | لا          | لا           |
+| تحديث بعد إجراء مالي   | لا تكرار ولا فقد حالة          | غير مختبر               | Playwright             | إن فشل           | نعم              | منع التكرار | لا           |
+| رجوع للخلف بعد الحفظ   | لا تنفيذ مكرر                  | غير مختبر               | Playwright             | إن فشل           | نعم مالي         | منع         | لا           |
+| ضغط مزدوج حفظ          | idempotency/disabled button    | غير مختبر               | Playwright/unit        | نعم              | نعم مالي         | منع         | لا           |
+| انقطاع اتصال           | لا حفظ كاذب، retry واضح        | غير مختبر               | Playwright route abort | نعم              | حسب الحدث        | لا حفظ      | retry        |
+| نفس الحساب من جلستين   | حالة متسقة                     | غير مختبر               | e2e/browser contexts   | نعم عند conflict | نعم مالي         | منع التعارض | لا           |
+| ظهور 429               | banner واضح/retry              | صامت في لقطة            | Playwright             | نعم              | لا غالباً        | لا          | retry        |
+| ظهور 403               | منع مفهوم                      | بعض المسارات جيدة       | Playwright/API         | نعم              | نعم للفشل الحساس | نعم         | لا           |
+| ظهور 500               | رسالة لا توحي بالحفظ           | غير معروف               | fault injection        | نعم              | نعم              | لا حفظ      | retry        |
+| فشل API صامت           | global banner                  | موجود كمشكلة            | Playwright             | نعم              | لا               | لا          | retry        |
 
 ---
 
 ### Phase 10 - التوثيق والتشغيل
 
-| Doc ID | الوثيقة | المحتوى المطلوب | الملفات المقترحة |
-|---|---|---|---|
-| D-01 | فلسفة المنتج | لماذا العلاقة عضو/كيان/محفظة/مسار هي الأساس | `Docs/01_Product/CollectiveTrustOS_Principles.md` |
-| D-02 | Entity/Wallet/Path | الفرق العملي مع أمثلة | `Docs/02_Domain/Entity_Wallet_Path.md` |
-| D-03 | Separable vs Shared | علاج فردي مقابل حارس/مصعد | `Docs/02_Domain/Benefit_Types.md` |
-| D-04 | Governance paths | BOARD/COMMITTEE/PUBLIC_VOTE... بلغة بشرية | `Docs/02_Domain/Governance_Paths.md` |
-| D-05 | Membership states | Active/Conditional/Supporter/Suspended/Exited | `Docs/02_Domain/Membership_States.md` |
-| D-06 | Disbursement lifecycle | Request -> Decision -> Approval -> Ledger | `Docs/03_Workflows/Disbursement_Lifecycle.md` |
-| D-07 | Seed stories | قصص seed والحسابات | `Docs/08_Production_Readiness/Seed_Stories.md` |
-| D-08 | Test operations | تشغيل seed validate وPlaywright 18/18 | `Docs/08_Production_Readiness/Test_Runbook.md` |
-| D-09 | DB identity | كيف تتأكد من قاعدة البيانات الصحيحة | `Docs/08_Production_Readiness/Database_Identity_Runbook.md` |
-| D-10 | Known limitations | ما تبقى بعد كل مرحلة | `Docs/08_Production_Readiness/Known_Limitations.md` |
-| D-11 | Test accounts | حسابات الاختبار والأدوار والقصص | `Docs/08_Production_Readiness/Test_Accounts.md` |
-| D-12 | Audit timeline | كيف يقرأ المدقق السجل | `Docs/03_Workflows/Audit_Timeline.md` |
+| Doc ID | الوثيقة                | المحتوى المطلوب                               | الملفات المقترحة                                            |
+| ------ | ---------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| D-01   | فلسفة المنتج           | لماذا العلاقة عضو/كيان/محفظة/مسار هي الأساس   | `Docs/01_Product/CollectiveTrustOS_Principles.md`           |
+| D-02   | Entity/Wallet/Path     | الفرق العملي مع أمثلة                         | `Docs/02_Domain/Entity_Wallet_Path.md`                      |
+| D-03   | Separable vs Shared    | علاج فردي مقابل حارس/مصعد                     | `Docs/02_Domain/Benefit_Types.md`                           |
+| D-04   | Governance paths       | BOARD/COMMITTEE/PUBLIC_VOTE... بلغة بشرية     | `Docs/02_Domain/Governance_Paths.md`                        |
+| D-05   | Membership states      | Active/Conditional/Supporter/Suspended/Exited | `Docs/02_Domain/Membership_States.md`                       |
+| D-06   | Disbursement lifecycle | Request -> Decision -> Approval -> Ledger     | `Docs/03_Workflows/Disbursement_Lifecycle.md`               |
+| D-07   | Seed stories           | قصص seed والحسابات                            | `Docs/08_Production_Readiness/Seed_Stories.md`              |
+| D-08   | Test operations        | تشغيل seed validate وPlaywright 18/18         | `Docs/08_Production_Readiness/Test_Runbook.md`              |
+| D-09   | DB identity            | كيف تتأكد من قاعدة البيانات الصحيحة           | `Docs/08_Production_Readiness/Database_Identity_Runbook.md` |
+| D-10   | Known limitations      | ما تبقى بعد كل مرحلة                          | `Docs/08_Production_Readiness/Known_Limitations.md`         |
+| D-11   | Test accounts          | حسابات الاختبار والأدوار والقصص               | `Docs/08_Production_Readiness/Test_Accounts.md`             |
+| D-12   | Audit timeline         | كيف يقرأ المدقق السجل                         | `Docs/03_Workflows/Audit_Timeline.md`                       |
 
 ---
 
@@ -699,59 +716,74 @@
 
 هذه ليست مشاكل، لكنها نقاط قوة وردت في التقرير ويجب تحويلها إلى حواجز منع regression:
 
-| Guardrail ID | القوة الحالية | كيف نحافظ عليها؟ | اختبار الحماية |
-|---|---|---|---|
-| G-001 | البيانات ليست سطحية وتغطي كيانات ومحافظ وقرارات ونزاعات | لا تقبل Seed reset يقلل التغطية دون تحديث validator | `seed:validate` story coverage |
-| G-002 | الدفتر المالي متوازن | أي عملية مالية تمر عبر `LedgerService` وتنتج entries متوازنة | financial-boundaries + ledger balance check |
-| G-003 | الأدوار الأساسية ممثلة | كل دور يبقى له حساب seed ومسار Playwright | `npm run test:ux:roles` |
-| G-004 | حالات الدفع متنوعة | validator يفشل إذا غابت paid/overdue/pending/waived أو record statuses | seed validator |
-| G-005 | Playwright audit موجود ومفيد | لا يلغى السكربت، بل يطور ويشغل بعد كل phase مؤثرة | CI/local QA runbook |
+| Guardrail ID | القوة الحالية                                           | كيف نحافظ عليها؟                                                       | اختبار الحماية                              |
+| ------------ | ------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------- |
+| G-001        | البيانات ليست سطحية وتغطي كيانات ومحافظ وقرارات ونزاعات | لا تقبل Seed reset يقلل التغطية دون تحديث validator                    | `seed:validate` story coverage              |
+| G-002        | الدفتر المالي متوازن                                    | أي عملية مالية تمر عبر `LedgerService` وتنتج entries متوازنة           | financial-boundaries + ledger balance check |
+| G-003        | الأدوار الأساسية ممثلة                                  | كل دور يبقى له حساب seed ومسار Playwright                              | `npm run test:ux:roles`                     |
+| G-004        | حالات الدفع متنوعة                                      | validator يفشل إذا غابت paid/overdue/pending/waived أو record statuses | seed validator                              |
+| G-005        | Playwright audit موجود ومفيد                            | لا يلغى السكربت، بل يطور ويشغل بعد كل phase مؤثرة                      | CI/local QA runbook                         |
 
 ### Task ID: BLK-P0-001
 
 ### Title:
+
 Disbursement final approval must require a valid governance decision.
 
 ### Priority:
+
 Critical
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+`approveRequest` يرفض بلا `decisionId` ويتحقق من `DISBURSE_FUNDS/CLOSED/APPROVED/path/item/amount`; `npm test -- disbursement-requests.service.spec.ts --runInBand`; backend build.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Bug / Finance / Governance / Backend
 
 ### Description:
+
 في `approveDisbursementRequest` لا تسمح بتحويل الطلب إلى `APPROVED` إلا بوجود `decisionId` مرتبط بقرار `DISBURSE_FUNDS` حالته `CLOSED` ونتيجته `APPROVED` ويطابق المسار والبند والمبلغ.
 
 ### Why it matters:
+
 هذا يغلق أكبر ثغرة منطق تشغيل في التقرير: المال لا يتحرك ولا يعتمد دون حوكمة.
 
 ### Scope:
+
 Service validation, DTO behavior, audit log on failure, tests.
 
 ### Out of scope:
+
 تصميم كامل لشاشة القرار، لكنه يعتمد عليه لاحقاً.
 
 ### Files likely affected:
+
 `backend/src/disbursement-requests/disbursement-requests.service.ts`, `dto/review-disbursement-request.dto.ts`, `decisions.service.ts`, tests.
 
 ### Dependencies:
+
 لا شيء.
 
 ### Acceptance Criteria:
+
 - approve بلا decisionId يرجع 400 عربي.
 - approve بقرار غير مغلق يرجع 400.
 - approve بقرار مرفوض يرجع 400.
@@ -759,831 +791,1088 @@ Service validation, DTO behavior, audit log on failure, tests.
 - approve بقرار صحيح يحول إلى `APPROVED`.
 
 ### Test Cases:
+
 Unit + e2e لكل الحالات أعلاه.
 
 ### Risk if skipped:
+
 حالة مالية خاطئة وثقة مكسورة.
 
 ### Task ID: BLK-P0-002
 
 ### Title:
+
 Introduce or enforce a non-final pre-approval state for disbursement review.
 
 ### Priority:
+
 Critical
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+تم اختيار مسار enforcement بدون enum جديد: أي `APPROVED` يجب أن يرتبط بقرار صرف مغلق ومعتمد ومطابق؛ تم تصحيح السجل العالق في DB الحالية؛ تعديل seed؛ `npm run seed:validate` مر بنجاح.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Feature / Backend / Database / Frontend
 
 ### Description:
+
 إذا احتاجت الإدارة إلى قبول أولي قبل القرار، أضف حالة `PRE_APPROVED` أو ما يعادلها. لا تستخدم `APPROVED` إلا للقرار النهائي المرتبط بقرار حوكمي.
 
 ### Why it matters:
+
 يحافظ على الفرق بين موافقة إدارية أولية واعتماد حوكمي نهائي.
 
 ### Scope:
+
 Prisma enum migration, service state machine, UI labels.
 
 ### Out of scope:
+
 تغيير كل نماذج الحوكمة.
 
 ### Files likely affected:
+
 `backend/prisma/schema.prisma`, migrations, `disbursement-requests.service.ts`, frontend review pages.
 
 ### Dependencies:
+
 BLK-P0-001.
 
 ### Acceptance Criteria:
+
 - لا توجد `APPROVED` بلا قرار.
 - `PRE_APPROVED` لا يسمح بالتنفيذ.
 - الواجهة تسمي الحالة "قبول أولي" لا "موافقة نهائية".
 
 ### Test Cases:
+
 Migration test, API state transition tests, Playwright.
 
 ### Risk if skipped:
+
 استمرار stuck approvals.
 
 ### Task ID: BLK-P0-003
 
 ### Title:
+
 Fix Decimal balance comparison and validation order in disbursement execution.
 
 ### Priority:
+
 Critical
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+فحص القرار يسبق فحص الرصيد؛ مقارنة الرصيد أصبحت عبر cents؛ اختبارات service + backend build.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Bug / Backend / Finance
 
 ### Description:
+
 نفذ فحص القرار قبل الرصيد، واستخدم مقارنة Decimal صحيحة. لا تعد رسالة رصيد غير كاف إذا كانت المشكلة قراراً مفقوداً.
 
 ### Why it matters:
+
 رسالة خاطئة في المال تجعل المستخدم لا يثق بالنظام.
 
 ### Scope:
+
 Execution path and tests.
 
 ### Out of scope:
+
 إعادة تصميم ledger.
 
 ### Files likely affected:
+
 `backend/src/disbursement-requests/disbursement-requests.service.ts`, `backend/src/ledger/ledger.service.ts`.
 
 ### Dependencies:
+
 BLK-P0-001.
 
 ### Acceptance Criteria:
+
 - طلب بلا قرار يفشل بسبب القرار.
 - طلب أكبر من الرصيد يفشل بسبب الرصيد.
 - طلب صحيح ينفذ.
 
 ### Test Cases:
+
 3 service tests + e2e.
 
 ### Risk if skipped:
+
 فشل صرف صحيح أو تشخيص خاطئ.
 
 ### Task ID: BLK-P0-004
 
 ### Title:
+
 Fix Review Center disbursement approval UI.
 
 ### Priority:
+
 Critical
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+زر Review Center لم يعد ينفذ اعتماداً مباشراً؛ Playwright desktop على `localhost:3003` أثبت الانتقال إلى `/disbursement-requests?pathId=...`.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Bug / Frontend / UX
 
 ### Description:
+
 أزل زر الموافقة النهائي المباشر للصرف أو عطله حتى يوجد قرار حوكمي صالح. أضف زر "إنشاء/ربط قرار صرف".
 
 ### Why it matters:
+
 هذه الصفحة هي الطريق الأسهل لإنتاج طلب عالق.
 
 ### Scope:
+
 Review Center disbursement cards.
 
 ### Out of scope:
+
 إعادة تصميم مركز المراجعات بالكامل.
 
 ### Files likely affected:
+
 `frontend/src/app/(main)/entities/[id]/review/page.tsx`, `reviewCenter.json`, API client.
 
 ### Dependencies:
+
 BLK-P0-001.
 
 ### Acceptance Criteria:
+
 - لا request approve بلا `decisionId`.
 - UI يشرح لماذا الزر معطل.
 - يوجد مسار واضح لإنشاء/ربط القرار.
 
 ### Test Cases:
+
 Playwright focused on entity review page.
 
 ### Risk if skipped:
+
 استمرار خلل الصرف من الواجهة.
 
 ### Task ID: BLK-P0-005
 
 ### Title:
+
 Fix Disbursement Requests approval UI and execution messages.
 
 ### Priority:
+
 Critical
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+زر الاعتماد في صفحة Disbursement Requests معطل قبل اختيار القرار وتظهر رسالة عربية؛ Playwright desktop/mobile + frontend build.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Bug / Frontend / UX / Finance
 
 ### Description:
+
 اجعل قرار الصرف مطلوباً للاعتماد النهائي، واعرض رسالة تنفيذ واضحة عند نقص القرار أو الرصيد.
 
 ### Why it matters:
+
 هذه الصفحة هي أداة التشغيل اليومية لطلبات الصرف.
 
 ### Scope:
+
 Decision select, empty approved decisions, execute panel, messages.
 
 ### Out of scope:
+
 تصميم Decision module الكامل.
 
 ### Files likely affected:
+
 `frontend/src/app/(main)/disbursement-requests/page.tsx`, CSS, locales.
 
 ### Dependencies:
+
 BLK-P0-001, BLK-P0-003.
 
 ### Acceptance Criteria:
+
 - لا اعتماد نهائي بدون قرار.
 - عند عدم وجود قرار تظهر empty state مفيدة.
 - أخطاء التنفيذ تظهر في banner واضح.
 
 ### Test Cases:
+
 Playwright + API.
 
 ### Risk if skipped:
+
 فشل رحلة الصرف.
 
 ### Task ID: BLK-P1-001
 
 ### Title:
+
 Make seed validation prove the target DB identity.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+`npm run seed:validate:docker` داخل شبكة compose؛ target `postgres:5432/stgp_dev`؛ server `PostgreSQL 16.14 on x86_64-pc-linux-musl`; validation passed بعد `seed:reset:docker`.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 DevOps / Test / Database
 
 ### Description:
+
 أضف طباعة وتحذير DB identity في seed validator، ووثق تشغيله على قاعدة Docker الصحيحة.
 
 ### Why it matters:
+
 يمنع أن يصدق الفريق نتائج فحص قاعدة أخرى.
 
 ### Scope:
+
 seed runtime, validator, scripts, docs.
 
 ### Out of scope:
+
 تغيير بنية Postgres الإنتاجية.
 
 ### Files likely affected:
+
 `backend/prisma/seed-runtime.ts`, `seed-validate.ts`, `package.json`, docs.
 
 ### Dependencies:
+
 لا شيء.
 
 ### Acceptance Criteria:
+
 - validator يطبع DB address/port/start time.
 - docs تحدد Docker source of truth.
 - تحذير عند mismatch.
 
 ### Test Cases:
+
 تشغيل ضد host DB وضد Docker DB.
 
 ### Risk if skipped:
+
 ثقة كاذبة في نتائج الفحص.
 
 ### Task ID: BLK-P1-002
 
 ### Title:
+
 Make UX role audit pass 18/18 without 429.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+Docker backend env: `THROTTLE_LIMIT=1000`, `THROTTLE_TTL_MS=60000`; `npm run test:ux:roles` مر 18/18، 0 failed users، 0 issues؛ summary في `%TEMP%\stgp-ux-role-audit-2026-06-28T15-31-37-355Z\summary.json`.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Test / DevOps / Backend
 
 ### Description:
+
 اضبط throttling في dev/test، وحسن Playwright ليستمر بعد فشل مستخدم ويخرج summary كامل.
 
 ### Why it matters:
+
 لا يمكن إغلاق صلاحيات الأدوار دون الجولة الكاملة.
 
 ### Scope:
+
 Throttler env, Playwright script, docs.
 
 ### Out of scope:
+
 تخفيف throttling في production.
 
 ### Files likely affected:
+
 `backend/src/app.module.ts`, `.env.example`, `frontend/scripts/ux-role-audit.spec.cjs`.
 
 ### Dependencies:
+
 لا شيء.
 
 ### Acceptance Criteria:
+
 - `npm run test:ux:roles` يمر 18/18.
 - لا 429 في dev.
 - failure summary شامل إن حدث فشل.
 
 ### Test Cases:
+
 Run full role audit.
 
 ### Risk if skipped:
+
 صلاحيات وتجارب غير مثبتة.
 
 ### Task ID: BLK-P2-001
 
 ### Title:
+
 Implement named operational seed stories.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+`backend/prisma/seed-stories.ts` يعرّف S-01..S-14؛ `npm run seed:validate:docker` يطبع `seedStories: 14` ويمر؛ `npm run test:ux:roles` مر 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-28
 
 ### Type:
+
 Seed / Test / Documentation
 
 ### Description:
+
 أنشئ قصص seed S-01 إلى S-14 كما في الجدول، مع users ثابتين وسيناريوهات مالية وحوكمية مترابطة.
 
 ### Why it matters:
+
 البيانات الحالية واسعة لكنها لا تغطي كل القصص الواقعية.
 
 ### Scope:
+
 Seed builders, validator, account docs.
 
 ### Out of scope:
+
 استبدال كل أسماء seed الحالية إذا لم يلزم.
 
 ### Files likely affected:
+
 `backend/prisma/seed.ts`, `seed-operational-history.ts`, `seed-validate.ts`, docs.
 
 ### Dependencies:
+
 P1 DB identity.
 
 ### Acceptance Criteria:
+
 - كل قصة تظهر في validator.
 - كل قصة لها حساب أو أكثر.
 - Playwright يستطيع الوصول إلى صفحاتها.
 
 ### Test Cases:
+
 seed reset + validate + smoke logins + UX audit.
 
 ### Risk if skipped:
+
 لا نرى المشاكل الواقعية قبل التجريبي.
 
 ### Task ID: BLK-P3-001
 
 ### Title:
+
 Expose rights and obligations across core member surfaces.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+أضيف Relationship Summary في Dashboard وPortal: حالة الاشتراك، المسار، الالتزام الشهري، المستحق الحالي، أهلية الاستفادة، وحالات `CONDITIONAL` و`SUPPORTER_ONLY`. صفحة Entities تعرض الدور، المحافظ النشطة، الاشتراكات التشغيلية، المستحق الحالي، وحالات المنصة. Entity Detail يوضح دور المستخدم ومساراته والتزامه ومستحقه. Wallet Detail يعرض مصفوفة مسارات ولوحة SHARED. Path Detail يشرح نوع المسار بلغة بشرية. Subscriptions تعرض أثر التفضيلات ومعنى الحقوق. Decisions وDisbursement Requests تعرضان أثر القرار وسياق المال. التحقق النهائي: frontend/backend build، backend tests 25/25 suites و93/93 tests، frontend Vitest 2 files و6 tests، `seed:validate:docker` passed، و`npm run test:ux:roles` passed 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Feature / UX / Frontend / Backend
 
 ### Description:
+
 أضف Relationship Summary في Dashboard, Entities, Entity Detail, Wallet Detail, Path Detail, Portal/Subscriptions, Profile, Payment Due, Decision, Disbursement Request.
 
 ### Why it matters:
+
 هذه هي فلسفة CollectiveTrustOS الأساسية.
 
 ### Scope:
+
 API summary + reusable UI component + text.
 
 ### Out of scope:
+
 إعادة تصميم كل الصفحات بصرياً.
 
 ### Files likely affected:
+
 Frontend pages listed above, `subscriptions.service.ts`, `entities.service`, `wallets.service` حسب الحاجة.
 
 ### Dependencies:
+
 Seed stories for states.
 
 ### Acceptance Criteria:
+
 - النصوص المحددة في طلب المستخدم تظهر للحالات المناسبة.
 - member يعرف لماذا يرى/لا يرى القرار أو الطلب.
 
 ### Test Cases:
+
 Playwright for active, conditional, supporter-only, suspended, multi-entity.
 
 ### Risk if skipped:
+
 يبقى المنتج غير مفهوم.
 
 ### Task ID: BLK-P4-001
 
 ### Title:
+
 Add governance explanation and decision effect panels.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+Path Detail وWallet Detail يعرضان تسميات وقواعد بشرية للمسارات بدل enum فقط. Decisions تعرض Decision Effect Panel يشرح نوع القرار، المسار، المبلغ، قابلية التنفيذ، والأثر المتوقع، وتعرض صندوق تقديم اعتراض للقرارات المناسبة مع خطوة نزاع مرتبطة. Appeals service يسجل الأثر ويعيد حالة القرار عند إغلاق آخر اعتراض. التحقق النهائي: backend/frontend build، `appeals.service.spec.ts`, backend full tests، وrole audit 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Feature / Governance / UX
 
 ### Description:
+
 حول مسارات الحوكمة من enum إلى شرح، وأضف Decision Effect Panel يشرح الأثر قبل وبعد القرار.
 
 ### Why it matters:
+
 القرار بلا أثر مفهوم يصبح تصويتاً شكلياً.
 
 ### Scope:
+
 Decisions, Path Detail, Wallet Detail.
 
 ### Out of scope:
+
 محرك قواعد كامل جديد.
 
 ### Files likely affected:
+
 `frontend/src/app/(main)/decisions/page.tsx`, `paths/[id]`, `wallets/[id]`, locales, backend decision DTO/response.
 
 ### Dependencies:
+
 P3 summary, Seed stories.
 
 ### Acceptance Criteria:
+
 - كل قرار يعرض ما سيتغير.
 - كل مسار يعرض قواعده بلغة بشرية.
 
 ### Test Cases:
+
 Playwright + API response tests.
 
 ### Risk if skipped:
+
 التصويت والحوكمة غير مفهومين.
 
 ### Task ID: BLK-P5-001
 
 ### Title:
+
 Improve financial action clarity and safety.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+تم إصلاح ترتيب تحقق `recordDisbursement` بحيث يرفض القرار غير الصالح قبل فحص الرصيد. صفحة تسجيل الصرف تعرض Financial Impact Preview قبل الحفظ. Finance تعرض الآن لوحة "لماذا تغيّر الرصيد؟" مع السداد المؤكد، قيد المراجعة، المستحق غير المسدد، وآخر اعتماد. Wallet Detail لم يعد يسبب 403 لأدوار غير إدارية. التحقق النهائي: `ledger.service.spec.ts`, backend full tests، frontend build/Vitest، `seed:validate:docker`, role audit 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Finance / UX / Backend / Test
 
 ### Description:
+
 كل إجراء مالي يعرض مصدر المال ووجهته والقرار والأثر المتوقع، ويمنع التكرار والدفعات السالبة والصرف فوق الرصيد.
 
 ### Why it matters:
+
 المال هو أعلى منطقة حساسية بعد الصلاحيات.
 
 ### Scope:
+
 Finance, disbursement, ledger, payment records.
 
 ### Out of scope:
+
 تكامل دفع خارجي جديد.
 
 ### Files likely affected:
+
 `finance/page.tsx`, `disbursement-requests`, `ledger.service.ts`, `subscriptions.service.ts`.
 
 ### Dependencies:
+
 P0 disbursement fixes.
 
 ### Acceptance Criteria:
+
 - preview قبل الحفظ.
 - double click لا ينشئ قيداً مكرراً.
 - رسائل مالية واضحة.
 
 ### Test Cases:
+
 Unit/e2e/Playwright negative cases.
 
 ### Risk if skipped:
+
 سوء فهم أو خطأ مالي.
 
 ### Task ID: BLK-P6-001
 
 ### Title:
+
 Convert audit logs into a readable timeline.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+أضيف presenter في `AuditorService` يحول audit logs إلى timeline readable: actor/title/context/effect/severity/linkedRecords/changes. واجهة Auditor تعرض timeline مجمعاً حسب اليوم وتدعم الفلاتر والتصدير. اعتراضات القرارات، failed auth، failed ledger validation، وnotification push dispatch/failure أصبحت تسجل أحداث audit مناسبة. التحقق النهائي: auditor/auth/ledger/notifications/appeals specs، backend full tests، frontend build، role audit 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Audit / Feature / UX / Backend
 
 ### Description:
+
 أنشئ API وواجهة timeline تعرض من فعل ماذا ومتى وعلى أي سجل، مع before/after وروابط وفلاتر وتصدير.
 
 ### Why it matters:
+
 المدقق والنزاعات يحتاجون قصة لا raw IDs.
 
 ### Scope:
+
 Auditor API/UI, audit event enrichment, seed timeline.
 
 ### Out of scope:
+
 نظام BI كامل.
 
 ### Files likely affected:
+
 `backend/src/auditor/*`, `frontend/src/app/(main)/auditor/*`, docs.
 
 ### Dependencies:
+
 P0 audit events, seed dispute timeline.
 
 ### Acceptance Criteria:
+
 - قصة نزاع كاملة قابلة للقراءة.
 - فلاتر user/entity/type/date/severity.
 - export basic.
 
 ### Test Cases:
+
 API snapshots + Playwright auditor.
 
 ### Risk if skipped:
+
 التدقيق غير عملي.
 
 ### Task ID: BLK-P7-001
 
 ### Title:
+
 Page-by-page UX pass for all audited interfaces.
 
 ### Priority:
+
 Medium
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+أضيف `ApiError` و`humanizeApiError` في `frontend/src/lib/api.ts` لترجمة رسائل class-validator الشائعة وأكواد 401/403/404/429/500. اكتملت مراجعة الصفحات الأساسية عبر role audit desktop/mobile، وأضيفت breadcrumbs قابلة للضغط، empty states، نصوص الحقوق والالتزامات، وسياقات المال/الحوكمة. التحقق النهائي: frontend build، frontend Vitest 2 files/6 tests، Docker frontend، وrole audit 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 UX / Frontend / Test
 
 ### Description:
+
 نفذ جدول Phase 7 لكل صفحة: Dashboard, Entities, Entity Detail, Entity Settings, Members, Wallets, Wallet Detail, Path Detail, Portal/Subscriptions, Finance, Review Center, Disbursement Requests, Decisions, Disputes, Auditor, Notifications, Search.
 
 ### Why it matters:
+
 التقرير ذكر ملاحظات صغيرة على كل واجهة لا يجوز إسقاطها.
 
 ### Scope:
+
 Visible text, CTAs, empty states, success/failure, mobile.
 
 ### Out of scope:
+
 إعادة تصميم هوية كاملة.
 
 ### Files likely affected:
+
 All listed frontend pages and locales.
 
 ### Dependencies:
+
 P0/P3/P4/P5/P6.
 
 ### Acceptance Criteria:
+
 - لا raw enum كشرح وحيد.
 - لا empty state مبهم.
 - كل صفحة تملك CTA أساسي وخطوة تالية.
 
 ### Test Cases:
+
 Playwright role audit + focused specs.
 
 ### Risk if skipped:
+
 تجربة متقطعة رغم إصلاح المنطق.
 
 ### Task ID: BLK-P8-001
 
 ### Title:
+
 Arabic domain glossary, tooltips, and validation error translation.
 
 ### Priority:
+
 Medium
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+تمت إضافة طبقة ترجمة أخطاء مركزية `humanizeApiError` و`ApiError`، وتوسيع نصوص locales العربية/الإنجليزية للمصطلحات الأساسية في المال والحوكمة والاشتراكات والقرارات والمحافظ والمسارات والتدقيق. التحقق: frontend Vitest 2 files/6 tests، frontend build، وrole audit 18/18 بلا raw validation/HTTP failure صامت.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 UX / Documentation / Frontend / Backend
 
 ### Description:
+
 أضف مصطلحات وشروحات قصيرة ورسائل أخطاء عربية موحدة، خصوصاً للـ validation errors.
 
 ### Why it matters:
+
 المستخدم العادي لا يجب أن يرى رسائل تقنية أو مصطلحات بلا سياق.
 
 ### Scope:
+
 Glossary, tooltip copy, backend exception filter or frontend error mapper.
 
 ### Out of scope:
+
 دليل تدريبي طويل داخل التطبيق.
 
 ### Files likely affected:
+
 locales, API fetch wrapper, backend validation pipe/exception filter.
 
 ### Dependencies:
+
 لا شيء.
 
 ### Acceptance Criteria:
+
 - رسالة اسم المحفظة بالعربية.
 - 429/403/500 بالعربية.
 - المصطلحات الأساسية لها tooltip أو help text.
 
 ### Test Cases:
+
 Unit error mapper + Playwright invalid forms.
 
 ### Risk if skipped:
+
 احتكاك وفهم ضعيف.
 
 ### Task ID: BLK-P9-001
 
 ### Title:
+
 Negative and dangerous scenario test suite.
 
 ### Priority:
+
 High
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+تمت تغطية السيناريوهات الخطرة عبر اختبارات backend المركزة والكاملة، seed validator، وPlaywright role audit: منع اعتماد الصرف بلا قرار، ترتيب فحص القرار قبل الرصيد، Decimal money comparison، failed audit events، search permission filtering، 403 غير صامت، 429 throttle profile، الجوال، وتعدد الأدوار/الكيانات. التحقق النهائي: backend tests 25/25 suites و93/93 tests، frontend Vitest، `seed:validate:docker`, role audit 18/18.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Test / Security / Finance / Permission
 
 ### Description:
+
 حول جدول Phase 9 إلى اختبارات API وPlaywright تغطي الصلاحيات، المال، الروابط المباشرة، الجوال، الضغط المزدوج، انقطاع الاتصال، 429/403/500.
 
 ### Why it matters:
+
 السيناريوهات السلبية تكشف العيوب الحقيقية.
 
 ### Scope:
+
 Backend e2e, frontend Playwright, fault injection where practical.
 
 ### Out of scope:
+
 اختبارات أداء واسعة.
 
 ### Files likely affected:
+
 backend test/e2e, frontend scripts/tests.
 
 ### Dependencies:
+
 P1 throttle, P2 seed stories.
 
 ### Acceptance Criteria:
+
 - كل حالة في Phase 9 لها test أو documented manual test.
 - فشل API لا يكون صامتاً.
 
 ### Test Cases:
+
 كما في جدول Phase 9.
 
 ### Risk if skipped:
+
 ثغرات تظهر بعد التجريبي.
 
 ### Task ID: BLK-P10-001
 
 ### Title:
+
 Production readiness documentation updates.
 
 ### Priority:
+
 Medium
 
 ### Status:
-Not Started
+
+Verified
 
 ### Owner:
-TBD
+
+Codex
 
 ### PR / Commit:
-TBD
+
+This commit
 
 ### Verification Evidence:
-TBD
+
+أضيفت وثائق التشغيل والحوكمة: `Database_Identity_Runbook.md`, `Seed_Stories_Runbook.md`, `Test_Runbook.md`, `Product_Engineering_Guardrails.md`، وتم تحديث `Deployment_Decisions.md` وخطة التنفيذ نفسها بحالة الإغلاق. التحقق: `seed:validate:docker` يطبع DB identity ويمر، ولا توجد عناصر Inventory مفتوحة.
 
 ### Re-test Date:
-TBD
+
+2026-06-29
 
 ### Type:
+
 Documentation
 
 ### Description:
+
 أنشئ أو حدّث وثائق فلسفة المنتج، المصطلحات، workflow الصرف، seed stories، تشغيل الاختبارات، DB identity، حسابات الاختبار، Audit Timeline.
 
 ### Why it matters:
+
 المطور أو Agent التالي يحتاج مرجعاً لا يعتمد على الذاكرة.
 
 ### Scope:
+
 Docs listed in Phase 10.
 
 ### Out of scope:
+
 موقع توثيق عام.
 
 ### Files likely affected:
+
 `Docs/01_Product`, `Docs/02_Domain`, `Docs/03_Workflows`, `Docs/08_Production_Readiness`.
 
 ### Dependencies:
+
 بعد تنفيذ أو أثناء تنفيذ المراحل.
 
 ### Acceptance Criteria:
+
 - كل قرار/سلوك مهم موثق.
 - known limitations محدثة.
 - test runbook واضح.
 
 ### Test Cases:
+
 Docs review checklist.
 
 ### Risk if skipped:
+
 تكرار الأسئلة والقرارات المتضاربة.
 
 ---

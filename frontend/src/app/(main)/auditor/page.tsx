@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import styles from "./auditor.module.css";
 import { getEntities, Entity } from "../../../lib/api/entities";
 import VisibilityNotice from "../../../components/shared/VisibilityNotice";
+import Breadcrumbs from "../../../components/shared/Breadcrumbs";
 import {
   AUDITOR_ROLES,
   filterEntitiesByRoles,
@@ -30,6 +31,7 @@ import { DECISION_TYPE_KEYS } from "../../../lib/enum-labels";
 export default function AuditorPage() {
   const t = useTranslations("auditor");
   const tEnums = useTranslations("enums");
+  const nav = useTranslations("nav");
 
   const LEDGER_TYPE_LABELS: Record<string, string> = {
     SUBSCRIPTION_PAYMENT: t("opTypeSubscriptionPayment"),
@@ -189,8 +191,58 @@ export default function AuditorPage() {
   const filteredAuditLogs = auditLogs.filter((i) => {
     if (statusFilter !== "ALL" && i.action !== statusFilter) return false;
     if (!inDateRange(i.createdAt)) return false;
-    return matchText(`${i.id} ${i.action} ${i.targetType} ${i.targetId}`);
+    return matchText(
+      `${i.id} ${i.action} ${i.targetType} ${i.targetId} ${i.title ?? ""} ${i.context ?? ""} ${i.effect ?? ""} ${i.actor?.name ?? ""}`,
+    );
   });
+
+  const groupedAuditLogs = filteredAuditLogs.reduce<Array<{ day: string; logs: AuditorAuditLog[] }>>(
+    (groups, log) => {
+      const day = new Date(log.createdAt).toLocaleDateString("ar-SA", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const current = groups.find((group) => group.day === day);
+      if (current) current.logs.push(log);
+      else groups.push({ day, logs: [log] });
+      return groups;
+    },
+    [],
+  );
+
+  function severityLabel(severity?: string) {
+    if (severity === "HIGH") return t("severityHigh");
+    if (severity === "MEDIUM") return t("severityMedium");
+    return t("severityLow");
+  }
+
+  function severityClass(severity?: string) {
+    if (severity === "HIGH") return styles.severityHigh;
+    if (severity === "MEDIUM") return styles.severityMedium;
+    return styles.severityLow;
+  }
+
+  function linkedRecordHref(type: string, id: string) {
+    if (type === "decisions") return `/decisions?decisionId=${id}`;
+    if (type === "wallets") return `/wallets/${id}`;
+    if (type === "governance_paths") return `/paths/${id}`;
+    if (type === "disbursement_requests") return `/disbursement-requests?requestId=${id}`;
+    if (type === "payment_dues" || type === "payment_records") return `/finance?tab=reviews`;
+    if (type === "memberships") return selectedEntityId ? `/entities/${selectedEntityId}?tab=members` : "/entities";
+    if (type === "subscriptions") return `/subscriptions`;
+    if (type === "disputes") return `/disputes/${id}`;
+    return null;
+  }
+
+  function formatAuditValue(value: unknown) {
+    if (value === null || value === undefined || value === "") return "—";
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      return String(value);
+    }
+    if (Array.isArray(value)) return value.length === 0 ? "[]" : value.join(", ");
+    return JSON.stringify(value);
+  }
 
   function escapeCsvCell(value: unknown): string {
     const cell = String(value ?? "");
@@ -228,7 +280,21 @@ export default function AuditorPage() {
     } else if (activeTab === "appeals") {
       downloadCsv(`auditor-appeals-${stamp}.csv`, filteredAppeals.map((i) => ({ id: i.id, title: i.title, type: i.type, status: i.status, createdAt: i.createdAt })));
     } else if (activeTab === "auditLogs") {
-      downloadCsv(`auditor-audit-logs-${stamp}.csv`, filteredAuditLogs.map((i) => ({ id: i.id, action: i.action, targetType: i.targetType, targetId: i.targetId, createdAt: i.createdAt })));
+      downloadCsv(
+        `auditor-audit-logs-${stamp}.csv`,
+        filteredAuditLogs.map((i) => ({
+          id: i.id,
+          action: i.action,
+          actor: i.actor?.name ?? i.person?.name ?? "",
+          title: i.title ?? "",
+          context: i.context ?? "",
+          effect: i.effect ?? "",
+          severity: i.severity ?? "",
+          targetType: i.targetType,
+          targetId: i.targetId,
+          createdAt: i.createdAt,
+        })),
+      );
     }
   }
 
@@ -395,22 +461,92 @@ export default function AuditorPage() {
         return (
           <div className={styles.card}>
             <h2 className={styles.sectionTitle}>{t("sectionAuditLogs")}</h2>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead><tr><th>{t("colEvent")}</th><th>{t("colTable")}</th><th>{t("colId")}</th><th>{t("colDate")}</th></tr></thead>
-                <tbody>
-                  {filteredAuditLogs.length === 0 && <tr><td colSpan={4} className={styles.emptyState}>{t("auditLogEmpty")}</td></tr>}
-                  {filteredAuditLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td><span className={styles.badge}>{log.action}</span></td>
-                      <td>{log.targetType}</td>
-                      <td>{log.targetId.substring(0, 8)}</td>
-                      <td>{new Date(log.createdAt).toLocaleString("ar-SA")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {filteredAuditLogs.length === 0 ? (
+              <div className={styles.emptyState}>{t("auditLogEmpty")}</div>
+            ) : (
+              <div className={styles.timeline}>
+                {groupedAuditLogs.map((group) => (
+                  <section key={group.day} className={styles.timelineDayGroup}>
+                    <div className={styles.timelineDayHeader}>
+                      <span>{group.day}</span>
+                      <strong>{t("auditLogDayCount", { count: group.logs.length })}</strong>
+                    </div>
+                    {group.logs.map((log) => (
+                      <article key={log.id} className={styles.timelineItem}>
+                        <div className={styles.timelineMarker} />
+                        <div className={styles.timelineContent}>
+                          <div className={styles.timelineHeader}>
+                            <div>
+                              <div className={styles.timelineTitle}>
+                                {log.title ?? `${log.action} ${log.targetType}`}
+                              </div>
+                              <div className={styles.timelineMeta}>
+                                {log.actor?.name ?? log.person?.name ?? t("systemActor")} ·{" "}
+                                {new Date(log.createdAt).toLocaleString("ar-SA")}
+                              </div>
+                            </div>
+                            <div className={styles.timelineBadges}>
+                              <span className={`${styles.severityBadge} ${severityClass(log.severity)}`}>
+                                {severityLabel(log.severity)}
+                              </span>
+                              <span className={styles.badge}>{log.action}</span>
+                            </div>
+                          </div>
+                          {log.context && (
+                            <div className={styles.timelineContext}>
+                              <span>{t("timelineContext")}</span>
+                              <strong>{log.context}</strong>
+                            </div>
+                          )}
+                          {log.effect && (
+                            <div className={styles.timelineEffect}>
+                              <span>{t("timelineEffect")}</span>
+                              <strong>{log.effect}</strong>
+                            </div>
+                          )}
+                          {log.linkedRecords && log.linkedRecords.length > 0 && (
+                            <div className={styles.linkedRecords}>
+                              <span className={styles.linkedLabel}>
+                                {t("linkedRecords")}
+                              </span>
+                              {log.linkedRecords.map((record) => {
+                                const href = linkedRecordHref(record.type, record.id);
+                                const label = `${record.label} ${record.shortId}`;
+                                return href ? (
+                                  <a key={`${record.type}-${record.id}`} href={href} className={styles.linkedPill}>
+                                    {label}
+                                  </a>
+                                ) : (
+                                  <span key={`${record.type}-${record.id}`} className={styles.linkedPill}>
+                                    {label}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                          {log.changes && log.changes.length > 0 && (
+                            <div className={styles.changeGrid}>
+                              {log.changes.slice(0, 6).map((change) => (
+                                <div key={change.field} className={styles.changeItem}>
+                                  <span className={styles.changeField}>
+                                    {change.field}
+                                  </span>
+                                  <div className={styles.changeValues}>
+                                    <span>{formatAuditValue(change.before)}</span>
+                                    <span className={styles.changeArrow}>→</span>
+                                    <strong>{formatAuditValue(change.after)}</strong>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </section>
+                ))}
+              </div>
+            )}
           </div>
         );
       default:
@@ -420,6 +556,12 @@ export default function AuditorPage() {
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("auditor") },
+        ]}
+      />
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t("title")}</h1>
         <select

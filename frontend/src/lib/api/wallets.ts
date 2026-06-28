@@ -7,6 +7,7 @@ export interface Wallet {
   balance: number;
   isActive: boolean;
   entityId: string;
+  benefitType: WalletBenefitType;
   ledgerAccountId?: string;
 }
 
@@ -35,12 +36,14 @@ export interface GovernancePath {
   balance: number;
   currency: string;
   ledgerAccountId?: string;
+  _count?: { subscriptions?: number; spendingItems?: number };
 }
 
 interface WalletResponse {
   id: string;
   name: string;
   entityId: string;
+  benefitType?: WalletBenefitType;
   isActive: boolean;
   ledgerAccount?: {
     id: string;
@@ -55,6 +58,7 @@ interface GovernancePathResponse {
   walletId: string;
   type: string;
   isActive: boolean;
+  _count?: { subscriptions?: number; spendingItems?: number };
   ledgerAccount?: {
     id: string;
     balance: number | string;
@@ -67,6 +71,7 @@ function mapWallet(wallet: WalletResponse): Wallet {
     id: wallet.id,
     name: wallet.name,
     entityId: wallet.entityId,
+    benefitType: wallet.benefitType ?? "SEPARABLE",
     isActive: wallet.isActive,
     balance: Number(wallet.ledgerAccount?.balance ?? 0),
     currency: wallet.ledgerAccount?.currency ?? "SAR",
@@ -84,6 +89,7 @@ function mapPath(path: GovernancePathResponse): GovernancePath {
     balance: Number(path.ledgerAccount?.balance ?? 0),
     currency: path.ledgerAccount?.currency ?? "SAR",
     ledgerAccountId: path.ledgerAccount?.id,
+    _count: path._count,
   };
 }
 

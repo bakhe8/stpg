@@ -51,6 +51,27 @@ export type SeedRuntimeOptions = {
   profile: SeedProfile;
   profileConfig: SeedProfileConfig;
   referenceDate: Date;
+  printDbIdentity: boolean;
+  expectedDbHost?: string;
+  expectedDbName?: string;
+  expectedDbPort?: number;
+};
+
+export type SeedConnectionSummary = {
+  host: string;
+  port: string;
+  database: string;
+  username: string;
+  sslmode: string | null;
+};
+
+export type SeedDbIdentity = {
+  currentDatabase: string;
+  currentUser: string;
+  serverAddress: string | null;
+  serverPort: number | null;
+  postmasterStartedAt: Date;
+  serverVersion: string;
 };
 
 const DEFAULT_CONNECTION_STRING =
@@ -117,6 +138,33 @@ function parseReferenceDate(input?: string): Date {
   return parsed;
 }
 
+function parseBooleanFlag(input: string | boolean | undefined): boolean {
+  if (input === true) {
+    return true;
+  }
+
+  if (typeof input !== 'string') {
+    return false;
+  }
+
+  return ['1', 'true', 'yes', 'y'].includes(input.toLowerCase());
+}
+
+function parseOptionalPositiveInt(
+  input: string | boolean | undefined,
+): number | undefined {
+  if (typeof input !== 'string' || input.trim().length === 0) {
+    return undefined;
+  }
+
+  const parsed = Number(input);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`Invalid positive integer "${input}".`);
+  }
+
+  return Math.floor(parsed);
+}
+
 export function resolveSeedRuntimeOptions(
   argv: string[] = process.argv.slice(2),
 ): SeedRuntimeOptions {
@@ -135,12 +183,29 @@ export function resolveSeedRuntimeOptions(
     (typeof cliArgs['database-url'] === 'string'
       ? cliArgs['database-url']
       : process.env.DATABASE_URL) ?? DEFAULT_CONNECTION_STRING;
+  const expectedDbPort = parseOptionalPositiveInt(
+    typeof cliArgs['expected-db-port'] === 'string'
+      ? cliArgs['expected-db-port']
+      : process.env.SEED_EXPECTED_DB_PORT,
+  );
 
   return {
     connectionString,
     profile,
     profileConfig: seedProfiles[profile],
     referenceDate,
+    printDbIdentity:
+      parseBooleanFlag(cliArgs['print-db-identity']) ||
+      parseBooleanFlag(process.env.SEED_PRINT_DB_IDENTITY),
+    expectedDbHost:
+      typeof cliArgs['expected-db-host'] === 'string'
+        ? cliArgs['expected-db-host']
+        : process.env.SEED_EXPECTED_DB_HOST,
+    expectedDbName:
+      typeof cliArgs['expected-db-name'] === 'string'
+        ? cliArgs['expected-db-name']
+        : process.env.SEED_EXPECTED_DB_NAME,
+    expectedDbPort,
   };
 }
 
@@ -150,6 +215,91 @@ export function createSeedDb(connectionString: string) {
   const prisma = new PrismaClient({ adapter });
 
   return { pool, prisma };
+}
+
+export function summarizeConnectionString(
+  connectionString: string,
+): SeedConnectionSummary {
+  const url = new URL(connectionString);
+  const database = url.pathname.replace(/^\/+/, '') || '(none)';
+
+  return {
+    host: url.hostname,
+    port: url.port || '5432',
+    database,
+    username: decodeURIComponent(url.username),
+    sslmode: url.searchParams.get('sslmode'),
+  };
+}
+
+export async function readSeedDbIdentity(pool: Pool): Promise<SeedDbIdentity> {
+  const result = await pool.query<{
+    current_database: string;
+    current_user: string;
+    server_address: string | null;
+    server_port: number | null;
+    postmaster_started_at: Date;
+    server_version: string;
+  }>(`
+    SELECT
+      current_database(),
+      current_user,
+      inet_server_addr()::text AS server_address,
+      inet_server_port() AS server_port,
+      pg_postmaster_start_time() AS postmaster_started_at,
+      version() AS server_version
+  `);
+  const row = result.rows[0];
+
+  return {
+    currentDatabase: row.current_database,
+    currentUser: row.current_user,
+    serverAddress: row.server_address,
+    serverPort: row.server_port,
+    postmasterStartedAt: row.postmaster_started_at,
+    serverVersion: row.server_version,
+  };
+}
+
+export function compareExpectedDbIdentity(
+  identity: SeedDbIdentity,
+  options: Pick<
+    SeedRuntimeOptions,
+    'expectedDbHost' | 'expectedDbName' | 'expectedDbPort'
+  >,
+) {
+  const mismatches: string[] = [];
+
+  if (
+    options.expectedDbName &&
+    identity.currentDatabase !== options.expectedDbName
+  ) {
+    mismatches.push(
+      `Expected database "${options.expectedDbName}" but connected to "${identity.currentDatabase}".`,
+    );
+  }
+
+  if (
+    options.expectedDbHost &&
+    identity.serverAddress &&
+    identity.serverAddress !== options.expectedDbHost
+  ) {
+    mismatches.push(
+      `Expected database host "${options.expectedDbHost}" but server address is "${identity.serverAddress}".`,
+    );
+  }
+
+  if (
+    options.expectedDbPort &&
+    identity.serverPort &&
+    identity.serverPort !== options.expectedDbPort
+  ) {
+    mismatches.push(
+      `Expected database port ${options.expectedDbPort} but server port is ${identity.serverPort}.`,
+    );
+  }
+
+  return mismatches;
 }
 
 export const formatSeedDate = (date: Date) => date.toISOString();

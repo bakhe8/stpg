@@ -16,8 +16,12 @@ export interface Decision {
   createdAt: string;
   canVote?: boolean;
   hasVoted?: boolean;
-  governancePath?: { id: string; name: string };
-  _count?: { votes: number };
+  governancePath?: {
+    id: string;
+    name: string;
+    wallet?: { entityId: string };
+  };
+  _count?: { votes: number; appeals?: number };
 }
 
 export interface Vote {

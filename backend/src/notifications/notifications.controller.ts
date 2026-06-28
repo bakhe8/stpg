@@ -45,6 +45,11 @@ export class NotificationsController {
     return this.notificationsService.countUnread(user.id);
   }
 
+  @Get('recipient-matrix')
+  getRecipientMatrix() {
+    return this.notificationsService.getRecipientMatrix();
+  }
+
   @Patch(':id/read')
   markRead(
     @CurrentUser() user: Person,

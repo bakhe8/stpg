@@ -37,9 +37,17 @@ const USERS = (process.env.STGP_UX_USERS || DEFAULT_USERS.join(","))
   .filter(Boolean);
 
 const TEST_TIMEOUT_MS = Number(process.env.STGP_UX_TEST_TIMEOUT_MS || 240000);
+const RETRY_LIMIT = Number(process.env.STGP_UX_RETRY_LIMIT || 3);
+const RETRY_BASE_MS = Number(process.env.STGP_UX_RETRY_BASE_MS || 700);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function login(page, username) {
-  await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+  await gotoWithRetry(page, `${BASE_URL}/login`, {
+    waitUntil: "domcontentloaded",
+  });
   await page.getByRole("button", { name: /دخول المطورين|Developer/i }).click();
   await page.locator("#username-input").fill(username);
   await page.getByRole("button", { name: /دخول تطويري|Dev/i }).click();
@@ -51,9 +59,22 @@ async function login(page, username) {
 async function apiGet(token, endpoint, entityId) {
   const headers = { Authorization: `Bearer ${token}` };
   if (entityId) headers["X-Entity-ID"] = entityId;
-  const response = await fetch(`${API_URL}${endpoint}`, { headers });
-  if (!response.ok) throw new Error(`${endpoint} returned ${response.status}`);
-  return response.json();
+
+  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt += 1) {
+    const response = await fetch(`${API_URL}${endpoint}`, { headers });
+    if (response.status === 429 && attempt < RETRY_LIMIT) {
+      await sleep(RETRY_BASE_MS * (attempt + 1));
+      continue;
+    }
+    if (!response.ok) {
+      throw new Error(
+        `${endpoint} returned ${response.status} after ${attempt + 1} attempt(s)`,
+      );
+    }
+    return response.json();
+  }
+
+  throw new Error(`${endpoint} exhausted retry attempts`);
 }
 
 function isOperational(entity) {
@@ -132,7 +153,10 @@ async function discoverRoutes(page, username) {
     (primary.myRole === "FOUNDER" || primary.myRole === "ADMIN")
   ) {
     routes.push(
-      { label: "platform-access", url: `/entities/${primary.id}/platform-access` },
+      {
+        label: "platform-access",
+        url: `/entities/${primary.id}/platform-access`,
+      },
       { label: "entity-settings", url: `/entities/${primary.id}/settings` },
       { label: "review", url: `/entities/${primary.id}/review` },
     );
@@ -158,10 +182,16 @@ async function discoverRoutes(page, username) {
 
   const walletContext = await firstAccessibleWalletAndPath(token, entities);
   if (walletContext.wallet?.id) {
-    routes.push({ label: "wallet-detail", url: `/wallets/${walletContext.wallet.id}` });
+    routes.push({
+      label: "wallet-detail",
+      url: `/wallets/${walletContext.wallet.id}`,
+    });
   }
   if (walletContext.path?.id) {
-    routes.push({ label: "path-detail", url: `/paths/${walletContext.path.id}` });
+    routes.push({
+      label: "path-detail",
+      url: `/paths/${walletContext.path.id}`,
+    });
   }
 
   const disputes = primary?.id
@@ -170,7 +200,10 @@ async function discoverRoutes(page, username) {
       )
     : [];
   if (disputes[0]?.id) {
-    routes.push({ label: "dispute-detail", url: `/disputes/${disputes[0].id}` });
+    routes.push({
+      label: "dispute-detail",
+      url: `/disputes/${disputes[0].id}`,
+    });
   }
 
   const expectations = buildExpectations(username, entities, subscriptions);
@@ -180,13 +213,18 @@ async function discoverRoutes(page, username) {
 function buildExpectations(username, entities, subscriptions) {
   const expectations = [];
   const entityTags = entities.map(
-    (entity) => `${entity.type}:${entity.myRole}:${entity.platformStatus || "ACTIVE"}`,
+    (entity) =>
+      `${entity.type}:${entity.myRole}:${entity.platformStatus || "ACTIVE"}`,
   );
 
   const push = (type, ok, detail) => expectations.push({ type, ok, detail });
 
   if (username === "seed.faisal.overlap") {
-    push("multi-entity", entities.length >= 2, entities.map((entity) => entity.name));
+    push(
+      "multi-entity",
+      entities.length >= 2,
+      entities.map((entity) => entity.name),
+    );
   }
   if (username === "seed.khaled.suspended") {
     push(
@@ -198,14 +236,19 @@ function buildExpectations(username, entities, subscriptions) {
   if (username === "seed.abdullah.building") {
     push(
       "building-founder",
-      entities.some((entity) => entity.type === "BUILDING" && entity.myRole === "FOUNDER"),
+      entities.some(
+        (entity) => entity.type === "BUILDING" && entity.myRole === "FOUNDER",
+      ),
       entityTags,
     );
   }
   if (username === "seed.yahya.neighborhood") {
     push(
       "neighborhood-founder",
-      entities.some((entity) => entity.type === "NEIGHBORHOOD" && entity.myRole === "FOUNDER"),
+      entities.some(
+        (entity) =>
+          entity.type === "NEIGHBORHOOD" && entity.myRole === "FOUNDER",
+      ),
       entityTags,
     );
     push(
@@ -217,7 +260,10 @@ function buildExpectations(username, entities, subscriptions) {
   if (username === "seed.fahad.case") {
     push(
       "case-campaign-readonly",
-      entities.some((entity) => entity.type === "CAMPAIGN" && entity.platformStatus === "READ_ONLY"),
+      entities.some(
+        (entity) =>
+          entity.type === "CAMPAIGN" && entity.platformStatus === "READ_ONLY",
+      ),
       entityTags,
     );
   }
@@ -262,7 +308,9 @@ function buildExpectations(username, entities, subscriptions) {
   if (username === "seed.abdulrahman.tribe") {
     push(
       "tribe-founder",
-      entities.some((entity) => entity.type === "TRIBE" && entity.myRole === "FOUNDER"),
+      entities.some(
+        (entity) => entity.type === "TRIBE" && entity.myRole === "FOUNDER",
+      ),
       entityTags,
     );
   }
@@ -278,7 +326,11 @@ function buildExpectations(username, entities, subscriptions) {
     );
   }
   if (username === "seed.reem.overlap") {
-    push("wide-overlap", entities.length >= 4, entities.map((entity) => entity.name));
+    push(
+      "wide-overlap",
+      entities.length >= 4,
+      entities.map((entity) => entity.name),
+    );
   }
 
   return expectations;
@@ -299,6 +351,20 @@ function sanitize(name) {
     .replace(/[^a-z0-9_-]+/gi, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+async function gotoWithRetry(page, url, options) {
+  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt += 1) {
+    const response = await page.goto(url, options);
+    if (response?.status() === 429 && attempt < RETRY_LIMIT) {
+      await sleep(RETRY_BASE_MS * (attempt + 1));
+      continue;
+    }
+
+    return response;
+  }
+
+  return null;
 }
 
 async function inspectPage(page) {
@@ -335,7 +401,8 @@ async function inspectPage(page) {
       const rect = el.getBoundingClientRect();
       if (rect.width < 1 || rect.height < 1) continue;
       const type = (el.getAttribute("type") || "").toLowerCase();
-      if (type === "hidden" || el.getAttribute("aria-hidden") === "true") continue;
+      if (type === "hidden" || el.getAttribute("aria-hidden") === "true")
+        continue;
       if ((type === "checkbox" || type === "radio") && el.closest("label")) {
         const labelRect = el.closest("label").getBoundingClientRect();
         if (labelRect.height >= 40 && labelRect.width >= 40) continue;
@@ -399,7 +466,9 @@ async function runInteractions(page, routeLabel) {
   }
 
   if (routeLabel === "review") {
-    const tab = page.getByRole("button", { name: /إثباتات الدفع|Payment/i }).first();
+    const tab = page
+      .getByRole("button", { name: /إثباتات الدفع|Payment/i })
+      .first();
     if (await tab.isVisible().catch(() => false)) {
       await tab.click();
       await page.waitForTimeout(250);
@@ -413,7 +482,10 @@ async function runInteractions(page, routeLabel) {
   if (routeLabel === "wallets") {
     const filter = page.locator("select").first();
     if (await filter.isVisible().catch(() => false)) {
-      const options = await filter.locator("option").count().catch(() => 0);
+      const options = await filter
+        .locator("option")
+        .count()
+        .catch(() => 0);
       interactions.push({
         action: "wallet entity filter visible",
         ok: options > 0,
@@ -425,46 +497,43 @@ async function runInteractions(page, routeLabel) {
   return interactions;
 }
 
-test.describe("STGP UX role audit", () => {
-  test.describe.configure({ mode: "serial" });
+async function auditUser(browser, username) {
+  const userOutDir = path.join(OUT_DIR, sanitize(username));
+  fs.mkdirSync(userOutDir, { recursive: true });
 
-  for (const username of USERS) {
-    test(`STGP UX role audit - ${username}`, async ({ page }, testInfo) => {
-      testInfo.setTimeout(TEST_TIMEOUT_MS);
-    const userOutDir = path.join(OUT_DIR, sanitize(username));
-    fs.mkdirSync(userOutDir, { recursive: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const logs = [];
+  const responses = [];
+  const pageErrors = [];
+  const results = [];
+  const screenshots = [];
+  const issues = [];
+  let current = "bootstrap";
 
-    const logs = [];
-    const responses = [];
-    const pageErrors = [];
-    let current = "bootstrap";
+  page.on("console", (msg) => {
+    if (["error", "warning"].includes(msg.type())) {
+      logs.push({ route: current, type: msg.type(), text: msg.text() });
+    }
+  });
+  page.on("pageerror", (err) =>
+    pageErrors.push({ route: current, text: err.message }),
+  );
+  page.on("response", (response) => {
+    const status = response.status();
+    const url = response.url();
+    if (status >= 400 && !/favicon|_next\/image/.test(url)) {
+      responses.push({ route: current, status, url });
+    }
+  });
 
-    page.on("console", (msg) => {
-      if (["error", "warning"].includes(msg.type())) {
-        logs.push({ route: current, type: msg.type(), text: msg.text() });
-      }
-    });
-    page.on("pageerror", (err) =>
-      pageErrors.push({ route: current, text: err.message }),
-    );
-    page.on("response", (response) => {
-      const status = response.status();
-      const url = response.url();
-      if (status >= 400 && !/favicon|_next\/image/.test(url)) {
-        responses.push({ route: current, status, url });
-      }
-    });
-
+  try {
     await login(page, username);
     const { routes, expectations } = await discoverRoutes(page, username);
     const viewports = [
       { name: "desktop", width: 1280, height: 900 },
       { name: "mobile", width: 390, height: 844 },
     ];
-
-    const results = [];
-    const screenshots = [];
-    const issues = [];
 
     for (const expectation of expectations) {
       if (!expectation.ok) {
@@ -483,7 +552,7 @@ test.describe("STGP UX role audit", () => {
       });
       for (const route of routes) {
         current = `${username}:${viewport.name}:${route.label}`;
-        await page.goto(`${BASE_URL}${route.url}`, {
+        await gotoWithRetry(page, `${BASE_URL}${route.url}`, {
           waitUntil: "domcontentloaded",
         });
         await page.waitForTimeout(900);
@@ -514,8 +583,12 @@ test.describe("STGP UX role audit", () => {
             detail: inspection.bodyTextLength,
           });
         }
-        if (inspection.overlay) issues.push({ route: current, type: "framework-overlay" });
-        if (inspection.rawPlaceholder) issues.push({ route: current, type: "raw-placeholder" });
+        if (inspection.overlay) {
+          issues.push({ route: current, type: "framework-overlay" });
+        }
+        if (inspection.rawPlaceholder) {
+          issues.push({ route: current, type: "raw-placeholder" });
+        }
         if (inspection.horizontalOverflow > 2) {
           issues.push({
             route: current,
@@ -524,54 +597,163 @@ test.describe("STGP UX role audit", () => {
           });
         }
         for (const target of inspection.smallTargets) {
-          issues.push({ route: current, type: "small-click-target", detail: target });
+          issues.push({
+            route: current,
+            type: "small-click-target",
+            detail: target,
+          });
         }
         for (const interaction of interactions) {
           if (!interaction.ok) {
-            issues.push({ route: current, type: "interaction-failed", detail: interaction });
+            issues.push({
+              route: current,
+              type: "interaction-failed",
+              detail: interaction,
+            });
           }
         }
       }
     }
+  } catch (error) {
+    issues.push({
+      route: current,
+      type: "audit-crash",
+      detail: error instanceof Error ? error.message : String(error),
+    });
+    const crashScreenshot = path.join(userOutDir, "audit-crash.png");
+    await page
+      .screenshot({ path: crashScreenshot, fullPage: false })
+      .catch(() => null);
+    screenshots.push(crashScreenshot);
+  } finally {
+    await context.close().catch(() => null);
+  }
 
-    const relevantLogs = logs.filter((entry) =>
-      /MISSING_MESSAGE|Unhandled|hydration|TypeError|ReferenceError|SyntaxError|Failed to load resource/i.test(
-        entry.text,
-      ),
+  const relevantLogs = logs.filter((entry) =>
+    /MISSING_MESSAGE|Unhandled|hydration|TypeError|ReferenceError|SyntaxError|Failed to load resource/i.test(
+      entry.text,
+    ),
+  );
+  for (const log of relevantLogs) {
+    issues.push({ route: log.route, type: "console", detail: log });
+  }
+  for (const error of pageErrors) {
+    issues.push({ route: error.route, type: "pageerror", detail: error });
+  }
+  for (const response of responses) {
+    issues.push({
+      route: response.route,
+      type: "http-status",
+      detail: response,
+    });
+  }
+
+  const payload = {
+    username,
+    baseUrl: BASE_URL,
+    apiUrl: API_URL,
+    outDir: userOutDir,
+    checkedStates: results.length,
+    issueCount: issues.length,
+    issues,
+    results,
+    logs,
+    responses,
+    pageErrors,
+    screenshots,
+  };
+  fs.writeFileSync(
+    path.join(userOutDir, "result.json"),
+    JSON.stringify(payload, null, 2),
+    "utf8",
+  );
+
+  return payload;
+}
+
+function writeRunSummary(userResults) {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+
+  const userSummaries = userResults.map((result) => ({
+    username: result.username,
+    outDir: result.outDir,
+    checkedStates: result.checkedStates,
+    issueCount: result.issueCount,
+    firstIssues: result.issues.slice(0, 5),
+  }));
+  const summary = {
+    baseUrl: BASE_URL,
+    apiUrl: API_URL,
+    outDir: OUT_DIR,
+    generatedAt: new Date().toISOString(),
+    totalUsers: userResults.length,
+    passedUsers: userSummaries.filter((item) => item.issueCount === 0).length,
+    failedUsers: userSummaries.filter((item) => item.issueCount > 0).length,
+    totalIssues: userSummaries.reduce((sum, item) => sum + item.issueCount, 0),
+    userSummaries,
+  };
+
+  fs.writeFileSync(
+    path.join(OUT_DIR, "summary.json"),
+    JSON.stringify(summary, null, 2),
+    "utf8",
+  );
+
+  const index = [
+    "# STGP UX Role Audit",
+    "",
+    `- Base URL: ${BASE_URL}`,
+    `- API URL: ${API_URL}`,
+    `- Generated at: ${summary.generatedAt}`,
+    `- Users: ${summary.passedUsers}/${summary.totalUsers} passed`,
+    `- Total issues: ${summary.totalIssues}`,
+    "",
+    "| User | Checked states | Issues | Result directory |",
+    "|---|---:|---:|---|",
+    ...userSummaries.map(
+      (item) =>
+        `| ${item.username} | ${item.checkedStates} | ${item.issueCount} | ${item.outDir} |`,
+    ),
+    "",
+  ].join("\n");
+
+  fs.writeFileSync(path.join(OUT_DIR, "index.md"), index, "utf8");
+
+  return summary;
+}
+
+test.describe("STGP UX role audit", () => {
+  test("STGP UX role audit - all configured users", async ({
+    browser,
+  }, testInfo) => {
+    testInfo.setTimeout(
+      Math.max(TEST_TIMEOUT_MS, TEST_TIMEOUT_MS * USERS.length),
     );
-    for (const log of relevantLogs) {
-      issues.push({ route: log.route, type: "console", detail: log });
-    }
-    for (const error of pageErrors) {
-      issues.push({ route: error.route, type: "pageerror", detail: error });
-    }
-    for (const response of responses) {
-      issues.push({ route: response.route, type: "http-status", detail: response });
+    fs.mkdirSync(OUT_DIR, { recursive: true });
+
+    const userResults = [];
+    for (const username of USERS) {
+      userResults.push(await auditUser(browser, username));
     }
 
-    const payload = {
-      username,
-      baseUrl: BASE_URL,
-      outDir: userOutDir,
-      checkedStates: results.length,
-      issueCount: issues.length,
-      issues,
-      results,
-      logs,
-      responses,
-      pageErrors,
-      screenshots,
-    };
-    fs.writeFileSync(
-      path.join(userOutDir, "result.json"),
-      JSON.stringify(payload, null, 2),
-      "utf8",
+    const summary = writeRunSummary(userResults);
+    const failures = summary.userSummaries.filter(
+      (item) => item.issueCount > 0,
     );
 
     expect(
-      issues,
-      JSON.stringify({ outDir: userOutDir, issues: issues.slice(0, 20) }, null, 2),
+      failures,
+      JSON.stringify(
+        {
+          outDir: OUT_DIR,
+          passedUsers: summary.passedUsers,
+          failedUsers: summary.failedUsers,
+          totalIssues: summary.totalIssues,
+          failures,
+        },
+        null,
+        2,
+      ),
     ).toEqual([]);
-    });
-  }
+  });
 });

@@ -10,6 +10,7 @@ export interface Dispute {
   walletId?: string | null;
   governancePathId?: string | null;
   linkedAppealId?: string | null;
+  disbursementRequestId?: string | null;
   policyVersionId?: string | null;
   initiatorId: string;
   respondentId?: string;
@@ -21,6 +22,13 @@ export interface Dispute {
   initiator?: { name: string };
   respondent?: { name: string };
   arbitrator?: { name: string };
+  disbursementRequest?: {
+    id: string;
+    status: string;
+    amount: number | string;
+    beneficiaryName: string;
+    governancePathId: string;
+  } | null;
 }
 
 export function getMyDisputes(): Promise<Dispute[]> {
@@ -44,6 +52,7 @@ export function openDispute(data: {
   type: string;
   respondentId?: string;
   linkedAppealId?: string;
+  disbursementRequestId?: string;
   deadline?: string;
 }): Promise<Dispute> {
   return fetchApi("/disputes", { method: "POST", body: JSON.stringify(data) });

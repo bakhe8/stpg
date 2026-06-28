@@ -23,7 +23,7 @@ export interface Subscription {
     role?: string;
     person: { id: string; name: string; username: string };
   };
-  governancePath?: { id: string; name: string; type: string };
+  governancePath?: { id: string; name: string; type: string; walletId?: string };
 }
 
 export function getSubscriptions(params: {
@@ -78,15 +78,20 @@ export interface PaymentDue {
   subscription?: {
     id: string;
     membership?: {
+      id?: string;
       entityId: string;
       person?: { id: string; name: string; username: string };
     };
-    governancePath: { id: string; name: string };
+    governancePath: { id: string; name: string; type?: string; walletId?: string };
   };
 }
 
 export function getMyPaymentDues(): Promise<PaymentDue[]> {
   return fetchApi("/subscriptions/payment-dues/my");
+}
+
+export function getEntityPaymentDues(entityId: string): Promise<PaymentDue[]> {
+  return fetchApi(`/subscriptions/payment-dues?entityId=${entityId}`);
 }
 
 export interface PaymentRecord {
@@ -99,6 +104,7 @@ export interface PaymentRecord {
   description?: string | null;
   attachments: string[];
   status: "PROCESSING" | "SUBMITTED" | "CONFIRMED" | "REJECTED" | "CANCELLED";
+  reviewedById?: string | null;
   reviewerNotes?: string | null;
   transactionId?: string | null;
   submittedAt: string;

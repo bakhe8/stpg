@@ -19,11 +19,13 @@ import {
   filterEntitiesByRoles,
   hasRole,
 } from "../../../lib/access";
+import Breadcrumbs from "../../../components/shared/Breadcrumbs";
 import styles from "./committees.module.css";
 
 export default function CommitteesPage() {
   const t = useTranslations("committees");
   const tCommon = useTranslations("common");
+  const nav = useTranslations("nav");
   const [entities, setEntities] = useState<Entity[]>([]);
   const [entityId, setEntityId] = useState("");
   const [committees, setCommittees] = useState<Committee[]>([]);
@@ -34,6 +36,7 @@ export default function CommitteesPage() {
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [currentPersonId, setCurrentPersonId] = useState<string | null>(null);
 
   const [form, setForm] = useState({ name: "", description: "" });
   const [addMember, setAddMember] = useState<Record<string, string>>({});
@@ -49,8 +52,11 @@ export default function CommitteesPage() {
   const canManage = selectedEntity
     ? hasRole(selectedEntity, ADMIN_ROLES)
     : false;
+  const isCommitteeMemberView =
+    selectedEntity?.myRole === "COMMITTEE_MEMBER" && !canManage;
 
   useEffect(() => {
+    setCurrentPersonId(localStorage.getItem("personId"));
     getEntities()
       .then((items) =>
         setEntities(filterEntitiesByRoles(items, COMMITTEE_ROLES)),
@@ -162,8 +168,41 @@ export default function CommitteesPage() {
   }
 
   const currentDetail = (id: string) => detail[id] ?? committees.find((c) => c.id === id);
+  const isMyCommittee = (committee: Committee) =>
+    Boolean(
+      currentPersonId &&
+        (committee.members ?? []).some(
+          (member) => member.membership.person.id === currentPersonId,
+        ),
+    );
+  const myCommittees = committees.filter(isMyCommittee);
+  const myCommitteePathCount = myCommittees.reduce(
+    (sum, committee) => sum + (committee.paths?.length ?? committee._count?.paths ?? 0),
+    0,
+  );
+  const allCommitteePathCount = committees.reduce(
+    (sum, committee) => sum + (committee.paths?.length ?? committee._count?.paths ?? 0),
+    0,
+  );
+
+  function pathTypeLabel(type: string) {
+    if (type === "COMMITTEE") return t("pathTypeCommittee");
+    if (type === "PUBLIC_VOTE") return t("pathTypePublicVote");
+    if (type === "INDIVIDUAL_WITH_CAP") return t("pathTypeIndividual");
+    if (type === "DONATION_ONLY") return t("pathTypeDonation");
+    if (type === "EMERGENCY_FAST") return t("pathTypeEmergency");
+    if (type === "BOARD") return t("pathTypeBoard");
+    return t("pathTypeGeneral");
+  }
+
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("committees") },
+        ]}
+      />
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t('title')}</h1>
         <div className={styles.controls}>
@@ -193,6 +232,58 @@ export default function CommitteesPage() {
       )}
 
       {!entityId && <div className={styles.prompt}>{t('chooseEntity')}</div>}
+
+      {entityId && isCommitteeMemberView && (
+        <section className={styles.scopePanel}>
+          <div className={styles.scopeIntro}>
+            <span className={styles.scopeEyebrow}>{t("myScopeEyebrow")}</span>
+            <h2>{t("myScopeTitle")}</h2>
+            <p>{t("myScopeDescription")}</p>
+          </div>
+          <div className={styles.scopeStats}>
+            <div>
+              <span>{t("myCommitteeCount")}</span>
+              <strong>{myCommittees.length}</strong>
+            </div>
+            <div>
+              <span>{t("myCommitteePathCount")}</span>
+              <strong>{myCommitteePathCount}</strong>
+            </div>
+            <div>
+              <span>{t("outOfScopePathCount")}</span>
+              <strong>{Math.max(0, allCommitteePathCount - myCommitteePathCount)}</strong>
+            </div>
+          </div>
+          {myCommittees.length === 0 ? (
+            <div className={styles.scopeEmpty}>{t("myScopeEmpty")}</div>
+          ) : (
+            <div className={styles.scopeCards}>
+              {myCommittees.map((committee) => (
+                <div key={committee.id} className={styles.scopeCard}>
+                  <div>
+                    <strong>{committee.name}</strong>
+                    <span>{committee.description ?? t("noDescription")}</span>
+                  </div>
+                  <div className={styles.scopeChips}>
+                    {(committee.paths ?? []).length > 0 ? (
+                      committee.paths?.map((path) => (
+                        <span key={path.id} className={styles.scopeChip}>
+                          {path.name} · {pathTypeLabel(path.type)}
+                        </span>
+                      ))
+                    ) : (
+                      <span className={styles.scopeChipMuted}>
+                        {t("noLinkedPaths")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className={styles.scopeNote}>{t("myScopeNote")}</p>
+        </section>
+      )}
 
       {entityId && showForm && (
         <div className={styles.formCard}>
@@ -242,7 +333,18 @@ export default function CommitteesPage() {
                   <div className={styles.committeeHeader} onClick={() => handleExpand(c.id)}>
                     <div className={styles.committeeIcon}>{c.name.charAt(0)}</div>
                     <div className={styles.committeeInfo}>
-                      <div className={styles.committeeName}>{c.name}</div>
+                      <div className={styles.committeeNameRow}>
+                        <div className={styles.committeeName}>{c.name}</div>
+                        {isCommitteeMemberView && (
+                          <span
+                            className={`${styles.scopeBadge} ${
+                              isMyCommittee(c) ? styles.scopeBadgeIn : styles.scopeBadgeOut
+                            }`}
+                          >
+                            {isMyCommittee(c) ? t("insideMyScope") : t("outsideMyScope")}
+                          </span>
+                        )}
+                      </div>
                       <div className={styles.committeeMeta}>
                         {c.description ?? "—"}
                         {c._count && ` · ${t('memberCount', { count: c._count.members })} · ${t('pathCount', { count: c._count.paths })}`}
@@ -299,6 +401,7 @@ export default function CommitteesPage() {
                         {(d?.paths ?? []).map((p) => (
                           <div key={p.id} className={styles.pathRow}>
                             <span className={styles.pathName}>{p.name}</span>
+                            <span className={styles.pathType}>{pathTypeLabel(p.type)}</span>
                             {canManage ? (
                               <button
                                 className={styles.unassignBtn}

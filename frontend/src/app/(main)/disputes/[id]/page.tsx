@@ -160,6 +160,12 @@ export default function DisputeDetailPage() {
         <div className={styles.card}>
           <div className={styles.cardTitle}>{t('detailsTitle')}</div>
           <p className={styles.description}>{dispute.description}</p>
+          {dispute.linkedAppealId && (
+            <div className={styles.linkedAppeal}>
+              <span className={styles.linkedAppealLabel}>{t('linkedAppealDetail')}</span>
+              <span>{dispute.linkedAppealId.slice(0, 8)}</span>
+            </div>
+          )}
           {dispute.resolution && (
             <div className={styles.resolution}>
               <div className={styles.resolutionLabel}>{t('decisionLabel')}</div>

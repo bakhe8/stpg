@@ -45,6 +45,93 @@
 .kpiValue { font-size: 1.4rem; font-weight: 800; color: var(--accent-primary); }
 .kpiLabel { font-size: 0.8rem; color: var(--text-secondary); }
 
+.balanceExplanation {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.balanceExplanationHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.balanceExplanationTitle {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+}
+
+.balanceExplanationText {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.balanceExplanationScope {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.balanceExplanationGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.balanceExplanationGrid div {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.balanceExplanationGrid span {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.balanceExplanationGrid strong {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.balanceExplanationNotes {
+  border-right: 3px solid var(--accent-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 10px;
+}
+
+.balanceExplanationNotes p {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
 /* Tabs */
 .tabs { display: flex; gap: 4px; background: var(--bg-secondary); border-radius: 12px; padding: 4px; }
 
@@ -196,6 +283,47 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
+.impactPreview {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.impactTitle {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+.impactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+.impactGrid div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.impactGrid span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+.impactGrid strong {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.impactPreview p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
 .recordList { display: flex; flex-direction: column; gap: 12px; }
 .recordCard {
   background: rgba(255,255,255,0.04);
@@ -244,6 +372,9 @@
   .sectionHeader,
   .pageHeader,
   .walletHeader { flex-direction: column; align-items: stretch; }
+  .impactGrid { grid-template-columns: 1fr; }
+  .balanceExplanationHeader { align-items: stretch; flex-direction: column; }
+  .balanceExplanationGrid { grid-template-columns: 1fr; }
   .recordSide { align-items: flex-start; }
   .submitBtn,
   .secondaryBtn { width: 100%; }

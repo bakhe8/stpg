@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { getMyDisputes, openDispute, Dispute } from "../../../lib/api/disputes";
 import {
@@ -15,6 +16,15 @@ import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
 
 export default function DisputesPage() {
   const t = useTranslations("disputes");
+  const searchParams = useSearchParams();
+  const linkedAppealParam = searchParams.get("linkedAppealId");
+  const entityParam = searchParams.get("entityId");
+  const decisionIdParam = searchParams.get("decisionId");
+  const decisionTitleParam = searchParams.get("decisionTitle");
+  const disbursementRequestParam = searchParams.get("disbursementRequestId");
+  const disbursementTitleParam = searchParams.get("disbursementTitle");
+  const respondentIdParam = searchParams.get("respondentId");
+  const respondentNameParam = searchParams.get("respondentName");
 
   const STATUS_MAP: Record<string, { label: string; className: string }> = {
     OPEN: { label: t("statusOpen"), className: styles.statusOpen },
@@ -44,6 +54,16 @@ export default function DisputesPage() {
   const [ruleHints, setRuleHints] = useState<string[]>([]);
   const [respondents, setRespondents] = useState<DisputeRespondentOption[]>([]);
   const [respondentsLoading, setRespondentsLoading] = useState(false);
+  const [linkedContext, setLinkedContext] = useState<{
+    type: "appeal" | "disbursement" | "member";
+    linkedAppealId: string;
+    decisionId?: string;
+    decisionTitle?: string;
+    disbursementRequestId?: string;
+    disbursementTitle?: string;
+    respondentId?: string;
+    respondentName?: string;
+  } | null>(null);
   const [form, setForm] = useState({
     entityId: "",
     title: "",
@@ -51,6 +71,8 @@ export default function DisputesPage() {
     type: "FINANCIAL_MISCONDUCT",
     respondentId: "",
     deadline: "",
+    linkedAppealId: "",
+    disbursementRequestId: "",
   });
 
   async function load() {
@@ -69,12 +91,7 @@ export default function DisputesPage() {
     void load();
   }, []);
 
-  async function handleEntityChange(entityId: string) {
-    setForm((current) => ({
-      ...current,
-      entityId,
-      respondentId: "",
-    }));
+  const loadRespondentsForEntity = useCallback(async (entityId: string) => {
     setRespondents([]);
     if (!entityId) return;
 
@@ -86,7 +103,119 @@ export default function DisputesPage() {
     } finally {
       setRespondentsLoading(false);
     }
+  }, []);
+
+  async function handleEntityChange(entityId: string) {
+    setForm((current) => ({
+      ...current,
+      entityId,
+      respondentId: "",
+    }));
+    await loadRespondentsForEntity(entityId);
   }
+
+  useEffect(() => {
+    const linkedAppealId = linkedAppealParam;
+    const disbursementRequestId = disbursementRequestParam;
+    const respondentId = respondentIdParam;
+    if (!linkedAppealId && !disbursementRequestId && !respondentId) return;
+
+    const entityId = entityParam ?? "";
+    const decisionId = decisionIdParam ?? undefined;
+    const decisionTitle = decisionTitleParam ?? undefined;
+    const disbursementTitle = disbursementTitleParam ?? undefined;
+    const respondentName = respondentNameParam ?? undefined;
+    const decisionLabel =
+      decisionTitle || (decisionId ? decisionId.slice(0, 8) : t("decisionFallback"));
+
+    if (linkedAppealId) {
+      setLinkedContext({
+        type: "appeal",
+        linkedAppealId,
+        decisionId,
+        decisionTitle,
+      });
+    } else if (disbursementRequestId) {
+      setLinkedContext({
+        type: "disbursement",
+        linkedAppealId: "",
+        disbursementRequestId,
+        disbursementTitle,
+      });
+    } else if (respondentId) {
+      setLinkedContext({
+        type: "member",
+        linkedAppealId: "",
+        respondentId,
+        respondentName,
+      });
+    }
+
+    setShowForm(true);
+    setForm((current) => ({
+      ...current,
+      entityId: entityId || current.entityId,
+      linkedAppealId: linkedAppealId ?? "",
+      disbursementRequestId: disbursementRequestId ?? "",
+      respondentId: respondentId ?? current.respondentId,
+      type: linkedAppealId
+        ? "UNFAIR_DECISION"
+        : disbursementRequestId
+          ? "FINANCIAL_MISCONDUCT"
+          : "MEMBER_CONFLICT",
+      title:
+        current.title ||
+        (linkedAppealId
+          ? t("linkedAppealTitle", { decision: decisionLabel })
+          : disbursementRequestId
+            ? t("linkedDisbursementTitle", {
+                request:
+                  disbursementTitle ||
+                  disbursementRequestId?.slice(0, 8) ||
+                  t("disbursementFallback"),
+              })
+            : t("linkedMemberTitle", {
+                member:
+                  respondentName ||
+                  respondentId?.slice(0, 8) ||
+                  t("memberFallback"),
+              })),
+      description:
+        current.description ||
+        (linkedAppealId
+          ? t("linkedAppealDescription", {
+              decision: decisionLabel,
+              appeal: linkedAppealId.slice(0, 8),
+            })
+          : disbursementRequestId
+            ? t("linkedDisbursementDescription", {
+                request:
+                  disbursementTitle ||
+                  disbursementRequestId?.slice(0, 8) ||
+                  t("disbursementFallback"),
+                id: disbursementRequestId?.slice(0, 8) ?? "",
+              })
+            : t("linkedMemberDescription", {
+                member:
+                  respondentName ||
+                  respondentId?.slice(0, 8) ||
+                  t("memberFallback"),
+              })),
+    }));
+
+    if (entityId) void loadRespondentsForEntity(entityId);
+  }, [
+    decisionIdParam,
+    decisionTitleParam,
+    disbursementRequestParam,
+    disbursementTitleParam,
+    entityParam,
+    linkedAppealParam,
+    respondentIdParam,
+    respondentNameParam,
+    loadRespondentsForEntity,
+    t,
+  ]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -101,9 +230,12 @@ export default function DisputesPage() {
         type: form.type,
         respondentId: form.respondentId || undefined,
         deadline: form.deadline || undefined,
+        linkedAppealId: form.linkedAppealId || undefined,
+        disbursementRequestId: form.disbursementRequestId || undefined,
       });
       setMsg(t("openSuccess"));
       setShowForm(false);
+      setLinkedContext(null);
       setForm({
         entityId: "",
         title: "",
@@ -111,6 +243,8 @@ export default function DisputesPage() {
         type: "FINANCIAL_MISCONDUCT",
         respondentId: "",
         deadline: "",
+        linkedAppealId: "",
+        disbursementRequestId: "",
       });
       await load();
     } catch (err) {
@@ -165,6 +299,54 @@ export default function DisputesPage() {
       {showForm && (
         <div className={styles.formCard}>
           <h3 className={styles.formTitle}>{t("formTitle")}</h3>
+          {linkedContext && (
+            <div className={styles.linkedContext}>
+              <div>
+                <strong>
+                  {linkedContext.type === "appeal"
+                    ? t("linkedContextTitle")
+                    : linkedContext.type === "disbursement"
+                      ? t("linkedDisbursementContextTitle")
+                      : t("linkedMemberContextTitle")}
+                </strong>
+                <p>
+                  {linkedContext.type === "appeal"
+                    ? t("linkedContextDesc")
+                    : linkedContext.type === "disbursement"
+                      ? t("linkedDisbursementContextDesc")
+                      : t("linkedMemberContextDesc")}
+                </p>
+              </div>
+              <div className={styles.linkedContextMeta}>
+                <span>
+                  {linkedContext.type === "appeal"
+                    ? t("linkedAppealId", {
+                        id: linkedContext.linkedAppealId.slice(0, 8),
+                      })
+                    : linkedContext.type === "disbursement"
+                      ? t("linkedDisbursementId", {
+                          id:
+                            linkedContext.disbursementRequestId?.slice(0, 8) ??
+                            "",
+                        })
+                      : t("linkedMemberId", {
+                          member:
+                            linkedContext.respondentName ||
+                            linkedContext.respondentId?.slice(0, 8) ||
+                            t("memberFallback"),
+                        })}
+                </span>
+                {linkedContext.type === "appeal" && linkedContext.decisionId && (
+                  <Link
+                    href={`/decisions#decision-${linkedContext.decisionId}`}
+                    className={styles.linkedContextLink}
+                  >
+                    {t("openDecision")}
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
           <form onSubmit={handleCreate} className={styles.form}>
             <div className={styles.fieldRow}>
               <div className={styles.fieldGroup}>

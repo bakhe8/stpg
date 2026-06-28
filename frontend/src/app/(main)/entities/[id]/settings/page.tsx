@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   getEntity,
   updateEntity,
@@ -12,10 +13,12 @@ import {
   ClosureChecklist,
 } from "../../../../../lib/api/entities";
 import ConfirmActionDialog from "../../../../../components/shared/ConfirmActionDialog";
+import Breadcrumbs from "../../../../../components/shared/Breadcrumbs";
 import styles from "./settings.module.css";
 
 export default function EntitySettingsPage() {
   const { id } = useParams<{ id: string }>();
+  const nav = useTranslations("nav");
 
   const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,9 +109,44 @@ export default function EntitySettingsPage() {
   }
 
   const alreadyRequestedClosure = !!entity.closureStatus;
+  const hasNameChange = name.trim() !== entity.name;
+  const hasDescriptionChange = description.trim() !== (entity.description ?? "");
+  const hasBankChange =
+    bankAccountNumber.trim() !== (entity.bankAccountNumber ?? "") ||
+    bankName.trim() !== (entity.bankName ?? "");
+  const bankWillBeComplete = Boolean(
+    bankAccountNumber.trim() && bankName.trim(),
+  );
+  const hasAnyBasicChange =
+    hasNameChange || hasDescriptionChange || hasBankChange;
+  const impactItems = [
+    hasNameChange
+      ? "سيظهر الاسم الجديد في قوائم الأعضاء، الدعوات، التقارير، وسجل التدقيق بعد الحفظ."
+      : null,
+    hasDescriptionChange
+      ? "تغيير الوصف يوضح الغرض للأعضاء، لكنه لا يغير المحافظ أو المسارات أو الاشتراكات."
+      : null,
+    hasBankChange && bankWillBeComplete
+      ? "اكتمال بيانات البنك يحسن جاهزية التشغيل المالي ومراجعة المنصة، لكنه لا ينقل أو يغير أي رصيد."
+      : null,
+    hasBankChange && !bankWillBeComplete
+      ? "بيانات البنك ستبقى ناقصة؛ قد تظهر حالة انتظار أو نقص جاهزية قبل التشغيل المالي."
+      : null,
+    hasAnyBasicChange
+      ? "لن تتغير صلاحيات الأعضاء أو المستحقات أو الأرصدة بمجرد حفظ هذه البيانات الأساسية."
+      : "لا توجد تغييرات غير محفوظة حالياً. عدّل حقلاً لترى أثره قبل الحفظ.",
+  ].filter((item): item is string => Boolean(item));
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav("dashboard"), href: "/dashboard" },
+          { label: nav("entities"), href: "/entities" },
+          { label: entity.name, href: `/entities/${id}` },
+          { label: "إعدادات" },
+        ]}
+      />
       <Link href={`/entities/${id}`} className={styles.back}>← العودة للكيان</Link>
 
       <h1 className={styles.title}>إعدادات الكيان</h1>
@@ -157,6 +195,17 @@ export default function EntitySettingsPage() {
                 maxLength={100}
               />
             </div>
+          </div>
+          <div className={styles.impactPreview}>
+            <div className={styles.impactHeader}>
+              <strong>أثر الحفظ قبل التنفيذ</strong>
+              <span>{hasAnyBasicChange ? "تغييرات غير محفوظة" : "لا تغيير"}</span>
+            </div>
+            <ul>
+              {impactItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
           {saveMsg && (
             <div className={`${styles.msg} ${saveMsg.type === "success" ? styles.msgSuccess : styles.msgError}`}>

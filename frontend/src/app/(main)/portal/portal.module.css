@@ -1,8 +1,26 @@
-.page { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
 
-.pageHeader { display: flex; flex-direction: column; gap: 4px; }
-.pageTitle { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin: 0; }
-.pageSubtitle { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
 
 /* ── Attention Section ── */
 .attentionSection {
@@ -29,7 +47,9 @@
   font-size: 0.85rem;
 }
 
-.attentionPath { color: #92400e; }
+.attentionPath {
+  color: #92400e;
+}
 
 .stateBadge {
   padding: 2px 10px;
@@ -38,14 +58,33 @@
   font-weight: 700;
 }
 
-.stateBadge[data-state="CONDITIONAL"] { background: rgba(245,158,11,0.15); color: #b45309; }
-.stateBadge[data-state="SUSPENDED"] { background: rgba(239,68,68,0.15); color: #b91c1c; }
-.stateBadge[data-state="ENTITY_SUSPENDED"] { background: rgba(127,29,29,0.14); color: #991b1b; }
-.stateBadge[data-state="ENTITY_READ_ONLY"] { background: rgba(59,130,246,0.14); color: #1d4ed8; }
-.stateBadge[data-state="ENTITY_INACTIVE"] { background: rgba(100,116,139,0.14); color: #475569; }
+.stateBadge[data-state="CONDITIONAL"] {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+.stateBadge[data-state="SUSPENDED"] {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+.stateBadge[data-state="ENTITY_SUSPENDED"] {
+  background: rgba(127, 29, 29, 0.14);
+  color: #991b1b;
+}
+.stateBadge[data-state="ENTITY_READ_ONLY"] {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+}
+.stateBadge[data-state="ENTITY_INACTIVE"] {
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+}
 
 /* ── Wallet List ── */
-.walletList { display: flex; flex-direction: column; gap: 20px; }
+.walletList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
 .walletCard {
   background: var(--glass-bg);
@@ -75,7 +114,10 @@
   color: var(--text-secondary);
 }
 
-.walletSep { color: var(--text-muted); font-size: 0.75rem; }
+.walletSep {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
 
 .walletName {
   font-weight: 700;
@@ -89,7 +131,12 @@
 }
 
 /* ── Payment Status ── */
-.paymentSection { padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
+.paymentSection {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .paymentClean {
   padding: 12px 20px;
@@ -98,9 +145,9 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: rgba(34,197,94,0.06);
+  background: rgba(34, 197, 94, 0.06);
   border-radius: 8px;
-  border: 1px solid rgba(34,197,94,0.2);
+  border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .paymentCleanTitle {
@@ -115,7 +162,11 @@
   opacity: 0.8;
 }
 
-.checkIcon { color: #22c55e; font-size: 1.1rem; margin-top: 1px; }
+.checkIcon {
+  color: #22c55e;
+  font-size: 1.1rem;
+  margin-top: 1px;
+}
 
 .paymentRow {
   display: flex;
@@ -145,8 +196,13 @@
 }
 
 @keyframes urgentPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.82; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.82;
+  }
 }
 
 /* فترة السماح — 1–15 يوم */
@@ -171,7 +227,10 @@
   border-color: rgba(99, 102, 241, 0.2);
 }
 
-.paymentIcon { font-size: 1.1rem; flex-shrink: 0; }
+.paymentIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
 
 .paymentBody {
   flex: 1;
@@ -181,7 +240,10 @@
   gap: 2px;
 }
 
-.paymentLabel { font-size: 0.85rem; color: var(--text-primary); }
+.paymentLabel {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
 
 .paymentAmount {
   font-size: 0.95rem;
@@ -265,7 +327,7 @@
 .rightWarning {
   font-size: 0.72rem;
   color: #b45309;
-  background: rgba(245,158,11,0.1);
+  background: rgba(245, 158, 11, 0.1);
   padding: 2px 7px;
   border-radius: 4px;
   width: fit-content;
@@ -282,7 +344,9 @@
   margin-top: 4px;
 }
 
-.rightRequestBtn:hover { text-decoration: underline; }
+.rightRequestBtn:hover {
+  text-decoration: underline;
+}
 
 /* ── Centered / Loading / Error ── */
 .centered {
@@ -296,16 +360,25 @@
 }
 
 .spinner {
-  width: 40px; height: 40px;
+  width: 40px;
+  height: 40px;
   border: 3px solid var(--glass-border);
   border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-.errorMsg { color: #ef4444; padding: 40px; text-align: center; }
+.errorMsg {
+  color: #ef4444;
+  padding: 40px;
+  text-align: center;
+}
 
 .empty {
   text-align: center;
@@ -389,7 +462,9 @@
   text-decoration: none;
 }
 
-.emptyLink:hover { text-decoration: underline; }
+.emptyLink:hover {
+  text-decoration: underline;
+}
 
 .membershipMeta {
   display: flex;
@@ -422,7 +497,86 @@
   color: #b45309;
 }
 
+.relationshipPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+.relationshipLine {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.relationshipGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.relationshipItem {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.relationshipLabel {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.relationshipItem strong {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.relationshipOutcome {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.rightsBlocked {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.rightsBlocked strong {
+  color: var(--text-primary);
+}
+
 @media (max-width: 640px) {
-  .walletHeaderMeta { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .rightsGrid { grid-template-columns: 1fr; }
+  .walletHeaderMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .relationshipGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rightsGrid {
+    grid-template-columns: 1fr;
+  }
 }

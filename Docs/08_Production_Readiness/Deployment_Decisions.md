@@ -157,6 +157,18 @@ npm run test:ux:roles
 
 هذا الفحص يعتمد على دخول المطورين وحسابات seed، لذلك لا يشغّل على الإنتاج العام بعد تعطيل Developer Login. وظيفته كشف مشاكل تجربة المستخدم والصلاحيات قبل النشر، بينما يبقى `production-smoke.sh` هو فحص ما بعد النشر الفعلي.
 
+مرجع تشغيل الاختبارات وتوثيق fallback عند تعطل المتصفح الداخلي:
+
+```text
+Docs/08_Production_Readiness/Test_Runbook.md
+```
+
+ويجب الالتزام بالـ guardrails التشغيلية التالية عند أي تعديل لاحق:
+
+```text
+Docs/08_Production_Readiness/Product_Engineering_Guardrails.md
+```
+
 ## عاشراً: قرار الترقية
 
 لا توجد حاجة حالياً للترقية إلى خطة أعلى من KVM 2.

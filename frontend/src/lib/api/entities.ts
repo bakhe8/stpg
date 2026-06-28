@@ -19,6 +19,9 @@ export interface Entity {
   closureStatus?: string | null;
   closureRequestedAt?: string | null;
   closureReason?: string | null;
+  isCampaign?: boolean | null;
+  campaignEndsAt?: string | null;
+  parentEntityId?: string | null;
   description?: string | null;
 }
 

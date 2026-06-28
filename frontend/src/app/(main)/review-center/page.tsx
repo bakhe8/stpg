@@ -8,10 +8,12 @@ import { ReviewTask } from '../../../lib/models/ReviewTask';
 import { ADMIN_ROLES, filterEntitiesByRoles } from '../../../lib/access';
 import type { Translator } from '../../../lib/i18n';
 import { useTranslations } from 'next-intl';
+import Breadcrumbs from '../../../components/shared/Breadcrumbs';
 import styles from './review-center.module.css';
 
 export default function ReviewCenterPage() {
   const t = useTranslations('reviewCenter');
+  const nav = useTranslations('nav');
   const [tasks, setTasks] = useState<ReviewTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +63,12 @@ export default function ReviewCenterPage() {
 
   return (
     <div className={styles.page}>
+      <Breadcrumbs
+        items={[
+          { label: nav('dashboard'), href: '/dashboard' },
+          { label: nav('reviewCenter') },
+        ]}
+      />
       <header className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t('title')}</h1>
         <p className={styles.pageSubtitle}>{t('subtitle')}</p>
