@@ -43,6 +43,13 @@ else
 fi
 echo "✓ الكود محدث"
 
+# ── 3.5 تثبيت سكربتات التشغيل المساندة ─────────────────────
+echo "▶ تثبيت سكربتات التشغيل..."
+install -m 750 "$APP_DIR/repo/backup.sh" "$APP_DIR/backup.sh"
+install -m 750 "$APP_DIR/repo/restore.sh" "$APP_DIR/restore.sh"
+install -m 750 "$APP_DIR/repo/production-smoke.sh" "$APP_DIR/production-smoke.sh"
+echo "✓ سكربتات backup/restore/smoke جاهزة"
+
 # ── 4. التحقق من ملف البيئة ────────────────────────────────
 if [ ! -f "$APP_DIR/.env" ]; then
   echo ""
@@ -85,6 +92,13 @@ if curl -sf http://localhost:3001/health > /dev/null 2>&1; then
 else
   echo "⚠ الباكند لم يستجب بعد — قد يحتاج وقتاً أطول"
   echo "  تحقق بـ: docker compose -f docker-compose.prod.yml logs backend"
+fi
+
+echo "▶ تشغيل smoke test..."
+if "$APP_DIR/production-smoke.sh"; then
+  echo "✓ smoke test نجح"
+else
+  echo "⚠ smoke test فشل — راجع السجلات قبل فتح الموقع للعامة"
 fi
 
 echo ""

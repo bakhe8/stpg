@@ -36,6 +36,46 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── محرك البحث الداخلي ───────────────────────────────────
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow\\&timeout=5s >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  # ── محرك سير العمل الداخلي ───────────────────────────────
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    restart: unless-stopped
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: ${DB_PASSWORD}
+      POSTGRES_SEEDS: postgres
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+    volumes:
+      - ./deploy/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "temporal operator cluster health --address localhost:7233 >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+
   # ── تهيئة مستخدم تطبيق غير superuser ─────────────────────
   db-init:
     image: postgres:16-alpine
@@ -80,6 +120,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      OPENSEARCH_NODE: ${OPENSEARCH_NODE:-http://opensearch:9200}
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
       UPLOAD_DIR: /app/uploads
       PORT: "3001"
       ALLOWED_ORIGINS: "https://stpg.wbgl.tech"
@@ -89,6 +131,10 @@ services:
       db-init:
         condition: service_completed_successfully
       redis:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+      temporal:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health >/dev/null || exit 1"]
@@ -133,6 +179,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  opensearch_data:
   caddy_data:
   caddy_config:
   uploads:

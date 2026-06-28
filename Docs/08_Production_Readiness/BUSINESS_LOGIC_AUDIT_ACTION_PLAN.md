@@ -20,12 +20,12 @@
 7. تم تشديد balance transfer requests وربط التنفيذ بقرار موثق و `LedgerService`.
 8. تم جعل entity support يتطلب قراراً واتجاهاً صحيحاً لعلاقة الدعم المالي.
 9. تم تنظيف lint للواجهة والخلفية، وإضافة اختبارات regression و E2E للمخاطر الأمنية.
-10. تم تحديث Docker/Caddy/TLS وإضافة smoke test محلي عبر Docker.
+10. تم تحديث Docker/Caddy/TLS وإضافة OpenSearch و Temporal وسكربتات restore و production smoke.
 11. تم تشغيل تجربة حسابات seed حسب الأدوار، وإغلاق تعارضين ظهرا أثناء الاختبار:
     - `SuspendedEntityGuard` كان لا يطبق حالة `READ_ONLY/SUSPENDED` على مسارات تبدأ بـ `/api`.
     - الواجهة كانت تعرض صفحة auditor لأمين الصندوق رغم أن API auditor يرفضه.
 
-**القرار النهائي:** من ناحية الكود، بنود التقرير مغلقة. من ناحية الإنتاج الفعلي، لا يزال يلزم إدخال أسرار الإنتاج وتشغيل اختبارات live مع Stripe/Moyasar و OAuth/DNS/TLS قبل فتح النظام للعامة.
+**القرار النهائي:** من ناحية الكود والإعدادات، بنود التقرير مغلقة. من ناحية الإنتاج الفعلي، لا يزال يلزم إدخال أسرار الإنتاج وتشغيل اختبارات live مع Stripe/Moyasar و OAuth/DNS/TLS، ثم تشغيل smoke الإنتاجي بعد النشر قبل فتح النظام للعامة.
 
 ---
 
@@ -52,6 +52,7 @@
 | P3-05 | TLS/Caddy | منجز إعدادياً | Caddy domain + فتح 80/443 |
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
+| P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
 
 ---
 
@@ -272,6 +273,7 @@
 1. `Caddyfile` يستخدم الدومين الإنتاجي.
 2. `docker-compose.prod.yml` يفتح `80:80`, `443:443`, و `443:443/udp`.
 3. `NEXT_PUBLIC_API_URL` و `FRONTEND_PUBLIC_URL` موجودان في إعدادات الإنتاج.
+4. `/health` العام يمر عبر Caddy إلى الباك إند لا إلى الواجهة.
 
 ### BL-14 - تجربة حسابات الاختبار حسب الصلاحيات
 
@@ -295,6 +297,23 @@
    - لا توجد failed API responses غير متوقعة.
    - desktop screenshots للحالات المميزة.
    - mobile smoke لأحمد وفيصل.
+
+### BL-15 - OpenSearch و Temporal و Restore/Smoke
+
+**الهدف:** إكمال بنية التشغيل المطلوبة حول البحث وسير العمل، وإضافة مسار استعادة وفحص إنتاجي قابل للتكرار.
+**الحالة:** منجز إعدادياً.
+
+**التنفيذ:**
+
+1. تمت إضافة `opensearch` إلى `docker-compose.yml` و `docker-compose.prod.yml`.
+2. تمت إضافة `temporal` إلى `docker-compose.yml` و `docker-compose.prod.yml` باستخدام PostgreSQL persistence.
+3. تم تمرير `OPENSEARCH_NODE` و `TEMPORAL_ADDRESS` إلى الباك إند.
+4. تم إضافة dynamic config لـ Temporal في `deploy/temporal/dynamicconfig/development-sql.yaml`.
+5. تم تحديث `.env.example` و `.env.production.example` بقيم البحث وسير العمل.
+6. تم تحديث `backup.sh` ليولد dump قابل للاستعادة بـ `--clean --if-exists --no-owner --no-privileges`.
+7. تمت إضافة `restore.sh` مع حماية `CONFIRM_RESTORE=stgp_prod` قبل أي عملية هدم/استعادة.
+8. تمت إضافة `production-smoke.sh` لفحص الواجهة، health، docs-json، تعطيل dev-login، OpenSearch، و Temporal.
+9. تم تحديث `deploy.sh` لتثبيت سكربتات backup/restore/smoke وتشغيل smoke بعد النشر.
 
 ---
 
@@ -335,6 +354,13 @@ POST http://localhost:3001/api/balance-transfer-requests            PASS - 401
 POST http://localhost:3001/api/ledger/transfers                     PASS - 401
 GET http://localhost:3001/api/docs-json                             PASS - 200
 RLS migration runtime smoke on PostgreSQL 16                         PASS
+docker compose config --quiet after OpenSearch/Temporal              PASS
+docker compose --env-file .env.production.example -f docker-compose.prod.yml config --quiet PASS
+Git Bash bash -n backup.sh restore.sh production-smoke.sh deploy.sh   PASS
+git diff --check                                                     PASS
+production-smoke.sh public frontend/health/docs/dev-login             PASS
+production-smoke.sh local backend/OpenSearch/Temporal                 BLOCKED - Docker daemon غير متاح محلياً
+docker compose ps                                                     BLOCKED - dockerDesktopLinuxEngine pipe missing
 ```
 
 ---

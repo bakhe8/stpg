@@ -18,6 +18,14 @@ stpg.wbgl.tech {
 
     encode zstd gzip
 
+    # ── Health check عام يمرر للباكند ───────────────────────
+    handle /health {
+        reverse_proxy backend:3001 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
     # ── API (NestJS) — كل طلبات /api* تذهب للباكند ──────────
     handle /api* {
         reverse_proxy backend:3001 {

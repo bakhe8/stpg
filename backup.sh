@@ -37,7 +37,7 @@ DB_FILE="${BACKUP_DIR}/db/stgp_${DATE}.sql.gz"
 log "نسخ قاعدة البيانات إلى: ${DB_FILE}"
 
 docker compose -f "${COMPOSE_DIR}/docker-compose.prod.yml" exec -T postgres \
-  pg_dump -U "${DB_USER}" "${DB_NAME}" | gzip > "${DB_FILE}"
+  pg_dump --clean --if-exists --no-owner --no-privileges -U "${DB_USER}" "${DB_NAME}" | gzip > "${DB_FILE}"
 
 log "حجم ملف قاعدة البيانات: $(du -sh "${DB_FILE}" | cut -f1)"
 
