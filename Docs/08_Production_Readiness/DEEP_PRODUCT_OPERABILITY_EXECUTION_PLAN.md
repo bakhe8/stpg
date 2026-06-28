@@ -17,73 +17,85 @@
 
 ---
 
+## آلية متابعة التنفيذ
+
+كل بند في الـ Inventory وكل مهمة في الـ Backlog تبدأ بالحالة `Not Started` إلى أن يبدأ التنفيذ. يتم تحديث الحقول كالتالي:
+
+- `Status`: Not Started / In Progress / Fixed / Verified / Deferred.
+- `Owner`: اسم الشخص أو Agent المسؤول عن التنفيذ أو التحقق.
+- `PR / Commit`: رابط PR أو hash commit الذي نفذ أو تحقق من البند.
+- `Verification Evidence`: أمر اختبار، لقطة، تقرير Playwright، SQL check، أو رابط سجل يثبت الإغلاق.
+- `Re-test Date`: تاريخ آخر إعادة اختبار للبند بعد الإصلاح.
+
+لا ينتقل أي بند إلى `Verified` إلا بوجود دليل تحقق واضح، ولا يستخدم `Deferred` إلا مع سبب موثق داخل خانة الدليل أو في ملاحظة مرتبطة.
+
 ## Full Audit Findings Inventory
 
-| ID | النص المختصر للملاحظة | القسم الذي وردت فيه | التصنيف | الأولوية | مكررة؟ | كود؟ | Seed؟ | واجهة؟ | اختبار؟ | مانعة للتجريبي؟ |
-|---|---|---|---|---|---|---|---|---|---|---|
-| F-001 | اعتماد طلب صرف نهائي بدون قرار حوكمي صالح | الملخص، الرحلات، الواجهات، الصلاحيات، المال، قائمة المشاكل، الخطة | Bug / Finance / Governance | Critical | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-002 | طلب صرف يبقى `APPROVED` عالقاً بلا `decisionId` ولا `transactionId` | المال، قائمة المشاكل | Bug / Finance | Critical | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-003 | رسالة تنفيذ مضللة: رصيد غير كاف رغم أن الرصيد كاف | الملخص، المال، قائمة المشاكل | Bug / UX / Finance | Critical | نعم | نعم | لا | نعم | نعم | نعم |
-| F-004 | مقارنة Decimal محتملة الخطأ في فحص الرصيد | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم |
-| F-005 | ترتيب الفحوص خطأ: فحص الرصيد قبل فحص القرار | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم |
-| F-006 | زر موافقة الصرف في Review Center يستدعي الموافقة بلا قرار | الملخص، الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم |
-| F-007 | صفحة Disbursement Requests تجعل اختيار القرار اختيارياً | الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم |
-| F-008 | الحاجة لتسجيل محاولات الفشل المهمة في Audit Log | سجل التدقيق، Phase 0 المطلوب | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-009 | `seed:validate` من host قد يفحص قاعدة غير قاعدة التطبيق | الملخص، قائمة المشاكل، الخطة العاجلة | DevOps / Testing / Database | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-010 | أدوات الفحص لا تطبع DB identity بشكل يمنع الثقة الكاذبة | قائمة المشاكل، الخطة العاجلة | DevOps / Testing | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-011 | الحاجة لتشغيل validation داخل Docker أو شبكة صحيحة | قائمة المشاكل، الخطة العاجلة | DevOps / Documentation | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-012 | فحص UX الكامل يتوقف بسبب 429 على `/api/entities/mine` | الملخص، الرحلات، الصلاحيات، قائمة المشاكل | Testing / DevOps / Backend | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-013 | لا يجوز إغلاق بند الصلاحيات قبل نجاح 18/18 | الرحلات، الصلاحيات، الخطة العاجلة | Permission / Testing | High | نعم | لا | لا | لا | نعم | نعم |
-| F-014 | Playwright يحتاج تقرير فشل واضح ويجب ألا يخفي آخر الحسابات | قائمة المشاكل، مطلوب المستخدم | Testing | High | لا | نعم | لا | لا | نعم | نعم |
-| F-015 | الـ 11 حساباً الأصلية لا تكفي لكل السيناريوهات | الملخص، قائمة المشاكل، Seed | Data / Testing | High | نعم | نعم | نعم | لا | نعم | نعم |
-| F-016 | نقص قصة كيان جديد فارغ بالكامل مع founder day-one | Seed، الرحلات، الحالات الفارغة | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-017 | المشاركة المشروطة موجودة كبيانات لا كرحلة مفهومة | الملخص، Seed، الرحلات، الحوكمة | Data / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-018 | المصلحة المشتركة `SHARED` لا تمثل free-riders والعجز بوضوح | الملخص، Seed، الرحلات، الواجهات، قائمة المشاكل | Data / UX / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-019 | محفظة متعددة المسارات تحتاج أرصدة وحقوق وقرارات مستقلة | الملخص، Seed، الرحلات، Wallet Detail | Data / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-020 | سيناريو الرفض يحتاج سبباً وخطوة تالية مفهومة | Seed، UX، Small items | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-021 | الاعتراض يحتاج رحلة كاملة من القرار إلى الرد والأثر | Seed، الرحلات، الحوكمة | Governance / UX / Audit | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-022 | سجل التدقيق غني لكنه raw ويحتاج timeline قابل للقراءة | الملخص، Seed، الرحلات، Auditor، سجل التدقيق، قائمة المشاكل | Audit / UX | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-023 | `SUPPORTER_ONLY` موجود كحالة لكنه غير مفهوم كحق بلا استفادة | Seed، الحوكمة، المصطلحات | Data / UX / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-024 | تعدد الكيانات يعرض أسماء فقط ولا يعرض الالتزامات والحقوق | الملخص، الرحلات، Entities، قائمة المشاكل | UX / Data | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-025 | حملة علاج مؤقتة تحتاج قصة انتهاء/READ_ONLY/إغلاق | Seed، البيانات المقترحة | Data / UX | Medium | لا | نعم | نعم | نعم | نعم | لا |
-| F-026 | قبيلة/صندوق واسع يحتاج دعم وفاة/وقف/تبرع/لجنة/اعتراض | Seed، البيانات المقترحة | Data / Governance | Medium | لا | نعم | نعم | نعم | نعم | لا |
-| F-027 | كيان PENDING_REVIEW يحتاج واجهة انتظار وماذا ينقص | Seed، البيانات المقترحة | UX / Data | Medium | لا | نعم | نعم | نعم | نعم | لا |
-| F-028 | علاقات كيانات ومحافظ مشتركة مع رقابة دون تصويت غير كافية | السيناريوهات غير المغطاة، لاحقاً | Data / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-029 | البيانات أحياناً أرقام وسجلات لا قصص تشغيلية | ما غير الواقعي | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-030 | المحافظ/المسارات دون اشتراكات تحتاج empty states أفضل | ما غير الواقعي، قائمة المشاكل | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-031 | Founder onboarding غير كاف بعد إنشاء كيان/محفظة/مسار | الرحلات، قبل التجريبي | UX / Frontend | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-032 | Dashboard لا يشرح لماذا يظهر المستحق وما أثره والخطوة التالية | Dashboard، UX | UX | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-033 | Dashboard وقائمة المستحقات كثيفة وتحتاج تجميعاً | Low، Dashboard | UX | Low | نعم | نعم | لا | نعم | نعم | لا |
-| F-034 | بطاقة Entity يجب أن تعرض دور/مستحقات/محافظ/قرارات/حالة منصة | Entities، قائمة المشاكل | UX | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-035 | Entity Detail يحتاج خريطة العلاقة: كيان/محفظة/مسار/اشتراك/حقوق | Entity Detail، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم |
-| F-036 | Entity Settings تحتاج أثر الإعداد قبل الحفظ | Entity Settings | UX / Governance | Medium | لا | نعم | لا | نعم | نعم | لا |
-| F-037 | Members يحتاج ربط الدور بالاشتراكات والديون وحقوق الاستفادة | Members | UX / Permission | Medium | لا | نعم | لا | نعم | نعم | لا |
-| F-038 | Wallets لا تشرح الفرق بين `SEPARABLE` و `SHARED` | Wallets، المصطلحات | UX / Finance | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-039 | Wallet Detail يحتاج Matrix للمسارات داخل المحفظة | Wallet Detail، الرحلات، Phase 4 | UX / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-040 | Path Detail يعرض enum ولا يترجمه إلى قاعدة بشرية | Path Detail، الحوكمة | UX / Governance | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-041 | Portal/Subscriptions يحتاج بطاقة اشتراك موحدة للحقوق والالتزامات | Portal، Phase 3 | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-042 | Finance يجب أن يعرض المصدر والهدف والقرار والأثر قبل كل إجراء | Finance، الصلاحيات، المال | Finance / UX | High | نعم | نعم | لا | نعم | نعم | نعم |
-| F-043 | Decisions تحتاج Decision Effect Panel بعد الإغلاق وقبل التصويت | Decisions، الرحلات، الحوكمة | Governance / UX | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-044 | Disputes يجب أن تبدأ من سياق قرار/صرف/عضو لا صفحة عامة فقط | Disputes، الرحلات | Governance / UX / Audit | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-045 | Notifications تحتاج event -> recipient matrix | Notifications، سجل التدقيق | Backend / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-046 | Search يجب أن يبقى مرشحاً بالصلاحيات ومغطى باختبار ثابت | Search | Permission / Testing | Medium | لا | نعم | لا | نعم | نعم | لا |
-| F-047 | Auditor يحتاج filters/export/before-after/linked records | الصلاحيات، Auditor، سجل التدقيق | Audit / UX | High | نعم | نعم | لا | نعم | نعم | نعم |
-| F-048 | Committee Member يحتاج تمثيل أوضح لما يخص لجنته فقط | الصلاحيات | Permission / UX | Medium | لا | نعم | نعم | نعم | نعم | لا |
-| F-049 | Member يحتاج تبسيط الفرق بين دفع/اشتراك/استفادة/تصويت/اعتراض | الصلاحيات، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم |
-| F-050 | مسارات الحوكمة ممثلة بياناتياً لكنها تحتاج شرحاً بشرياً | الحوكمة، Path Detail | Governance / UX | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-051 | MemberPreference موجود لكن أثره غير ظاهر للمستخدم | الحوكمة، Seed | Governance / UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا |
-| F-052 | الحقوق والالتزامات غير ظاهرة كعلاقة جوهرية في كل صفحة | الملخص، الحوكمة، الحكم النهائي | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-053 | التقارير المالية لا تشرح لماذا تغير الرصيد ومن اعتمد | المال، لاحقاً | Finance / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-054 | لا يوجد دليل كامل بعد حل 429 على عدم خلط الكيانات | المال، الصلاحيات | Permission / Testing / Finance | High | نعم | لا | لا | لا | نعم | نعم |
-| F-055 | عزل المسارات موجود بنيوياً لكن UI لا يشرحه كفاية | المال، الحوكمة | Finance / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم |
-| F-056 | Audit Log يحتاج تسجيل failed auth والـ validation failures المالية | سجل التدقيق، Phase 6 | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم |
-| F-057 | Audit Log يحتاج تسجيل إشعار تم/فشل، تغييرات الدور، فشل تنفيذ الصرف | سجل التدقيق | Audit / Backend | Medium | نعم | نعم | لا | لا | نعم | لا |
-| F-058 | رسائل validation التقنية تحتاج تعريباً وطبقة ترجمة | قائمة المشاكل، Phase 8 | UX / Backend / Frontend | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-059 | أخطاء API مثل 429/403/500 قد تكون صامتة في الواجهة | قائمة المشاكل، Phase 1، Phase 8 | UX / Testing | Medium | نعم | نعم | لا | نعم | نعم | لا |
-| F-060 | صفحات الإدارة تحتاج breadcrumbs هرمية | Low، Small items | UX | Low | نعم | نعم | لا | نعم | نعم | لا |
-| F-061 | الجوال يجب أن يبقى جزءاً من كل فحص UX | منهجية، Playwright، مطلوب المستخدم | Testing / UX | Medium | نعم | لا | لا | نعم | نعم | لا |
-| F-062 | المتصفح الداخلي لم يكن متاحاً ويجب توثيق fallback | منهجية | Testing / Documentation | Low | لا | لا | لا | لا | نعم | لا |
-| F-063 | نقاط القوة يجب أن تتحول إلى guardrails لا تضيع | أفضل 5 نقاط قوة | Documentation / Testing | Medium | نعم | نعم | نعم | لا | نعم | لا |
+| ID | النص المختصر للملاحظة | القسم الذي وردت فيه | التصنيف | الأولوية | مكررة؟ | كود؟ | Seed؟ | واجهة؟ | اختبار؟ | مانعة للتجريبي؟ | Status | Owner | PR / Commit | Verification Evidence | Re-test Date |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| F-001 | اعتماد طلب صرف نهائي بدون قرار حوكمي صالح | الملخص، الرحلات، الواجهات، الصلاحيات، المال، قائمة المشاكل، الخطة | Bug / Finance / Governance | Critical | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-002 | طلب صرف يبقى `APPROVED` عالقاً بلا `decisionId` ولا `transactionId` | المال، قائمة المشاكل | Bug / Finance | Critical | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-003 | رسالة تنفيذ مضللة: رصيد غير كاف رغم أن الرصيد كاف | الملخص، المال، قائمة المشاكل | Bug / UX / Finance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-004 | مقارنة Decimal محتملة الخطأ في فحص الرصيد | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-005 | ترتيب الفحوص خطأ: فحص الرصيد قبل فحص القرار | المال، قائمة المشاكل، الخطة العاجلة | Bug / Backend / Finance | Critical | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-006 | زر موافقة الصرف في Review Center يستدعي الموافقة بلا قرار | الملخص، الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-007 | صفحة Disbursement Requests تجعل اختيار القرار اختيارياً | الواجهات، قائمة المشاكل | Bug / Frontend / Governance | Critical | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-008 | الحاجة لتسجيل محاولات الفشل المهمة في Audit Log | سجل التدقيق، Phase 0 المطلوب | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-009 | `seed:validate` من host قد يفحص قاعدة غير قاعدة التطبيق | الملخص، قائمة المشاكل، الخطة العاجلة | DevOps / Testing / Database | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-010 | أدوات الفحص لا تطبع DB identity بشكل يمنع الثقة الكاذبة | قائمة المشاكل، الخطة العاجلة | DevOps / Testing | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-011 | الحاجة لتشغيل validation داخل Docker أو شبكة صحيحة | قائمة المشاكل، الخطة العاجلة | DevOps / Documentation | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-012 | فحص UX الكامل يتوقف بسبب 429 على `/api/entities/mine` | الملخص، الرحلات، الصلاحيات، قائمة المشاكل | Testing / DevOps / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-013 | لا يجوز إغلاق بند الصلاحيات قبل نجاح 18/18 | الرحلات، الصلاحيات، الخطة العاجلة | Permission / Testing | High | نعم | لا | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-014 | Playwright يحتاج تقرير فشل واضح ويجب ألا يخفي آخر الحسابات | قائمة المشاكل، مطلوب المستخدم | Testing | High | لا | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-015 | الـ 11 حساباً الأصلية لا تكفي لكل السيناريوهات | الملخص، قائمة المشاكل، Seed | Data / Testing | High | نعم | نعم | نعم | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-016 | نقص قصة كيان جديد فارغ بالكامل مع founder day-one | Seed، الرحلات، الحالات الفارغة | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-017 | المشاركة المشروطة موجودة كبيانات لا كرحلة مفهومة | الملخص، Seed، الرحلات، الحوكمة | Data / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-018 | المصلحة المشتركة `SHARED` لا تمثل free-riders والعجز بوضوح | الملخص، Seed، الرحلات، الواجهات، قائمة المشاكل | Data / UX / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-019 | محفظة متعددة المسارات تحتاج أرصدة وحقوق وقرارات مستقلة | الملخص، Seed، الرحلات، Wallet Detail | Data / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-020 | سيناريو الرفض يحتاج سبباً وخطوة تالية مفهومة | Seed، UX، Small items | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-021 | الاعتراض يحتاج رحلة كاملة من القرار إلى الرد والأثر | Seed، الرحلات، الحوكمة | Governance / UX / Audit | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-022 | سجل التدقيق غني لكنه raw ويحتاج timeline قابل للقراءة | الملخص، Seed، الرحلات، Auditor، سجل التدقيق، قائمة المشاكل | Audit / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-023 | `SUPPORTER_ONLY` موجود كحالة لكنه غير مفهوم كحق بلا استفادة | Seed، الحوكمة، المصطلحات | Data / UX / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-024 | تعدد الكيانات يعرض أسماء فقط ولا يعرض الالتزامات والحقوق | الملخص، الرحلات، Entities، قائمة المشاكل | UX / Data | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-025 | حملة علاج مؤقتة تحتاج قصة انتهاء/READ_ONLY/إغلاق | Seed، البيانات المقترحة | Data / UX | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-026 | قبيلة/صندوق واسع يحتاج دعم وفاة/وقف/تبرع/لجنة/اعتراض | Seed، البيانات المقترحة | Data / Governance | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-027 | كيان PENDING_REVIEW يحتاج واجهة انتظار وماذا ينقص | Seed، البيانات المقترحة | UX / Data | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-028 | علاقات كيانات ومحافظ مشتركة مع رقابة دون تصويت غير كافية | السيناريوهات غير المغطاة، لاحقاً | Data / Governance | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-029 | البيانات أحياناً أرقام وسجلات لا قصص تشغيلية | ما غير الواقعي | Data / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-030 | المحافظ/المسارات دون اشتراكات تحتاج empty states أفضل | ما غير الواقعي، قائمة المشاكل | UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-031 | Founder onboarding غير كاف بعد إنشاء كيان/محفظة/مسار | الرحلات، قبل التجريبي | UX / Frontend | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-032 | Dashboard لا يشرح لماذا يظهر المستحق وما أثره والخطوة التالية | Dashboard، UX | UX | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-033 | Dashboard وقائمة المستحقات كثيفة وتحتاج تجميعاً | Low، Dashboard | UX | Low | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-034 | بطاقة Entity يجب أن تعرض دور/مستحقات/محافظ/قرارات/حالة منصة | Entities، قائمة المشاكل | UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-035 | Entity Detail يحتاج خريطة العلاقة: كيان/محفظة/مسار/اشتراك/حقوق | Entity Detail، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-036 | Entity Settings تحتاج أثر الإعداد قبل الحفظ | Entity Settings | UX / Governance | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-037 | Members يحتاج ربط الدور بالاشتراكات والديون وحقوق الاستفادة | Members | UX / Permission | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-038 | Wallets لا تشرح الفرق بين `SEPARABLE` و `SHARED` | Wallets، المصطلحات | UX / Finance | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-039 | Wallet Detail يحتاج Matrix للمسارات داخل المحفظة | Wallet Detail، الرحلات، Phase 4 | UX / Governance / Finance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-040 | Path Detail يعرض enum ولا يترجمه إلى قاعدة بشرية | Path Detail، الحوكمة | UX / Governance | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-041 | Portal/Subscriptions يحتاج بطاقة اشتراك موحدة للحقوق والالتزامات | Portal، Phase 3 | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-042 | Finance يجب أن يعرض المصدر والهدف والقرار والأثر قبل كل إجراء | Finance، الصلاحيات، المال | Finance / UX | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-043 | Decisions تحتاج Decision Effect Panel بعد الإغلاق وقبل التصويت | Decisions، الرحلات، الحوكمة | Governance / UX | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-044 | Disputes يجب أن تبدأ من سياق قرار/صرف/عضو لا صفحة عامة فقط | Disputes، الرحلات | Governance / UX / Audit | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-045 | Notifications تحتاج event -> recipient matrix | Notifications، سجل التدقيق | Backend / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-046 | Search يجب أن يبقى مرشحاً بالصلاحيات ومغطى باختبار ثابت | Search | Permission / Testing | Medium | لا | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-047 | Auditor يحتاج filters/export/before-after/linked records | الصلاحيات، Auditor، سجل التدقيق | Audit / UX | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-048 | Committee Member يحتاج تمثيل أوضح لما يخص لجنته فقط | الصلاحيات | Permission / UX | Medium | لا | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-049 | Member يحتاج تبسيط الفرق بين دفع/اشتراك/استفادة/تصويت/اعتراض | الصلاحيات، الحكم النهائي | UX / Governance | High | نعم | نعم | لا | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-050 | مسارات الحوكمة ممثلة بياناتياً لكنها تحتاج شرحاً بشرياً | الحوكمة، Path Detail | Governance / UX | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-051 | MemberPreference موجود لكن أثره غير ظاهر للمستخدم | الحوكمة، Seed | Governance / UX / Data | Medium | نعم | نعم | نعم | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-052 | الحقوق والالتزامات غير ظاهرة كعلاقة جوهرية في كل صفحة | الملخص، الحوكمة، الحكم النهائي | UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-053 | التقارير المالية لا تشرح لماذا تغير الرصيد ومن اعتمد | المال، لاحقاً | Finance / UX / Audit | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-054 | لا يوجد دليل كامل بعد حل 429 على عدم خلط الكيانات | المال، الصلاحيات | Permission / Testing / Finance | High | نعم | لا | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-055 | عزل المسارات موجود بنيوياً لكن UI لا يشرحه كفاية | المال، الحوكمة | Finance / UX / Governance | High | نعم | نعم | نعم | نعم | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-056 | Audit Log يحتاج تسجيل failed auth والـ validation failures المالية | سجل التدقيق، Phase 6 | Audit / Backend | High | نعم | نعم | لا | لا | نعم | نعم | Not Started | TBD | TBD | TBD | TBD |
+| F-057 | Audit Log يحتاج تسجيل إشعار تم/فشل، تغييرات الدور، فشل تنفيذ الصرف | سجل التدقيق | Audit / Backend | Medium | نعم | نعم | لا | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-058 | رسائل validation التقنية تحتاج تعريباً وطبقة ترجمة | قائمة المشاكل، Phase 8 | UX / Backend / Frontend | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-059 | أخطاء API مثل 429/403/500 قد تكون صامتة في الواجهة | قائمة المشاكل، Phase 1، Phase 8 | UX / Testing | Medium | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-060 | صفحات الإدارة تحتاج breadcrumbs هرمية | Low، Small items | UX | Low | نعم | نعم | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-061 | الجوال يجب أن يبقى جزءاً من كل فحص UX | منهجية، Playwright، مطلوب المستخدم | Testing / UX | Medium | نعم | لا | لا | نعم | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-062 | المتصفح الداخلي لم يكن متاحاً ويجب توثيق fallback | منهجية | Testing / Documentation | Low | لا | لا | لا | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
+| F-063 | نقاط القوة يجب أن تتحول إلى guardrails لا تضيع | أفضل 5 نقاط قوة | Documentation / Testing | Medium | نعم | نعم | نعم | لا | نعم | لا | Not Started | TBD | TBD | TBD | TBD |
 
 ---
 
@@ -703,6 +715,21 @@ Disbursement final approval must require a valid governance decision.
 ### Priority:
 Critical
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Bug / Finance / Governance / Backend
 
@@ -745,6 +772,21 @@ Introduce or enforce a non-final pre-approval state for disbursement review.
 ### Priority:
 Critical
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Feature / Backend / Database / Frontend
 
@@ -784,6 +826,21 @@ Fix Decimal balance comparison and validation order in disbursement execution.
 
 ### Priority:
 Critical
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 Bug / Backend / Finance
@@ -825,6 +882,21 @@ Fix Review Center disbursement approval UI.
 ### Priority:
 Critical
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Bug / Frontend / UX
 
@@ -864,6 +936,21 @@ Fix Disbursement Requests approval UI and execution messages.
 
 ### Priority:
 Critical
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 Bug / Frontend / UX / Finance
@@ -905,6 +992,21 @@ Make seed validation prove the target DB identity.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 DevOps / Test / Database
 
@@ -944,6 +1046,21 @@ Make UX role audit pass 18/18 without 429.
 
 ### Priority:
 High
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 Test / DevOps / Backend
@@ -985,6 +1102,21 @@ Implement named operational seed stories.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Seed / Test / Documentation
 
@@ -1025,6 +1157,21 @@ Expose rights and obligations across core member surfaces.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Feature / UX / Frontend / Backend
 
@@ -1064,6 +1211,21 @@ Add governance explanation and decision effect panels.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Feature / Governance / UX
 
@@ -1102,6 +1264,21 @@ Improve financial action clarity and safety.
 
 ### Priority:
 High
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 Finance / UX / Backend / Test
@@ -1143,6 +1320,21 @@ Convert audit logs into a readable timeline.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Audit / Feature / UX / Backend
 
@@ -1182,6 +1374,21 @@ Page-by-page UX pass for all audited interfaces.
 
 ### Priority:
 Medium
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 UX / Frontend / Test
@@ -1223,6 +1430,21 @@ Arabic domain glossary, tooltips, and validation error translation.
 ### Priority:
 Medium
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 UX / Documentation / Frontend / Backend
 
@@ -1263,6 +1485,21 @@ Negative and dangerous scenario test suite.
 ### Priority:
 High
 
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
+
 ### Type:
 Test / Security / Finance / Permission
 
@@ -1301,6 +1538,21 @@ Production readiness documentation updates.
 
 ### Priority:
 Medium
+
+### Status:
+Not Started
+
+### Owner:
+TBD
+
+### PR / Commit:
+TBD
+
+### Verification Evidence:
+TBD
+
+### Re-test Date:
+TBD
 
 ### Type:
 Documentation
