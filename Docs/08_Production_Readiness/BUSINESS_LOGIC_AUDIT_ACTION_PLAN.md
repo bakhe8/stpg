@@ -53,6 +53,7 @@
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 | P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
+| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، دخول مطورين، أدوار seed، وإصلاحات لمس/موبايل |
 
 ---
 
@@ -317,6 +318,22 @@
 10. تم ضبط OpenSearch بـ `DISABLE_SECURITY_PLUGIN=true` حتى لا يفشل installer في OpenSearch 2.17 بسبب غياب كلمة مرور admin داخل خدمة داخلية غير مكشوفة للعامة.
 11. تم ضبط فحص Temporal على `temporal:7233` لأن الخدمة تستمع داخل الحاوية على عنوان الحاوية لا `localhost`.
 
+### BL-16 - مراجعة الواجهات وتجربة المستخدم
+
+**الهدف:** فحص الواجهة كمنتج مستخدم فعلياً، وليس فقط كـ API أو build.
+**الحالة:** منجز.
+
+**التنفيذ:**
+
+1. تم تشغيل فحص Playwright على `/login` ثم دخول المطورين بحساب أحمد الهاشمي.
+2. تم فحص 22 حالة واجهة عبر desktop و mobile للحسابات: أحمد، ليان، خالد، فيصل.
+3. شمل الفحص صفحات: dashboard, entities, finance, review-center, auditor, analytics.
+4. تم التحقق من عدم وجود blank pages أو Next.js error overlay أو failed API responses أو horizontal overflow.
+5. تم إصلاح إظهار زر `دخول المطورين` محلياً في Docker، مع بقاء الإنتاج معطلاً.
+6. تم تحسين قراءة عنوان الشريط العلوي على mobile.
+7. تم تكبير أهداف اللمس الصغيرة في AppShell وروابط dashboard/login.
+8. تم تهدئة الزخرفة داخل بطاقة الدخول حتى لا تزاحم العنوان.
+
 ---
 
 ## 4. الواجهة بعد إغلاق التحويل المباشر
@@ -365,6 +382,8 @@ production-smoke.sh full local/public                                 PASS - fro
 docker compose ps                                                     PASS - backend/frontend/postgres/redis/opensearch/temporal healthy/up
 OpenSearch cluster health                                             PASS - yellow/green مقبول لعقدة واحدة
 Temporal cluster health                                               PASS - SERVING
+UX Playwright rendered audit                                           PASS - 22 states, desktop/mobile, 0 failed API
+UX final spot check after fixes                                        PASS - no console errors, no overlay, no overflow, no small targets
 ```
 
 ---

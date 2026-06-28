@@ -204,6 +204,7 @@
   text-decoration: none;
   color: inherit;
   border-radius: 8px;
+  min-height: 44px;
   padding: 4px;
   transition: background 0.15s;
 }
@@ -234,8 +235,8 @@
 }
 
 .logoutBtn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border: 1px solid var(--border);
@@ -436,7 +437,9 @@
   }
 
   .headerTitles {
-    max-width: 34%;
+    flex: 1 1 38%;
+    min-width: 92px;
+    max-width: 46%;
   }
 
   .topbarEyebrow {

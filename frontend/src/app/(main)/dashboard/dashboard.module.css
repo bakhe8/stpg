@@ -87,6 +87,9 @@
 }
 
 .seeAll {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.85rem;
   color: var(--accent-primary);
   font-weight: 600;
