@@ -384,50 +384,23 @@ export default function EntityDetailPage() {
           </div>
         )}
         {canManage && (
-          <div style={{ marginRight: 'auto', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className={styles.manageActions}>
             <Link
               href={`/entities/${entity.id}/members`}
-              style={{
-                padding: '0.45rem 1rem',
-                background: 'var(--surface)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-              }}
+              className={styles.manageLink}
             >
               الأعضاء
             </Link>
             <Link
               href={`/entities/${entity.id}/review`}
-              style={{
-                padding: '0.45rem 1rem',
-                background: 'var(--surface)',
-                color: 'var(--accent-primary)',
-                border: '1px solid var(--accent-primary)',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-              }}
+              className={`${styles.manageLink} ${styles.manageLinkPrimary}`}
             >
               مركز المراجعات
             </Link>
             {(entity.myRole === 'FOUNDER' || entity.myRole === 'ADMIN') && (
               <Link
                 href={`/entities/${entity.id}/settings`}
-                style={{
-                  padding: '0.45rem 1rem',
-                  background: 'var(--surface)',
-                  color: 'var(--text-secondary)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                }}
+                className={styles.manageLink}
               >
                 ⚙ الإعدادات
               </Link>
@@ -435,17 +408,7 @@ export default function EntityDetailPage() {
             <button
               onClick={copyInviteLink}
               disabled={isActionDisabled}
-              style={{
-                padding: '0.45rem 1rem',
-                background: inviteCopied ? '#22c55e' : 'var(--accent-primary)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'background 0.2s',
-              }}
+              className={`${styles.inviteButton} ${inviteCopied ? styles.inviteButtonCopied : ''}`}
             >
               {inviteCopied ? '✓ تم النسخ' : '🔗 رابط الدعوة'}
             </button>
@@ -521,10 +484,11 @@ export default function EntityDetailPage() {
             {entity.bankAccountNumber && (
               <div className={styles.infoRow}>
                 <span>رقم الحساب</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'monospace', fontSize: '13px', direction: 'ltr' }}>
+                <span className={styles.bankAccountValue}>
                   {entity.bankAccountNumber}
                   <button
-                    style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', padding: '0 4px', opacity: 0.7 }}
+                    className={styles.copyButton}
+                    aria-label="نسخ رقم الحساب"
                     title="نسخ رقم الحساب"
                     onClick={() => void navigator.clipboard.writeText(entity.bankAccountNumber!)}
                   >

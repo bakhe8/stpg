@@ -20,6 +20,7 @@
   color: var(--text-primary);
   outline: none;
   cursor: pointer;
+  min-height: 40px;
 }
 
 .grid {

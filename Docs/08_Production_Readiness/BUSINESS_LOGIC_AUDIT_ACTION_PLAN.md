@@ -57,7 +57,7 @@
 | P3-06 | JWT invitation secret | منجز | استخدام `getAccessTokenSecret()` |
 | P3-07 | Seed role UI/API smoke | منجز | 11 حساب اختبار، 30 فحص API، و Playwright role smoke بدون أخطاء console/API |
 | P3-08 | OpenSearch/Temporal/Restore/Smoke | منجز إعدادياً | خدمات داخلية + سكربت restore + smoke إنتاجي |
-| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed + 7 edge accounts + أدوار المنصة، role journeys، وإصلاحات صلاحيات ولمس/موبايل |
+| P3-09 | UX/UI rendered audit | منجز | Playwright desktop/mobile، 11 حساب seed + 7 edge accounts + أدوار المنصة، role journeys، 234 حالة seed تفصيلية، وإصلاحات صلاحيات ولمس/موبايل |
 
 ---
 
@@ -399,6 +399,13 @@
 37. تم إصلاح نموذج دخول المنصة من `minLength=8` إلى `minLength=6` ليتطابق مع DTO الخلفي وبيانات seed الافتراضية.
 38. تم إصلاح واجهة المنصة بحيث تظهر أزرار التعليق/التفعيل والرد على الاعتراضات فقط لـ `OWNER/SUPER_ADMIN`، بينما يرى `SUPPORT/ANALYST` حالة `متابعة فقط`.
 39. نتيجة فحص المنصة: 9 حالات عبر desktop/mobile والحساب المعطل، صفر مشاكل بعد الإصلاح، وتسجيل الدخول المعطل يبقى في `/platform/login` بلا token وبخطأ واضح.
+40. تم تنفيذ جولة تفصيلية جديدة على 11 حساب seed عبر `/login` الحقيقي و Playwright، بإجمالي 234 حالة desktop/mobile، وتشمل صفحات dashboard, entities, entity detail, wallets, wallet detail, path detail, notifications, profile، والمسارات الخاصة بالدور مثل review/settings/platform-access/finance/auditor/committees/portal/subscriptions.
+41. تم إصلاح صفحة `/entities/:id/platform-access`: كانت تستخدم namespace `admin` مع مفاتيح `platformAccess.*`، ما أنتج `MISSING_MESSAGE` في الواجهة. أصبحت تستخدم `platformAccess` مباشرة، والجدول أصبح داخل حاوية تمرير أفقية داخلية بدل توليد overflow للصفحة.
+42. تم إصلاح مركز المراجعات `/entities/:id/review`: إزالة الاستدعاءات الخاطئة مثل `reviewCenter.reviewCenter.relationship`، وإضافة مفاتيح `confirm/cancel/relationship/sponsor/notePrefix` إلى `reviewCenter.json` بالعربية والإنجليزية.
+43. تم تكبير أهداف النقر الصغيرة في صفحات profile, notifications, wallets, entity detail, entity settings, wallet detail, path detail, dispute detail, review، بما يشمل روابط الرجوع، أزرار الموافقة/الرفض، فلتر الكيان، زر نسخ رقم الحساب، وروابط/أزرار الإدارة.
+44. تم إصلاح `/paths/:id` حتى لا يطلب `/subscriptions?pathId=...` إلا عند `FOUNDER/ADMIN`. الأدوار الأخرى ترى عداد الاشتراكات الآمن القادم مع المسار ولا يظهر لها تبويب الاشتراكات التفصيلي أو زر إنشاء بند صرف.
+45. تم إصلاح placeholder ظاهر في تبويب قرارات المسار: `القرارات ({count})` أصبح يستقبل `count` فعلياً، وأضيفت قاعدة فحص UX ترفض أي placeholder خام مثل `{count}` في النص الظاهر.
+46. نتيجة الجولة التفصيلية الأخيرة: كل الـ 11 حساب seed مرّت بـ `issueCount=0`: لا صفحات فارغة، لا Next.js overlay، لا failed API responses غير متوقعة، لا `MISSING_MESSAGE`، لا overflow أفقي، لا أهداف لمس صغيرة، ولا placeholders خام.
 
 ---
 
@@ -460,6 +467,13 @@ UX rules/health touch target retest                                      PASS - 
 UX mobile login and role audit                                           PASS - real /login dev flow + 7 accounts x 5 routes, no overlay/overflow/small targets
 UX edge tenant audit                                                      PASS - 7 edge accounts, 147 desktop/mobile states, 0 real issues after fixes
 UX platform role audit                                                    PASS - OWNER/SUPER_ADMIN/SUPPORT/ANALYST + inactive account, 9 states, 0 issues
+UX detailed seed route audit                                               PASS - 11 seed accounts, 234 desktop/mobile states, 0 issues, raw placeholder check enabled
+frontend npm run lint after detailed UX fixes                              PASS
+docker compose up -d --build frontend after detailed UX fixes              PASS
+GET http://localhost:3001/health after detailed UX fixes                   PASS - 200
+GET http://localhost:3001/api/docs-json after detailed UX fixes            PASS - 200
+OpenSearch cluster health after detailed UX fixes                          PASS - yellow
+Temporal cluster health after detailed UX fixes                            PASS - SERVING
 ```
 
 ---

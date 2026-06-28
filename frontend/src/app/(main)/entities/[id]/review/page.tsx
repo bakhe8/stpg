@@ -89,9 +89,9 @@ function ActionNoteModal({
             onClick={() => onConfirm(note)}
             disabled={requireNote && !note.trim()}
           >
-            {t("reviewCenter.confirm")}
+            {t("confirm")}
           </button>
-          <button className={styles.modalCancel} onClick={onCancel}>{t("reviewCenter.cancel")}</button>
+          <button className={styles.modalCancel} onClick={onCancel}>{t("cancel")}</button>
         </div>
       </div>
     </div>
@@ -173,12 +173,12 @@ function MembershipApplicationsTab({
             </div>
             {application.relationshipDescription && (
               <div className={styles.cardRef}>
-                {t("reviewCenter.relationship", { desc: application.relationshipDescription })}
+                {t("relationship", { desc: application.relationshipDescription })}
               </div>
             )}
             {application.sponsorName && (
               <div className={styles.cardRef}>
-                {t("reviewCenter.sponsor", { name: application.sponsorName })}
+                {t("sponsor", { name: application.sponsorName })}
               </div>
             )}
             {application.note && (

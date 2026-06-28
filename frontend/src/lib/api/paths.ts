@@ -11,6 +11,7 @@ export interface GovernancePath {
   currency: string;
   ledgerAccountId?: string;
   wallet?: { id: string; name: string; entityId: string };
+  _count?: { subscriptions?: number; spendingItems?: number };
 }
 
 export interface SpendingItem {

@@ -11,6 +11,7 @@ import {
   GovernancePath,
   SpendingItem,
 } from "../../../../lib/api/paths";
+import { getEntity } from "../../../../lib/api/entities";
 import {
   getSubscriptions,
   Subscription,
@@ -39,6 +40,8 @@ export default function PathDetailPage() {
   const [items, setItems] = useState<SpendingItem[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [canManagePath, setCanManagePath] = useState(false);
+  const [canViewSubscriptions, setCanViewSubscriptions] = useState(false);
   const [tab, setTab] = useState<Tab>("items");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -55,25 +58,47 @@ export default function PathDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    Promise.allSettled([
-      getPath(id),
-      getPathSpendingItems(id),
-      getSubscriptions({ pathId: id }),
-      getDecisions(id),
-    ])
-      .then(
-        ([pathResult, itemsResult, subscriptionsResult, decisionsResult]) => {
-          if (pathResult.status === "fulfilled") setPath(pathResult.value);
-          if (itemsResult.status === "fulfilled") setItems(itemsResult.value);
-          if (subscriptionsResult.status === "fulfilled") {
-            setSubscriptions(subscriptionsResult.value);
-          }
-          if (decisionsResult.status === "fulfilled") {
-            setDecisions(decisionsResult.value);
-          }
-        },
-      )
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      const [pathResult, itemsResult, decisionsResult] = await Promise.allSettled([
+        getPath(id),
+        getPathSpendingItems(id),
+        getDecisions(id),
+      ]);
+
+      if (cancelled) return;
+
+      if (pathResult.status === "fulfilled") {
+        const loadedPath = pathResult.value;
+        setPath(loadedPath);
+
+        const entityId = loadedPath.wallet?.entityId;
+        const entity = entityId ? await getEntity(entityId).catch(() => null) : null;
+        if (cancelled) return;
+
+        const canManage = entity?.myRole === "FOUNDER" || entity?.myRole === "ADMIN";
+        setCanManagePath(canManage);
+        setCanViewSubscriptions(canManage);
+
+        if (canManage) {
+          const subs = await getSubscriptions({ pathId: id }).catch(() => []);
+          if (!cancelled) setSubscriptions(subs);
+        } else {
+          setSubscriptions([]);
+        }
+      }
+
+      if (itemsResult.status === "fulfilled") setItems(itemsResult.value);
+      if (decisionsResult.status === "fulfilled") setDecisions(decisionsResult.value);
+      setLoading(false);
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   async function handleCreate(e: React.FormEvent) {
@@ -127,7 +152,9 @@ export default function PathDetailPage() {
     (s, i) => s + (i.ledgerAccount?.balance ?? 0),
     0,
   );
-  const activeSubs = subscriptions.filter((s) => s.state === "ACTIVE").length;
+  const activeSubs = canViewSubscriptions
+    ? subscriptions.filter((s) => s.state === "ACTIVE").length
+    : (path._count?.subscriptions ?? 0);
   const openDecs = decisions.filter((d) => d.status === "OPEN").length;
 
   const PRIVACY_LEVEL_MAP: Record<string, "PublicToMembers" | "VisibleToCommittee" | "HiddenSensitive"> = {
@@ -199,26 +226,30 @@ export default function PathDetailPage() {
         <button className={`${styles.tab} ${tab === 'items' ? styles.tabActive : ''}`} onClick={() => setTab('items')}>
           {t('tabItems')} {items.length > 0 && `(${items.length})`}
         </button>
-        <button className={`${styles.tab} ${tab === 'subscriptions' ? styles.tabActive : ''}`} onClick={() => setTab('subscriptions')}>
-          {t('tabSubscriptions')} {subscriptions.length > 0 && `(${subscriptions.length})`}
-        </button>
+        {canViewSubscriptions && (
+          <button className={`${styles.tab} ${tab === 'subscriptions' ? styles.tabActive : ''}`} onClick={() => setTab('subscriptions')}>
+            {t('tabSubscriptions', { count: subscriptions.length })}
+          </button>
+        )}
         <button className={`${styles.tab} ${tab === 'decisions' ? styles.tabActive : ''}`} onClick={() => setTab('decisions')}>
-          {t('tabDecisions')} {openDecs > 0 && `(${openDecs})`}
+          {t('tabDecisions', { count: openDecs })}
         </button>
       </div>
 
       {tab === "items" && (
         <>
-          <div className={styles.tabHeader}>
-            <button
-              className={styles.addBtn}
-              onClick={() => setShowForm(!showForm)}
-            >
-              {showForm ? t('cancelCreate') : t('newItem')}
-            </button>
-          </div>
+          {canManagePath && (
+            <div className={styles.tabHeader}>
+              <button
+                className={styles.addBtn}
+                onClick={() => setShowForm(!showForm)}
+              >
+                {showForm ? t('cancelCreate') : t('newItem')}
+              </button>
+            </div>
+          )}
 
-          {showForm && (
+          {canManagePath && showForm && (
             <div className={styles.formCard}>
               <h3 className={styles.formTitle}>{t('createItemTitle')}</h3>
               <form onSubmit={handleCreate} className={styles.form}>

@@ -169,6 +169,10 @@
   padding: 0.2rem 0.5rem;
   border-radius: 0.375rem;
   font-weight: 500;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .editBtn:hover { background: var(--accent-soft); }
@@ -183,6 +187,7 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 40px;
 }
 
 .saveBtn:disabled { opacity: 0.6; }
@@ -196,6 +201,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 40px;
 }
 
 .editMsg {
@@ -269,6 +275,7 @@
   font-weight: 600;
   cursor: pointer;
   width: fit-content;
+  min-height: 44px;
 }
 
 .primaryBtn:hover { background: var(--accent-strong); }
@@ -283,6 +290,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   width: fit-content;
+  min-height: 40px;
 }
 
 /* ── Messages ── */

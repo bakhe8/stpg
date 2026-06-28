@@ -7,6 +7,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 40px;
+  width: fit-content;
   transition: var(--transition-fast);
 }
 .back:hover { color: var(--accent-primary); }
@@ -48,19 +50,78 @@
 .healthBadgeWrap {
   position: relative;
   display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   cursor: pointer;
   outline: none;
 }
 
 .healthBadge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
+  min-height: 40px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.manageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.manageLink,
+.inviteButton {
+  align-items: center;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0.45rem 1rem;
+  text-decoration: none;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.manageLink {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.manageLink:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-primary);
+}
+
+.manageLinkPrimary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.inviteButton {
+  background: var(--accent-primary);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.inviteButtonCopied {
+  background: #22c55e;
+}
+
+.inviteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .healthInfoIcon {
@@ -172,6 +233,7 @@
 .decisionLink {
   width: fit-content;
   padding: 9px 14px;
+  min-height: 40px;
   border: 1px solid var(--accent-border);
   border-radius: 10px;
   background: var(--surface);
@@ -208,6 +270,7 @@
   border: none;
   border-radius: 8px;
   padding: 10px;
+  min-height: 40px;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-secondary);
@@ -258,6 +321,38 @@
 }
 .infoRow span:last-child { color: var(--text-primary); font-weight: 500; }
 .infoRow:last-child { border-bottom: none; }
+
+.bankAccountValue {
+  align-items: center;
+  direction: ltr;
+  display: inline-flex;
+  font-family: monospace;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.copyButton {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 14px;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0;
+  transition: var(--transition-fast);
+}
+
+.copyButton:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent-primary);
+}
 
 /* Members */
 .membersList {
@@ -411,6 +506,7 @@
   font-family: inherit;
   font-size: 0.86rem;
   font-weight: 700;
+  min-height: 40px;
   padding: 9px 16px;
 }
 
@@ -595,6 +691,7 @@
     order: 3;
     font-size: 0.8rem;
     padding: 6px 12px;
+    min-height: 40px;
   }
 
   .statsRow {

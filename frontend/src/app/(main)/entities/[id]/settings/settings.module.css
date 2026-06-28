@@ -10,6 +10,10 @@
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  width: fit-content;
 }
 
 .title {
@@ -105,6 +109,7 @@
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
+  min-height: 44px;
 }
 
 .saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -187,6 +192,7 @@
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s;
+  min-height: 44px;
 }
 
 .dangerBtn:hover:not(:disabled) { background: #dc2626; }

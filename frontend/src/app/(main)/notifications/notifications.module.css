@@ -42,6 +42,14 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   cursor: pointer;
+  min-height: 40px;
+  padding-inline: 2px;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-primary);
 }
 
 .markAllBtn {
@@ -54,6 +62,10 @@
   cursor: pointer;
   font-family: inherit;
   transition: var(--transition-fast);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .markAllBtn:hover {

@@ -44,6 +44,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 40px;
   transition: all 0.15s;
 }
 
@@ -130,6 +131,10 @@
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s;
 }
 
@@ -145,6 +150,10 @@
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s;
 }
 
@@ -210,6 +219,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .modalConfirm:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -223,6 +233,7 @@
   border-radius: 10px;
   font-size: 0.9rem;
   cursor: pointer;
+  min-height: 44px;
 }
 
 /* ── Empty / Loading / Error ── */

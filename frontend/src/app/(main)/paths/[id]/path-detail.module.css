@@ -1,5 +1,5 @@
 .page { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-.back { color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; }
+.back { color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; min-height: 40px; width: fit-content; }
 .back:hover { color: var(--accent-primary); }
 
 .header { display: flex; align-items: flex-start; gap: 16px; }
@@ -22,7 +22,7 @@
 .tabActive { background: var(--glass-bg); color: var(--accent-primary); font-weight: 700; }
 
 .tabHeader { display: flex; justify-content: flex-start; }
-.addBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition-fast); }
+.addBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition-fast); min-height: 44px; }
 .addBtn:hover { transform: translateY(-1px); }
 
 .formCard { background: var(--glass-bg);  border: 1px solid var(--glass-border); border-radius: 16px; padding: 22px; /* max-width removed */ }
@@ -34,7 +34,7 @@
 .input { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 13px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; transition: var(--transition-fast); }
 .input:focus { border-color: var(--accent-primary);  }
 .checkRow { display: flex; align-items: center; gap: 8px; padding: 10px 13px; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 10px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary); }
-.submitBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 11px 22px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; align-self: flex-start; transition: var(--transition-fast); }
+.submitBtn { background: var(--accent-primary); color: white; border: none; border-radius: 10px; padding: 11px 22px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; align-self: flex-start; transition: var(--transition-fast); min-height: 44px; }
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Items grid */
@@ -66,7 +66,7 @@
 .decTitle { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
 .decMeta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
 .decStatus { font-size: 0.82rem; font-weight: 600; }
-.decLink { font-size: 0.82rem; color: var(--accent-primary); text-decoration: none; border: 1px solid var(--accent-border); border-radius: 6px; padding: 4px 10px; transition: var(--transition-fast); }
+.decLink { font-size: 0.82rem; color: var(--accent-primary); text-decoration: none; border: 1px solid var(--accent-border); border-radius: 6px; padding: 4px 10px; transition: var(--transition-fast); min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
 .decLink:hover { background: var(--accent-soft); }
 
 /* States */
