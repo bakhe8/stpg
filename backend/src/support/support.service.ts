@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuditAction, SupportSessionStatus } from '@prisma/client';
+import { AuditAction, PlatformRole, SupportSessionStatus } from '@prisma/client';
 
 @Injectable()
 export class SupportService {
@@ -79,7 +79,11 @@ export class SupportService {
 
   async getActiveSessions(
     entityId: string,
-    requester: { id: string; userType: 'tenant' | 'platform' },
+    requester: {
+      id: string;
+      userType: 'tenant' | 'platform';
+      role?: PlatformRole;
+    },
   ) {
     if (requester.userType === 'tenant') {
       const membership = await this.prisma.membership.findFirst({
@@ -92,11 +96,23 @@ export class SupportService {
       }
     }
 
+    if (requester.userType === 'platform') {
+      if (requester.role === PlatformRole.ANALYST) {
+        throw new ForbiddenException(
+          'المحلل يرى مؤشرات مجمعة فقط ولا يرى جلسات دعم تفصيلية',
+        );
+      }
+    }
+
     return this.prisma.supportSession.findMany({
       where: {
         entityId,
         status: SupportSessionStatus.ACTIVE,
         expiresAt: { gt: new Date() },
+        ...(requester.userType === 'platform' &&
+        requester.role === PlatformRole.SUPPORT
+          ? { platformAccountId: requester.id }
+          : {}),
       },
       include: {
         platformAccount: {

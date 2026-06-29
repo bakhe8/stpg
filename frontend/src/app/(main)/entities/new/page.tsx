@@ -107,6 +107,8 @@ export default function EntityWizardPage() {
         type: state.type,
         description: state.description.trim() || undefined,
         templateId: state.templateId || undefined,
+        defaultGovernanceType: state.governanceType || undefined,
+        allowMultiplePaths: state.allowMultiplePaths,
       }) as { id: string };
       setCreatedEntityId(result.id);
       setStep(STEPS.length);

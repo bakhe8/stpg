@@ -33,6 +33,131 @@ export interface PlatformAccessLogEntry {
   platformAccount: { name: string; role: string };
 }
 
+export type PlatformSurfacePriority = "critical" | "urgent" | "normal" | "info";
+export type PlatformSurfaceTone = "positive" | "attention" | "blocked" | "neutral";
+
+export interface PlatformSurfaceCta {
+  label: string;
+  href: string;
+}
+
+export interface PlatformSurfaceMessage {
+  tone: PlatformSurfaceTone;
+  title: string;
+  body: string;
+  nextStep: string;
+}
+
+export interface PlatformSurfaceMetric {
+  id: string;
+  label: string;
+  value: number;
+  caption: string;
+  tone: PlatformSurfaceTone;
+}
+
+export interface PlatformSurfaceCapability {
+  key:
+    | "MANAGE_ENTITY_STATUS"
+    | "RESPOND_TO_APPEALS"
+    | "VIEW_SUPPORT_SCOPE"
+    | "OPEN_SUPPORT_SESSION"
+    | "VIEW_AGGREGATES"
+    | "VIEW_ENTITY_NAMES";
+  label: string;
+  isAllowed: boolean;
+  reason: string;
+}
+
+export interface PlatformSurfaceAction {
+  id: string;
+  priority: PlatformSurfacePriority;
+  title: string;
+  body: string;
+  scopeText?: string;
+  expectedAfterAction: string;
+  cta?: PlatformSurfaceCta;
+}
+
+export interface PlatformSurfaceSupportSession {
+  id: string;
+  entityId?: string;
+  entityName?: string;
+  operatorName?: string;
+  operatorRoleLabel?: string;
+  scope: string;
+  expiresAt: string;
+  statusLabel: string;
+  isOwnSession: boolean;
+  whyShown: string;
+  cta?: PlatformSurfaceCta;
+}
+
+export interface PlatformSurfaceEntityReview {
+  id: string;
+  entityId: string;
+  entityName: string;
+  entityTypeLabel: string;
+  status: PlatformEntity["platformStatus"];
+  statusLabel: string;
+  memberCount: number;
+  reason: string;
+  title: string;
+  body: string;
+  canAct: boolean;
+  cta?: PlatformSurfaceCta;
+}
+
+export interface PlatformSurfaceAccessEvent {
+  id: string;
+  title: string;
+  body: string;
+  accessTypeLabel: string;
+  entityName: string;
+  operatorName: string;
+  scope: string;
+  reason: string;
+  startedAt: string;
+  needsReview: boolean;
+}
+
+export interface PlatformSurfaceAggregateInsight {
+  id: string;
+  title: string;
+  body: string;
+  value: number;
+  tone: PlatformSurfaceTone;
+}
+
+export interface PlatformSurfaceAdvancedTool {
+  href: string;
+  label: string;
+  reason: string;
+  requiredRole: PlatformAccount["role"] | "ANY";
+}
+
+export interface PlatformSurface {
+  generatedAt: string;
+  account: PlatformAccount & {
+    email?: string;
+    roleLabel: string;
+    isActive: boolean;
+  };
+  primaryMessage: PlatformSurfaceMessage;
+  metrics: PlatformSurfaceMetric[];
+  requiredActions: PlatformSurfaceAction[];
+  activeSupportSessions: PlatformSurfaceSupportSession[];
+  entityReviews: PlatformSurfaceEntityReview[];
+  accessEvents: PlatformSurfaceAccessEvent[];
+  aggregateInsights: PlatformSurfaceAggregateInsight[];
+  capabilities: PlatformSurfaceCapability[];
+  advancedTools: PlatformSurfaceAdvancedTool[];
+  diagnostics: {
+    source: "platform-surface-v1";
+    legacyEntityTableAvailable: boolean;
+  };
+}
+
 function getPlatformToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("platformAccessToken");
@@ -97,6 +222,10 @@ export function getEntitiesList(params?: {
   if (params?.status) q.set("status", params.status);
   if (params?.page) q.set("page", String(params.page));
   return platformFetch(`/platform/entities?${q.toString()}`);
+}
+
+export function getPlatformSurface(): Promise<PlatformSurface> {
+  return platformFetch("/platform/surface/me");
 }
 
 export function suspendEntity(

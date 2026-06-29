@@ -1,6 +1,8 @@
 {
   "nav": {
     "dashboard": "لوحة التحكم",
+    "dailySurface": "حالتك الآن",
+    "legacyDashboard": "الواجهة القديمة",
     "portal": "اشتراكاتي",
     "entities": "الكيانات",
     "finance": "المالية",
@@ -20,6 +22,7 @@
     "personalGroup": "مساحتي",
     "operationsGroup": "إدارة وتشغيل",
     "oversightGroup": "رقابة وتحليل",
+    "advancedGroup": "تفصيلي ومقارنة",
     "workspace": "مساحة العمل",
     "closeMenu": "إغلاق القائمة",
     "checkingAccess": "جارٍ التحقق من صلاحيات الوصول…",

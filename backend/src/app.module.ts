@@ -43,6 +43,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { SearchModule } from './search/search.module';
 import { TemporalModule } from './temporal/temporal.module';
 import { SupportModule } from './support/support.module';
+import { WorkSurfaceModule } from './work-surface/work-surface.module';
+import { PlatformSurfaceModule } from './platform-surface/platform-surface.module';
 
 function parsePositiveInt(value: string | undefined, fallback: number) {
   if (!value) {
@@ -99,6 +101,8 @@ const throttleLimit = parsePositiveInt(
     SearchModule,
     TemporalModule,
     SupportModule,
+    WorkSurfaceModule,
+    PlatformSurfaceModule,
   ],
   controllers: [AppController],
   providers: [

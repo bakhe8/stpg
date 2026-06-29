@@ -7,150 +7,78 @@ import { useTranslations } from "next-intl";
 import styles from "./appshell.module.css";
 import { getMe, logout } from "../../lib/api/auth";
 import { Entity, getEntities } from "../../lib/api/entities";
-import {
-  BENEFICIARY_ROLES,
-  COMMITTEE_ROLES,
-  FINANCE_ROLES,
-  MemberRole,
-  OVERSIGHT_ROLES,
-  ADMIN_ROLES,
-  AUDITOR_ROLES,
-  hasAnyRole,
-} from "../../lib/access";
+import { getMyWorkSurface, WorkSurface } from "../../lib/api/work-surface";
+import { MemberRole, hasAnyRole } from "../../lib/access";
 import { setupPushNotifications, unsubscribePushNotifications } from "../../lib/push";
 import GlobalSearch from "../shared/GlobalSearch";
 import BottomNav from "./BottomNav";
+import {
+  buildAdvancedNavItems,
+  buildDailyNavItems,
+  buildNewUserNavItems,
+  buildRouteAccessItems,
+  canAccessNavItem,
+  findActiveNavItem,
+  selectBottomNavItems,
+  type NavItem,
+  type SurfaceNavLabels,
+} from "./surfaceNavigation";
 
-interface NavItem {
-  href: string;
-  label: string;
-  icon: string;
-  roles?: readonly MemberRole[];
-}
-
-interface NavSection {
-  label: string;
-  items: NavItem[];
-}
+const TOOL_SEARCH_ROLES: readonly MemberRole[] = [
+  "FOUNDER",
+  "ADMIN",
+  "TREASURER",
+  "AUDITOR",
+  "COMMITTEE_MEMBER",
+];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const t = useTranslations("nav");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entities, setEntities] = useState<Entity[]>([]);
+  const [surface, setSurface] = useState<WorkSurface | null>(null);
   const [accessLoading, setAccessLoading] = useState(true);
   const [personName, setPersonName] = useState("");
 
-  const navSections: NavSection[] = [
-    {
-      label: t("personalGroup"),
-      items: [
-        { href: "/dashboard", label: t("dashboard"), icon: "⌂" },
-        { href: "/portal", label: t("portal"), icon: "◎" },
-        { href: "/entities", label: t("entities"), icon: "◇" },
-        { href: "/finance", label: t("finance"), icon: "◫" },
-        { href: "/subscriptions", label: t("subscriptions"), icon: "≋" },
-        { href: "/decisions", label: t("decisions"), icon: "✓" },
-        { href: "/disputes", label: t("disputes"), icon: "↔" },
-        { href: "/documents", label: t("documents"), icon: "▤" },
-        { href: "/notifications", label: t("notifications"), icon: "◌" },
-      ],
-    },
-    {
-      label: t("operationsGroup"),
-      items: [
-        {
-          href: "/review-center",
-          label: t("reviewCenter"),
-          icon: "⚡",
-          roles: ADMIN_ROLES,
-        },
-        {
-          href: "/disbursement-requests",
-          label: t("disbursementRequests"),
-          icon: "＋",
-        },
-        {
-          href: "/committees",
-          label: t("committees"),
-          icon: "◉",
-          roles: COMMITTEE_ROLES,
-        },
-        {
-          href: "/beneficiaries",
-          label: t("beneficiaries"),
-          icon: "♙",
-          roles: BENEFICIARY_ROLES,
-        },
-        {
-          href: "/disbursements",
-          label: t("disbursements"),
-          icon: "↗",
-          roles: FINANCE_ROLES,
-        },
-        {
-          href: "/rules",
-          label: t("rules"),
-          icon: "§",
-          roles: ADMIN_ROLES,
-        },
-      ],
-    },
-    {
-      label: t("oversightGroup"),
-      items: [
-        {
-          href: "/health",
-          label: t("health"),
-          icon: "♡",
-          roles: ADMIN_ROLES,
-        },
-        {
-          href: "/analytics",
-          label: t("analytics"),
-          icon: "⌁",
-          roles: OVERSIGHT_ROLES,
-        },
-        {
-          href: "/auditor",
-          label: t("auditor"),
-          icon: "⌕",
-          roles: AUDITOR_ROLES,
-        },
-      ],
-    },
-  ];
+  const labels: SurfaceNavLabels = {
+    dailySurface: t("dailySurface"),
+    notifications: t("notifications"),
+    entities: t("entities"),
+    reviewCenter: t("reviewCenter"),
+    finance: t("finance"),
+    auditor: t("auditor"),
+    committees: t("committees"),
+    legacyDashboard: t("legacyDashboard"),
+  };
 
   const hasEntities = entities.length > 0;
-  const allItems = navSections.flatMap((section) => section.items);
-
-  // للمستخدم الجديد بلا كيانات: اعرض فقط dashboard + entities
-  const newUserItems: NavItem[] = [
-    { href: '/dashboard', label: t('dashboard'), icon: '⌂' },
-    { href: '/entities', label: t('entities'), icon: '◇' },
-    { href: '/notifications', label: t('notifications'), icon: '◌' },
+  const dailyItems = hasEntities
+    ? buildDailyNavItems(surface, labels)
+    : buildNewUserNavItems(labels);
+  const advancedItems = hasEntities ? buildAdvancedNavItems(surface, labels) : [];
+  const allItems = [
+    ...dailyItems,
+    ...advancedItems,
+    ...buildRouteAccessItems(labels),
   ];
-
-  const visibleSections = hasEntities
-    ? navSections
-        .map((section) => ({
-          ...section,
-          items: section.items.filter(
-            (item) => !item.roles || hasAnyRole(entities, item.roles),
-          ),
-        }))
-        .filter((section) => section.items.length > 0)
-    : [{ label: t('personalGroup'), items: newUserItems }];
-  const activeItem = allItems.find((item) => pathname.startsWith(item.href));
-  const canAccessCurrent =
-    !activeItem?.roles || hasAnyRole(entities, activeItem.roles);
+  const bottomItems = selectBottomNavItems(dailyItems);
+  const showGlobalSearch =
+    hasEntities && hasAnyRole(entities, TOOL_SEARCH_ROLES);
+  const activeItem = findActiveNavItem(pathname, allItems);
+  const canAccessCurrent = canAccessNavItem(activeItem, entities);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getEntities(), getMe()])
-      .then(([nextEntities, person]) => {
+    Promise.all([
+      getEntities(),
+      getMe(),
+      getMyWorkSurface().catch(() => null),
+    ])
+      .then(([nextEntities, person, nextSurface]) => {
         if (cancelled) return;
         setEntities(nextEntities);
+        setSurface(nextSurface);
         setPersonName(person.name);
         localStorage.setItem("personName", person.name);
         localStorage.setItem("personId", person.id);
@@ -209,25 +137,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className={styles.nav}>
-          {visibleSections.map((section) => (
-            <div key={section.label} className={styles.navSection}>
-              <div className={styles.navSectionLabel}>{section.label}</div>
-              {section.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`${styles.navItem} ${
-                    pathname.startsWith(item.href)
-                      ? styles.navItemActive
-                      : ""
-                  }`}
-                >
-                  <span className={styles.navIcon}>{item.icon}</span>
-                  <span className={styles.navLabel}>{item.label}</span>
-                </Link>
-              ))}
-            </div>
-          ))}
+          <div className={styles.navSection}>
+            <div className={styles.navSectionLabel}>{t("personalGroup")}</div>
+            {dailyItems.map((item) => (
+              <ShellNavLink key={item.href} item={item} pathname={pathname} />
+            ))}
+          </div>
+          {advancedItems.length > 0 ? (
+            <details className={styles.navAdvanced}>
+              <summary className={styles.navAdvancedSummary}>
+                {t("advancedGroup")}
+              </summary>
+              <p className={styles.navAdvancedHint}>
+                تظهر هذه الأدوات عند الحاجة أو للمقارنة، وليست قائمة العمل
+                اليومية.
+              </p>
+              <div className={styles.navAdvancedBody}>
+                {advancedItems.map((item) => (
+                  <ShellNavLink
+                    key={item.href}
+                    item={item}
+                    pathname={pathname}
+                  />
+                ))}
+              </div>
+            </details>
+          ) : null}
           {!hasEntities && !accessLoading && (
             <div className={styles.navHint}>
               {t("joinOrCreateHint")}
@@ -276,7 +211,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 {activeItem?.label ?? "CollectiveTrustOS"}
               </div>
             </div>
-            <GlobalSearch />
+            {showGlobalSearch ? <GlobalSearch /> : null}
           </div>
         </header>
 
@@ -298,7 +233,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <BottomNav onMoreClick={() => setSidebarOpen(true)} />
+      <BottomNav items={bottomItems} onMoreClick={() => setSidebarOpen(true)} />
     </div>
+  );
+}
+
+function ShellNavLink({
+  item,
+  pathname,
+}: {
+  item: NavItem;
+  pathname: string;
+}) {
+  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  return (
+    <Link
+      href={item.href}
+      className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+    >
+      <span className={styles.navIcon}>{item.icon}</span>
+      <span className={styles.navLabel}>{item.label}</span>
+    </Link>
   );
 }

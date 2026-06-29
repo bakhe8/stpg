@@ -6,8 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { getPlatformAccount, platformLogout } from '../../lib/api/platform';
 import styles from './platform.module.css';
 
-const NAV_LINKS = [
-  { href: '/platform', label: 'الكيانات', icon: '⬡' },
+const BASE_NAV_LINKS = [{ href: '/platform', label: 'سطح المنصة', icon: '⬡' }];
+const MANAGER_NAV_LINKS = [
   { href: '/platform/appeals', label: 'الاعتراضات', icon: '⚖' },
 ];
 
@@ -18,11 +18,17 @@ export default function PlatformLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const account = !isLoginPath(pathname) ? getPlatformAccount() : null;
+  const canReviewAppeals =
+    account?.role === 'OWNER' || account?.role === 'SUPER_ADMIN';
+  const navLinks = canReviewAppeals
+    ? [...BASE_NAV_LINKS, ...MANAGER_NAV_LINKS]
+    : BASE_NAV_LINKS;
 
   useEffect(() => {
     const isLoginPage = pathname === '/platform/login';
-    const account = getPlatformAccount();
-    if (!account && !isLoginPage) {
+    const nextAccount = getPlatformAccount();
+    if (!nextAccount && !isLoginPage) {
       void router.push('/platform/login');
     }
   }, [pathname, router]);
@@ -50,7 +56,7 @@ export default function PlatformLayout({
       </div>
       {!isLoginPage && (
         <nav className={styles.platformNav}>
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -67,4 +73,8 @@ export default function PlatformLayout({
       <main className={styles.platformMain}>{children}</main>
     </div>
   );
+}
+
+function isLoginPath(pathname: string) {
+  return pathname === '/platform/login';
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, HttpCode, Req } from '@nestjs/common';
+import { Controller, Post, Body, Headers, HttpCode, Req, UnauthorizedException } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -42,7 +42,13 @@ export class PaymentsController {
   @Post('webhook/moyasar')
   @HttpCode(200)
   @ApiOperation({ summary: 'Moyasar webhook endpoint' })
-  handleMoyasarWebhook(@Body() payload: unknown) {
-    return this.paymentsService.handleWebhook(GatewayProvider.MOYASAR, payload);
+  async handleMoyasarWebhook(@Body() payload: unknown) {
+    const result = await this.paymentsService.handleWebhook(GatewayProvider.MOYASAR, payload);
+    // رفض صريح بـ 401 عند توقيع خاطئ أو secret_token مفقود
+    // (يُبلِّغ Moyasar بالرفض بدلاً من 200 صامت)
+    if (!result.success && result.reason?.includes('Invalid signature')) {
+      throw new UnauthorizedException('Invalid Moyasar webhook secret_token');
+    }
+    return result;
   }
 }

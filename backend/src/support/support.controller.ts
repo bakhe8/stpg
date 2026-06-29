@@ -14,6 +14,8 @@ import { AllowPlatform } from '../identity/auth/decorators/allow-platform.decora
 import { CurrentPlatformUser } from '../identity/auth/decorators/current-platform-user.decorator';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { CreateSupportSessionDto } from './dto/support-session.dto';
+import { ForbiddenException } from '@nestjs/common';
+import { PlatformRole } from '@prisma/client';
 
 @Controller('support')
 export class SupportController {
@@ -24,7 +26,12 @@ export class SupportController {
   @UseGuards(JwtGuard)
   async getSessions(
     @Param('entityId', ParseUUIDPipe) entityId: string,
-    @CurrentUser() user: { id: string; userType: 'tenant' | 'platform' },
+    @CurrentUser()
+    user: {
+      id: string;
+      userType: 'tenant' | 'platform';
+      role?: PlatformRole;
+    },
   ) {
     return this.supportService.getActiveSessions(entityId, user);
   }
@@ -34,9 +41,17 @@ export class SupportController {
   @UseGuards(JwtGuard, PlatformGuard)
   async createSession(
     @Param('entityId', ParseUUIDPipe) entityId: string,
-    @CurrentPlatformUser() operator: { id: string },
+    @CurrentPlatformUser() operator: { id: string; role: PlatformRole },
     @Body() dto: CreateSupportSessionDto,
   ) {
+    if (
+      operator.role !== PlatformRole.OWNER &&
+      operator.role !== PlatformRole.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(
+        'فتح جلسات الدعم يتطلب OWNER أو SUPER_ADMIN حتى لا يفتح الدعم أو التحليل نطاقاً لنفسه',
+      );
+    }
     return this.supportService.requestSupportAccess(
       entityId,
       operator.id,
@@ -51,7 +66,16 @@ export class SupportController {
   async revokeSession(
     @Param('entityId', ParseUUIDPipe) entityId: string,
     @Param('id', ParseUUIDPipe) sessionId: string,
+    @CurrentPlatformUser() operator: { role: PlatformRole },
   ) {
+    if (
+      operator.role !== PlatformRole.OWNER &&
+      operator.role !== PlatformRole.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(
+        'إلغاء جلسات الدعم يتطلب OWNER أو SUPER_ADMIN',
+      );
+    }
     return this.supportService.revokeSupportAccess(sessionId, entityId);
   }
 }

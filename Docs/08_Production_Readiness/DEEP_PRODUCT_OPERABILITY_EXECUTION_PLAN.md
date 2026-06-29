@@ -4,7 +4,7 @@
 **التاريخ:** 2026-06-28
 **النطاق:** `C:\Users\Bakheet\Projects\CollectiveTrustOS\STGP`
 **الغرض:** تحويل تقرير التدقيق العميق من تحليل إلى Backlog تنفيذي شامل، قابل للتنفيذ والاختبار، دون إسقاط أي ملاحظة.
-**حالة التنفيذ:** تم تنفيذ البنود وتحويل جميع عناصر Inventory إلى `Verified` بتاريخ 2026-06-28 بعد مرور build backend/frontend، كامل اختبارات backend، اختبارات Vitest، `seed:validate:docker`، وفحص Playwright للأدوار 18/18.
+**حالة التنفيذ:** تم تنفيذ البنود وتحويل جميع عناصر Inventory إلى `Verified` بتاريخ 2026-06-28، ثم أعيد تثبيت معيار تجربة المستخدم بتاريخ 2026-06-29 عبر SLC-11/SLC-12: تقليل التنقل اليومي إلى Role Surfaces، وتحويل الأدوات العميقة إلى Advanced، وتحديث `test:ux:roles` ليقيس أسئلة Surface اليومية بدل routes قديمة. مر build backend/frontend، كامل اختبارات backend، اختبارات Vitest، `seed:validate:docker`، وفحص Playwright للأدوار 18/18.
 
 ---
 
@@ -97,6 +97,37 @@
 | F-061 | الجوال يجب أن يبقى جزءاً من كل فحص UX                               | منهجية، Playwright، مطلوب المستخدم                                | Testing / UX                   | Medium   | نعم    | لا   | لا    | نعم    | نعم     | لا              | Verified    | Codex | This commit | UX role audit يفحص desktop وmobile لكل route ومر 18/18                                                                                     | 2026-06-28   |
 | F-062 | المتصفح الداخلي لم يكن متاحاً ويجب توثيق fallback                   | منهجية                                                            | Testing / Documentation        | Low      | لا     | لا   | لا    | لا     | نعم     | لا              | Verified | Codex | This commit | أضيف `Docs/08_Production_Readiness/Test_Runbook.md` وفيه سياسة Browser fallback: محاولة in-app browser أولاً، توثيق سبب الفشل، ثم Playwright مع screenshots خارج repo. وثق الحالة المرصودة `browser.documentation is not a function` بتاريخ 2026-06-28، وربط المستند من `Deployment_Decisions.md` | 2026-06-28   |
 | F-063 | نقاط القوة يجب أن تتحول إلى guardrails لا تضيع                      | أفضل 5 نقاط قوة                                                   | Documentation / Testing        | Medium   | نعم    | نعم  | نعم   | لا     | نعم     | لا              | Verified | Codex | This commit | أضيف `Docs/08_Production_Readiness/Product_Engineering_Guardrails.md` يحول نقاط القوة إلى guardrails: Ledger First, Governance Before Money, relationship-based rights, seed stories, role coverage 18/18, audit timeline, search permission filtering, mock provider boundary, UX evidence required. وربط المستند من `Deployment_Decisions.md` | 2026-06-28   |
+
+---
+
+## تحديث Surface و UX بتاريخ 2026-06-29
+
+بعد إغلاق خطة التدقيق الأصلية، ظهر معيار منتج أهم: لا يكفي أن تكون كل routes القديمة تعمل؛ يجب أن يرى كل مستخدم ما يحتاجه الآن فقط، بينما تبقى أدوات النظام العميقة في الخلفية أو داخل Advanced.
+
+### ما تم تثبيته
+
+- `SLC-11`: تم تقليل التنقل اليومي في `AppShell` و`BottomNav` حسب `work-surface`، بحيث يرى العضو العادي `حالتك الآن` و`الإشعارات` فقط، ويرى كل دور مختص رابط Surface واحداً: `مركز المراجعات` للمؤسس/المسؤول، `المالية` لأمين الصندوق، `المراجع` للمدقق، و`اللجان` لعضو اللجنة.
+- `SLC-11`: تم توسيع `advancedTools` في `GET /api/work-surface/me` حتى تبقى الصفحات العميقة متاحة لمن يحتاجها داخل `تفصيلي ومقارنة`، لا كقائمة عمل يومية.
+- `SLC-12`: تم تحديث `frontend/scripts/ux-role-audit.spec.cjs` ليقيس أسئلة التشغيل اليومية: ماذا علي الآن؟ ماذا أستفيد؟ ما المطلوب مني؟ ما الممنوع ولماذا؟ هل يوجد خلط بين كيانات؟ هل الجوال سليم؟ وهل توجد 429/403/500 غير متوقعة؟
+- `SLC-12`: لم يعد حذف route قديم أو إخفاؤه من التنقل اليومي فشلاً إذا استبدل بـ Surface أبسط يجيب عن حاجة المستخدم.
+
+### البنود المتأثرة من Inventory
+
+- `F-012`: ما زال 429 مغلقاً، وتمت إعادة التحقق عبر اختبار Surface الجديد 18/18 بدون 429.
+- `F-013`: لا يغلق بند الصلاحيات إلا بعد 18/18؛ آخر فحص Surface مر `passedUsers=18`, `failedUsers=0`, `totalIssues=0`.
+- `F-014`: تقرير Playwright أصبح يخرج `summary.json`, `index.md`, screenshots، وقائمة `questionsCovered` بدل تقرير routes فقط.
+- `F-052`: الحقوق والالتزامات صارت تقاس من زاوية Surface: `primaryMessage`, `requiredActions`, `benefitSummary`, `blockedCapabilities`, `nonOperationalSummary`, و`contextSummaries`.
+- `F-061`: الجوال لا يزال جزءاً من كل فحص، لكنه الآن يفحص `mobileBottomNav` وسلامة dashboard surface لا كل route قديم.
+
+### دليل التحقق
+
+- `frontend npm run build`: نجح بتاريخ 2026-06-29.
+- `frontend npm test`: نجح، 2 files / 6 tests.
+- `backend npm run build`: نجح.
+- `backend npm test -- --runInBand`: نجح، 25 suites / 93 tests.
+- `frontend npm run test:ux:roles`: نجح 18/18 خلال 1.4 دقيقة.
+- مخرجات Playwright Surface audit: `%TEMP%\stgp-ux-role-surface-audit-slc12-verified-20260629`.
+- ملخص Playwright: `passedUsers=18`, `failedUsers=0`, `totalIssues=0`.
 
 ---
 

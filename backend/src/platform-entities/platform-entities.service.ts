@@ -2,22 +2,46 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { EntityPlatformStatus } from '@prisma/client';
+import {
+  EntityPlatformStatus,
+  PlatformRole,
+  SupportSessionStatus,
+} from '@prisma/client';
 
 @Injectable()
 export class PlatformEntitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters: { status?: string; page?: number; limit?: number }) {
+  async findAll(filters: {
+    status?: string;
+    page?: number;
+    limit?: number;
+    operator?: { id: string; role: PlatformRole };
+  }) {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where = filters.status
-      ? { platformStatus: filters.status as EntityPlatformStatus }
-      : {};
+    if (filters.operator?.role === PlatformRole.ANALYST) {
+      throw new ForbiddenException(
+        'المحلل يستخدم /platform/surface/me للمؤشرات المجمعة ولا يرى جدول الكيانات',
+      );
+    }
+
+    const scopedEntityIds =
+      filters.operator?.role === PlatformRole.SUPPORT
+        ? await this.activeSupportEntityIds(filters.operator.id)
+        : undefined;
+
+    const where = {
+      ...(filters.status
+        ? { platformStatus: filters.status as EntityPlatformStatus }
+        : {}),
+      ...(scopedEntityIds ? { id: { in: scopedEntityIds } } : {}),
+    };
 
     const [entities, total] = await Promise.all([
       this.prisma.entity.findMany({
@@ -40,6 +64,18 @@ export class PlatformEntitiesService {
     ]);
 
     return { entities, total, page, limit };
+  }
+
+  private async activeSupportEntityIds(platformAccountId: string) {
+    const sessions = await this.prisma.supportSession.findMany({
+      where: {
+        platformAccountId,
+        status: SupportSessionStatus.ACTIVE,
+        expiresAt: { gt: new Date() },
+      },
+      select: { entityId: true },
+    });
+    return [...new Set(sessions.map((session) => session.entityId))];
   }
 
   async suspend(

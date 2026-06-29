@@ -1,6 +1,8 @@
 {
   "nav": {
     "dashboard": "Dashboard",
+    "dailySurface": "Your Now",
+    "legacyDashboard": "Legacy Dashboard",
     "portal": "My Subscriptions",
     "entities": "Entities",
     "finance": "Finance",
@@ -20,6 +22,7 @@
     "personalGroup": "My Space",
     "operationsGroup": "Operations & Management",
     "oversightGroup": "Oversight & Analytics",
+    "advancedGroup": "Details & Compare",
     "workspace": "Workspace",
     "closeMenu": "Close Menu",
     "checkingAccess": "Checking access permissions…",

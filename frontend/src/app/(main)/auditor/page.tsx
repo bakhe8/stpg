@@ -101,15 +101,42 @@ export default function AuditorPage() {
       try {
         const data = await getEntities();
         const allowedEntities = filterEntitiesByRoles(data, AUDITOR_ROLES);
+        const params =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search)
+            : null;
+        const requestedEntityId = params?.get("entityId");
         setEntities(allowedEntities);
         if (allowedEntities.length > 0) {
-          setSelectedEntityId(allowedEntities[0].id);
+          const requestedEntity = allowedEntities.find(
+            (entity) => entity.id === requestedEntityId,
+          );
+          setSelectedEntityId(requestedEntity?.id ?? allowedEntities[0].id);
         }
       } catch (err) {
         console.error("Failed to load entities", err);
       }
     }
     loadEntities();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedTab = params.get("tab");
+    const validTabs = [
+      "operations",
+      "documents",
+      "decisions",
+      "exceptions",
+      "conflicts",
+      "appeals",
+      "reports",
+      "auditLogs",
+    ];
+    if (requestedTab && validTabs.includes(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
   }, []);
 
   useEffect(() => {

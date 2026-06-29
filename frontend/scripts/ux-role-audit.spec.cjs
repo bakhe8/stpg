@@ -8,7 +8,7 @@ const API_URL = process.env.API_URL || "http://localhost:3001/api";
 const STAMP = new Date().toISOString().replace(/[:.]/g, "-");
 const OUT_DIR =
   process.env.STGP_UX_OUT_DIR ||
-  path.join(os.tmpdir(), `stgp-ux-role-audit-${STAMP}`);
+  path.join(os.tmpdir(), `stgp-ux-role-surface-audit-${STAMP}`);
 
 const DEFAULT_USERS = [
   "seed.ahmed.family",
@@ -36,12 +36,165 @@ const USERS = (process.env.STGP_UX_USERS || DEFAULT_USERS.join(","))
   .map((value) => value.trim())
   .filter(Boolean);
 
-const TEST_TIMEOUT_MS = Number(process.env.STGP_UX_TEST_TIMEOUT_MS || 240000);
+const TEST_TIMEOUT_MS = Number(process.env.STGP_UX_TEST_TIMEOUT_MS || 180000);
 const RETRY_LIMIT = Number(process.env.STGP_UX_RETRY_LIMIT || 3);
 const RETRY_BASE_MS = Number(process.env.STGP_UX_RETRY_BASE_MS || 700);
 
+const MEMBER_SURFACES = new Set([
+  "MEMBER",
+  "MULTI_ENTITY_MEMBER",
+  "CONDITIONAL_MEMBER",
+  "SUSPENDED_MEMBER",
+  "EXITED_MEMBER",
+  "SUPPORTER_ONLY",
+  "READ_ONLY_MEMBER",
+  "PENDING_REVIEW_MEMBER",
+]);
+
+const DAILY_NAV_BY_SURFACE = {
+  FOUNDER: {
+    required: ["حالتك الآن", "مركز المراجعات", "الإشعارات"],
+    forbidden: [
+      "المالية",
+      "المراجع",
+      "النزاعات",
+      "القرارات",
+      "اللجان",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+  ADMIN: {
+    required: ["حالتك الآن", "مركز المراجعات", "الإشعارات"],
+    forbidden: [
+      "المالية",
+      "المراجع",
+      "النزاعات",
+      "القرارات",
+      "اللجان",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+  TREASURER: {
+    required: ["حالتك الآن", "المالية", "الإشعارات"],
+    forbidden: [
+      "مركز المراجعات",
+      "المراجع",
+      "النزاعات",
+      "القرارات",
+      "اللجان",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+  AUDITOR: {
+    required: ["حالتك الآن", "المراجع", "الإشعارات"],
+    forbidden: [
+      "مركز المراجعات",
+      "المالية",
+      "النزاعات",
+      "القرارات",
+      "اللجان",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+  COMMITTEE_MEMBER: {
+    required: ["حالتك الآن", "اللجان", "الإشعارات"],
+    forbidden: [
+      "مركز المراجعات",
+      "المالية",
+      "المراجع",
+      "النزاعات",
+      "القرارات",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+  MEMBER: {
+    required: ["حالتك الآن", "الإشعارات"],
+    forbidden: [
+      "مركز المراجعات",
+      "المالية",
+      "المراجع",
+      "النزاعات",
+      "القرارات",
+      "اللجان",
+      "الصرف",
+      "الكيانات",
+      "المستفيدون",
+      "التحليلات",
+      "القواعد",
+      "المستندات",
+    ],
+  },
+};
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function sanitize(name) {
+  return name
+    .replace(/[^a-z0-9_-]+/gi, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function includesText(haystack, needle) {
+  const cleanNeedle = normalizeText(needle);
+  if (!cleanNeedle) return false;
+  return normalizeText(haystack).includes(cleanNeedle);
+}
+
+function containsAny(bodyText, candidates) {
+  return candidates.some((candidate) => includesText(bodyText, candidate));
+}
+
+function navLabel(item) {
+  return normalizeText(item).replace(/^[^\p{L}\p{N}]+/u, "").trim();
+}
+
+function hasNavLabel(items, label) {
+  return items.some((item) => navLabel(item) === label);
+}
+
+async function gotoWithRetry(page, url, options) {
+  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt += 1) {
+    const response = await page.goto(url, options);
+    if (response?.status() === 429 && attempt < RETRY_LIMIT) {
+      await sleep(RETRY_BASE_MS * (attempt + 1));
+      continue;
+    }
+    return response;
+  }
+
+  return null;
 }
 
 async function login(page, username) {
@@ -53,7 +206,8 @@ async function login(page, username) {
   await page.getByRole("button", { name: /دخول تطويري|Dev/i }).click();
   await page.waitForURL("**/dashboard", { timeout: 30000 });
   await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(600);
+  await page.waitForSelector("aside nav", { timeout: 15000 });
+  await page.waitForTimeout(900);
 }
 
 async function apiGet(token, endpoint, entityId) {
@@ -77,294 +231,52 @@ async function apiGet(token, endpoint, entityId) {
   throw new Error(`${endpoint} exhausted retry attempts`);
 }
 
-function isOperational(entity) {
-  return !entity.platformStatus || entity.platformStatus === "ACTIVE";
-}
-
-function isReadableDetail(entity) {
-  return entity.isActive !== false && entity.platformStatus !== "SUSPENDED";
-}
-
-function hasActiveRole(entities, roles) {
-  return entities.some(
-    (entity) => isOperational(entity) && roles.includes(entity.myRole),
-  );
-}
-
-async function firstAccessibleWalletAndPath(token, entities) {
-  for (const entity of entities.filter(isOperational)) {
-    const wallets = await apiGet(
-      token,
-      `/entities/${entity.id}/wallets`,
-      entity.id,
-    ).catch(() => []);
-    if (!wallets.length) continue;
-
-    for (const wallet of wallets) {
-      const paths = await apiGet(
-        token,
-        `/wallets/${wallet.id}/paths`,
-        entity.id,
-      ).catch(() => []);
-      if (paths.length) return { entity, wallet, path: paths[0] };
-    }
-    return { entity, wallet: wallets[0], path: null };
-  }
-  return { entity: null, wallet: null, path: null };
-}
-
-async function discoverRoutes(page, username) {
+async function readSession(page) {
   const token = await page.evaluate(() => localStorage.getItem("accessToken"));
   if (!token) throw new Error("missing access token after login");
 
-  const entities = await apiGet(token, "/entities/mine");
-  if (!entities.length) throw new Error("no entities discovered for audit");
+  const [surface, entities] = await Promise.all([
+    apiGet(token, "/work-surface/me"),
+    apiGet(token, "/entities/mine"),
+  ]);
 
-  const subscriptions = await apiGet(token, "/subscriptions")
-    .then((value) => (Array.isArray(value) ? value : [value]))
-    .catch(() => []);
+  return { token, surface, entities };
+}
 
-  const primary =
-    entities.find(
-      (entity) =>
-        isOperational(entity) &&
-        (entity.myRole === "FOUNDER" || entity.myRole === "ADMIN"),
-    ) ||
-    entities.find(isOperational) ||
-    entities[0];
+async function visibleChromeState(page) {
+  return page.evaluate(() => {
+    const visible = (el) => {
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    };
+    const clean = (el) => el.innerText.replace(/\s+/g, " ").trim();
 
-  const routes = [
-    { label: "dashboard", url: "/dashboard" },
-    { label: "profile", url: "/profile" },
-    { label: "notifications", url: "/notifications" },
-    { label: "wallets", url: "/wallets" },
-    { label: "entities", url: "/entities" },
-  ];
-
-  for (const entity of entities.filter(isReadableDetail)) {
-    routes.push({
-      label: `entity-detail-${entity.type}-${entity.myRole}-${entity.platformStatus || "ACTIVE"}`,
-      url: `/entities/${entity.id}`,
-    });
-  }
-
-  if (
-    isOperational(primary) &&
-    (primary.myRole === "FOUNDER" || primary.myRole === "ADMIN")
-  ) {
-    routes.push(
-      {
-        label: "platform-access",
-        url: `/entities/${primary.id}/platform-access`,
-      },
-      { label: "entity-settings", url: `/entities/${primary.id}/settings` },
-      { label: "review", url: `/entities/${primary.id}/review` },
-    );
-  }
-
-  if (hasActiveRole(entities, ["TREASURER"])) {
-    routes.push({ label: "finance", url: "/finance" });
-  }
-
-  if (hasActiveRole(entities, ["AUDITOR"])) {
-    routes.push({ label: "auditor", url: "/auditor" });
-  }
-
-  if (hasActiveRole(entities, ["COMMITTEE_MEMBER"])) {
-    routes.push({ label: "committees", url: "/committees" });
-    routes.push({ label: "disbursements", url: "/disbursements" });
-  }
-
-  if (entities.some((entity) => entity.myRole === "MEMBER")) {
-    routes.push({ label: "portal", url: "/portal" });
-    routes.push({ label: "subscriptions", url: "/subscriptions" });
-  }
-
-  const walletContext = await firstAccessibleWalletAndPath(token, entities);
-  if (walletContext.wallet?.id) {
-    routes.push({
-      label: "wallet-detail",
-      url: `/wallets/${walletContext.wallet.id}`,
-    });
-  }
-  if (walletContext.path?.id) {
-    routes.push({
-      label: "path-detail",
-      url: `/paths/${walletContext.path.id}`,
-    });
-  }
-
-  const disputes = primary?.id
-    ? await apiGet(token, `/disputes?entityId=${primary.id}`, primary.id).catch(
-        () => [],
+    return {
+      dailyLinks: Array.from(document.querySelectorAll("aside nav a"))
+        .filter(visible)
+        .map(clean)
+        .filter(Boolean),
+      advancedSummaries: Array.from(
+        document.querySelectorAll("aside nav summary"),
       )
-    : [];
-  if (disputes[0]?.id) {
-    routes.push({
-      label: "dispute-detail",
-      url: `/disputes/${disputes[0].id}`,
-    });
-  }
-
-  const expectations = buildExpectations(username, entities, subscriptions);
-  return { routes: dedupeRoutes(routes), expectations };
-}
-
-function buildExpectations(username, entities, subscriptions) {
-  const expectations = [];
-  const entityTags = entities.map(
-    (entity) =>
-      `${entity.type}:${entity.myRole}:${entity.platformStatus || "ACTIVE"}`,
-  );
-
-  const push = (type, ok, detail) => expectations.push({ type, ok, detail });
-
-  if (username === "seed.faisal.overlap") {
-    push(
-      "multi-entity",
-      entities.length >= 2,
-      entities.map((entity) => entity.name),
-    );
-  }
-  if (username === "seed.khaled.suspended") {
-    push(
-      "suspended-subscription",
-      subscriptions.some((item) => item?.state === "SUSPENDED"),
-      subscriptions.map((item) => item?.state),
-    );
-  }
-  if (username === "seed.abdullah.building") {
-    push(
-      "building-founder",
-      entities.some(
-        (entity) => entity.type === "BUILDING" && entity.myRole === "FOUNDER",
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.yahya.neighborhood") {
-    push(
-      "neighborhood-founder",
-      entities.some(
-        (entity) =>
-          entity.type === "NEIGHBORHOOD" && entity.myRole === "FOUNDER",
-      ),
-      entityTags,
-    );
-    push(
-      "pending-review-entity",
-      entities.some((entity) => entity.platformStatus === "PENDING_REVIEW"),
-      entityTags,
-    );
-  }
-  if (username === "seed.fahad.case") {
-    push(
-      "case-campaign-readonly",
-      entities.some(
-        (entity) =>
-          entity.type === "CAMPAIGN" && entity.platformStatus === "READ_ONLY",
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.omar.youth") {
-    push(
-      "community-suspended-admin",
-      entities.some(
-        (entity) =>
-          entity.type === "COMMUNITY" &&
-          entity.myRole === "ADMIN" &&
-          entity.platformStatus === "SUSPENDED",
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.huda.exited") {
-    push(
-      "exited-subscription-covered",
-      subscriptions.every((item) => item?.state !== "EXITED"),
-      subscriptions.map((item) => item?.state),
-    );
-  }
-  if (username === "seed.amal.conditional") {
-    push(
-      "conditional-subscription",
-      subscriptions.some((item) => item?.state === "CONDITIONAL"),
-      subscriptions.map((item) => item?.state),
-    );
-  }
-  if (username === "seed.mariam.family") {
-    push(
-      "suspended-community-member",
-      entities.some(
-        (entity) =>
-          entity.type === "COMMUNITY" &&
-          entity.myRole === "MEMBER" &&
-          entity.platformStatus === "SUSPENDED",
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.abdulrahman.tribe") {
-    push(
-      "tribe-founder",
-      entities.some(
-        (entity) => entity.type === "TRIBE" && entity.myRole === "FOUNDER",
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.mona.building") {
-    push(
-      "building-admin-or-treasurer",
-      entities.some(
-        (entity) =>
-          entity.type === "BUILDING" &&
-          (entity.myRole === "ADMIN" || entity.myRole === "TREASURER"),
-      ),
-      entityTags,
-    );
-  }
-  if (username === "seed.reem.overlap") {
-    push(
-      "wide-overlap",
-      entities.length >= 4,
-      entities.map((entity) => entity.name),
-    );
-  }
-
-  return expectations;
-}
-
-function dedupeRoutes(routes) {
-  const seen = new Set();
-  return routes.filter((route) => {
-    const key = `${route.label}:${route.url}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+        .filter(visible)
+        .map(clean)
+        .filter(Boolean),
+      bottomNav: Array.from(
+        document.querySelectorAll("nav[class*='bar'] a, nav[class*='bar'] button"),
+      )
+        .filter(visible)
+        .map(clean)
+        .filter(Boolean),
+      bodyText: document.body?.innerText || "",
+    };
   });
-}
-
-function sanitize(name) {
-  return name
-    .replace(/[^a-z0-9_-]+/gi, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-async function gotoWithRetry(page, url, options) {
-  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt += 1) {
-    const response = await page.goto(url, options);
-    if (response?.status() === 429 && attempt < RETRY_LIMIT) {
-      await sleep(RETRY_BASE_MS * (attempt + 1));
-      continue;
-    }
-
-    return response;
-  }
-
-  return null;
 }
 
 async function inspectPage(page) {
@@ -387,8 +299,8 @@ async function inspectPage(page) {
         'button, a, select, input, textarea, [role="button"], summary, [tabindex]:not([tabindex="-1"])',
       ),
     );
-
     const smallTargets = [];
+
     for (const el of clickables) {
       const style = window.getComputedStyle(el);
       if (
@@ -401,8 +313,9 @@ async function inspectPage(page) {
       const rect = el.getBoundingClientRect();
       if (rect.width < 1 || rect.height < 1) continue;
       const type = (el.getAttribute("type") || "").toLowerCase();
-      if (type === "hidden" || el.getAttribute("aria-hidden") === "true")
+      if (type === "hidden" || el.getAttribute("aria-hidden") === "true") {
         continue;
+      }
       if ((type === "checkbox" || type === "radio") && el.closest("label")) {
         const labelRect = el.closest("label").getBoundingClientRect();
         if (labelRect.height >= 40 && labelRect.width >= 40) continue;
@@ -449,66 +362,359 @@ async function inspectPage(page) {
   });
 }
 
-async function runInteractions(page, routeLabel) {
-  const interactions = [];
+function navRuleFor(surfaceKind) {
+  if (MEMBER_SURFACES.has(surfaceKind)) return DAILY_NAV_BY_SURFACE.MEMBER;
+  return DAILY_NAV_BY_SURFACE[surfaceKind] || DAILY_NAV_BY_SURFACE.MEMBER;
+}
 
-  if (routeLabel.startsWith("entity-detail")) {
-    const health = page.locator('[class*="healthBadgeWrap"]').first();
-    if (await health.isVisible().catch(() => false)) {
-      await health.click();
-      const tooltipVisible = await page
-        .getByText(/مكونات مؤشر الصحة|Health/i)
-        .first()
-        .isVisible()
-        .catch(() => false);
-      interactions.push({ action: "click health badge", ok: tooltipVisible });
-    }
-  }
+function addIssue(issues, question, type, detail) {
+  issues.push({ question, type, detail });
+}
 
-  if (routeLabel === "review") {
-    const tab = page
-      .getByRole("button", { name: /إثباتات الدفع|Payment/i })
-      .first();
-    if (await tab.isVisible().catch(() => false)) {
-      await tab.click();
-      await page.waitForTimeout(250);
-      interactions.push({
-        action: "switch review tab",
-        ok: await tab.isVisible().catch(() => false),
+function verifyDailyNavigation(issues, surface, chrome, viewportName) {
+  const rule = navRuleFor(surface.surfaceKind);
+  const visibleLinks =
+    viewportName === "mobile" ? chrome.bottomNav : chrome.dailyLinks;
+  const joined = visibleLinks.join(" | ");
+
+  for (const label of rule.required) {
+    if (!hasNavLabel(visibleLinks, label)) {
+      addIssue(issues, "daily-navigation", "missing-daily-link", {
+        viewport: viewportName,
+        label,
+        visibleLinks,
+        surfaceKind: surface.surfaceKind,
       });
     }
   }
 
-  if (routeLabel === "wallets") {
-    const filter = page.locator("select").first();
-    if (await filter.isVisible().catch(() => false)) {
-      const options = await filter
-        .locator("option")
-        .count()
-        .catch(() => 0);
-      interactions.push({
-        action: "wallet entity filter visible",
-        ok: options > 0,
-        options,
+  for (const label of rule.forbidden) {
+    if (hasNavLabel(visibleLinks, label)) {
+      addIssue(issues, "daily-navigation", "deep-tool-visible-daily", {
+        viewport: viewportName,
+        label,
+        visibleLinks,
+        surfaceKind: surface.surfaceKind,
       });
     }
   }
 
-  return interactions;
+  if (visibleLinks.length > (viewportName === "mobile" ? 4 : 3)) {
+    addIssue(issues, "daily-navigation", "too-many-daily-links", {
+      viewport: viewportName,
+      count: visibleLinks.length,
+      visibleLinks,
+      surfaceKind: surface.surfaceKind,
+      joined,
+    });
+  }
+}
+
+function verifySurfaceQuestions(issues, surface, bodyText) {
+  const body = normalizeText(bodyText);
+  const primaryTitle = surface.primaryMessage?.title;
+
+  if (!primaryTitle || !includesText(body, primaryTitle)) {
+    addIssue(issues, "what-now", "primary-message-not-visible", {
+      primaryTitle,
+      surfaceKind: surface.surfaceKind,
+    });
+  }
+
+  const actionCandidates = [
+    ...(surface.requiredActions || []).flatMap((item) => [
+      item.title,
+      item.body,
+      item.nextStep,
+      item.cta?.label,
+    ]),
+    ...(surface.exceptions || []).flatMap((item) => [
+      item.title,
+      item.body,
+      item.impact,
+      item.whyShown,
+      item.cta?.label,
+    ]),
+  ].filter(Boolean);
+
+  if (actionCandidates.length > 0 && !containsAny(body, actionCandidates)) {
+    addIssue(issues, "what-is-required", "action-or-exception-not-visible", {
+      sample: actionCandidates.slice(0, 6),
+      surfaceKind: surface.surfaceKind,
+    });
+  }
+
+  if (
+    actionCandidates.length === 0 &&
+    !primaryTitle &&
+    !/لا يوجد مطلوب|متابعة هادئة|للمتابعة فقط/.test(body)
+  ) {
+    addIssue(issues, "what-is-required", "quiet-state-not-clear", {
+      primaryTitle,
+      surfaceKind: surface.surfaceKind,
+    });
+  }
+
+  const benefitCandidates = [
+    ...(surface.benefitSummary?.items || []).flatMap((item) => [
+      item.title,
+      item.body,
+    ]),
+    ...(surface.sharedBenefitSummary?.items || []).flatMap((item) => [
+      item.title,
+      item.benefitText,
+      item.coverageText,
+      item.userContributionText,
+    ]),
+    ...(surface.contextSummaries || []).flatMap((item) => [
+      item.label,
+      item.benefitText,
+      item.moneyText,
+      item.attentionText,
+    ]),
+  ].filter(Boolean);
+
+  if (benefitCandidates.length > 0 && !containsAny(body, benefitCandidates)) {
+    addIssue(issues, "what-do-i-benefit", "benefit-context-not-visible", {
+      sample: benefitCandidates.slice(0, 8),
+      surfaceKind: surface.surfaceKind,
+    });
+  }
+
+  const blockedCandidates = [
+    ...(surface.blockedCapabilities || []).flatMap((item) => [
+      item.title,
+      item.reason,
+      item.contextLabel,
+      item.fixCta?.label,
+    ]),
+    ...(surface.nonOperationalSummary?.items || []).flatMap((item) => [
+      item.title,
+      item.whatThisMeans,
+      item.nextStep,
+      item.whyShown,
+      ...(item.blockedActions || []),
+      ...(item.allowedActions || []),
+    ]),
+  ].filter(Boolean);
+
+  if (blockedCandidates.length > 0 && !containsAny(body, blockedCandidates)) {
+    addIssue(issues, "what-is-blocked-and-why", "blocked-reason-not-visible", {
+      sample: blockedCandidates.slice(0, 8),
+      surfaceKind: surface.surfaceKind,
+    });
+  }
+
+  const contexts = surface.contextSummaries || [];
+  if (contexts.length > 1) {
+    const labelsShown = contexts.filter((item) => includesText(body, item.label));
+    const uniqueIds = new Set(contexts.map((item) => item.id));
+
+    if (labelsShown.length < Math.min(2, contexts.length)) {
+      addIssue(issues, "entity-mixing", "multi-context-labels-not-visible", {
+        expectedLabels: contexts.map((item) => item.label),
+        labelsShown: labelsShown.map((item) => item.label),
+        surfaceKind: surface.surfaceKind,
+      });
+    }
+    if (uniqueIds.size !== contexts.length) {
+      addIssue(issues, "entity-mixing", "duplicate-context-ids", {
+        contextIds: contexts.map((item) => item.id),
+        surfaceKind: surface.surfaceKind,
+      });
+    }
+  }
+}
+
+function verifySeedStoryCoverage(issues, username, surface, entities) {
+  const entityTags = entities.map(
+    (entity) =>
+      `${entity.type}:${entity.myRole}:${entity.platformStatus || "ACTIVE"}`,
+  );
+  const contextLabels = (surface.contextSummaries || []).map((item) => item.label);
+  const contextKinds = (surface.activeContexts || []).map((item) => item.kind);
+  const nonOperational = surface.nonOperationalSummary || {};
+
+  const checks = {
+    "seed.faisal.overlap": [
+      (surface.contextSummaries || []).length >= 2,
+      "multi-entity member must show more than one context",
+    ],
+    "seed.khaled.suspended": [
+      surface.surfaceKind === "SUSPENDED_MEMBER" ||
+        (nonOperational.suspendedCount || 0) > 0 ||
+        (surface.blockedCapabilities || []).some((item) =>
+          /موقوف|معل/.test(`${item.title} ${item.reason}`),
+        ),
+      "suspended member state must be represented",
+    ],
+    "seed.abdullah.building": [
+      surface.surfaceKind === "FOUNDER" &&
+        entities.some(
+          (entity) => entity.type === "BUILDING" && entity.myRole === "FOUNDER",
+        ),
+      "building founder story must be represented",
+    ],
+    "seed.yahya.neighborhood": [
+      surface.surfaceKind === "FOUNDER" &&
+        (nonOperational.pendingReviewCount || 0) > 0,
+      "neighborhood founder with pending review entity must be represented",
+    ],
+    "seed.fahad.case": [
+      surface.surfaceKind === "READ_ONLY_MEMBER" ||
+        (nonOperational.readOnlyCount || 0) > 0 ||
+        contextKinds.includes("CAMPAIGN"),
+      "read-only medical campaign story must be represented",
+    ],
+    "seed.omar.youth": [
+      (nonOperational.suspendedCount || 0) > 0 ||
+        entities.some((entity) => entity.platformStatus === "SUSPENDED"),
+      "suspended community admin story must be represented",
+    ],
+    "seed.huda.exited": [
+      surface.surfaceKind === "EXITED_MEMBER" ||
+        (surface.blockedCapabilities || []).some((item) =>
+          /خارج|Exited|منته/.test(`${item.title} ${item.reason}`),
+        ),
+      "exited member story must be represented",
+    ],
+    "seed.amal.conditional": [
+      surface.surfaceKind === "CONDITIONAL_MEMBER" ||
+        (surface.blockedCapabilities || []).some((item) =>
+          /مشروط|شرط/.test(`${item.title} ${item.reason}`),
+        ),
+      "conditional member story must be represented",
+    ],
+    "seed.mariam.family": [
+      (nonOperational.suspendedCount || 0) > 0 ||
+        entities.some((entity) => entity.platformStatus === "SUSPENDED"),
+      "suspended community member story must be represented",
+    ],
+    "seed.abdulrahman.tribe": [
+      surface.surfaceKind === "FOUNDER" &&
+        entities.some(
+          (entity) => entity.type === "TRIBE" && entity.myRole === "FOUNDER",
+        ),
+      "tribe founder story must be represented",
+    ],
+    "seed.mona.building": [
+      ["ADMIN", "TREASURER"].includes(surface.surfaceKind) ||
+        entities.some(
+          (entity) =>
+            entity.type === "BUILDING" &&
+            ["ADMIN", "TREASURER"].includes(entity.myRole),
+        ),
+      "building admin/treasurer story must be represented",
+    ],
+    "seed.reem.overlap": [
+      (surface.contextSummaries || []).length >= 4,
+      "wide overlap member must show four or more contexts",
+    ],
+  };
+
+  const check = checks[username];
+  if (check && !check[0]) {
+    addIssue(issues, "seed-story-coverage", "seed-story-not-covered", {
+      message: check[1],
+      surfaceKind: surface.surfaceKind,
+      entityTags,
+      contextLabels,
+      nonOperational,
+    });
+  }
+}
+
+async function verifyAdvancedTools(page, issues, surface) {
+  if (!surface.advancedTools?.length) return [];
+
+  const summary = page.locator("aside nav summary").first();
+  if (!(await summary.isVisible().catch(() => false))) {
+    addIssue(issues, "advanced-tools", "advanced-summary-missing", {
+      expectedTools: surface.advancedTools.map((item) => item.label),
+    });
+    return [];
+  }
+
+  await summary.click();
+  await page.waitForTimeout(250);
+  const state = await visibleChromeState(page);
+  const missing = surface.advancedTools
+    .map((item) => item.label)
+    .filter((label) => !state.dailyLinks.some((link) => link.includes(label)));
+
+  if (missing.length > 0) {
+    addIssue(issues, "advanced-tools", "advanced-tool-link-missing", {
+      missing,
+      visibleLinks: state.dailyLinks,
+    });
+  }
+
+  return state.dailyLinks;
+}
+
+async function verifyDirectDenyForMember(page, issues, surface) {
+  if (!MEMBER_SURFACES.has(surface.surfaceKind)) return null;
+
+  await gotoWithRetry(page, `${BASE_URL}/finance`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForTimeout(700);
+  const state = await visibleChromeState(page);
+  const denied = /ليست ضمن صلاحيات دورك|لا تملك صلاحية|not within your role/i.test(
+    state.bodyText,
+  );
+
+  if (!denied) {
+    addIssue(issues, "direct-route-permission", "finance-not-denied", {
+      surfaceKind: surface.surfaceKind,
+      bodySample: normalizeText(state.bodyText).slice(0, 500),
+    });
+  }
+
+  return { route: "/finance", denied };
+}
+
+function addInspectionIssues(issues, question, inspection, detail) {
+  if (inspection.bodyTextLength < 25) {
+    addIssue(issues, question, "blank-or-thin-page", {
+      ...detail,
+      bodyTextLength: inspection.bodyTextLength,
+    });
+  }
+  if (inspection.overlay) {
+    addIssue(issues, question, "framework-overlay", detail);
+  }
+  if (inspection.rawPlaceholder) {
+    addIssue(issues, question, "raw-placeholder", detail);
+  }
+  if (inspection.horizontalOverflow > 2) {
+    addIssue(issues, question, "horizontal-overflow", {
+      ...detail,
+      horizontalOverflow: inspection.horizontalOverflow,
+    });
+  }
+  for (const target of inspection.smallTargets) {
+    addIssue(issues, question, "small-click-target", {
+      ...detail,
+      target,
+    });
+  }
 }
 
 async function auditUser(browser, username) {
   const userOutDir = path.join(OUT_DIR, sanitize(username));
   fs.mkdirSync(userOutDir, { recursive: true });
 
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
   const page = await context.newPage();
   const logs = [];
   const responses = [];
   const pageErrors = [];
-  const results = [];
-  const screenshots = [];
   const issues = [];
+  const screenshots = [];
+  const checks = [];
   let current = "bootstrap";
 
   page.on("console", (msg) => {
@@ -516,9 +722,9 @@ async function auditUser(browser, username) {
       logs.push({ route: current, type: msg.type(), text: msg.text() });
     }
   });
-  page.on("pageerror", (err) =>
-    pageErrors.push({ route: current, text: err.message }),
-  );
+  page.on("pageerror", (err) => {
+    pageErrors.push({ route: current, text: err.message });
+  });
   page.on("response", (response) => {
     const status = response.status();
     const url = response.url();
@@ -528,102 +734,86 @@ async function auditUser(browser, username) {
   });
 
   try {
+    current = `${username}:login`;
     await login(page, username);
-    const { routes, expectations } = await discoverRoutes(page, username);
-    const viewports = [
-      { name: "desktop", width: 1280, height: 900 },
-      { name: "mobile", width: 390, height: 844 },
-    ];
+    const { surface, entities } = await readSession(page);
 
-    for (const expectation of expectations) {
-      if (!expectation.ok) {
-        issues.push({
-          route: "data-expectations",
-          type: expectation.type,
-          detail: expectation.detail,
-        });
-      }
-    }
+    current = `${username}:desktop-dashboard`;
+    await gotoWithRetry(page, `${BASE_URL}/dashboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    await page.waitForTimeout(1100);
+    const desktopChrome = await visibleChromeState(page);
+    const desktopInspection = await inspectPage(page);
+    verifyDailyNavigation(issues, surface, desktopChrome, "desktop");
+    verifySurfaceQuestions(issues, surface, desktopChrome.bodyText);
+    verifySeedStoryCoverage(issues, username, surface, entities);
+    addInspectionIssues(issues, "desktop-dashboard-health", desktopInspection, {
+      viewport: "desktop",
+      surfaceKind: surface.surfaceKind,
+    });
 
-    for (const viewport of viewports) {
-      await page.setViewportSize({
-        width: viewport.width,
-        height: viewport.height,
-      });
-      for (const route of routes) {
-        current = `${username}:${viewport.name}:${route.label}`;
-        await gotoWithRetry(page, `${BASE_URL}${route.url}`, {
-          waitUntil: "domcontentloaded",
-        });
-        await page.waitForTimeout(900);
+    const desktopScreenshot = path.join(userOutDir, "desktop-dashboard.png");
+    await page.screenshot({ path: desktopScreenshot, fullPage: false });
+    screenshots.push(desktopScreenshot);
 
-        const inspection = await inspectPage(page);
-        const interactions = await runInteractions(page, route.label);
-        const screenshotPath = path.join(
-          userOutDir,
-          `${viewport.name}-${sanitize(route.label)}.png`,
-        );
-        await page.screenshot({ path: screenshotPath, fullPage: false });
-        screenshots.push(screenshotPath);
+    current = `${username}:advanced-tools`;
+    const advancedLinks = await verifyAdvancedTools(page, issues, surface);
+    const advancedScreenshot = path.join(userOutDir, "desktop-advanced.png");
+    await page.screenshot({ path: advancedScreenshot, fullPage: false });
+    screenshots.push(advancedScreenshot);
 
-        results.push({
-          route: route.url,
-          label: route.label,
-          viewport,
-          url: page.url(),
-          inspection,
-          interactions,
-          screenshotPath,
-        });
+    current = `${username}:mobile-dashboard`;
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoWithRetry(page, `${BASE_URL}/dashboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    await page.waitForTimeout(1100);
+    const mobileChrome = await visibleChromeState(page);
+    const mobileInspection = await inspectPage(page);
+    verifyDailyNavigation(issues, surface, mobileChrome, "mobile");
+    addInspectionIssues(issues, "mobile-dashboard-health", mobileInspection, {
+      viewport: "mobile",
+      surfaceKind: surface.surfaceKind,
+    });
 
-        if (inspection.bodyTextLength < 25) {
-          issues.push({
-            route: current,
-            type: "blank-or-thin-page",
-            detail: inspection.bodyTextLength,
-          });
-        }
-        if (inspection.overlay) {
-          issues.push({ route: current, type: "framework-overlay" });
-        }
-        if (inspection.rawPlaceholder) {
-          issues.push({ route: current, type: "raw-placeholder" });
-        }
-        if (inspection.horizontalOverflow > 2) {
-          issues.push({
-            route: current,
-            type: "horizontal-overflow",
-            detail: inspection.horizontalOverflow,
-          });
-        }
-        for (const target of inspection.smallTargets) {
-          issues.push({
-            route: current,
-            type: "small-click-target",
-            detail: target,
-          });
-        }
-        for (const interaction of interactions) {
-          if (!interaction.ok) {
-            issues.push({
-              route: current,
-              type: "interaction-failed",
-              detail: interaction,
-            });
-          }
-        }
-      }
-    }
+    const mobileScreenshot = path.join(userOutDir, "mobile-dashboard.png");
+    await page.screenshot({ path: mobileScreenshot, fullPage: false });
+    screenshots.push(mobileScreenshot);
+
+    current = `${username}:direct-route-permission`;
+    const directDeny = await verifyDirectDenyForMember(page, issues, surface);
+    const directScreenshot = path.join(userOutDir, "direct-route-check.png");
+    await page.screenshot({ path: directScreenshot, fullPage: false }).catch(
+      () => null,
+    );
+    screenshots.push(directScreenshot);
+
+    checks.push({
+      surfaceKind: surface.surfaceKind,
+      primaryMessage: surface.primaryMessage?.title,
+      dailyLinks: desktopChrome.dailyLinks,
+      advancedSummaries: desktopChrome.advancedSummaries,
+      advancedLinks,
+      mobileBottomNav: mobileChrome.bottomNav,
+      advancedToolCount: surface.advancedTools?.length || 0,
+      requiredActionCount: surface.requiredActions?.length || 0,
+      exceptionCount: surface.exceptions?.length || 0,
+      contextCount: surface.contextSummaries?.length || 0,
+      blockedCapabilityCount: surface.blockedCapabilities?.length || 0,
+      nonOperationalVisible: Boolean(surface.nonOperationalSummary?.isVisible),
+      sharedBenefitVisible: Boolean(surface.sharedBenefitSummary?.isVisible),
+      directDeny,
+    });
   } catch (error) {
-    issues.push({
+    addIssue(issues, "audit-runtime", "audit-crash", {
       route: current,
-      type: "audit-crash",
-      detail: error instanceof Error ? error.message : String(error),
+      message: error instanceof Error ? error.message : String(error),
     });
     const crashScreenshot = path.join(userOutDir, "audit-crash.png");
-    await page
-      .screenshot({ path: crashScreenshot, fullPage: false })
-      .catch(() => null);
+    await page.screenshot({ path: crashScreenshot, fullPage: false }).catch(
+      () => null,
+    );
     screenshots.push(crashScreenshot);
   } finally {
     await context.close().catch(() => null);
@@ -635,17 +825,20 @@ async function auditUser(browser, username) {
     ),
   );
   for (const log of relevantLogs) {
-    issues.push({ route: log.route, type: "console", detail: log });
+    addIssue(issues, "console-health", "console", log);
   }
   for (const error of pageErrors) {
-    issues.push({ route: error.route, type: "pageerror", detail: error });
+    addIssue(issues, "console-health", "pageerror", error);
   }
   for (const response of responses) {
-    issues.push({
-      route: response.route,
-      type: "http-status",
-      detail: response,
-    });
+    if (response.status === 429 || response.status >= 500) {
+      addIssue(issues, "http-health", "http-status", response);
+    } else if (
+      response.status === 403 &&
+      !String(response.route).includes("direct-route-permission")
+    ) {
+      addIssue(issues, "http-health", "unexpected-403", response);
+    }
   }
 
   const payload = {
@@ -653,15 +846,16 @@ async function auditUser(browser, username) {
     baseUrl: BASE_URL,
     apiUrl: API_URL,
     outDir: userOutDir,
-    checkedStates: results.length,
+    checkedStates: checks.length,
     issueCount: issues.length,
     issues,
-    results,
+    checks,
     logs,
     responses,
     pageErrors,
     screenshots,
   };
+
   fs.writeFileSync(
     path.join(userOutDir, "result.json"),
     JSON.stringify(payload, null, 2),
@@ -679,6 +873,9 @@ function writeRunSummary(userResults) {
     outDir: result.outDir,
     checkedStates: result.checkedStates,
     issueCount: result.issueCount,
+    surfaceKind: result.checks[0]?.surfaceKind || "UNKNOWN",
+    dailyLinks: result.checks[0]?.dailyLinks || [],
+    mobileBottomNav: result.checks[0]?.mobileBottomNav || [],
     firstIssues: result.issues.slice(0, 5),
   }));
   const summary = {
@@ -690,6 +887,18 @@ function writeRunSummary(userResults) {
     passedUsers: userSummaries.filter((item) => item.issueCount === 0).length,
     failedUsers: userSummaries.filter((item) => item.issueCount > 0).length,
     totalIssues: userSummaries.reduce((sum, item) => sum + item.issueCount, 0),
+    questionsCovered: [
+      "what-now",
+      "what-is-required",
+      "what-do-i-benefit",
+      "what-is-blocked-and-why",
+      "entity-mixing",
+      "daily-navigation",
+      "advanced-tools",
+      "direct-route-permission",
+      "mobile-dashboard-health",
+      "http-health",
+    ],
     userSummaries,
   };
 
@@ -700,7 +909,7 @@ function writeRunSummary(userResults) {
   );
 
   const index = [
-    "# STGP UX Role Audit",
+    "# STGP UX Role Surface Audit",
     "",
     `- Base URL: ${BASE_URL}`,
     `- API URL: ${API_URL}`,
@@ -708,11 +917,15 @@ function writeRunSummary(userResults) {
     `- Users: ${summary.passedUsers}/${summary.totalUsers} passed`,
     `- Total issues: ${summary.totalIssues}`,
     "",
-    "| User | Checked states | Issues | Result directory |",
-    "|---|---:|---:|---|",
+    "## Questions Covered",
+    "",
+    ...summary.questionsCovered.map((item) => `- ${item}`),
+    "",
+    "| User | Surface | Daily links | Mobile nav | Issues | Result directory |",
+    "|---|---|---|---|---:|---|",
     ...userSummaries.map(
       (item) =>
-        `| ${item.username} | ${item.checkedStates} | ${item.issueCount} | ${item.outDir} |`,
+        `| ${item.username} | ${item.surfaceKind} | ${item.dailyLinks.join(" / ")} | ${item.mobileBottomNav.join(" / ")} | ${item.issueCount} | ${item.outDir} |`,
     ),
     "",
   ].join("\n");
@@ -722,8 +935,8 @@ function writeRunSummary(userResults) {
   return summary;
 }
 
-test.describe("STGP UX role audit", () => {
-  test("STGP UX role audit - all configured users", async ({
+test.describe("STGP UX role surface audit", () => {
+  test("all configured users answer the daily surface questions", async ({
     browser,
   }, testInfo) => {
     testInfo.setTimeout(

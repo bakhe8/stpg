@@ -113,6 +113,7 @@ function FinanceContent() {
   });
   const [paying, setPaying] = useState(false);
   const [payMsg, setPayMsg] = useState<string | null>(null);
+  const [gatewayMsg, setGatewayMsg] = useState<{ dueId: string; text: string; isError: boolean } | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
   // inline confirm for approve/cancel; modal for reject
@@ -641,6 +642,11 @@ function FinanceContent() {
                           ]}
                           outcome={t("dueImpactOutcome")}
                         />
+                        {gatewayMsg?.dueId === due.id && (
+                          <div className={`${styles.payMsg} ${gatewayMsg.isError ? styles.payError : styles.paySuccess}`}>
+                            {gatewayMsg.text}
+                          </div>
+                        )}
                         <div className={styles.actionRow}>
                           <button
                             type="button"
@@ -659,31 +665,33 @@ function FinanceContent() {
                             type="button"
                             className={styles.submitBtn}
                             onClick={async () => {
-                               try {
-                                 const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'STRIPE' }) });
-                                 alert(`تم تحويلك افتراضياً لبوابة الدفع (Stripe). الجلسة: ${res.id}`);
-                                 setTimeout(() => void loadFinanceData(selectedId), 2000);
-                               } catch(e) {
-                                 alert(`Error: ${e instanceof Error ? e.message : 'Failed'}`);
-                               }
+                              setGatewayMsg(null);
+                              try {
+                                const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'STRIPE' }) });
+                                setGatewayMsg({ dueId: due.id, text: t("gatewaySessionCreated", { provider: "Stripe", id: res.id }), isError: false });
+                                setTimeout(() => void loadFinanceData(selectedId), 3000);
+                              } catch (e) {
+                                setGatewayMsg({ dueId: due.id, text: e instanceof Error ? e.message : t("gatewayError"), isError: true });
+                              }
                             }}
                           >
-                            دفع إلكتروني (Stripe)
+                            {t("payStripe")}
                           </button>
                           <button
                             type="button"
                             className={styles.submitBtn}
                             onClick={async () => {
-                               try {
-                                 const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'MOYASAR' }) });
-                                 alert(`تم تحويلك افتراضياً لبوابة الدفع (Moyasar). الجلسة: ${res.id}`);
-                                 setTimeout(() => void loadFinanceData(selectedId), 2000);
-                               } catch(e) {
-                                 alert(`Error: ${e instanceof Error ? e.message : 'Failed'}`);
-                               }
+                              setGatewayMsg(null);
+                              try {
+                                const res = await fetchApi<{ id: string }>('/payments/intent', { method: 'POST', body: JSON.stringify({ paymentDueId: due.id, provider: 'MOYASAR' }) });
+                                setGatewayMsg({ dueId: due.id, text: t("gatewaySessionCreated", { provider: "Moyasar", id: res.id }), isError: false });
+                                setTimeout(() => void loadFinanceData(selectedId), 3000);
+                              } catch (e) {
+                                setGatewayMsg({ dueId: due.id, text: e instanceof Error ? e.message : t("gatewayError"), isError: true });
+                              }
                             }}
                           >
-                            دفع إلكتروني (Moyasar)
+                            {t("payMoyasar")}
                           </button>
                         </div>
                       </div>

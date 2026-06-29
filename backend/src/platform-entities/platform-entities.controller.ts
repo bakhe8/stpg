@@ -37,11 +37,14 @@ export class PlatformEntitiesController {
     @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @CurrentPlatformUser()
+    operator?: { id: string; role: PlatformRole },
   ) {
     return this.service.findAll({
       status,
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
+      operator,
     });
   }
 
@@ -84,7 +87,16 @@ export class PlatformEntitiesController {
     @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @CurrentPlatformUser() operator?: { role: PlatformRole },
   ) {
+    if (
+      operator?.role !== PlatformRole.OWNER &&
+      operator?.role !== PlatformRole.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(
+        'عرض اعتراضات التعليق يتطلب OWNER أو SUPER_ADMIN',
+      );
+    }
     return this.service.getSuspensionAppeals({
       status,
       page: page ? parseInt(page) : 1,

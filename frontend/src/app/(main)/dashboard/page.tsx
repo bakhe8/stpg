@@ -2,402 +2,695 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { getEntities, Entity } from "../../../lib/api/entities";
 import {
-  getMyPaymentDues,
-  getMyPaymentRecords,
-  getSubscriptions,
-  PaymentDue,
-  PaymentRecord,
-  Subscription,
-} from "../../../lib/api/subscriptions";
-import {
-  getMemberSubscriptionOverlaps,
-  SubscriptionOverlap,
-} from "../../../lib/api/analytics";
-import {
-  getMyMembershipApplications,
-  MembershipApplication,
-} from "../../../lib/api/membership-applications";
-import type { Translator } from "../../../lib/i18n";
-import { ENTITY_TYPE_KEYS } from "../../../lib/enum-labels";
+  AdvancedToolLink,
+  BlockedCapability,
+  ContextSurfaceSummary,
+  getMyWorkSurface,
+  SurfaceAction,
+  SurfaceException,
+  SurfaceUpdate,
+  WorkSurface,
+} from "../../../lib/api/work-surface";
 import styles from "./dashboard.module.css";
 
-// ── نوع موحّد لبند في قائمة المطلوبات ────────────────────────────────
-interface ActionItem {
-  id: string;
-  priority: "urgent" | "normal";
-  icon: string;
-  title: string;
-  subtitle: string;
-  reason: string;
-  impact: string;
-  nextStep: string;
-  href: string;
-  ctaLabel: string;
+function priorityLabel(priority: string) {
+  if (priority === "critical" || priority === "urgent") return "مهم الآن";
+  if (priority === "normal") return "مطلوب";
+  return "للمتابعة";
 }
 
-interface SubscriptionSummary {
-  active: number;
-  conditional: number;
-  supporterOnly: number;
-  overdueAmount: number;
-  entityCount: number;
-}
-
-function buildSubscriptionSummary(
-  subscriptions: Subscription[],
-  paymentDues: PaymentDue[],
-): SubscriptionSummary {
-  return {
-    active: subscriptions.filter(
-      (subscription) => subscription.state === "ACTIVE",
-    ).length,
-    conditional: subscriptions.filter(
-      (subscription) => subscription.state === "CONDITIONAL",
-    ).length,
-    supporterOnly: subscriptions.filter(
-      (subscription) => subscription.state === "SUPPORTER_ONLY",
-    ).length,
-    overdueAmount: paymentDues
-      .filter((due) => due.status === "OVERDUE")
-      .reduce((sum, due) => sum + Number(due.amountDue), 0),
-    entityCount: new Set(
-      subscriptions
-        .map((subscription) => subscription.membership?.entityId)
-        .filter(Boolean),
-    ).size,
-  };
-}
-
-function buildActionItems(
-  paymentDues: PaymentDue[],
-  paymentRecords: PaymentRecord[],
-  membershipApplications: MembershipApplication[],
-  t: Translator,
-): ActionItem[] {
-  const items: ActionItem[] = [];
-
-  membershipApplications
-    .filter((application) =>
-      ["PENDING", "UNDER_REVIEW", "REJECTED"].includes(application.status),
-    )
-    .forEach((application) => {
-      const rejected = application.status === "REJECTED";
-      items.push({
-        id: `membership-application-${application.id}`,
-        priority: rejected ? "urgent" : "normal",
-        icon: rejected ? "!" : "…",
-        title: rejected
-          ? t("rejectedMembershipTitle", {
-              entityName: application.entity?.name ?? t("entityFallback"),
-            })
-          : t("pendingMembershipTitle", {
-              entityName: application.entity?.name ?? t("entityFallback"),
-            }),
-        subtitle: rejected
-          ? (application.reviewerNotes ??
-            t("rejectedMembershipDefaultSubtitle"))
-          : application.status === "UNDER_REVIEW"
-            ? t("underReviewSubtitle")
-            : t("pendingMembershipSubtitle"),
-        reason: rejected
-          ? t("membershipRejectedReason")
-          : application.status === "UNDER_REVIEW"
-            ? t("membershipUnderReviewReason")
-            : t("membershipPendingReason"),
-        impact: rejected
-          ? t("membershipRejectedImpact")
-          : t("membershipPendingImpact"),
-        nextStep: rejected
-          ? t("membershipRejectedNext")
-          : t("membershipPendingNext"),
-        href: rejected ? "/entities" : "/dashboard",
-        ctaLabel: rejected ? t("viewOptions") : t("continue"),
-      });
-    });
-
-  // الدفعات المتأخرة
-  const overdue = paymentDues.filter((d) => d.status === "OVERDUE");
-  overdue.forEach((d) => {
-    items.push({
-      id: `due-${d.id}`,
-      priority: "urgent",
-      icon: "⚠",
-      title: t("overdueTitle", {
-        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
-      }),
-      subtitle: t("overdueSubtitle", {
-        amount: d.amountDue.toLocaleString("ar-SA"),
-        period: d.periodLabel,
-      }),
-      reason: t("overdueReason", {
-        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
-      }),
-      impact: t("overdueImpact"),
-      nextStep: t("overdueNext"),
-      href: "/portal",
-      ctaLabel: t("payNow"),
-    });
-  });
-
-  // الدفعات المستحقة (غير المتأخرة بعد)
-  const pending = paymentDues.filter((d) => d.status === "PENDING");
-  pending.forEach((d) => {
-    items.push({
-      id: `due-${d.id}`,
-      priority: "normal",
-      icon: "📅",
-      title: t("pendingDueTitle", {
-        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
-      }),
-      subtitle: t("pendingDueSubtitle", {
-        amount: d.amountDue.toLocaleString("ar-SA"),
-        date: new Date(d.dueDate).toLocaleDateString("ar-SA"),
-      }),
-      reason: t("pendingDueReason", {
-        pathName: d.subscription?.governancePath?.name ?? t("pathFallback"),
-      }),
-      impact: t("pendingDueImpact"),
-      nextStep: t("pendingDueNext"),
-      href: "/portal",
-      ctaLabel: t("pay"),
-    });
-  });
-
-  // إثباتات دفع أرسلتها وتنتظر تأكيد أمين الصندوق
-  const submitted = paymentRecords.filter((r) => r.status === "SUBMITTED");
-  submitted.forEach((r) => {
-    items.push({
-      id: `rec-${r.id}`,
-      priority: "normal",
-      icon: "🕐",
-      title: t("proofPendingTitle", {
-        pathName: r.subscription?.governancePath?.name ?? t("pathFallback"),
-      }),
-      subtitle: t("proofPendingSubtitle", {
-        amount: r.amount.toLocaleString("ar-SA"),
-        period: r.paymentDue?.periodLabel ?? "",
-      }),
-      reason: t("proofPendingReason"),
-      impact: t("proofPendingImpact"),
-      nextStep: t("proofPendingNext"),
-      href: "/portal",
-      ctaLabel: t("continue"),
-    });
-  });
-
-  return items;
-}
-
-function ActionItemCard({
-  item,
-  urgent = false,
-}: {
-  item: ActionItem;
-  urgent?: boolean;
-}) {
-  const t = useTranslations("dashboard");
-
+function ActionCard({ action }: { action: SurfaceAction }) {
   return (
-    <Link
-      href={item.href}
-      className={`${styles.actionItem} ${urgent ? styles.actionItemUrgent : ""}`}
+    <article
+      className={`${styles.surfaceCard} ${styles[`surfacePriority_${action.priority}`] ?? ""}`}
     >
-      <span className={styles.actionIcon}>{item.icon}</span>
-      <div className={styles.actionBody}>
-        <div className={styles.actionTitle}>{item.title}</div>
-        <div className={styles.actionSubtitle}>{item.subtitle}</div>
-        <div className={styles.actionReasonGrid}>
-          <span>
-            <strong>{t("actionWhy")}</strong>
-            {item.reason}
-          </span>
-          <span>
-            <strong>{t("actionImpact")}</strong>
-            {item.impact}
-          </span>
-          <span>
-            <strong>{t("actionNext")}</strong>
-            {item.nextStep}
-          </span>
-        </div>
+      <div className={styles.surfaceCardHeader}>
+        <span className={styles.surfaceBadge}>
+          {priorityLabel(action.priority)}
+        </span>
+        {action.contextLabel ? (
+          <span className={styles.surfaceContext}>{action.contextLabel}</span>
+        ) : null}
       </div>
-      <span className={styles.actionCta}>{item.ctaLabel}</span>
-    </Link>
+      <h3 className={styles.surfaceCardTitle}>{action.title}</h3>
+      <p className={styles.surfaceCardBody}>{action.body}</p>
+      {action.reason ? (
+        <p className={styles.surfaceReason}>{action.reason}</p>
+      ) : null}
+      {action.expectedAfterAction ? (
+        <p className={styles.surfaceExpected}>{action.expectedAfterAction}</p>
+      ) : null}
+      <Link href={action.cta.href} className={styles.surfacePrimaryLink}>
+        {action.cta.label}
+      </Link>
+    </article>
   );
 }
 
-// ── كرت الكيان المبسّط (بدون analytics) ─────────────────────────────
-function EntityCard({ entity }: { entity: Entity }) {
-  const tEnums = useTranslations("enums");
-  const tEntities = useTranslations("entities");
-
-  const roleKey = entity.myRole
-    ? `role${entity.myRole
-        .toLowerCase()
-        .split("_")
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join("")}`
-    : null;
-
+function ExceptionCard({ item }: { item: SurfaceException }) {
   return (
-    <Link href={`/entities/${entity.id}`} className={styles.entityCard}>
-      <div className={styles.entityHeader}>
-        <div className={styles.entityIcon}>⬡</div>
-        <div className={styles.entityMeta}>
-          <div className={styles.entityName}>{entity.name}</div>
-          <div className={styles.entityType}>
-            {ENTITY_TYPE_KEYS[entity.type]
-              ? tEnums(
-                  ENTITY_TYPE_KEYS[entity.type] as Parameters<typeof tEnums>[0],
-                )
-              : entity.type}
-            {roleKey && (
-              <span className={styles.roleBadge}>
-                {tEntities(roleKey as Parameters<typeof tEntities>[0])}
-              </span>
-            )}
-          </div>
-        </div>
-        <div
-          className={`${styles.entityStatus} ${entity.isActive ? styles.entityStatusActive : styles.entityStatusInactive}`}
-        >
-          <span>
-            {entity.isActive ? tEntities("active") : tEntities("inactive")}
-          </span>
-        </div>
+    <article
+      className={`${styles.surfaceCard} ${styles[`surfacePriority_${item.severity}`] ?? ""}`}
+    >
+      <div className={styles.surfaceCardHeader}>
+        <span className={styles.surfaceBadge}>
+          {priorityLabel(item.severity)}
+        </span>
+        <span className={styles.surfaceContext}>
+          {exceptionRoleLabel(item.ownerRole)}
+        </span>
       </div>
-      <div className={styles.entityArrow}>›</div>
-    </Link>
+      {item.contextLabel ? (
+        <div className={styles.surfaceExceptionMeta}>
+          <span>{item.contextLabel}</span>
+        </div>
+      ) : null}
+      <h3 className={styles.surfaceCardTitle}>{item.title}</h3>
+      <p className={styles.surfaceCardBody}>{item.body}</p>
+      <p className={styles.surfaceImpact}>{item.impact}</p>
+      <p className={styles.surfaceReason}>{item.whyShown}</p>
+      {item.expectedAfterAction ? (
+        <p className={styles.surfaceExpected}>{item.expectedAfterAction}</p>
+      ) : null}
+      <Link href={item.cta.href} className={styles.surfacePrimaryLink}>
+        {item.cta.label}
+      </Link>
+    </article>
   );
 }
 
-// ── الصفحة الفارغة (أول دخول) ────────────────────────────────────────
-function EmptyDashboard({ personName }: { personName: string }) {
-  const router = useRouter();
-  const t = useTranslations("dashboard");
-  const [inviteInput, setInviteInput] = useState("");
+function QuietUpdate({ update }: { update: SurfaceUpdate }) {
+  const content = (
+    <>
+      <div>
+        <strong>{update.title}</strong>
+        <p>{update.body}</p>
+      </div>
+      {update.contextLabel ? <span>{update.contextLabel}</span> : null}
+    </>
+  );
 
-  function handleInviteGo() {
-    const trimmed = inviteInput.trim();
-    if (!trimmed) return;
-    const match = trimmed.match(/\/join\/([a-f0-9-]{36})/i);
-    const token = match ? match[1] : trimmed;
-    void router.push(`/join/${token}`);
+  if (update.href) {
+    return (
+      <Link href={update.href} className={styles.surfaceUpdate}>
+        {content}
+      </Link>
+    );
   }
 
+  return <div className={styles.surfaceUpdate}>{content}</div>;
+}
+
+function BlockedItem({ item }: { item: BlockedCapability }) {
   return (
-    <div className={styles.emptyDashboard}>
-      <div className={styles.emptyGreeting}>
-        <span className={styles.emptyWave}>👋</span>
-        <div>
-          <h2 className={styles.emptyTitle}>
-            {personName
-              ? t("emptyGreetingWithName", { name: personName })
-              : t("emptyGreeting")}
-          </h2>
-          <p className={styles.emptySubtitle}>{t("emptySubtitle")}</p>
-        </div>
+    <article className={styles.surfaceBlockedItem}>
+      <div>
+        <strong>{item.title}</strong>
+        <p>{item.reason}</p>
+        {item.contextLabel ? (
+          <span className={styles.surfaceContextLine}>{item.contextLabel}</span>
+        ) : null}
       </div>
-      <div className={styles.emptyCards}>
-        <div className={styles.emptyCard}>
-          <div className={styles.emptyCardIcon}>◇</div>
-          <h3 className={styles.emptyCardTitle}>{t("createEntity")}</h3>
-          <p className={styles.emptyCardDesc}>{t("createEntityDesc")}</p>
-          <Link href="/entities/new" className={styles.emptyCardBtn}>
-            {t("startCreation")}
-          </Link>
-        </div>
-        <div className={styles.emptyCard}>
-          <div className={styles.emptyCardIcon}>🔗</div>
-          <h3 className={styles.emptyCardTitle}>{t("haveInviteLink")}</h3>
-          <p className={styles.emptyCardDesc}>{t("haveInviteLinkDesc")}</p>
-          <div className={styles.inviteInputRow}>
-            <input
-              className={styles.inviteInput}
-              placeholder={t("inviteLinkPlaceholder")}
-              value={inviteInput}
-              onChange={(e) => setInviteInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleInviteGo()}
-            />
-            <button
-              className={styles.inviteGoBtn}
-              onClick={handleInviteGo}
-              disabled={!inviteInput.trim()}
-            >
-              {t("join")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      {item.fixCta ? (
+        <Link href={item.fixCta.href} className={styles.surfaceInlineLink}>
+          {item.fixCta.label}
+        </Link>
+      ) : null}
+    </article>
   );
 }
 
-// ── الصفحة الرئيسية ───────────────────────────────────────────────────
+function AdvancedTool({ tool }: { tool: AdvancedToolLink }) {
+  return (
+    <Link href={tool.href} className={styles.surfaceTool}>
+      <strong>{tool.label}</strong>
+      <span>{tool.reason}</span>
+    </Link>
+  );
+}
+
+function ContextSummaryCard({ item }: { item: ContextSurfaceSummary }) {
+  return (
+    <article className={styles.surfaceContextCard}>
+      <div className={styles.surfaceContextCardHeader}>
+        <div>
+          <strong>{item.label}</strong>
+          <span>{contextKindLabel(item.kind)}</span>
+        </div>
+        <span className={styles.surfaceContextStatus}>{item.stateLabel}</span>
+      </div>
+      <div className={styles.surfaceContextStats}>
+        <div>
+          <span>المال</span>
+          <strong>{item.moneyText}</strong>
+        </div>
+        <div>
+          <span>الاستفادة</span>
+          <strong>{item.benefitText}</strong>
+        </div>
+        <div>
+          <span>ما يهمك</span>
+          <strong>{item.attentionText ?? "لا يوجد تنبيه"}</strong>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function FinanceSummaryPanel({
+  summary,
+}: {
+  summary: WorkSurface["financeSummary"];
+}) {
+  const metrics = [
+    {
+      label: "دفعات تنتظر المطابقة",
+      value: summary.pendingPaymentCount.toLocaleString("ar-SA"),
+      subValue: formatMoney(summary.pendingPaymentAmount),
+    },
+    {
+      label: "متأخرات",
+      value: summary.overdueDueCount.toLocaleString("ar-SA"),
+      subValue: formatMoney(summary.overdueDueAmount),
+    },
+    {
+      label: "صرف معتمد",
+      value: summary.approvedDisbursementCount.toLocaleString("ar-SA"),
+      subValue: formatMoney(summary.approvedDisbursementAmount),
+    },
+    {
+      label: "مانع رصيد",
+      value: summary.blockedDisbursementCount.toLocaleString("ar-SA"),
+      subValue: formatMoney(summary.blockedDisbursementAmount),
+    },
+    {
+      label: "الرصيد المتاح",
+      value: formatMoney(summary.availableBalance),
+      subValue: `${summary.entityCount.toLocaleString("ar-SA")} صندوق`,
+    },
+  ];
+
+  return (
+    <section className={styles.surfaceFinancePanel}>
+      <div className={styles.surfaceSectionHeader}>
+        <div>
+          <h2>المال الذي يحتاجك الآن</h2>
+          <p>مطابقة وتنفيذ وتفسير، بدون فتح الدفتر الخام.</p>
+        </div>
+        <span className={styles.surfaceCount}>
+          {summary.entityCount.toLocaleString("ar-SA")}
+        </span>
+      </div>
+
+      <p className={styles.surfaceFinanceLead}>{summary.displayText}</p>
+
+      <div className={styles.surfaceFinanceMetrics}>
+        {metrics.map((metric) => (
+          <div key={metric.label} className={styles.surfaceFinanceMetric}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
+            <small>{metric.subValue}</small>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.surfaceFinanceInsights}>
+        {summary.insights.map((item) => (
+          <article
+            key={item.id}
+            className={`${styles.surfaceFinanceInsight} ${
+              styles[`surfacePriority_${item.severity}`] ?? ""
+            }`}
+          >
+            <div className={styles.surfaceCardHeader}>
+              <span className={styles.surfaceBadge}>
+                {priorityLabel(item.severity)}
+              </span>
+              {item.contextLabel ? (
+                <span className={styles.surfaceContext}>
+                  {item.contextLabel}
+                </span>
+              ) : null}
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+            {typeof item.amount === "number" ? (
+              <strong className={styles.surfaceFinanceAmount}>
+                {formatMoney(item.amount)}
+              </strong>
+            ) : null}
+            {item.cta ? (
+              <Link href={item.cta.href} className={styles.surfaceInlineLink}>
+                {item.cta.label}
+              </Link>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CommitteeSummaryPanel({
+  summary,
+}: {
+  summary: WorkSurface["committeeSummary"];
+}) {
+  return (
+    <section className={styles.surfaceCommitteePanel}>
+      <div className={styles.surfaceSectionHeader}>
+        <div>
+          <h2>أعمال اللجنة التي تخصك</h2>
+          <p>تظهر هنا القرارات التي تحتاج رأيك فقط، لا كل الحوكمة.</p>
+        </div>
+        <span className={styles.surfaceCount}>
+          {summary.pendingVoteCount.toLocaleString("ar-SA")}
+        </span>
+      </div>
+
+      <div className={styles.surfaceCommitteeLead}>
+        <p>{summary.displayText}</p>
+        <div>
+          <span>لجانك</span>
+          <strong>{summary.committeeCount.toLocaleString("ar-SA")}</strong>
+        </div>
+        <div>
+          <span>صوّت عليها</span>
+          <strong>{summary.alreadyVotedCount.toLocaleString("ar-SA")}</strong>
+        </div>
+      </div>
+
+      {summary.decisions.length > 0 ? (
+        <div className={styles.surfaceCommitteeList}>
+          {summary.decisions.map((decision) => (
+            <article
+              key={decision.id}
+              className={`${styles.surfaceCommitteeItem} ${
+                decision.hasVoted ? styles.surfaceCommitteeItemDone : ""
+              }`}
+            >
+              <div className={styles.surfaceCardHeader}>
+                <span className={styles.surfaceBadge}>
+                  {decision.hasVoted ? "صوتك محفوظ" : "ينتظر رأيك"}
+                </span>
+                <span className={styles.surfaceContext}>
+                  {decision.contextLabel}
+                </span>
+              </div>
+              <h3>{decision.title}</h3>
+              <p>{decision.body}</p>
+              <dl className={styles.surfaceCommitteeFacts}>
+                <div>
+                  <dt>اللجنة</dt>
+                  <dd>{decision.committeeName}</dd>
+                </div>
+                <div>
+                  <dt>نوع القرار</dt>
+                  <dd>{decision.decisionTypeLabel}</dd>
+                </div>
+                <div>
+                  <dt>الموعد</dt>
+                  <dd>{formatDate(decision.closesAt)}</dd>
+                </div>
+                <div>
+                  <dt>الأصوات</dt>
+                  <dd>
+                    {decision.voteCount.toLocaleString("ar-SA")} /{" "}
+                    {decision.eligibleVoterCount.toLocaleString("ar-SA")}
+                  </dd>
+                </div>
+              </dl>
+              {decision.voteChoice ? (
+                <p className={styles.surfaceCommitteeVote}>
+                  صوتك: {voteChoiceLabel(decision.voteChoice)}
+                </p>
+              ) : null}
+              <p className={styles.surfaceReason}>{decision.whyShown}</p>
+              <p className={styles.surfaceExpected}>
+                {decision.expectedAfterVote}
+              </p>
+              <Link href={decision.cta.href} className={styles.surfacePrimaryLink}>
+                {decision.cta.label}
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.surfaceDone}>
+          لا توجد قرارات لجنة تحتاج منك إجراء الآن.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function AuditorSummaryPanel({
+  summary,
+}: {
+  summary: WorkSurface["auditorSummary"];
+}) {
+  const metrics = [
+    {
+      label: "أحداث مهمة",
+      value: summary.highRiskCount.toLocaleString("ar-SA"),
+    },
+    {
+      label: "أحداث مالية",
+      value: summary.financeEventCount.toLocaleString("ar-SA"),
+    },
+    {
+      label: "أحداث حوكمة",
+      value: summary.governanceEventCount.toLocaleString("ar-SA"),
+    },
+    {
+      label: "أحداث عضوية",
+      value: summary.membershipEventCount.toLocaleString("ar-SA"),
+    },
+  ];
+
+  return (
+    <section className={styles.surfaceAuditorPanel}>
+      <div className={styles.surfaceSectionHeader}>
+        <div>
+          <h2>ما يحتاجه المدقق الآن</h2>
+          <p>Timeline رقابي مختصر: من فعل ماذا، وما الأثر، وما الذي تغير.</p>
+        </div>
+        <span className={styles.surfaceCount}>
+          {summary.eventCount.toLocaleString("ar-SA")}
+        </span>
+      </div>
+
+      <div className={styles.surfaceAuditorLead}>
+        <p>{summary.displayText}</p>
+        {metrics.map((metric) => (
+          <div key={metric.label}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      {summary.timeline.length > 0 ? (
+        <div className={styles.surfaceAuditorTimeline}>
+          {summary.timeline.map((event) => (
+            <article
+              key={event.id}
+              className={`${styles.surfaceAuditorEvent} ${
+                styles[`surfacePriority_${event.severity}`] ?? ""
+              }`}
+            >
+              <div className={styles.surfaceCardHeader}>
+                <span className={styles.surfaceBadge}>
+                  {event.severityLabel}
+                </span>
+                <span className={styles.surfaceContext}>
+                  {event.contextLabel}
+                </span>
+              </div>
+              <h3>{event.title}</h3>
+              <div className={styles.surfaceAuditorMeta}>
+                <span>{event.actorName}</span>
+                <span>{formatDate(event.occurredAt)}</span>
+                <span>{auditorCategoryLabel(event.category)}</span>
+              </div>
+              <p className={styles.surfaceExpected}>{event.effect}</p>
+
+              {event.changes.length > 0 ? (
+                <dl className={styles.surfaceAuditorChanges}>
+                  {event.changes.slice(0, 3).map((change) => (
+                    <div key={change.field}>
+                      <dt>{change.label}</dt>
+                      <dd>
+                        <span>{change.before}</span>
+                        <strong>{change.after}</strong>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+
+              {event.linkedRecords.length > 0 ? (
+                <div className={styles.surfaceAuditorLinks}>
+                  {event.linkedRecords.slice(0, 4).map((record) =>
+                    record.href ? (
+                      <Link
+                        key={`${event.id}-${record.type}-${record.id}`}
+                        href={record.href}
+                      >
+                        {record.label} {record.shortId}
+                      </Link>
+                    ) : (
+                      <span key={`${event.id}-${record.type}-${record.id}`}>
+                        {record.label} {record.shortId}
+                      </span>
+                    ),
+                  )}
+                </div>
+              ) : null}
+
+              <p className={styles.surfaceReason}>{event.whyShown}</p>
+              <Link href={event.cta.href} className={styles.surfaceInlineLink}>
+                {event.cta.label}
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.surfaceDone}>
+          لا توجد أحداث تدقيق تحتاج مراجعة الآن.
+        </div>
+      )}
+
+      <Link href={summary.cta.href} className={styles.surfacePrimaryLink}>
+        {summary.cta.label}
+      </Link>
+    </section>
+  );
+}
+
+function NonOperationalSummaryPanel({
+  summary,
+}: {
+  summary: WorkSurface["nonOperationalSummary"];
+}) {
+  const metrics = [
+    {
+      label: "موقوف",
+      value: summary.suspendedCount.toLocaleString("ar-SA"),
+    },
+    {
+      label: "قيد المراجعة",
+      value: summary.pendingReviewCount.toLocaleString("ar-SA"),
+    },
+    {
+      label: "متابعة فقط",
+      value: summary.readOnlyCount.toLocaleString("ar-SA"),
+    },
+  ];
+
+  return (
+    <section className={styles.surfaceNonOperationalPanel}>
+      <div className={styles.surfaceSectionHeader}>
+        <div>
+          <h2>حالة التشغيل</h2>
+          <p>
+            هذه الصناديق لا تعمل كصناديق عادية الآن، لذلك أخفى النظام إجراءات
+            الدفع والصرف والقرارات غير المناسبة.
+          </p>
+        </div>
+        <span className={styles.surfaceCount}>
+          {summary.items.length.toLocaleString("ar-SA")}
+        </span>
+      </div>
+
+      <div className={styles.surfaceNonOperationalLead}>
+        <p>{summary.displayText}</p>
+        {metrics.map((metric) => (
+          <div key={metric.label}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.surfaceNonOperationalList}>
+        {summary.items.map((item) => (
+          <article
+            key={item.id}
+            className={`${styles.surfaceNonOperationalItem} ${
+              styles[`surfaceNonOperationalItem_${item.tone}`] ?? ""
+            }`}
+          >
+            <div className={styles.surfaceCardHeader}>
+              <span className={styles.surfaceBadge}>{item.statusLabel}</span>
+              <span className={styles.surfaceContext}>{item.roleLabel}</span>
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.whatThisMeans}</p>
+            <div className={styles.surfaceNonOperationalColumns}>
+              <div>
+                <strong>لا يعرضه النظام الآن</strong>
+                <ul>
+                  {item.blockedActions.map((action) => (
+                    <li key={action}>{action}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>المسموح لك</strong>
+                <ul>
+                  {item.allowedActions.map((action) => (
+                    <li key={action}>{action}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <p className={styles.surfaceExpected}>{item.nextStep}</p>
+            <p className={styles.surfaceReason}>{item.whyShown}</p>
+            {item.cta ? (
+              <Link href={item.cta.href} className={styles.surfacePrimaryLink}>
+                {item.cta.label}
+              </Link>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SharedBenefitSummaryPanel({
+  summary,
+}: {
+  summary: WorkSurface["sharedBenefitSummary"];
+}) {
+  const metrics = [
+    {
+      label: "العجز الحالي",
+      value: formatMoney(summary.totalCurrentDeficit),
+    },
+    {
+      label: "المتأخرات",
+      value: formatMoney(summary.totalOverdueAmount),
+    },
+    {
+      label: "مصالح مشتركة",
+      value: summary.itemCount.toLocaleString("ar-SA"),
+    },
+  ];
+
+  return (
+    <section className={styles.surfaceSharedBenefitPanel}>
+      <div className={styles.surfaceSectionHeader}>
+        <div>
+          <h2>المصالح المشتركة</h2>
+          <p>
+            خدمات يستفيد منها الجميع مثل الصيانة أو المرافق، لذلك يعرضها النظام
+            كتغطية وعجز لا كطلب فردي.
+          </p>
+        </div>
+        <span className={styles.surfaceCount}>
+          {summary.itemCount.toLocaleString("ar-SA")}
+        </span>
+      </div>
+
+      <div className={styles.surfaceSharedBenefitLead}>
+        <p>{summary.displayText}</p>
+        {metrics.map((metric) => (
+          <div key={metric.label}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.surfaceSharedBenefitList}>
+        {summary.items.map((item) => (
+          <article
+            key={item.id}
+            className={`${styles.surfaceSharedBenefitItem} ${
+              styles[`surfaceSharedBenefitItem_${item.tone}`] ?? ""
+            }`}
+          >
+            <div className={styles.surfaceCardHeader}>
+              <span className={styles.surfaceBadge}>{item.entityName}</span>
+              <span className={styles.surfaceContext}>{item.roleLabel}</span>
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.benefitText}</p>
+
+            <div className={styles.surfaceSharedCoverage}>
+              <div>
+                <span>نسبة التغطية</span>
+                <strong>{item.coveragePercent.toLocaleString("ar-SA")}%</strong>
+              </div>
+              <div
+                className={styles.surfaceSharedCoverageBar}
+                aria-label={item.coverageText}
+              >
+                <span style={{ width: `${Math.min(item.coveragePercent, 100)}%` }} />
+              </div>
+              <p>{item.coverageText}</p>
+            </div>
+
+            <div className={styles.surfaceSharedBenefitMetrics}>
+              <div>
+                <span>الدعم المتوقع</span>
+                <strong>{formatMoney(item.expectedMonthlySupport)}</strong>
+              </div>
+              <div>
+                <span>العجز الحالي</span>
+                <strong>{formatMoney(item.currentDeficitAmount)}</strong>
+              </div>
+              <div>
+                <span>غير داعمين الآن</span>
+                <strong>{item.nonSupportingCount.toLocaleString("ar-SA")}</strong>
+              </div>
+            </div>
+
+            <p className={styles.surfaceExpected}>{item.userContributionText}</p>
+            <p className={styles.surfaceImpact}>{item.sharedImpactText}</p>
+            <p className={styles.surfaceReason}>{item.nextStep}</p>
+            <p className={styles.surfaceSharedWhy}>{item.whyShown}</p>
+            {item.cta ? (
+              <Link href={item.cta.href} className={styles.surfacePrimaryLink}>
+                {item.cta.label}
+              </Link>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function DashboardPage() {
-  const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
-  const [entities, setEntities] = useState<Entity[]>([]);
-  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
-  const [overlaps, setOverlaps] = useState<SubscriptionOverlap | null>(null);
-  const [suspendedSubs, setSuspendedSubs] = useState<Subscription[]>([]);
-  const [subscriptionSummary, setSubscriptionSummary] =
-    useState<SubscriptionSummary>({
-      active: 0,
-      conditional: 0,
-      supporterOnly: 0,
-      overdueAmount: 0,
-      entityCount: 0,
-    });
-  const [showAllItems, setShowAllItems] = useState(false);
-  const ACTION_PAGE_SIZE = 8;
-  const [personName, setPersonName] = useState("");
-  const [pendingApplications, setPendingApplications] = useState<
-    MembershipApplication[]
-  >([]);
+  const [surface, setSurface] = useState<WorkSurface | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setPersonName(localStorage.getItem("personName") ?? "");
-  }, []);
+    let cancelled = false;
+    getMyWorkSurface()
+      .then((nextSurface) => {
+        if (!cancelled) setSurface(nextSurface);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "تعذر تحميل حالتك");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [entityList, dues, records, overlapData, applications, allSubs] =
-          await Promise.all([
-            getEntities(),
-            getMyPaymentDues().catch(() => [] as PaymentDue[]),
-            getMyPaymentRecords().catch(() => [] as PaymentRecord[]),
-            getMemberSubscriptionOverlaps().catch(() => null),
-            getMyMembershipApplications().catch(
-              () => [] as MembershipApplication[],
-            ),
-            getSubscriptions({}).catch(() => [] as Subscription[]),
-          ]);
-        setEntities(entityList);
-        setActionItems(buildActionItems(dues, records, applications, t));
-        setOverlaps(overlapData);
-        setSuspendedSubs(allSubs.filter((s) => s.state === "SUSPENDED"));
-        setSubscriptionSummary(buildSubscriptionSummary(allSubs, dues));
-        setPendingApplications(
-          applications.filter(
-            (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
-          ),
-        );
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t("generalError"));
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, [t]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -408,309 +701,382 @@ export default function DashboardPage() {
     );
   }
 
-  if (error) {
+  if (error || !surface) {
     return (
       <div className={styles.centered}>
-        <p className={styles.errorText}>⚠ {error}</p>
+        <p className={styles.errorText}>{error ?? tCommon("error")}</p>
+        <Link href="/dashboard/legacy" className={styles.surfacePrimaryLink}>
+          فتح الواجهة التفصيلية القديمة
+        </Link>
       </div>
     );
   }
 
-  if (entities.length === 0 && actionItems.length === 0) {
-    return (
-      <div className={styles.page}>
-        <EmptyDashboard personName={personName} />
-      </div>
-    );
-  }
-
-  const urgentItems = actionItems.filter((i) => i.priority === "urgent");
-  const normalItems = actionItems.filter((i) => i.priority === "normal");
-  const visibleNormalItems = showAllItems
-    ? normalItems
-    : normalItems.slice(0, Math.max(0, ACTION_PAGE_SIZE - urgentItems.length));
-  const hiddenCount = normalItems.length - visibleNormalItems.length;
+  const hasActions = surface.requiredActions.length > 0;
+  const hasBenefits = surface.benefitSummary.items.length > 0;
+  const hasUpdates = surface.quietUpdates.length > 0;
+  const hasExceptions = surface.exceptions.length > 0;
+  const hasMultipleContexts = surface.contextSummaries.length > 1;
+  const showFinanceSummary = surface.financeSummary?.isVisible;
+  const showCommitteeSummary = surface.committeeSummary?.isVisible;
+  const showAuditorSummary = surface.auditorSummary?.isVisible;
+  const showNonOperationalSummary = surface.nonOperationalSummary?.isVisible;
+  const showSharedBenefitSummary = surface.sharedBenefitSummary?.isVisible;
+  const showGettingStarted =
+    surface.activeContexts.length === 0 &&
+    surface.requiredActions.length === 0 &&
+    surface.exceptions.length === 0;
 
   return (
     <div className={styles.page}>
-      <section className={styles.intro}>
+      <section
+        className={`${styles.surfaceHero} ${styles[`surfaceTone_${surface.primaryMessage.tone}`] ?? ""}`}
+      >
         <div>
-          <span className={styles.introEyebrow}>{t("personalWorkspace")}</span>
-          <h1>
-            {personName
-              ? t("welcomeName", { name: personName })
-              : t("myOverview")}
-          </h1>
-        </div>
-      </section>
-
-      {suspendedSubs.length > 0 && (
-        <div className={styles.suspendedBanner}>
-          <span className={styles.overlapIcon}>🔒</span>
-          <div>
-            <strong>
-              اشتراكاتك معلّقة في{" "}
-              {suspendedSubs.length > 1
-                ? `${suspendedSubs.length} مسارات`
-                : `مسار "${suspendedSubs[0]?.governancePath?.name ?? ""}"`}
-            </strong>
-            <p className={styles.suspendedBannerNote}>
-              لا يمكنك الاستفادة من هذه المسارات حتى تُعاد تفعيل اشتراكاتك.
-              تواصل مع إدارة الكيان.
-            </p>
-          </div>
-          <Link href="/portal" className={styles.overlapLink}>
-            عرض الاشتراكات
-          </Link>
-        </div>
-      )}
-
-      {overlaps?.hasOverlaps && (
-        <div className={styles.overlapBanner}>
-          <span className={styles.overlapIcon}>⚠</span>
-          <div>
-            <strong>{t("overlapTitle")}</strong>{" "}
-            <Link href="/subscriptions" className={styles.overlapLink}>
-              {t("overlapLink")}
-            </Link>
-          </div>
-        </div>
-      )}
-
-      <section className={styles.relationshipSummary}>
-        <div className={styles.relationshipSummaryText}>
-          <span className={styles.relationshipSummaryEyebrow}>
-            عضويتك التشغيلية
+          <span className={styles.surfaceKicker}>
+            مرحباً {surface.person.displayName}
           </span>
-          <strong>
-            تظهر لك الالتزامات والحقوق حسب الكيان والمحفظة والمسار وحالة
-            الاشتراك.
-          </strong>
-        </div>
-        <div className={styles.relationshipSummaryGrid}>
-          <Link href="/portal" className={styles.relationshipSummaryItem}>
-            <span>اشتراكات نشطة</span>
-            <strong>{subscriptionSummary.active}</strong>
-          </Link>
-          <Link
-            href="/subscriptions"
-            className={styles.relationshipSummaryItem}
-          >
-            <span>مشاركات مشروطة</span>
-            <strong>{subscriptionSummary.conditional}</strong>
-          </Link>
-          <Link
-            href="/subscriptions"
-            className={styles.relationshipSummaryItem}
-          >
-            <span>داعم فقط</span>
-            <strong>{subscriptionSummary.supporterOnly}</strong>
-          </Link>
-          <Link href="/portal" className={styles.relationshipSummaryItem}>
-            <span>متأخرات حالية</span>
-            <strong>
-              {new Intl.NumberFormat("ar-SA").format(
-                subscriptionSummary.overdueAmount,
-              )}{" "}
-              ر.س
+          <h1>{surface.primaryMessage.title}</h1>
+          {surface.primaryMessage.body ? (
+            <p>{surface.primaryMessage.body}</p>
+          ) : null}
+          {surface.primaryMessage.nextStep ? (
+            <strong className={styles.surfaceNextStep}>
+              {surface.primaryMessage.nextStep}
             </strong>
-          </Link>
+          ) : null}
         </div>
-        {subscriptionSummary.supporterOnly > 0 && (
-          <div className={styles.supporterOnlyNote}>
-            لديك {subscriptionSummary.supporterOnly} اشتراك داعم فقط: تساهم
-            في الرصيد ولا تملك حق استفادة أو طلب صرف في هذه المسارات.
-          </div>
-        )}
+        <div className={styles.surfaceHeroMeta}>
+          <span>{surfaceLabel(surface.surfaceKind)}</span>
+          <span>{surface.moneySummary.displayText}</span>
+        </div>
       </section>
 
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>{t("actionItemsTitle")}</h2>
-            <p className={styles.sectionHint}>{t("actionItemsHint")}</p>
-          </div>
-          {actionItems.length > 0 && (
-            <span className={styles.actionCount}>{actionItems.length}</span>
-          )}
-        </div>
+      {surface.person.accountState === "UNVERIFIED" &&
+      surface.person.accountMessage ? (
+        <section className={styles.surfaceAlert}>
+          {surface.person.accountMessage}
+        </section>
+      ) : null}
 
-        {actionItems.length === 0 ? (
-          <div className={styles.actionEmpty}>
-            <span className={styles.actionEmptyIcon}>✓</span>
-            <p>{t("actionItemsEmpty")}</p>
+      {showGettingStarted ? (
+        <section className={styles.surfaceSection}>
+          <div className={styles.surfaceEmptyStart}>
+            <h2>ابدأ بانضمام أو إنشاء صندوق</h2>
+            <p>
+              لا تظهر هنا قوائم النظام الداخلية. عندما تصبح عضواً سيعرض لك
+              النظام المطلوب منك وما تستفيد منه فقط.
+            </p>
+            <div className={styles.surfaceActionsRow}>
+              <Link href="/entities/new" className={styles.surfacePrimaryLink}>
+                إنشاء صندوق
+              </Link>
+              <Link href="/entities" className={styles.surfaceSecondaryLink}>
+                استعراض الخيارات
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {showNonOperationalSummary ? (
+        <NonOperationalSummaryPanel summary={surface.nonOperationalSummary} />
+      ) : null}
+
+      {showSharedBenefitSummary ? (
+        <SharedBenefitSummaryPanel summary={surface.sharedBenefitSummary} />
+      ) : null}
+
+      {hasMultipleContexts ? (
+        <section className={styles.surfaceSection}>
+          <div className={styles.surfaceSectionHeader}>
+            <div>
+              <h2>صناديقك باختصار</h2>
+              <p>الأموال والحقوق مفصولة هنا حتى لا تختلط عليك الصناديق.</p>
+            </div>
+            <span className={styles.surfaceCount}>
+              {surface.contextSummaries.length}
+            </span>
+          </div>
+          <div className={styles.surfaceContextSummaryGrid}>
+            {surface.contextSummaries.map((item) => (
+              <ContextSummaryCard key={item.id} item={item} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className={styles.surfaceSection}>
+        <div className={styles.surfaceSectionHeader}>
+          <div>
+            <h2>المطلوب منك الآن</h2>
+            <p>النظام يعرض فقط ما يحتاج فعلاً إلى إجراء منك.</p>
+          </div>
+          <span className={styles.surfaceCount}>
+            {surface.requiredActions.length}
+          </span>
+        </div>
+        {hasActions ? (
+          <div className={styles.surfaceGrid}>
+            {surface.requiredActions.map((action) => (
+              <ActionCard key={action.id} action={action} />
+            ))}
           </div>
         ) : (
-          <div className={styles.actionList}>
-            {urgentItems.length > 0 && (
-              <div className={styles.actionGroupLabel}>
-                <span>{t("actionGroupUrgent")}</span>
-                <strong>{urgentItems.length}</strong>
-              </div>
-            )}
-            {urgentItems.map((item) => (
-              <ActionItemCard key={item.id} item={item} urgent />
-            ))}
-            {visibleNormalItems.length > 0 && (
-              <div className={styles.actionGroupLabel}>
-                <span>{t("actionGroupNormal")}</span>
-                <strong>{normalItems.length}</strong>
-              </div>
-            )}
-            {visibleNormalItems.map((item) => (
-              <ActionItemCard key={item.id} item={item} />
-            ))}
-            {hiddenCount > 0 && (
-              <button
-                className={styles.showMoreBtn}
-                onClick={() => setShowAllItems(true)}
-              >
-                {t("showMoreItems", { count: hiddenCount })}
-              </button>
-            )}
-            {showAllItems && normalItems.length > ACTION_PAGE_SIZE && (
-              <button
-                className={styles.showMoreBtn}
-                onClick={() => setShowAllItems(false)}
-              >
-                {t("showLessItems")}
-              </button>
-            )}
+          <div className={styles.surfaceDone}>
+            لا يوجد إجراء مطلوب منك الآن.
           </div>
         )}
       </section>
 
-      {/* ── رحلة الانضمام — للطلبات المعلقة ── */}
-      {pendingApplications.length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>{t("joinJourneyTitle")}</h2>
-          </div>
-          <div className={styles.joinJourneyList}>
-            {pendingApplications.map((app) => {
-              const isUnderReview = app.status === "UNDER_REVIEW";
-              return (
-                <div key={app.id} className={styles.joinJourneyCard}>
-                  <div className={styles.joinJourneyEntity}>
-                    {app.entity?.name ?? t("entityFallback")}
-                  </div>
-                  <div className={styles.joinTimeline}>
-                    <div
-                      className={`${styles.joinStep} ${styles.joinStepDone}`}
-                    >
-                      <span className={styles.joinStepDot} />
-                      <span className={styles.joinStepLabel}>
-                        {t("joinStepSubmitted")}
-                      </span>
-                      <span className={styles.joinStepDate}>
-                        {new Date(app.submittedAt).toLocaleDateString("ar-SA")}
-                      </span>
-                    </div>
-                    <div
-                      className={`${styles.joinStep} ${isUnderReview ? styles.joinStepActive : styles.joinStepPending}`}
-                    >
-                      <span className={styles.joinStepDot} />
-                      <span className={styles.joinStepLabel}>
-                        {t("joinStepReview")}
-                      </span>
-                      {isUnderReview && (
-                        <span className={styles.joinStepBadge}>
-                          {t("joinStatusUnderReview")}
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.joinStepPending}>
-                      <span
-                        className={`${styles.joinStep} ${styles.joinStepLast}`}
-                      />
-                      <span className={styles.joinStepLabel}>
-                        {t("joinStepActive")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {showFinanceSummary ? (
+        <FinanceSummaryPanel summary={surface.financeSummary} />
+      ) : null}
 
-      {entities.length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>{t("entitiesTitle")}</h2>
-            <Link href="/entities" className={styles.seeAll}>
-              {t("viewAll")}
-            </Link>
+      {showCommitteeSummary ? (
+        <CommitteeSummaryPanel summary={surface.committeeSummary} />
+      ) : null}
+
+      {showAuditorSummary ? (
+        <AuditorSummaryPanel summary={surface.auditorSummary} />
+      ) : null}
+
+      <section className={styles.surfaceTwoColumn}>
+        <div className={styles.surfacePanel}>
+          <div className={styles.surfaceSectionHeader}>
+            <h2>مدفوعاتك</h2>
           </div>
-          <div className={styles.entityGrid}>
-            {entities.map((e) => (
-              <EntityCard key={e.id} entity={e} />
+          <div className={styles.surfaceMoneyGrid}>
+            <div>
+              <span>المستحق الآن</span>
+              <strong>{formatMoney(surface.moneySummary.dueNow)}</strong>
+            </div>
+            <div>
+              <span>المتأخرات</span>
+              <strong>{formatMoney(surface.moneySummary.overdue)}</strong>
+            </div>
+            <div>
+              <span>إثباتات تنتظر التأكيد</span>
+              <strong>{surface.moneySummary.pendingProofs}</strong>
+            </div>
+          </div>
+          <p className={styles.surfacePanelNote}>
+            {surface.moneySummary.displayText}
+          </p>
+        </div>
+
+        <div className={styles.surfacePanel}>
+          <div className={styles.surfaceSectionHeader}>
+            <h2>{surface.benefitSummary.title}</h2>
+          </div>
+          {hasBenefits ? (
+            <div className={styles.surfaceBenefitList}>
+              {surface.benefitSummary.items.map((item) => (
+                <article key={item.id} className={styles.surfaceBenefit}>
+                  <span
+                    className={`${styles.surfaceBenefitState} ${
+                      styles[`surfaceBenefitState_${item.state}`] ?? ""
+                    }`}
+                  >
+                    {benefitStateLabel(item.state)}
+                  </span>
+                  <strong>{item.title}</strong>
+                  <p>{item.body}</p>
+                  {item.contextLabel ? <span>{item.contextLabel}</span> : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className={styles.surfacePanelNote}>
+              لا تظهر استفادة نشطة الآن. سيعرضها النظام عندما تصبح مرتبطة
+              بعضويتك.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {surface.blockedCapabilities.length > 0 ? (
+        <section className={styles.surfaceSection}>
+          <div className={styles.surfaceSectionHeader}>
+            <h2>ما لا يمكن فعله الآن ولماذا</h2>
+          </div>
+          <div className={styles.surfaceBlockedList}>
+            {surface.blockedCapabilities.map((item) => (
+              <BlockedItem key={item.id} item={item} />
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* ── بطاقة توجيه المستفيد ── */}
-      {entities.some((e) => e.myRole === "BENEFICIARY") && (
-        <section className={styles.section}>
-          <div className={styles.beneficiaryCard}>
-            <div className={styles.beneficiaryIcon}>🎁</div>
-            <div className={styles.beneficiaryBody}>
-              <div className={styles.beneficiaryTitle}>
-                أنت مستفيد في{" "}
-                {entities.filter((e) => e.myRole === "BENEFICIARY").length > 1
-                  ? `${entities.filter((e) => e.myRole === "BENEFICIARY").length} كيانات`
-                  : `"${entities.find((e) => e.myRole === "BENEFICIARY")?.name ?? ""}"`}
-              </div>
-              <div className={styles.beneficiaryDesc}>
-                يمكنك تقديم طلبات صرف والاطلاع على حقوقك في المحافظ المخصصة لك.
-              </div>
+      {hasExceptions ? (
+        <section className={styles.surfaceSection}>
+          <div className={styles.surfaceSectionHeader}>
+            <div>
+              <h2>استثناءات تحتاج تدخلك</h2>
+              <p>تظهر لأن دورك يتطلب التدخل عند هذه الحالات فقط.</p>
             </div>
-            <div className={styles.beneficiaryActions}>
-              <Link href="/portal" className={styles.beneficiaryBtn}>
-                محافظي وحقوقي
-              </Link>
-              <Link
-                href="/disbursement-requests"
-                className={styles.beneficiaryBtnSecondary}
-              >
-                طلبات صرف
-              </Link>
-            </div>
+            <span className={styles.surfaceCount}>
+              {surface.exceptions.length}
+            </span>
+          </div>
+          <div className={styles.surfaceGrid}>
+            {surface.exceptions.map((item) => (
+              <ExceptionCard key={item.id} item={item} />
+            ))}
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* ── وصول سريع — دائماً في الأسفل ── */}
-      <section className={styles.quickSection}>
-        <div className={styles.quickGrid}>
-          <Link href="/finance" className={styles.quickItem}>
-            <span className={styles.quickIcon}>◫</span>
-            <span className={styles.quickLabel}>{t("quickFinance")}</span>
-          </Link>
-          <Link href="/subscriptions" className={styles.quickItem}>
-            <span className={styles.quickIcon}>≋</span>
-            <span className={styles.quickLabel}>{t("quickSubscriptions")}</span>
-          </Link>
-          <Link href="/decisions" className={styles.quickItem}>
-            <span className={styles.quickIcon}>✓</span>
-            <span className={styles.quickLabel}>{t("quickDecisions")}</span>
-          </Link>
-          <Link href="/disputes" className={styles.quickItem}>
-            <span className={styles.quickIcon}>↔</span>
-            <span className={styles.quickLabel}>{t("quickDisputes")}</span>
-          </Link>
-          <Link href="/documents" className={styles.quickItem}>
-            <span className={styles.quickIcon}>▤</span>
-            <span className={styles.quickLabel}>{t("quickDocuments")}</span>
-          </Link>
-          <Link href="/notifications" className={styles.quickItem}>
-            <span className={styles.quickIcon}>◌</span>
-            <span className={styles.quickLabel}>{t("quickNotifications")}</span>
-          </Link>
+      <section className={styles.surfaceSection}>
+        <div className={styles.surfaceSectionHeader}>
+          <div>
+            <h2>ما حدث ويهمك</h2>
+            <p>تحديثات مختصرة بدون إدخالك في تفاصيل التشغيل.</p>
+          </div>
         </div>
+        {hasUpdates ? (
+          <div className={styles.surfaceUpdates}>
+            {surface.quietUpdates.map((update) => (
+              <QuietUpdate key={update.id} update={update} />
+            ))}
+          </div>
+        ) : (
+          <div className={styles.surfaceMutedEmpty}>
+            لا توجد تحديثات مهمة الآن.
+          </div>
+        )}
       </section>
+
+      <details className={styles.surfaceAdvanced}>
+        <summary>أدوات تفصيلية للمقارنة أو عند الحاجة</summary>
+        <p>
+          هذه ليست الواجهة اليومية. أبقيناها مؤقتاً حتى ترى الفرق بين التجربة
+          الجديدة والقديمة.
+        </p>
+        <div className={styles.surfaceToolGrid}>
+          {surface.advancedTools.map((tool) => (
+            <AdvancedTool key={tool.href} tool={tool} />
+          ))}
+        </div>
+      </details>
     </div>
   );
+}
+
+function surfaceLabel(kind: WorkSurface["surfaceKind"]) {
+  switch (kind) {
+    case "FOUNDER":
+      return "سطح مؤسس";
+    case "ADMIN":
+      return "سطح مسؤول";
+    case "TREASURER":
+      return "سطح أمين صندوق";
+    case "AUDITOR":
+      return "سطح مدقق";
+    case "COMMITTEE_MEMBER":
+      return "سطح لجنة";
+    case "MULTI_ENTITY_MEMBER":
+      return "عضو في أكثر من صندوق";
+    case "CONDITIONAL_MEMBER":
+      return "عضوية مشروطة";
+    case "SUSPENDED_MEMBER":
+      return "عضوية معلقة";
+    case "EXITED_MEMBER":
+      return "عضوية سابقة";
+    case "SUPPORTER_ONLY":
+      return "داعم فقط";
+    case "READ_ONLY_MEMBER":
+      return "متابعة فقط";
+    case "PENDING_REVIEW_MEMBER":
+      return "قيد المراجعة";
+    case "MEMBER":
+      return "سطح عضو";
+  }
+}
+
+function benefitStateLabel(
+  state: WorkSurface["benefitSummary"]["items"][number]["state"],
+) {
+  switch (state) {
+    case "AVAILABLE":
+      return "متاح";
+    case "SUPPORT_ONLY":
+      return "داعم فقط";
+    case "CONDITIONAL":
+      return "مشروط";
+    case "SUSPENDED":
+      return "معلق";
+    case "EXITED":
+      return "سابق";
+    case "READ_ONLY":
+      return "متابعة فقط";
+  }
+}
+
+function contextKindLabel(kind: ContextSurfaceSummary["kind"]) {
+  switch (kind) {
+    case "CAMPAIGN":
+      return "حملة";
+    case "SHARED_BENEFIT":
+      return "مصلحة مشتركة";
+    case "ENTITY":
+      return "صندوق";
+  }
+}
+
+function exceptionRoleLabel(role: SurfaceException["ownerRole"]) {
+  switch (role) {
+    case "FOUNDER":
+      return "للمؤسس";
+    case "ADMIN":
+      return "للإدارة";
+    case "TREASURER":
+      return "لأمين الصندوق";
+    case "AUDITOR":
+      return "للمدقق";
+    case "COMMITTEE":
+      return "للجنة";
+  }
+}
+
+function formatMoney(amount: number) {
+  return `${amount.toLocaleString("ar-SA", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  })} ر.س`;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("ar-SA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function voteChoiceLabel(choice: NonNullable<WorkSurface["committeeSummary"]["decisions"][number]["voteChoice"]>) {
+  switch (choice) {
+    case "APPROVE":
+      return "موافق";
+    case "REJECT":
+      return "رافض";
+    case "ABSTAIN":
+      return "امتناع";
+  }
+}
+
+function auditorCategoryLabel(
+  category: WorkSurface["auditorSummary"]["timeline"][number]["category"],
+) {
+  switch (category) {
+    case "FINANCE":
+      return "مالي";
+    case "GOVERNANCE":
+      return "حوكمة";
+    case "MEMBERSHIP":
+      return "عضوية";
+    case "ACCESS":
+      return "وصول";
+    case "OPERATIONS":
+      return "تشغيل";
+  }
 }

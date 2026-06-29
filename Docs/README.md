@@ -71,7 +71,21 @@
 | الوثيقة | الوصف |
 |---|---|
 | [Deployment_Decisions.md](08_Production_Readiness/Deployment_Decisions.md) | قرار الاستضافة والتشغيل والنسخ الاحتياطي للإنتاج |
-| [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md) | تقرير تنفيذ تدقيق منطق العمل وإغلاق المخاطر الحرجة والمتبقي التشغيلي قبل الإنتاج |
+| [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md) | تقرير تنفيذ تدقيق منطق العمل — النسخة الأولى |
+| [**AUDIT_REPORT_v2.md ⭐**](08_Production_Readiness/AUDIT_REPORT_v2.md) | **تقرير التدقيق المحدَّث (2026-06-29):** ما تم إصلاحه ✅ وما يمنع الإطلاق ❌ ومشاكل جديدة 🆕 |
+| [**BACKLOG.md ⭐**](08_Production_Readiness/BACKLOG.md) | **Backlog التنفيذي الكامل:** 42 مهمة بمعايير قبول قابلة للاختبار — نقطة البداية لكل مطوّر |
+
+---
+
+---
+
+### 👩‍💻 للمطوّرين — ابدأ هنا
+
+| الملف | الوصف |
+|---|---|
+| [**../CONTRIBUTING.md ⭐**](../CONTRIBUTING.md) | **دليل المطوّر:** إعداد البيئة + هيكل المشروع + كيف تختار مهمتك |
+| [08_Production_Readiness/AUDIT_REPORT_v2.md](08_Production_Readiness/AUDIT_REPORT_v2.md) | حالة المشروع: ما يعمل وما لا يعمل |
+| [08_Production_Readiness/BACKLOG.md](08_Production_Readiness/BACKLOG.md) | 42 مهمة جاهزة للتنفيذ بترتيب الأولوية |
 
 ---
 

@@ -1088,8 +1088,14 @@ export class LedgerService {
     amount: number,
   ) {
     await this.adjustWalletBalance(tx, walletId, amount);
+    // تحديث الحساب الإجمالي للكيان فقط — لا المحافظ ولا المسارات ولا بنود الإنفاق
     await tx.ledgerAccount.updateMany({
-      where: { entityId },
+      where: {
+        entityId,
+        walletId: null,
+        governancePathId: null,
+        spendingItemId: null,
+      },
       data: {
         balance:
           amount >= 0 ? { increment: amount } : { decrement: Math.abs(amount) },

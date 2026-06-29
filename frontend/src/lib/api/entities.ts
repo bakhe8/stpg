@@ -74,6 +74,8 @@ export function createEntity(data: {
   type: string;
   description?: string;
   templateId?: string;
+  defaultGovernanceType?: string;
+  allowMultiplePaths?: boolean;
 }) {
   return fetchApi("/entities", { method: "POST", body: JSON.stringify(data) });
 }
