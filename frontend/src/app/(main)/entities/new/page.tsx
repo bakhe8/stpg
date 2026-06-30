@@ -22,6 +22,13 @@ interface WizardState {
 }
 
 type FundFlowMode = "fund" | "campaign" | "";
+type OperationalTemplateProfile = {
+  title: string;
+  body: string;
+  outcome: string;
+  badge: string;
+  goals: string[];
+};
 
 const FUND_CREATE_FLOW_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW === "true";
@@ -64,6 +71,70 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
     { key: "TRIBE", label: t("fundProfileTribe") },
     { key: "CUSTOM", label: t("fundProfileCustom") },
   ];
+
+  function getOperationalTemplateProfile(
+    template: EntityTemplate,
+  ): OperationalTemplateProfile {
+    const rawExtraRules = template.defaultPolicy?.extraRules;
+    const extraRules =
+      typeof rawExtraRules === "object" && rawExtraRules !== null
+        ? (rawExtraRules as Record<string, unknown>)
+        : null;
+    const templateKey = String(extraRules?.templateKey ?? "");
+    const templateIdentity = `${templateKey} ${template.name}`.toLowerCase();
+    const goals = (template.suggestedGoals ?? [])
+      .map((goal) => goal.name)
+      .filter((goal): goal is string => Boolean(goal))
+      .slice(0, 2);
+
+    if (
+      templateIdentity.includes("mutual_aid") ||
+      templateIdentity.includes("تكافل")
+    ) {
+      return {
+        title: t("fundTemplateMutualAidTitle"),
+        body: t("fundTemplateMutualAidBody"),
+        outcome: t("fundTemplateMutualAidOutcome"),
+        badge: t("fundTemplateMutualAidBadge"),
+        goals,
+      };
+    }
+
+    if (
+      templateIdentity.includes("shared_services") ||
+      templateIdentity.includes("خدمات")
+    ) {
+      return {
+        title: t("fundTemplateSharedServicesTitle"),
+        body: t("fundTemplateSharedServicesBody"),
+        outcome: t("fundTemplateSharedServicesOutcome"),
+        badge: t("fundTemplateSharedServicesBadge"),
+        goals,
+      };
+    }
+
+    if (
+      templateIdentity.includes("supporter_only") ||
+      templateIdentity.includes("داعمين") ||
+      templateIdentity.includes("دعم")
+    ) {
+      return {
+        title: t("fundTemplateSupportTitle"),
+        body: t("fundTemplateSupportBody"),
+        outcome: t("fundTemplateSupportOutcome"),
+        badge: t("fundTemplateSupportBadge"),
+        goals,
+      };
+    }
+
+    return {
+      title: t("fundTemplateCustomTitle"),
+      body: t("fundTemplateCustomBody"),
+      outcome: t("fundTemplateCustomOutcome"),
+      badge: t("fundTemplateCustomBadge"),
+      goals,
+    };
+  }
 
   useEffect(() => {
     getEntityTemplates().then(setTemplates).catch(() => {});
@@ -406,37 +477,70 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
             )}
 
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t("wizardTemplateTitle")}</label>
-              <div className={styles.templateList}>
+              <label className={styles.label}>{t("fundStartModeTitle")}</label>
+              <p className={styles.fieldHelp}>{t("fundStartModeHint")}</p>
+              <div className={styles.operationalTemplateList}>
                 <button
-                  className={`${styles.templateCard} ${!templateId ? styles.templateCardSelected : ""}`}
+                  className={`${styles.operationalTemplateCard} ${!templateId ? styles.operationalTemplateSelected : ""}`}
                   onClick={() => setTemplateId("")}
                   type="button"
                 >
-                  <span className={styles.templateName}>{t("noTemplateOption")}</span>
-                  <span className={styles.templateDesc}>{t("noTemplateDesc")}</span>
-                </button>
-                {templates.map((template) => (
-                  <button
-                    key={template.id}
-                    className={`${styles.templateCard} ${templateId === template.id ? styles.templateCardSelected : ""}`}
-                    onClick={() => setTemplateId(template.id)}
-                    type="button"
-                  >
-                    <span className={styles.templateHeader}>
-                      {template.icon && (
-                        <span className={styles.templateIcon}>{template.icon}</span>
-                      )}
-                      <span className={styles.templateName}>{template.name}</span>
+                  <span className={styles.operationalTemplateHeader}>
+                    <span className={styles.operationalTemplateIcon}>□</span>
+                    <span className={styles.operationalTemplateTitle}>
+                      {t("fundStartEmptyTitle")}
                     </span>
-                    {template.description && (
-                      <span className={styles.templateDesc}>
-                        {template.description}
+                    <span className={styles.operationalTemplateBadge}>
+                      {t("fundStartEmptyBadge")}
+                    </span>
+                  </span>
+                  <span className={styles.operationalTemplateBody}>
+                    {t("fundStartEmptyBody")}
+                  </span>
+                  <span className={styles.operationalTemplateOutcome}>
+                    {t("fundStartEmptyOutcome")}
+                  </span>
+                </button>
+                {templates.map((template) => {
+                  const profile = getOperationalTemplateProfile(template);
+                  return (
+                    <button
+                      key={template.id}
+                      className={`${styles.operationalTemplateCard} ${templateId === template.id ? styles.operationalTemplateSelected : ""}`}
+                      onClick={() => setTemplateId(template.id)}
+                      type="button"
+                    >
+                      <span className={styles.operationalTemplateHeader}>
+                        <span className={styles.operationalTemplateIcon}>
+                          {template.icon ?? "◇"}
+                        </span>
+                        <span className={styles.operationalTemplateTitle}>
+                          {profile.title}
+                        </span>
+                        <span className={styles.operationalTemplateBadge}>
+                          {profile.badge}
+                        </span>
                       </span>
-                    )}
-                  </button>
-                ))}
+                      <span className={styles.operationalTemplateBody}>
+                        {profile.body}
+                      </span>
+                      <span className={styles.operationalTemplateOutcome}>
+                        {profile.outcome}
+                      </span>
+                      {profile.goals.length > 0 && (
+                        <span className={styles.operationalTemplateGoals}>
+                          {profile.goals.map((goal) => (
+                            <span key={`${template.id}-${goal}`}>{goal}</span>
+                          ))}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+              <p className={styles.templateDisclosure}>
+                {t("fundTemplateDisclosure")}
+              </p>
             </div>
           </>
         ) : (
