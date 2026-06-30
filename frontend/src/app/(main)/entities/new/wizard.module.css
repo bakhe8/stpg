@@ -57,6 +57,7 @@
 .label { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
 .required { color: #ef4444; }
 .hint { font-size: 0.75rem; color: var(--text-muted); text-align: left; }
+.fieldError { color: #b91c1c; font-size: 0.78rem; line-height: 1.5; }
 .input {
   padding: 10px 14px; border: 1.5px solid var(--border-strong); border-radius: 10px;
   font-size: 0.95rem; outline: none; transition: border-color 0.15s;
@@ -254,6 +255,91 @@
   font-size: 0.88rem;
 }
 
+.campaignPlan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.campaignPlanHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campaignPlanHeader strong,
+.campaignPlanNext strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.campaignPlanHeader span,
+.campaignPlanNext span {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.campaignPlanGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.campaignPlanItem {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.campaignPlanItem[data-ready="true"] {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.campaignPlanItem[data-ready="false"] {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.campaignPlanItem span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.campaignPlanItem strong {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.campaignPlanNext {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.campaignPlanOutcome {
+  margin: 0;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
 /* Success */
 .successScreen { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 3rem 2rem; background: var(--surface); border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow-sm); }
 .successIcon { font-size: 3rem; }
@@ -432,6 +518,10 @@
   }
 
   .modeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .campaignPlanGrid {
     grid-template-columns: 1fr;
   }
 

@@ -54,6 +54,7 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
   const [customProfileLabel, setCustomProfileLabel] = useState("");
   const [parentEntityId, setParentEntityId] = useState("");
   const [campaignEndsAt, setCampaignEndsAt] = useState("");
+  const [minCampaignEndDate, setMinCampaignEndDate] = useState("");
 
   const profileOptions = [
     { key: "", label: t("fundProfileNone") },
@@ -81,6 +82,12 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
   }, []);
 
   useEffect(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setMinCampaignEndDate(tomorrow.toISOString().slice(0, 10));
+  }, []);
+
+  useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setIsVerified(false);
@@ -100,11 +107,62 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
     profileKey === "CUSTOM"
       ? customProfileLabel.trim()
       : profileOptions.find((option) => option.key === profileKey)?.label;
+  const selectedParentEntity = parentEntities.find(
+    (entity) => entity.id === parentEntityId,
+  );
+  const campaignHasInvalidEndDate =
+    mode === "campaign" &&
+    Boolean(campaignEndsAt) &&
+    Boolean(minCampaignEndDate) &&
+    campaignEndsAt < minCampaignEndDate;
+  const campaignParentBankReady = Boolean(
+    selectedParentEntity?.bankAccountNumber && selectedParentEntity?.bankName,
+  );
+  const campaignPlanItems = [
+    {
+      key: "parent",
+      label: t("campaignPlanParentTitle"),
+      value: selectedParentEntity
+        ? t("campaignPlanParentReady", { name: selectedParentEntity.name })
+        : t("campaignPlanParentMissing"),
+      ready: Boolean(selectedParentEntity),
+    },
+    {
+      key: "duration",
+      label: t("campaignPlanDurationTitle"),
+      value: campaignEndsAt
+        ? t("campaignPlanDurationReady", {
+            date: new Date(`${campaignEndsAt}T00:00:00`).toLocaleDateString(
+              "ar-SA",
+            ),
+          })
+        : t("campaignPlanDurationOpen"),
+      ready: Boolean(campaignEndsAt) && !campaignHasInvalidEndDate,
+    },
+    {
+      key: "finance",
+      label: t("campaignPlanFinanceTitle"),
+      value: campaignParentBankReady
+        ? t("campaignPlanFinanceParentBankReady", {
+            bank: selectedParentEntity?.bankName ?? "",
+          })
+        : t("campaignPlanFinanceParentBankMissing"),
+      ready: campaignParentBankReady,
+    },
+    {
+      key: "governance",
+      label: t("campaignPlanGovernanceTitle"),
+      value: t("campaignPlanGovernanceDetail"),
+      ready: true,
+    },
+  ];
   const canSubmit =
     name.trim().length >= 2 &&
     legalAccepted &&
     (mode === "fund" ||
-      (mode === "campaign" && Boolean(parentEntityId))) &&
+      (mode === "campaign" &&
+        Boolean(parentEntityId) &&
+        !campaignHasInvalidEndDate)) &&
     (profileKey !== "CUSTOM" || customProfileLabel.trim().length >= 2);
 
   async function handleCreate() {
@@ -382,15 +440,49 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
             </div>
           </>
         ) : (
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>{t("campaignEndsAtLabel")}</label>
-            <input
-              className={styles.input}
-              type="date"
-              value={campaignEndsAt}
-              onChange={(event) => setCampaignEndsAt(event.target.value)}
-            />
-          </div>
+          <>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>{t("campaignEndsAtLabel")}</label>
+              <input
+                className={styles.input}
+                type="date"
+                min={minCampaignEndDate}
+                value={campaignEndsAt}
+                onChange={(event) => setCampaignEndsAt(event.target.value)}
+              />
+              {campaignHasInvalidEndDate && (
+                <span className={styles.fieldError}>
+                  {t("campaignEndDateInvalid")}
+                </span>
+              )}
+            </div>
+
+            <div className={styles.campaignPlan}>
+              <div className={styles.campaignPlanHeader}>
+                <strong>{t("campaignPlanTitle")}</strong>
+                <span>{t("campaignPlanSubtitle")}</span>
+              </div>
+              <div className={styles.campaignPlanGrid}>
+                {campaignPlanItems.map((item) => (
+                  <div
+                    key={item.key}
+                    className={styles.campaignPlanItem}
+                    data-ready={item.ready ? "true" : "false"}
+                  >
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.campaignPlanNext}>
+                <strong>{t("campaignPlanAfterCreateTitle")}</strong>
+                <span>{t("campaignPlanAfterCreateBody")}</span>
+              </div>
+              <p className={styles.campaignPlanOutcome}>
+                {t("campaignPlanOutcome")}
+              </p>
+            </div>
+          </>
         )}
 
         <div className={styles.legalBox}>

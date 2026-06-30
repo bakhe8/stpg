@@ -1,8 +1,8 @@
 # Repository State - CollectiveTrustOS
 
-**الإصدار التشغيلي:** 2.4
+**الإصدار التشغيلي:** 2.5
 **التاريخ:** 2026-06-30
-**الحالة:** Production readiness 08 closed; Improvement 09 Phase D setup checklist added behind feature-flagged flow
+**الحالة:** Production readiness 08 closed; Improvement 09 Phase D campaign operating map added behind feature-flagged flow
 **سجل الإصدار:** `Docs/RELEASE_NOTES.md`
 
 ## الغرض
@@ -18,8 +18,8 @@
 | Production readiness 08 | مغلق تنفيذيا حسب `Docs/08_Production_Readiness/BACKLOG.md` |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D بدأت وD-006 منفذة |
-| تنفيذ 09 | مسار إنشاء صندوق/حملة جديد موجود خلف feature flag، وتوجد setup checklist للصناديق غير المكتملة، وليس default بعد |
+| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D بدأت وD-006/D-007 منفذة |
+| تنفيذ 09 | مسار إنشاء صندوق/حملة جديد موجود خلف feature flag، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وليس default بعد |
 
 ## مصادر الحقيقة
 
@@ -29,7 +29,7 @@
 | ما حالة تقرير التدقيق v2؟ | `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` مع ملاحظة أنه superseded |
 | ما الخطة التالية؟ | `Docs/09_Improvement/00_README.md` |
 | ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md` |
-| ما العمل التالي؟ | استكمال `D-007` و`D-008` ثم parity pack داخل `Docs/09_Improvement/07_PHASE_D_PARALLEL_CREATE_FLOW.md` |
+| ما العمل التالي؟ | استكمال `D-008` ثم parity pack داخل `Docs/09_Improvement/07_PHASE_D_PARALLEL_CREATE_FLOW.md` |
 | ما القدرات التي لا يجوز خسارتها؟ | `Docs/09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md` |
 
 ## قرار الانتقال إلى 09
@@ -45,6 +45,7 @@
 - Phase C أضافت profile اختياري للصندوق وتفويض الإعدادات المتقدمة.
 - Phase D بدأت بشاشة اختيار صندوق/حملة خلف `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW`.
 - D-006 أضافت checklist تشغيل بعد إنشاء الصندوق لعرض نقص الوصف، البنك، المحفظة، المسار، والأعضاء.
+- D-007 أضافت خريطة تشغيل للحملة تعرض الصندوق الأب، المدة، جاهزية البنك، وخطوة تجهيز محفظة/مسار الحملة.
 - لم نجعل المسار الجديد default، ولم نغير routes، ولم نحذف `EntityType`.
 
 ## شرط قبل إغلاق Phase D

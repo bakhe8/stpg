@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.4`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.5`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -83,7 +83,8 @@ Phase D بدأت بشرائح صغيرة خلف feature flag:
 - إنشاء الصندوق الجديد يستخدم `COMMUNITY` داخليا وprofile اختياري.
 - إنشاء الحملة يتطلب صندوقا قائما كأب.
 - صندوق بلا قالب أو صندوق غير مكتمل يظهر له setup checklist بعد الإنشاء في صفحة الصندوق.
-- المتبقي في Phase D: تحسين تفاصيل الحملة، إخفاء تفاصيل القوالب التقنية أكثر، ثم parity pack وUX smoke tests قبل أي default switch.
+- شاشة الحملة تعرض خريطة تشغيلية للحملة بدون توسيع عقد backend الحالي.
+- المتبقي في Phase D: إخفاء تفاصيل القوالب التقنية أكثر، ثم parity pack وUX smoke tests قبل أي default switch.
 
 ## قواعد الحماية
 
