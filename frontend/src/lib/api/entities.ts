@@ -86,6 +86,20 @@ export function createEntity(data: {
   return fetchApi("/entities", { method: "POST", body: JSON.stringify(data) });
 }
 
+export function createCampaign(
+  parentEntityId: string,
+  data: {
+    name: string;
+    description?: string;
+    campaignEndsAt?: string;
+  },
+): Promise<Entity> {
+  return fetchApi(`/entities/${parentEntityId}/campaigns`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export interface EntityRelationship {
   id: string;
   sourceEntityId: string;

@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.2` بتاريخ 2026-06-30.
+**الحالة الحالية:** الإصدار التشغيلي `2.3` بتاريخ 2026-06-30.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -91,6 +91,7 @@
 | [04_PHASE_A_PREFLIGHT_BACKLOG.md](09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md) | أول backlog تنفيذي بعد إغلاق 08 |
 | [05_PHASE_B_TEMPLATE_NORMALIZATION.md](09_Improvement/05_PHASE_B_TEMPLATE_NORMALIZATION.md) | تطبيع القوالب وتطبيقها التشغيلي |
 | [06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md](09_Improvement/06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md) | مصدر profile الاختياري وتفويض الإعدادات المتقدمة |
+| [07_PHASE_D_PARALLEL_CREATE_FLOW.md](09_Improvement/07_PHASE_D_PARALLEL_CREATE_FLOW.md) | المسار الموازي لإنشاء صندوق/حملة خلف feature flag |
 
 ---
 
@@ -129,8 +130,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ التالي Phase D |
-| أول عمل مفتوح | Phase D: المسار الموازي خلف feature flag |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D بدأت |
+| أول عمل مفتوح | استكمال Phase D parity/setup checklist |
 | قاعدة التنفيذ | لا نجعل المسار الجديد default قبل parity pack |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)

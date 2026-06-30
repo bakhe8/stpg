@@ -1,5 +1,23 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.3 - 2026-06-30
+
+**النوع:** Phase D start / feature-flagged frontend flow
+**الحالة:** مسار إنشاء صندوق/حملة جديد خلف feature flag، وليس default بعد
+
+### ما تغير
+
+- أضيف `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW` للواجهة.
+- عند تفعيل العلم، تعرض `/entities/new` شاشة اختيار بين `صندوق` و`حملة`.
+- إنشاء الصندوق من المسار الجديد يستخدم `type = COMMUNITY` داخليا ويحفظ `profileKey/profileLabel` اختياريا.
+- إنشاء الحملة يستخدم endpoint الحالي `POST /entities/:id/campaigns` ويتطلب صندوقا قائما.
+- بقي النموذج القديم متاحا بزر رجوع وكسلوك default عند تعطيل flag.
+- أضيفت وثيقة `Docs/09_Improvement/07_PHASE_D_PARALLEL_CREATE_FLOW.md`.
+
+### المعنى العملي
+
+بدأ Phase D بدون كسر المسار القديم. المتبقي قبل جعل المسار الجديد default: setup checklist، parity pack، وUX smoke tests للعلمين.
+
 ## 2.2 - 2026-06-30
 
 **النوع:** 09 Improvement preflight implementation

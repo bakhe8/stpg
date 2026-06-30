@@ -4,8 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  getEntities,
   getEntityTemplates,
   createEntity,
+  createCampaign,
+  Entity,
   EntityTemplate,
 } from "@/lib/api/entities";
 import { createInvitation } from "@/lib/api/invitations";
@@ -18,7 +21,415 @@ interface WizardState {
   templateId: string;
 }
 
+type FundFlowMode = "fund" | "campaign" | "";
+
+const FUND_CREATE_FLOW_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW === "true";
+
 export default function EntityWizardPage() {
+  const [useLegacyOverride, setUseLegacyOverride] = useState(false);
+
+  if (FUND_CREATE_FLOW_ENABLED && !useLegacyOverride) {
+    return <FundCreateFlow onUseLegacy={() => setUseLegacyOverride(true)} />;
+  }
+
+  return <LegacyEntityWizardPage />;
+}
+
+function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
+  const router = useRouter();
+  const t = useTranslations("entities");
+  const [mode, setMode] = useState<FundFlowMode>("");
+  const [preGatePassed, setPreGatePassed] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [templates, setTemplates] = useState<EntityTemplate[]>([]);
+  const [parentEntities, setParentEntities] = useState<Entity[]>([]);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [templateId, setTemplateId] = useState("");
+  const [profileKey, setProfileKey] = useState("");
+  const [customProfileLabel, setCustomProfileLabel] = useState("");
+  const [parentEntityId, setParentEntityId] = useState("");
+  const [campaignEndsAt, setCampaignEndsAt] = useState("");
+
+  const profileOptions = [
+    { key: "", label: t("fundProfileNone") },
+    { key: "FAMILY", label: t("fundProfileFamily") },
+    { key: "BUILDING", label: t("fundProfileBuilding") },
+    { key: "NEIGHBORHOOD", label: t("fundProfileNeighborhood") },
+    { key: "TRIBE", label: t("fundProfileTribe") },
+    { key: "CUSTOM", label: t("fundProfileCustom") },
+  ];
+
+  useEffect(() => {
+    getEntityTemplates().then(setTemplates).catch(() => {});
+    getEntities()
+      .then((entities) => {
+        const manageableParents = entities.filter(
+          (entity) =>
+            !entity.isCampaign &&
+            entity.isActive !== false &&
+            (entity.myRole === "FOUNDER" || entity.myRole === "ADMIN"),
+        );
+        setParentEntities(manageableParents);
+        setParentEntityId(manageableParents[0]?.id ?? "");
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setIsVerified(false);
+      return;
+    }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { isVerified?: boolean } | null) =>
+        setIsVerified(data?.isVerified ?? false),
+      )
+      .catch(() => setIsVerified(false));
+  }, []);
+
+  const selectedProfileLabel =
+    profileKey === "CUSTOM"
+      ? customProfileLabel.trim()
+      : profileOptions.find((option) => option.key === profileKey)?.label;
+  const canSubmit =
+    name.trim().length >= 2 &&
+    legalAccepted &&
+    (mode === "fund" ||
+      (mode === "campaign" && Boolean(parentEntityId))) &&
+    (profileKey !== "CUSTOM" || customProfileLabel.trim().length >= 2);
+
+  async function handleCreate() {
+    if (!mode) return;
+    setCreating(true);
+    setError(null);
+    try {
+      if (mode === "campaign") {
+        const campaign = await createCampaign(parentEntityId, {
+          name: name.trim(),
+          description: description.trim() || undefined,
+          campaignEndsAt: campaignEndsAt || undefined,
+        });
+        router.push(`/entities/${campaign.id}`);
+        return;
+      }
+
+      const fund = (await createEntity({
+        name: name.trim(),
+        type: "COMMUNITY",
+        description: description.trim() || undefined,
+        templateId: templateId || undefined,
+        profileKey: profileKey || undefined,
+        profileLabel:
+          profileKey && selectedProfileLabel ? selectedProfileLabel : undefined,
+      })) as { id: string };
+      router.push(`/entities/${fund.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("createEntityFailed"));
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  const renderVerificationGate = () => {
+    if (isVerified !== false) return null;
+    return (
+      <div className={styles.unverifiedScreen}>
+        <div className={styles.unverifiedCard}>
+          <div className={styles.unverifiedIcon}>□</div>
+          <h2 className={styles.unverifiedTitle}>{t("unverifiedTitle")}</h2>
+          <p className={styles.unverifiedDesc}>{t("unverifiedDesc")}</p>
+          <button
+            className={styles.unverifiedBtn}
+            onClick={() => router.push("/profile")}
+          >
+            {t("goToProfile")}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const verificationGate = renderVerificationGate();
+  if (verificationGate) return verificationGate;
+
+  if (!preGatePassed) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.preGate}>
+          <div className={styles.preGateIcon}>◇</div>
+          <h2 className={styles.preGateTitle}>{t("preGateTitle")}</h2>
+          <p className={styles.preGateSubtitle}>{t("preGateSubtitle")}</p>
+
+          <div className={styles.preGateList}>
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className={styles.preGateItem}>
+                <span className={styles.preGateNum}>{item}</span>
+                <div>
+                  <strong>{t(`preGateItem${item}Title`)}</strong>
+                  <p>{t(`preGateItem${item}Body`)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className={styles.primaryBtn}
+            onClick={() => setPreGatePassed(true)}
+          >
+            {t("preGateConfirm")}
+          </button>
+          <button className={styles.secondaryBtn} onClick={() => router.back()}>
+            {t("preGateBack")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!mode) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.flowHeader}>
+          <div>
+            <p className={styles.flowEyebrow}>{t("fundFlowEyebrow")}</p>
+            <h1 className={styles.flowTitle}>{t("fundFlowTitle")}</h1>
+          </div>
+          <button className={styles.secondaryBtn} onClick={onUseLegacy}>
+            {t("useLegacyCreateFlow")}
+          </button>
+        </header>
+        <div className={styles.modeGrid}>
+          <button
+            className={styles.modeCard}
+            onClick={() => {
+              setMode("fund");
+              setLegalAccepted(false);
+            }}
+          >
+            <span className={styles.modeMark}>ص</span>
+            <strong>{t("fundFlowFundTitle")}</strong>
+            <span>{t("fundFlowFundBody")}</span>
+          </button>
+          <button
+            className={styles.modeCard}
+            onClick={() => {
+              setMode("campaign");
+              setLegalAccepted(false);
+            }}
+          >
+            <span className={styles.modeMark}>ح</span>
+            <strong>{t("fundFlowCampaignTitle")}</strong>
+            <span>{t("fundFlowCampaignBody")}</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.flowHeader}>
+        <div>
+          <p className={styles.flowEyebrow}>
+            {mode === "fund" ? t("fundFlowFundTitle") : t("fundFlowCampaignTitle")}
+          </p>
+          <h1 className={styles.flowTitle}>
+            {mode === "fund" ? t("fundCreateTitle") : t("campaignCreateTitle")}
+          </h1>
+        </div>
+        <button
+          className={styles.backBtn}
+          onClick={() => {
+            setMode("");
+            setError(null);
+          }}
+        >
+          {t("wizardBack")}
+        </button>
+      </header>
+
+      <div className={styles.card}>
+        {mode === "campaign" && (
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>{t("campaignParentLabel")}</label>
+            {parentEntities.length > 0 ? (
+              <select
+                className={styles.input}
+                value={parentEntityId}
+                onChange={(event) => setParentEntityId(event.target.value)}
+              >
+                {parentEntities.map((entity) => (
+                  <option key={entity.id} value={entity.id}>
+                    {entity.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className={styles.emptyParentBox}>
+                <span>{t("campaignNeedsParent")}</span>
+                <button
+                  className={styles.secondaryBtn}
+                  onClick={() => setMode("fund")}
+                >
+                  {t("createFundFirst")}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>
+            {mode === "fund" ? t("fundNameLabel") : t("campaignNameLabel")}
+            <span className={styles.required}> *</span>
+          </label>
+          <input
+            className={styles.input}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder={
+              mode === "fund"
+                ? t("fundNamePlaceholder")
+                : t("campaignNamePlaceholder")
+            }
+            maxLength={60}
+          />
+        </div>
+
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>{t("wizardDescLabel")}</label>
+          <textarea
+            className={styles.textarea}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder={t("wizardDescPlaceholder")}
+            rows={4}
+            maxLength={300}
+          />
+        </div>
+
+        {mode === "fund" ? (
+          <>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>{t("fundProfileLabel")}</label>
+              <select
+                className={styles.input}
+                value={profileKey}
+                onChange={(event) => setProfileKey(event.target.value)}
+              >
+                {profileOptions.map((option) => (
+                  <option key={option.key || "none"} value={option.key}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {profileKey === "CUSTOM" && (
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>{t("fundCustomProfileLabel")}</label>
+                <input
+                  className={styles.input}
+                  value={customProfileLabel}
+                  onChange={(event) => setCustomProfileLabel(event.target.value)}
+                  placeholder={t("fundCustomProfilePlaceholder")}
+                  maxLength={100}
+                />
+              </div>
+            )}
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>{t("wizardTemplateTitle")}</label>
+              <div className={styles.templateList}>
+                <button
+                  className={`${styles.templateCard} ${!templateId ? styles.templateCardSelected : ""}`}
+                  onClick={() => setTemplateId("")}
+                  type="button"
+                >
+                  <span className={styles.templateName}>{t("noTemplateOption")}</span>
+                  <span className={styles.templateDesc}>{t("noTemplateDesc")}</span>
+                </button>
+                {templates.map((template) => (
+                  <button
+                    key={template.id}
+                    className={`${styles.templateCard} ${templateId === template.id ? styles.templateCardSelected : ""}`}
+                    onClick={() => setTemplateId(template.id)}
+                    type="button"
+                  >
+                    <span className={styles.templateHeader}>
+                      {template.icon && (
+                        <span className={styles.templateIcon}>{template.icon}</span>
+                      )}
+                      <span className={styles.templateName}>{template.name}</span>
+                    </span>
+                    {template.description && (
+                      <span className={styles.templateDesc}>
+                        {template.description}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>{t("campaignEndsAtLabel")}</label>
+            <input
+              className={styles.input}
+              type="date"
+              value={campaignEndsAt}
+              onChange={(event) => setCampaignEndsAt(event.target.value)}
+            />
+          </div>
+        )}
+
+        <div className={styles.legalBox}>
+          <div className={styles.legalTitle}>{t("legalTitle")}</div>
+          <label className={styles.legalCheckRow}>
+            <input
+              type="checkbox"
+              checked={legalAccepted}
+              onChange={(event) => setLegalAccepted(event.target.checked)}
+              className={styles.legalCheckbox}
+            />
+            <span>{t("legalAccept")}</span>
+          </label>
+        </div>
+
+        {error && <div className={styles.error}>{error}</div>}
+      </div>
+
+      <div className={styles.navRow}>
+        <button className={styles.secondaryBtn} onClick={onUseLegacy}>
+          {t("useLegacyCreateFlow")}
+        </button>
+        <button
+          className={styles.primaryBtn}
+          onClick={handleCreate}
+          disabled={creating || !canSubmit}
+        >
+          {creating
+            ? t("creating")
+            : mode === "fund"
+              ? t("createFund")
+              : t("createCampaign")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LegacyEntityWizardPage() {
   const router = useRouter();
   const t = useTranslations("entities");
   const [step, setStep] = useState(0);
