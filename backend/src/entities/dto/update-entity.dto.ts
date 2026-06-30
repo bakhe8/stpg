@@ -1,11 +1,10 @@
 import {
   IsString,
-  IsEnum,
   IsOptional,
   MaxLength,
   MinLength,
+  Matches,
 } from 'class-validator';
-import { EntityType } from '@prisma/client';
 
 export class UpdateEntityDto {
   @IsOptional()
@@ -13,10 +12,6 @@ export class UpdateEntityDto {
   @MinLength(2)
   @MaxLength(100)
   name?: string;
-
-  @IsOptional()
-  @IsEnum(EntityType)
-  type?: EntityType;
 
   @IsOptional()
   @IsString()
@@ -36,4 +31,15 @@ export class UpdateEntityDto {
   @IsString()
   @MaxLength(100)
   bankName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  @Matches(/^[A-Z0-9_]+$/)
+  profileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  profileLabel?: string;
 }

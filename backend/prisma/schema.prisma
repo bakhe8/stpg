@@ -231,6 +231,10 @@ model Membership {
   personId  String     @db.Uuid
   entityId  String     @db.Uuid
   role      MemberRole @default(MEMBER)
+
+  /// صلاحية مستقلة لإدارة الإعدادات المتقدمة بدون منح صلاحيات مالية أو إدارية أوسع
+  canManageAdvancedSettings Boolean @default(false)
+
   joinedAt  DateTime   @default(now())
   exitedAt  DateTime?
   isActive  Boolean    @default(true)
@@ -361,6 +365,10 @@ model Entity {
   templateId String?          @db.Uuid
   template   EntityTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
+  /// وصف اختياري لطبيعة الصندوق للمستخدم — لا يقود السلوك التشغيلي
+  profileKey   String?
+  profileLabel String?
+
   /// الوحدات المُفعَّلة في هذا الكيان (تبدأ من القالب وتقبل التوسعة)
   /// مثال: ["payments","decisions","beneficiaries"]
   enabledModules Json?
@@ -391,6 +399,7 @@ model Entity {
 
   @@index([parentEntityId])
   @@index([templateId])
+  @@index([profileKey])
   @@map("entities")
 }
 

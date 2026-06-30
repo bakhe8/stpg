@@ -13,6 +13,7 @@ import {
 import { MembershipsService } from './memberships.service';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { UpdateAdvancedSettingsAccessDto } from './dto/update-advanced-settings-access.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { CreateDependentDto } from './dto/create-dependent.dto';
 import type { Person } from '@prisma/client';
@@ -41,6 +42,19 @@ export class MembershipsController {
     @CurrentUser() user: Person,
   ) {
     return this.membershipsService.updateRole(id, user.id, dto);
+  }
+
+  @Patch(':id/advanced-settings-access')
+  updateAdvancedSettingsAccess(
+    @Param('id') id: string,
+    @Body() dto: UpdateAdvancedSettingsAccessDto,
+    @CurrentUser() user: Person,
+  ) {
+    return this.membershipsService.updateAdvancedSettingsAccess(
+      id,
+      user.id,
+      dto,
+    );
   }
 
   @Delete(':id')

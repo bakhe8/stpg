@@ -3484,6 +3484,15 @@ const entityClosureStates: Record<
   },
 };
 
+const entityProfileLabels: Record<string, string> = {
+  FAMILY: 'عائلة',
+  TRIBE: 'قبيلة',
+  BUILDING: 'عمارة',
+  NEIGHBORHOOD: 'حي',
+  COMMUNITY: 'مخصص',
+  CAMPAIGN: 'حملة',
+};
+
 const entities = entitySeed.map((entity) => {
   const platformState = entityPlatformStates[entity.key] ?? {
     platformStatus: 'ACTIVE',
@@ -3496,6 +3505,8 @@ const entities = entitySeed.map((entity) => {
     key: entity.key,
     name: entity.name,
     type: entity.type,
+    profileKey: entity.type,
+    profileLabel: entityProfileLabels[entity.type] ?? 'مخصص',
     description: entity.description,
     logoUrl: entity.logoUrl,
     isActive: entity.isActive,
@@ -11550,6 +11561,8 @@ async function main() {
       update: {
         name: entity.name,
         type: entity.type as never,
+        profileKey: entity.profileKey,
+        profileLabel: entity.profileLabel,
         description: entity.description,
         logoUrl: entity.logoUrl,
         isActive: entity.isActive,
@@ -11571,6 +11584,8 @@ async function main() {
         id: entity.id,
         name: entity.name,
         type: entity.type as never,
+        profileKey: entity.profileKey,
+        profileLabel: entity.profileLabel,
         description: entity.description,
         logoUrl: entity.logoUrl,
         isActive: entity.isActive,

@@ -79,6 +79,7 @@ type SurfaceMembership = {
   personId: string;
   entityId: string;
   role: MemberRole;
+  canManageAdvancedSettings: boolean;
   isActive: boolean;
   entity: {
     id: string;
@@ -87,6 +88,7 @@ type SurfaceMembership = {
     isActive: boolean;
     isCampaign: boolean;
     platformStatus: EntityPlatformStatus;
+    wallets: Array<{ benefitType: string; isActive: boolean }>;
   };
   committeeMembers: Array<{ committeeId: string }>;
   subscriptions: Array<{
@@ -301,6 +303,10 @@ export class WorkSurfaceService {
               isActive: true,
               isCampaign: true,
               platformStatus: true,
+              wallets: {
+                where: { isActive: true },
+                select: { benefitType: true, isActive: true },
+              },
             },
           },
           committeeMembers: { select: { committeeId: true } },
@@ -2895,7 +2901,7 @@ export class WorkSurfaceService {
       id: membership.entityId,
       kind: membership.entity.isCampaign
         ? 'CAMPAIGN'
-        : membership.entity.type === 'BUILDING'
+        : this.hasSharedBenefitSignal(membership)
           ? 'SHARED_BENEFIT'
           : 'ENTITY',
       label: membership.entity.name,
@@ -3073,16 +3079,18 @@ export class WorkSurfaceService {
         requiredRole: 'FOUNDER',
       });
       pushTool({
-        href: '/rules',
-        label: 'قواعد وسياسات الصناديق',
-        reason: 'لضبط قواعد العضوية والشفافية والحوكمة عند التأسيس.',
-        requiredRole: 'FOUNDER',
-      });
-      pushTool({
         href: '/health',
         label: 'صحة الكيانات',
         reason: 'لفحص جاهزية الصناديق ومشاكل الإعداد النادرة.',
         requiredRole: 'FOUNDER',
+      });
+    }
+    if (this.hasAdvancedSettingsAccess(memberships)) {
+      pushTool({
+        href: '/rules',
+        label: 'قواعد وسياسات الصناديق',
+        reason: 'لضبط قواعد العضوية والشفافية والحوكمة عند التأسيس.',
+        requiredRole: 'ADVANCED_SETTINGS',
       });
     }
     if (this.hasAnyRole(memberships, PAYMENT_MATCHING_ROLES)) {
@@ -3443,6 +3451,28 @@ export class WorkSurfaceService {
   ) {
     return memberships.some(
       (membership) => membership.isActive && roles.includes(membership.role),
+    );
+  }
+
+  private hasAdvancedSettingsAccess(memberships: SurfaceMembership[]) {
+    return memberships.some(
+      (membership) =>
+        membership.isActive &&
+        (membership.role === MemberRole.FOUNDER ||
+          membership.canManageAdvancedSettings),
+    );
+  }
+
+  private hasSharedBenefitSignal(membership: SurfaceMembership) {
+    return (
+      membership.entity.wallets.some(
+        (wallet) => wallet.isActive && wallet.benefitType === 'SHARED',
+      ) ||
+      membership.subscriptions.some(
+        (subscription) =>
+          subscription.governancePath.wallet.benefitType === 'SHARED',
+      ) ||
+      membership.entity.type === 'BUILDING'
     );
   }
 

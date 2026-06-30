@@ -111,7 +111,7 @@ export class RulesService {
 
   async createRule(adminId: string, dto: CreateRuleDto) {
     const entityId = await this.resolveEntityId(dto.targetType, dto.targetId);
-    await this.requireAdminOrFounder(entityId, adminId);
+    await this.requireAdvancedSettingsManager(entityId, adminId);
 
     const rule = await this.prisma.rule.create({
       data: {
@@ -173,7 +173,7 @@ export class RulesService {
     if (!rule) throw new NotFoundException('القاعدة غير موجودة');
 
     const entityId = await this.resolveEntityId(rule.targetType, rule.targetId);
-    await this.requireAdminOrFounder(entityId, adminId);
+    await this.requireAdvancedSettingsManager(entityId, adminId);
 
     const updated = await this.prisma.rule.update({
       where: { id },
@@ -866,16 +866,25 @@ export class RulesService {
     }
   }
 
-  private async requireAdminOrFounder(entityId: string, personId: string) {
+  private async requireAdvancedSettingsManager(
+    entityId: string,
+    personId: string,
+  ) {
     const m = await this.prisma.membership.findFirst({
       where: {
         entityId,
         personId,
         isActive: true,
-        role: { in: [MemberRole.ADMIN, MemberRole.FOUNDER] },
+        OR: [
+          { role: MemberRole.FOUNDER },
+          { canManageAdvancedSettings: true },
+        ],
       },
     });
-    if (!m) throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً');
+    if (!m)
+      throw new ForbiddenException(
+        'يتطلب هذا الإجراء صلاحية إدارة الإعدادات المتقدمة',
+      );
   }
 
   private async requireMember(entityId: string, personId: string) {

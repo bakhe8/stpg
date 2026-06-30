@@ -14,8 +14,15 @@ import { EntitiesService } from './entities.service';
 describe('EntitiesService', () => {
   let prisma: {
     person: { findUnique: jest.Mock; findFirst: jest.Mock; create: jest.Mock };
-    entity: { create: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock };
+    entity: {
+      create: jest.Mock;
+      findUnique: jest.Mock;
+      findMany: jest.Mock;
+      update: jest.Mock;
+    };
     entityTemplate: { findUnique: jest.Mock };
+    entityPolicy: { findUnique: jest.Mock; update: jest.Mock };
+    policyVersion: { create: jest.Mock };
     wallet: { create: jest.Mock };
     governancePath: { create: jest.Mock };
     membership: {
@@ -40,8 +47,15 @@ describe('EntitiesService', () => {
         findFirst: jest.fn(),
         create: jest.fn(),
       },
-      entity: { create: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
+      entity: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
+        update: jest.fn(),
+      },
       entityTemplate: { findUnique: jest.fn() },
+      entityPolicy: { findUnique: jest.fn(), update: jest.fn() },
+      policyVersion: { create: jest.fn().mockResolvedValue({}) },
       wallet: { create: jest.fn() },
       governancePath: { create: jest.fn() },
       membership: {
@@ -335,6 +349,91 @@ describe('EntitiesService', () => {
         _count: { memberships: 3 },
       },
     ]);
+  });
+
+  it('strips immutable entity type from direct update service calls', async () => {
+    prisma.membership.findFirst.mockResolvedValue({ id: 'admin-membership' });
+    prisma.entity.update.mockImplementation(
+      ({ data }: { data: Record<string, unknown> }) =>
+        Promise.resolve({
+          id: 'entity-id',
+          name: data.name,
+          type: EntityType.FAMILY,
+        }),
+    );
+
+    await service.updateEntity(
+      'entity-id',
+      'admin-id',
+      {
+        name: 'Updated Fund',
+        type: EntityType.BUILDING,
+      } as unknown as Parameters<EntitiesService['updateEntity']>[2],
+    );
+
+    expect(prisma.entity.update).toHaveBeenCalledWith({
+      where: { id: 'entity-id' },
+      data: { name: 'Updated Fund' },
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          newValue: { name: 'Updated Fund' },
+        }),
+      }),
+    );
+  });
+
+  it('allows delegated advanced settings managers to update policy with risk metadata', async () => {
+    prisma.membership.findFirst.mockResolvedValue({
+      id: 'advanced-settings-membership',
+    });
+    prisma.entityPolicy.findUnique.mockResolvedValue({
+      id: 'policy-id',
+      entityId: 'entity-id',
+      version: 2,
+      defaultVoteType: VoteType.SIMPLE_MAJORITY,
+    });
+    prisma.entityPolicy.update.mockResolvedValue({
+      id: 'policy-id',
+      entityId: 'entity-id',
+      version: 3,
+      defaultVoteType: VoteType.TWO_THIRDS,
+    });
+    prisma.membership.findMany.mockResolvedValue([{ personId: 'member-id' }]);
+
+    await expect(
+      service.updatePolicy('entity-id', 'delegated-id', {
+        defaultVoteType: VoteType.TWO_THIRDS,
+      }),
+    ).resolves.toMatchObject({
+      version: 3,
+      defaultVoteType: VoteType.TWO_THIRDS,
+    });
+
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith({
+      where: {
+        entityId: 'entity-id',
+        personId: 'delegated-id',
+        isActive: true,
+        OR: [
+          { role: 'FOUNDER' },
+          { canManageAdvancedSettings: true },
+        ],
+      },
+      select: { id: true },
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          targetType: 'entity_policies',
+          newValue: expect.objectContaining({
+            defaultVoteType: VoteType.TWO_THIRDS,
+            changeRisk: 'GOVERNANCE_SENSITIVE',
+          }),
+        }),
+      }),
+    );
   });
 
   it('returns privacy-safe dispute respondent options for members', async () => {

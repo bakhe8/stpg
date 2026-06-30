@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditAction, MemberRole } from '@prisma/client';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { UpdateAdvancedSettingsAccessDto } from './dto/update-advanced-settings-access.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { CreateDependentDto } from './dto/create-dependent.dto';
 import { toJsonValue } from '../prisma/json-value';
@@ -87,6 +88,49 @@ export class MembershipsService {
         targetId: membershipId,
         oldValue: { role: membership.role },
         newValue: { role: dto.role },
+      },
+    });
+
+    return updated;
+  }
+
+  async updateAdvancedSettingsAccess(
+    membershipId: string,
+    founderId: string,
+    dto: UpdateAdvancedSettingsAccessDto,
+  ) {
+    const membership = await this.getMembershipOrThrow(membershipId);
+    await this.requireFounder(membership.entityId, founderId);
+
+    if (!membership.isActive) {
+      throw new BadRequestException('لا يمكن تفويض عضوية غير نشطة');
+    }
+    if (membership.role === MemberRole.FOUNDER) {
+      throw new ForbiddenException(
+        'المؤسس يملك الإعدادات المتقدمة ضمنياً ولا يمكن تعديلها من هنا',
+      );
+    }
+
+    const updated = await this.prisma.membership.update({
+      where: { id: membershipId },
+      data: {
+        canManageAdvancedSettings: dto.canManageAdvancedSettings,
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        action: AuditAction.UPDATE,
+        personId: founderId,
+        entityId: membership.entityId,
+        targetType: 'memberships',
+        targetId: membershipId,
+        oldValue: {
+          canManageAdvancedSettings: membership.canManageAdvancedSettings,
+        },
+        newValue: {
+          canManageAdvancedSettings: dto.canManageAdvancedSettings,
+        },
       },
     });
 
@@ -249,6 +293,18 @@ export class MembershipsService {
     const ok = await this.isAdminOrFounder(entityId, personId);
     if (!ok)
       throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً للكيان');
+  }
+
+  private async requireFounder(entityId: string, personId: string) {
+    const m = await this.prisma.membership.findFirst({
+      where: {
+        entityId,
+        personId,
+        isActive: true,
+        role: MemberRole.FOUNDER,
+      },
+    });
+    if (!m) throw new ForbiddenException('يجب أن تكون مؤسس الصندوق');
   }
 
   private async isAdminOrFounder(entityId: string, personId: string) {

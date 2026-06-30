@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import {
   AppealType,
   DecisionType,
@@ -13,20 +14,24 @@ import { RulesService } from './rules.service';
 
 describe('RulesService', () => {
   let prisma: {
-    rule: { findMany: jest.Mock };
+    rule: { create: jest.Mock; findMany: jest.Mock };
     governancePath: { findUnique: jest.Mock };
+    membership: { findFirst: jest.Mock };
+    auditLog: { create: jest.Mock };
   };
   let service: RulesService;
 
   beforeEach(() => {
     prisma = {
-      rule: { findMany: jest.fn() },
+      rule: { create: jest.fn(), findMany: jest.fn() },
       governancePath: {
         findUnique: jest.fn().mockResolvedValue({
           walletId: 'wallet-id',
           wallet: { entityId: 'entity-id' },
         }),
       },
+      membership: { findFirst: jest.fn() },
+      auditLog: { create: jest.fn().mockResolvedValue({}) },
     };
 
     service = new RulesService(prisma as unknown as PrismaService);
@@ -52,6 +57,56 @@ describe('RulesService', () => {
     );
 
     expect(result).toEqual({ allowed: true, violations: [] });
+  });
+
+  it('requires delegated advanced settings access to create rules', async () => {
+    prisma.membership.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.createRule('admin-id', {
+        targetType: RuleTargetType.ENTITY,
+        targetId: 'entity-id',
+        name: 'Rule name',
+        ruleType: RuleType.ELIGIBILITY,
+        ruleData: { requiresReview: true },
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.rule.create).not.toHaveBeenCalled();
+
+    prisma.membership.findFirst.mockResolvedValue({
+      id: 'advanced-settings-membership',
+    });
+    prisma.rule.create.mockResolvedValue({
+      id: 'rule-id',
+      targetType: RuleTargetType.ENTITY,
+      targetId: 'entity-id',
+      name: 'Rule name',
+      ruleType: RuleType.ELIGIBILITY,
+      ruleData: { requiresReview: true },
+    });
+
+    await expect(
+      service.createRule('delegated-id', {
+        targetType: RuleTargetType.ENTITY,
+        targetId: 'entity-id',
+        name: 'Rule name',
+        ruleType: RuleType.ELIGIBILITY,
+        ruleData: { requiresReview: true },
+      }),
+    ).resolves.toMatchObject({ id: 'rule-id' });
+
+    expect(prisma.membership.findFirst).toHaveBeenLastCalledWith({
+      where: {
+        entityId: 'entity-id',
+        personId: 'delegated-id',
+        isActive: true,
+        OR: [
+          { role: 'FOUNDER' },
+          { canManageAdvancedSettings: true },
+        ],
+      },
+    });
   });
 
   it('rejects REQUIRES_DOCUMENTS rules when no attachments are provided', async () => {

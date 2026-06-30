@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.1` بتاريخ 2026-06-30.  
+**الحالة الحالية:** الإصدار التشغيلي `2.2` بتاريخ 2026-06-30.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -89,6 +89,8 @@
 | [02_CAPABILITY_PRESERVATION_AUDIT.md](09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md) | جرد القدرات التي يجب حفظها بعد التبسيط |
 | [03_PREFLIGHT_GAPS_AND_COMPATIBILITY_AUDIT.md](09_Improvement/03_PREFLIGHT_GAPS_AND_COMPATIBILITY_AUDIT.md) | فجوات ما قبل التنفيذ ومخاطر التوافق |
 | [04_PHASE_A_PREFLIGHT_BACKLOG.md](09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md) | أول backlog تنفيذي بعد إغلاق 08 |
+| [05_PHASE_B_TEMPLATE_NORMALIZATION.md](09_Improvement/05_PHASE_B_TEMPLATE_NORMALIZATION.md) | تطبيع القوالب وتطبيقها التشغيلي |
+| [06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md](09_Improvement/06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md) | مصدر profile الاختياري وتفويض الإعدادات المتقدمة |
 
 ---
 
@@ -127,9 +129,9 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | موثق وجاهز للبدء من Phase A |
-| أول عمل مفتوح | `09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md` |
-| قاعدة التنفيذ | لا نبني تجربة الصندوق الجديدة قبل إغلاق Phase A |
+| Improvement 09 | Phase A وB وC منفذة؛ التالي Phase D |
+| أول عمل مفتوح | Phase D: المسار الموازي خلف feature flag |
+| قاعدة التنفيذ | لا نجعل المسار الجديد default قبل parity pack |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
 

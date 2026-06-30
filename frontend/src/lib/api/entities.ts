@@ -23,12 +23,15 @@ export interface Entity {
   campaignEndsAt?: string | null;
   parentEntityId?: string | null;
   description?: string | null;
+  profileKey?: string | null;
+  profileLabel?: string | null;
 }
 
 export interface EntityMember {
   id: string;
   role: string;
   isActive: boolean;
+  canManageAdvancedSettings?: boolean;
   person: { id: string; name: string; username: string };
 }
 
@@ -77,6 +80,8 @@ export function createEntity(data: {
   type: string;
   description?: string;
   templateId?: string;
+  profileKey?: string;
+  profileLabel?: string;
 }) {
   return fetchApi("/entities", { method: "POST", body: JSON.stringify(data) });
 }
@@ -135,6 +140,16 @@ export function updateMemberRole(
   return fetchApi(`/memberships/${membershipId}/role`, {
     method: "PATCH",
     body: JSON.stringify({ role }),
+  });
+}
+
+export function updateAdvancedSettingsAccess(
+  membershipId: string,
+  canManageAdvancedSettings: boolean,
+): Promise<EntityMember> {
+  return fetchApi(`/memberships/${membershipId}/advanced-settings-access`, {
+    method: "PATCH",
+    body: JSON.stringify({ canManageAdvancedSettings }),
   });
 }
 
@@ -228,7 +243,14 @@ export function getEntitySuspensionAppeals(
 
 export function updateEntity(
   entityId: string,
-  data: { name?: string; description?: string; bankAccountNumber?: string; bankName?: string },
+  data: {
+    name?: string;
+    description?: string;
+    bankAccountNumber?: string;
+    bankName?: string;
+    profileKey?: string;
+    profileLabel?: string;
+  },
 ): Promise<Entity> {
   return fetchApi(`/entities/${entityId}`, {
     method: "PATCH",

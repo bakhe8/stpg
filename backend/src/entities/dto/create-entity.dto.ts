@@ -5,6 +5,7 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  Matches,
 } from 'class-validator';
 import { EntityType } from '@prisma/client';
 
@@ -29,4 +30,15 @@ export class CreateEntityDto {
   @IsOptional()
   @IsUUID()
   templateId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  @Matches(/^[A-Z0-9_]+$/)
+  profileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  profileLabel?: string;
 }

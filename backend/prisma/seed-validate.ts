@@ -226,6 +226,8 @@ async function main() {
         suspendedReason: true,
         bankAccountNumber: true,
         bankName: true,
+        profileKey: true,
+        profileLabel: true,
         campaignEndsAt: true,
         closureStatus: true,
         closureRequestedAt: true,
@@ -628,6 +630,23 @@ async function main() {
       'Entity templates must match the normalized setup schema before they can be used in fund creation.',
       invalidTemplateFindings.length,
       sampleList(invalidTemplateFindings, 5),
+    );
+  }
+
+  const entitiesMissingProfile = entities.filter(
+    (entity) =>
+      entity.isActive &&
+      !entity.isCampaign &&
+      (!entity.profileKey?.trim() || !entity.profileLabel?.trim()),
+  );
+  if (entitiesMissingProfile.length > 0) {
+    pushFinding(
+      findings,
+      'error',
+      'ENTITY_PROFILE_MISSING',
+      'Active seeded funds must keep an optional user-facing profile separate from the operational Entity.type fallback.',
+      entitiesMissingProfile.length,
+      sampleList(entitiesMissingProfile.map((entity) => entity.name)),
     );
   }
 

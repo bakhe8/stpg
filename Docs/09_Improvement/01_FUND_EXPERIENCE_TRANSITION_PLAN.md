@@ -10,14 +10,14 @@ Read it with:
 - `00_README.md` for the current folder order and post-08 status.
 - `02_CAPABILITY_PRESERVATION_AUDIT.md` for the capabilities that must remain available.
 - `03_PREFLIGHT_GAPS_AND_COMPATIBILITY_AUDIT.md` for the detailed gaps.
-- `04_PHASE_A_PREFLIGHT_BACKLOG.md` for the first executable backlog after production readiness 08.
+- `04_PHASE_A_PREFLIGHT_BACKLOG.md`, `05_PHASE_B_TEMPLATE_NORMALIZATION.md`, and `06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md` for the executed preflight packages.
 
 Current execution assumption:
 
 - Production readiness backlog 08 is treated as closed based on the updated `Docs/08_Production_Readiness/BACKLOG.md`.
-- The current operational repository state is `2.1`, documented in `Docs/REPOSITORY_STATE.md`.
+- The current operational repository state is `2.2`, documented in `Docs/REPOSITORY_STATE.md`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` is historical when it conflicts with the updated backlog.
-- The first implementation step is Phase A contract/value cleanup, not the new fund wizard.
+- Phase A/B/C are complete. The next implementation step is Phase D: a new fund/campaign creation path behind a feature flag, not replacing the legacy flow yet.
 
 ## Purpose
 

@@ -179,6 +179,14 @@
 }
 
 /* ── Role Badge ── */
+.roleBadgeGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .roleBadge {
   padding: 3px 12px;
   border-radius: 20px;
@@ -197,6 +205,17 @@
 .roleBadge[data-role="COMMITTEE_MEMBER"] { background: rgba(14,116,144,0.12); color: #0e7490; }
 .roleBadge[data-role="INACTIVE"] { background: rgba(239,68,68,0.08); color: #b91c1c; }
 .roleBadge[data-role="PENDING"] { background: rgba(245,158,11,0.1); color: #92400e; }
+
+.advancedAccessBadge {
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.24);
+  white-space: nowrap;
+}
 
 /* ── Actions ── */
 .cardActions { display: flex; gap: 8px; }

@@ -88,6 +88,8 @@ export class EntitiesService {
           description: dto.description,
           logoUrl: dto.logoUrl,
           templateId: template?.id,
+          profileKey: dto.profileKey,
+          profileLabel: dto.profileLabel,
           enabledModules:
             template?.enabledModules === null ||
             template?.enabledModules === undefined
@@ -304,9 +306,12 @@ export class EntitiesService {
   async updateEntity(id: string, adminId: string, dto: UpdateEntityDto) {
     await this.requireAdminOrFounder(id, adminId);
 
+    const updateData = { ...dto };
+    delete (updateData as Record<string, unknown>).type;
+
     const entity = await this.prisma.entity.update({
       where: { id },
-      data: dto,
+      data: updateData,
     });
 
     await this.prisma.auditLog.create({
@@ -316,7 +321,7 @@ export class EntitiesService {
         entityId: id,
         targetType: 'entities',
         targetId: id,
-        newValue: toJsonValue(dto),
+        newValue: toJsonValue(updateData),
       },
     });
 
@@ -341,12 +346,13 @@ export class EntitiesService {
     adminId: string,
     dto: UpdateEntityPolicyDto,
   ) {
-    await this.requireAdminOrFounder(entityId, adminId);
+    await this.requireAdvancedSettingsManager(entityId, adminId);
 
     const policy = await this.prisma.entityPolicy.findUnique({
       where: { entityId },
     });
     if (!policy) throw new NotFoundException('سياسة الكيان غير موجودة');
+    const changeRisk = this.classifyPolicyChange(dto);
 
     return this.prisma.$transaction(async (tx) => {
       await tx.policyVersion.create({
@@ -387,7 +393,7 @@ export class EntitiesService {
           targetType: 'entity_policies',
           targetId: policy.id,
           oldValue: toJsonValue(policy),
-          newValue: toJsonValue(dto),
+          newValue: toJsonValue({ ...dto, changeRisk }),
         },
       });
 
@@ -952,6 +958,28 @@ export class EntitiesService {
       throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً للكيان');
   }
 
+  private async requireAdvancedSettingsManager(
+    entityId: string,
+    personId: string,
+  ) {
+    const membership = await this.prisma.membership.findFirst({
+      where: {
+        entityId,
+        personId,
+        isActive: true,
+        OR: [
+          { role: MemberRole.FOUNDER },
+          { canManageAdvancedSettings: true },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!membership)
+      throw new ForbiddenException(
+        'يتطلب هذا الإجراء صلاحية إدارة الإعدادات المتقدمة',
+      );
+  }
+
   private async isAdminOrFounder(entityId: string, personId: string) {
     const membership = await this.prisma.membership.findFirst({
       where: {
@@ -963,6 +991,46 @@ export class EntitiesService {
       select: { id: true },
     });
     return !!membership;
+  }
+
+  private classifyPolicyChange(dto: UpdateEntityPolicyDto) {
+    const risks = Object.keys(dto).map((field) =>
+      this.classifyPolicyField(field),
+    );
+    if (risks.includes('GOVERNANCE_SENSITIVE')) {
+      return 'GOVERNANCE_SENSITIVE';
+    }
+    if (risks.includes('OPERATIONAL')) {
+      return 'OPERATIONAL';
+    }
+    return 'ADMINISTRATIVE';
+  }
+
+  private classifyPolicyField(field: string) {
+    if (
+      [
+        'allowMultiplePaths',
+        'allowedGovernanceTypes',
+        'defaultVoteType',
+        'defaultTransparency',
+      ].includes(field)
+    ) {
+      return 'GOVERNANCE_SENSITIVE';
+    }
+    if (
+      [
+        'allowOpenMembership',
+        'requiresMemberApproval',
+        'allowSubEntities',
+        'allowEntityRelations',
+        'decisionQuorumPercent',
+        'allowAppeals',
+        'appealTimeoutDays',
+      ].includes(field)
+    ) {
+      return 'OPERATIONAL';
+    }
+    return 'ADMINISTRATIVE';
   }
 
   private async requireMember(entityId: string, personId: string) {
@@ -1079,7 +1147,7 @@ export class EntitiesService {
     field: string,
     value: string,
   ) {
-    await this.requireAdminOrFounder(entityId, requesterId);
+    await this.requireAdvancedSettingsManager(entityId, requesterId);
 
     const [activeMembers, activeSubscriptions, pendingAppeals, openDecisions] =
       await Promise.all([
@@ -1130,6 +1198,11 @@ export class EntitiesService {
     return {
       field,
       value,
+      changeRisk: this.classifyPolicyField(field),
+      recommendedApproval:
+        this.classifyPolicyField(field) === 'GOVERNANCE_SENSITIVE'
+          ? 'GOVERNANCE_DECISION'
+          : 'ADVANCED_SETTINGS_MANAGER',
       activeMembers,
       activeSubscriptions,
       pendingAppeals,

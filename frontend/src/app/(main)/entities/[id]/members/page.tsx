@@ -8,6 +8,7 @@ import {
   getEntity,
   getEntityMembers,
   updateMemberRole,
+  updateAdvancedSettingsAccess,
   activateMembership,
   removeMembership,
   Entity,
@@ -189,6 +190,7 @@ export default function MembersPage({
   if (!entity) return null;
 
   const manage = canManage(entity.myRole);
+  const founder = entity.myRole === "FOUNDER";
   const allRoles = Array.from(new Set(members.map((m) => m.role)));
   const matchesFilter = (m: EntityMember) => {
     if (roleFilter !== "ALL" && m.role !== roleFilter) return false;
@@ -547,9 +549,16 @@ export default function MembersPage({
                   </button>
                 </div>
               ) : (
-                <span className={styles.roleBadge} data-role={m.role}>
-                  {getRoleLabel(m.role)}
-                </span>
+                <div className={styles.roleBadgeGroup}>
+                  <span className={styles.roleBadge} data-role={m.role}>
+                    {getRoleLabel(m.role)}
+                  </span>
+                  {m.canManageAdvancedSettings && m.role !== "FOUNDER" ? (
+                    <span className={styles.advancedAccessBadge}>
+                      {t("advancedSettingsAccessBadge")}
+                    </span>
+                  ) : null}
+                </div>
               )}
 
               {renderMemberOperationalSummary(m)}
@@ -592,6 +601,28 @@ export default function MembersPage({
                   >
                     {t("changeRole")}
                   </button>
+                  {founder ? (
+                    <button
+                      className={styles.ghostBtn}
+                      disabled={actionLoading}
+                      onClick={() =>
+                        doAction(
+                          () =>
+                            updateAdvancedSettingsAccess(
+                              m.id,
+                              !m.canManageAdvancedSettings,
+                            ),
+                          m.canManageAdvancedSettings
+                            ? t("advancedSettingsAccessRemoved")
+                            : t("advancedSettingsAccessGranted"),
+                        )
+                      }
+                    >
+                      {m.canManageAdvancedSettings
+                        ? t("advancedSettingsAccessRemove")
+                        : t("advancedSettingsAccessGrant")}
+                    </button>
+                  ) : null}
                   <button
                     className={styles.rejectBtn}
                     onClick={() => setConfirmRemoveId(m.id)}

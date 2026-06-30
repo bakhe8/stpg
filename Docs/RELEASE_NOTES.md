@@ -1,5 +1,34 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.2 - 2026-06-30
+
+**النوع:** 09 Improvement preflight implementation
+**الحالة:** Phase A وB وC منفذة؛ التالي Phase D
+
+### ما تغير
+
+- Phase A: إغلاق تعارضات عقود الإنشاء وقيم enum بين الواجهة والباكند.
+- Phase B: تطبيع القوالب حتى تنشئ policy وwallets وpaths وledgers وaudit.
+- Phase C: إضافة `profileKey/profileLabel` للصندوق، وإضافة `canManageAdvancedSettings` للعضويات.
+- نقل صلاحية قواعد وسياسات الصندوق إلى مؤسس أو مفوض إعدادات متقدمة.
+- منع تغيير `Entity.type` من API العام، مع إبقائه حقل توافق داخلي.
+- تصنيف تغييرات policy حسب الخطورة داخل audit وpolicy impact.
+- تحديث seed وseed validation لتغطية profile الاختياري.
+
+### التحقق
+
+- backend targeted tests
+- backend build
+- Prisma validate
+- frontend build
+- frontend lint
+- Docker seed reset
+- Docker seed validate
+
+### المعنى العملي
+
+الآن يمكن بدء Phase D لبناء مسار إنشاء الصندوق/الحملة الجديد خلف feature flag، مع بقاء legacy flow وكل القدرات الحالية.
+
 ## 2.1 - 2026-06-30
 
 **النوع:** Repository state / documentation baseline  
@@ -24,4 +53,3 @@
 ### ملاحظات
 
 لم يتم رفع نسخ `backend/package.json` أو `frontend/package.json` في هذا الإصدار، لأن المشروع لا يملك حتى الآن سياسة إصدار منتج موحدة في الجذر. الإصدار `2.1` هنا هو إصدار تشغيلي لتوثيق حالة المستودع.
-
