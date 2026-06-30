@@ -102,11 +102,12 @@
 - `npm run lint` في `frontend` — نجح.
 - static search لقيم `FRIENDS`, `UNANIMOUS`, `WEIGHTED`, و`PUBLIC` داخل كود الواجهة والباكند — لا توجد استخدامات مخالفة، باستثناء اختبار DTO الذي يتعمد إرسال `defaultGovernanceType`.
 
-ملاحظة seed validation:
+Seed validation:
 
-- `npm run seed:validate:docker` وصل إلى قاعدة `stgp_dev` الصحيحة داخل شبكة Docker، لكنه فشل بسبب حالة seed/DB قائمة: `MOYASAR_CONFIRMED_PAYMENT_MISSING`.
-- هذا الفشل ليس من نطاق Phase A ولا من التعديلات الحالية.
-- لم يتم تشغيل `seed:reset:docker` لأن ذلك يعيد ضبط قاعدة dev ويمس بيانات الجهاز المحلية.
+- أول محاولة لـ `npm run seed:reset:docker` فشلت لأن قاعدة Docker كانت متأخرة عن migrations الحالية، وكان العمود `refresh_tokens.revokedAt` غير موجود.
+- تم تطبيق migrations الحالية على قاعدة Docker عبر `prisma migrate deploy`.
+- بعد ذلك نجح `npm run seed:reset:docker`.
+- ثم نجح `npm run seed:validate:docker` مستقلا، وأصبحت قاعدة `stgp_dev` خضراء.
 
 ## ترتيب التنفيذ المقترح
 
