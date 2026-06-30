@@ -50,6 +50,8 @@ const ROLE_MAP: Record<string, string> = {
   MEMBER: "roleMember",
 };
 
+type SetupChecklistAction = "settings" | "wallets" | "path" | "invite";
+
 function formatCurrency(amount: number, currency = "SAR") {
   return new Intl.NumberFormat("ar-SA", { style: "currency", currency }).format(
     amount,
@@ -204,6 +206,7 @@ export default function EntityDetailPage() {
   const [showWalletForm, setShowWalletForm] = useState(false);
   const [walletCreating, setWalletCreating] = useState(false);
   const [walletMsg, setWalletMsg] = useState<string | null>(null);
+  const [setupPathCount, setSetupPathCount] = useState<number | null>(null);
   const [walletForm, setWalletForm] = useState<{
     name: string;
     description: string;
@@ -223,6 +226,26 @@ export default function EntityDetailPage() {
       setTimeout(() => setInviteCopied(false), 2500);
     } catch {
       // clipboard may fail on non-HTTPS — fallback ignored
+    }
+  }
+
+  async function refreshSetupPathCount(nextWallets: Wallet[]) {
+    const activeWallets = nextWallets.filter((wallet) => wallet.isActive);
+    if (activeWallets.length === 0) {
+      setSetupPathCount(0);
+      return;
+    }
+
+    setSetupPathCount(null);
+    try {
+      const pathsByWallet = await Promise.all(
+        activeWallets.map((wallet) => getWalletPaths(wallet.id).catch(() => [])),
+      );
+      setSetupPathCount(
+        pathsByWallet.flat().filter((path) => path.isActive).length,
+      );
+    } catch {
+      setSetupPathCount(null);
     }
   }
 
@@ -257,7 +280,9 @@ export default function EntityDetailPage() {
         setRelationships(rels);
         setEntity(ent);
         setMembers(mems);
-        setWallets(wals as Wallet[]);
+        const typedWallets = wals as Wallet[];
+        setWallets(typedWallets);
+        void refreshSetupPathCount(typedWallets);
         setMySubscriptions(ownSubs);
         setMyPaymentDues(
           ownDues.filter(
@@ -420,13 +445,15 @@ export default function EntityDetailPage() {
         description: walletForm.description.trim() || undefined,
         benefitType: walletForm.benefitType,
       });
-      setWallets(await getEntityWallets(id));
+      const nextWallets = await getEntityWallets(id);
+      setWallets(nextWallets);
       setWalletForm({
         name: "",
         description: "",
         benefitType: "SEPARABLE",
       });
       setShowWalletForm(false);
+      void refreshSetupPathCount(nextWallets);
       setWalletMsg(t("walletCreateSuccess"));
     } catch (e) {
       setWalletMsg(e instanceof Error ? e.message : t("walletCreateFailed"));
@@ -513,6 +540,83 @@ export default function EntityDetailPage() {
   const showCampaignClosedPanel =
     isCampaignEntity && (entity.platformStatus === "READ_ONLY" || campaignEnded);
   const showPendingReviewPanel = entity.platformStatus === "PENDING_REVIEW";
+  const activeWallets = wallets.filter((wallet) => wallet.isActive);
+  const setupMemberCount = entity._count?.memberships ?? members.length;
+  const hasBankDetails = Boolean(entity.bankAccountNumber && entity.bankName);
+  const hasActivePaths = setupPathCount !== null && setupPathCount > 0;
+  const firstActiveWalletId = activeWallets[0]?.id;
+  const setupChecklistItems: Array<{
+    key: string;
+    done: boolean;
+    title: string;
+    detail: string;
+    action: SetupChecklistAction;
+    actionLabel: string;
+  }> = [
+    {
+      key: "basic",
+      done: Boolean(entity.description?.trim()),
+      title: t("setupChecklistBasicTitle"),
+      detail: entity.description?.trim()
+        ? t("setupChecklistBasicDone")
+        : t("setupChecklistBasicMissing"),
+      action: "settings",
+      actionLabel: t("setupChecklistBasicAction"),
+    },
+    {
+      key: "bank",
+      done: hasBankDetails,
+      title: t("setupChecklistBankTitle"),
+      detail: hasBankDetails
+        ? t("setupChecklistBankDone", { bank: entity.bankName ?? "" })
+        : t("setupChecklistBankMissing"),
+      action: "settings",
+      actionLabel: t("setupChecklistBankAction"),
+    },
+    {
+      key: "wallet",
+      done: activeWallets.length > 0,
+      title: t("setupChecklistWalletTitle"),
+      detail:
+        activeWallets.length > 0
+          ? t("setupChecklistWalletDone", { count: activeWallets.length })
+          : t("setupChecklistWalletMissing"),
+      action: "wallets",
+      actionLabel: t("setupChecklistWalletAction"),
+    },
+    {
+      key: "path",
+      done: hasActivePaths,
+      title: t("setupChecklistPathTitle"),
+      detail:
+        activeWallets.length === 0
+          ? t("setupChecklistPathNeedsWallet")
+          : setupPathCount === null
+            ? t("setupChecklistPathChecking")
+            : hasActivePaths
+              ? t("setupChecklistPathDone", { count: setupPathCount })
+              : t("setupChecklistPathMissing"),
+      action: "path",
+      actionLabel: t("setupChecklistPathAction"),
+    },
+    {
+      key: "members",
+      done: setupMemberCount > 1,
+      title: t("setupChecklistMembersTitle"),
+      detail:
+        setupMemberCount > 1
+          ? t("setupChecklistMembersDone", { count: setupMemberCount })
+          : t("setupChecklistMembersMissing"),
+      action: "invite",
+      actionLabel: t("setupChecklistMembersAction"),
+    },
+  ];
+  const setupDoneCount = setupChecklistItems.filter((item) => item.done).length;
+  const showSetupChecklist =
+    canManage &&
+    !isActionDisabled &&
+    !isCampaignEntity &&
+    setupDoneCount < setupChecklistItems.length;
   const pendingReviewItems = [
     {
       label: t("pendingReviewReasonLabel"),
@@ -550,6 +654,49 @@ export default function EntityDetailPage() {
   const relationshipSubscriptions = mySubscriptions.filter(
     (subscription) => subscription.state !== "EXITED",
   );
+
+  function renderSetupAction(action: SetupChecklistAction, label: string) {
+    if (action === "settings") {
+      return (
+        <Link href={`/entities/${id}/settings`} className={styles.setupChecklistAction}>
+          {label}
+        </Link>
+      );
+    }
+
+    if (action === "path" && firstActiveWalletId) {
+      return (
+        <Link href={`/wallets/${firstActiveWalletId}`} className={styles.setupChecklistAction}>
+          {label}
+        </Link>
+      );
+    }
+
+    if (action === "invite") {
+      return (
+        <button
+          type="button"
+          className={styles.setupChecklistAction}
+          onClick={() => void copyInviteLink()}
+        >
+          {inviteCopied ? t("setupChecklistInviteCopied") : label}
+        </button>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className={styles.setupChecklistAction}
+        onClick={() => {
+          setTab("wallets");
+          setShowWalletForm(true);
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -941,61 +1088,106 @@ export default function EntityDetailPage() {
       </div>
 
       {tab === "overview" && (
-        <div className={styles.overviewGrid}>
-          <div className={styles.infoCard}>
-            <h3 className={styles.cardTitle}>{t("infoCardTitle")}</h3>
-            <div className={styles.infoRow}>
-              <span>{t("infoStatus")}</span>
-              <span>{entity.isActive ? t("active") : t("inactive")}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>{t("infoCreatedAt")}</span>
-              <span>
-                {new Date(entity.createdAt).toLocaleDateString("ar-SA")}
-              </span>
-            </div>
-            {health && (
-              <>
-                <div className={styles.infoRow}>
-                  <span>{t("infoPaymentCompliance")}</span>
-                  <span>{Math.round(health.paymentCompliance * 100)}%</span>
+        <div className={styles.tabStack}>
+          {showSetupChecklist && (
+            <section className={styles.setupChecklistPanel}>
+              <div className={styles.setupChecklistHeader}>
+                <div>
+                  <span className={styles.setupChecklistEyebrow}>
+                    {t("setupChecklistEyebrow")}
+                  </span>
+                  <h2 className={styles.setupChecklistTitle}>
+                    {t("setupChecklistTitle")}
+                  </h2>
+                  <p className={styles.setupChecklistText}>
+                    {t("setupChecklistBody")}
+                  </p>
                 </div>
-                <div className={styles.infoRow}>
-                  <span>{t("infoSubscriptionHealth")}</span>
-                  <span>{Math.round(health.subscriptionHealth * 100)}%</span>
-                </div>
-                <div className={styles.infoRow}>
-                  <span>{t("infoActiveMemberRate")}</span>
-                  <span>{Math.round(health.activeMemberRate * 100)}%</span>
-                </div>
-              </>
-            )}
-            {entity.bankAccountNumber && (
-              <div className={styles.infoRow}>
-                <span>رقم الحساب</span>
-                <span className={styles.bankAccountValue}>
-                  {entity.bankAccountNumber}
-                  <button
-                    className={styles.copyButton}
-                    aria-label="نسخ رقم الحساب"
-                    title="نسخ رقم الحساب"
-                    onClick={() =>
-                      void navigator.clipboard.writeText(
-                        entity.bankAccountNumber!,
-                      )
-                    }
-                  >
-                    ⎘
-                  </button>
+                <span className={styles.setupChecklistProgress}>
+                  {t("setupChecklistProgress", {
+                    done: setupDoneCount,
+                    total: setupChecklistItems.length,
+                  })}
                 </span>
               </div>
-            )}
-            {entity.bankName && (
-              <div className={styles.infoRow}>
-                <span>البنك</span>
-                <span>{entity.bankName}</span>
+
+              <div className={styles.setupChecklistGrid}>
+                {setupChecklistItems.map((item) => (
+                  <div
+                    key={item.key}
+                    className={styles.setupChecklistItem}
+                    data-state={item.done ? "done" : "open"}
+                  >
+                    <span className={styles.setupChecklistIcon}>
+                      {item.done ? "✓" : "•"}
+                    </span>
+                    <div className={styles.setupChecklistItemBody}>
+                      <strong>{item.title}</strong>
+                      <p>{item.detail}</p>
+                      {!item.done && renderSetupAction(item.action, item.actionLabel)}
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </section>
+          )}
+
+          <div className={styles.overviewGrid}>
+            <div className={styles.infoCard}>
+              <h3 className={styles.cardTitle}>{t("infoCardTitle")}</h3>
+              <div className={styles.infoRow}>
+                <span>{t("infoStatus")}</span>
+                <span>{entity.isActive ? t("active") : t("inactive")}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span>{t("infoCreatedAt")}</span>
+                <span>
+                  {new Date(entity.createdAt).toLocaleDateString("ar-SA")}
+                </span>
+              </div>
+              {health && (
+                <>
+                  <div className={styles.infoRow}>
+                    <span>{t("infoPaymentCompliance")}</span>
+                    <span>{Math.round(health.paymentCompliance * 100)}%</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <span>{t("infoSubscriptionHealth")}</span>
+                    <span>{Math.round(health.subscriptionHealth * 100)}%</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <span>{t("infoActiveMemberRate")}</span>
+                    <span>{Math.round(health.activeMemberRate * 100)}%</span>
+                  </div>
+                </>
+              )}
+              {entity.bankAccountNumber && (
+                <div className={styles.infoRow}>
+                  <span>رقم الحساب</span>
+                  <span className={styles.bankAccountValue}>
+                    {entity.bankAccountNumber}
+                    <button
+                      className={styles.copyButton}
+                      aria-label="نسخ رقم الحساب"
+                      title="نسخ رقم الحساب"
+                      onClick={() =>
+                        void navigator.clipboard.writeText(
+                          entity.bankAccountNumber!,
+                        )
+                      }
+                    >
+                      ⎘
+                    </button>
+                  </span>
+                </div>
+              )}
+              {entity.bankName && (
+                <div className={styles.infoRow}>
+                  <span>البنك</span>
+                  <span>{entity.bankName}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

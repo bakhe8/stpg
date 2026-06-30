@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.3` بتاريخ 2026-06-30.
+**الحالة الحالية:** الإصدار التشغيلي `2.4` بتاريخ 2026-06-30.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -130,8 +130,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D بدأت |
-| أول عمل مفتوح | استكمال Phase D parity/setup checklist |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D بدأت وD-006 منفذة |
+| أول عمل مفتوح | استكمال D-007/D-008 ثم Phase D parity pack |
 | قاعدة التنفيذ | لا نجعل المسار الجديد default قبل parity pack |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
