@@ -22,11 +22,13 @@ import {
   AuditorOperation,
   AuditorDocument,
   AuditorDecision,
+  AuditorException,
+  AuditorConflict,
   AuditorDispute,
   AuditorReport,
   AuditorAuditLog,
 } from "../../../lib/api/auditor";
-import { DECISION_TYPE_KEYS } from "../../../lib/enum-labels";
+import { DECISION_TYPE_KEYS, DISPUTE_TYPE_KEYS } from "../../../lib/enum-labels";
 
 export default function AuditorPage() {
   const t = useTranslations("auditor");
@@ -67,8 +69,8 @@ export default function AuditorPage() {
   const [operations, setOperations] = useState<AuditorOperation[]>([]);
   const [documents, setDocuments] = useState<AuditorDocument[]>([]);
   const [decisions, setDecisions] = useState<AuditorDecision[]>([]);
-  const [exceptions, setExceptions] = useState<AuditorDecision[]>([]);
-  const [conflicts, setConflicts] = useState<AuditorDecision[]>([]);
+  const [exceptions, setExceptions] = useState<AuditorException[]>([]);
+  const [conflicts, setConflicts] = useState<AuditorConflict[]>([]);
   const [appeals, setAppeals] = useState<AuditorDispute[]>([]);
   const [report, setReport] = useState<AuditorReport | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditorAuditLog[]>([]);
@@ -301,9 +303,9 @@ export default function AuditorPage() {
     } else if (activeTab === "decisions") {
       downloadCsv(`auditor-decisions-${stamp}.csv`, filteredDecisions.map((i) => ({ id: i.id, title: i.title, type: i.type, status: i.status, createdAt: i.createdAt })));
     } else if (activeTab === "exceptions") {
-      downloadCsv(`auditor-exceptions-${stamp}.csv`, filteredExceptions.map((i) => ({ id: i.id, title: i.title, type: i.type, status: i.status, createdAt: i.createdAt })));
+      downloadCsv(`auditor-exceptions-${stamp}.csv`, filteredExceptions.map((i) => ({ id: i.id, title: i.title, type: i.type, severity: i.severity, description: i.description, status: i.status, createdAt: i.createdAt })));
     } else if (activeTab === "conflicts") {
-      downloadCsv(`auditor-conflicts-${stamp}.csv`, filteredConflicts.map((i) => ({ id: i.id, title: i.title, type: i.type, status: i.status, createdAt: i.createdAt })));
+      downloadCsv(`auditor-conflicts-${stamp}.csv`, filteredConflicts.map((i) => ({ id: i.id, title: i.title, type: i.type, parties: i.parties.join(" / "), status: i.status, createdAt: i.createdAt })));
     } else if (activeTab === "appeals") {
       downloadCsv(`auditor-appeals-${stamp}.csv`, filteredAppeals.map((i) => ({ id: i.id, title: i.title, type: i.type, status: i.status, createdAt: i.createdAt })));
     } else if (activeTab === "auditLogs") {
@@ -405,12 +407,45 @@ export default function AuditorPage() {
             <h2 className={styles.sectionTitle}>{t("sectionExceptions")}</h2>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
-                <thead><tr><th>{t("colExcluded")}</th><th>{t("colDate")}</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>{t("colExcluded")}</th>
+                    <th>{t("colType")}</th>
+                    <th>{t("colSeverity")}</th>
+                    <th>{t("colDescription")}</th>
+                    <th>{t("colStatus")}</th>
+                    <th>{t("colDate")}</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {filteredExceptions.length === 0 && <tr><td colSpan={2} className={styles.emptyState}>{t("noExceptions")}</td></tr>}
+                  {filteredExceptions.length === 0 && <tr><td colSpan={6} className={styles.emptyState}>{t("noExceptions")}</td></tr>}
                   {filteredExceptions.map((exc) => (
                     <tr key={exc.id}>
                       <td>{exc.id.substring(0, 8)}</td>
+                      <td>
+                        {DECISION_TYPE_KEYS[exc.type]
+                          ? tEnums(DECISION_TYPE_KEYS[exc.type] as Parameters<typeof tEnums>[0])
+                          : exc.type}
+                      </td>
+                      <td>
+                        <span
+                          className={`${styles.badge} ${
+                            exc.severity === "HIGH"
+                              ? styles.badgeError
+                              : exc.severity === "MEDIUM"
+                                ? styles.badgeWarning
+                                : ""
+                          }`}
+                        >
+                          {exc.severity === "HIGH"
+                            ? t("severityHigh")
+                            : exc.severity === "MEDIUM"
+                              ? t("severityMedium")
+                              : t("severityLow")}
+                        </span>
+                      </td>
+                      <td>{exc.description || "—"}</td>
+                      <td>{exc.status}</td>
                       <td>{new Date(exc.createdAt).toLocaleDateString("ar-SA")}</td>
                     </tr>
                   ))}
@@ -425,12 +460,27 @@ export default function AuditorPage() {
             <h2 className={styles.sectionTitle}>{t("sectionConflicts")}</h2>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
-                <thead><tr><th>{t("colId")}</th><th>{t("colDate")}</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>{t("colId")}</th>
+                    <th>{t("colType")}</th>
+                    <th>{t("colParties")}</th>
+                    <th>{t("colStatus")}</th>
+                    <th>{t("colDate")}</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {filteredConflicts.length === 0 && <tr><td colSpan={2} className={styles.emptyState}>{t("noConflicts")}</td></tr>}
+                  {filteredConflicts.length === 0 && <tr><td colSpan={5} className={styles.emptyState}>{t("noConflicts")}</td></tr>}
                   {filteredConflicts.map((conf) => (
                     <tr key={conf.id}>
                       <td>{conf.id.substring(0, 8)}</td>
+                      <td>
+                        {DISPUTE_TYPE_KEYS[conf.type]
+                          ? tEnums(DISPUTE_TYPE_KEYS[conf.type] as Parameters<typeof tEnums>[0])
+                          : conf.type}
+                      </td>
+                      <td>{conf.parties.length > 0 ? conf.parties.join(" / ") : "—"}</td>
+                      <td>{conf.status}</td>
                       <td>{new Date(conf.createdAt).toLocaleDateString("ar-SA")}</td>
                     </tr>
                   ))}

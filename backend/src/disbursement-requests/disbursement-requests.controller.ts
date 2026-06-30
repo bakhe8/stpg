@@ -7,12 +7,10 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { DisbursementRequestsService } from './disbursement-requests.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { CreateDisbursementRequestDto } from './dto/create-disbursement-request.dto';
@@ -26,7 +24,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('disbursements')
 @ApiBearerAuth('access-token')
 @Controller('disbursement-requests')
-@UseGuards(JwtGuard)
 export class DisbursementRequestsController {
   constructor(private readonly service: DisbursementRequestsService) {}
 

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -28,9 +29,11 @@ describe('AuthService OAuth', () => {
   };
   let service: AuthService;
   const originalGoogleClientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const originalEnableDevLogin = process.env.ENABLE_DEV_LOGIN;
 
   beforeEach(() => {
     delete process.env.GOOGLE_OAUTH_CLIENT_ID;
+    delete process.env.ENABLE_DEV_LOGIN;
     prisma = {
       oAuthAccount: { findUnique: jest.fn() },
       person: { findFirst: jest.fn(), findUnique: jest.fn(), create: jest.fn() },
@@ -38,7 +41,11 @@ describe('AuthService OAuth', () => {
       auditLog: { create: jest.fn() },
       $transaction: jest.fn(),
     };
-    service = new AuthService(prisma as never, new JwtService({}));
+    service = new AuthService(
+      prisma as never,
+      new JwtService({}),
+      { sendOtp: jest.fn() } as never,
+    );
   });
 
   afterEach(() => {
@@ -47,6 +54,19 @@ describe('AuthService OAuth', () => {
     } else {
       process.env.GOOGLE_OAUTH_CLIENT_ID = originalGoogleClientId;
     }
+    if (originalEnableDevLogin === undefined) {
+      delete process.env.ENABLE_DEV_LOGIN;
+    } else {
+      process.env.ENABLE_DEV_LOGIN = originalEnableDevLogin;
+    }
+  });
+
+  it('rejects dev login unless ENABLE_DEV_LOGIN is explicitly true', async () => {
+    await expect(service.devLogin('seed.ahmed.family')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+
+    expect(prisma.person.findUnique).not.toHaveBeenCalled();
   });
 
   it('rejects malformed OAuth tokens before any account lookup', async () => {

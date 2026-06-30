@@ -7,12 +7,10 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { WalletsService } from './wallets.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
@@ -30,7 +28,6 @@ import {
 @ApiTags('wallets')
 @ApiBearerAuth('access-token')
 @Controller('wallets')
-@UseGuards(JwtGuard)
 export class WalletsController {
   constructor(private readonly walletsService: WalletsService) {}
 

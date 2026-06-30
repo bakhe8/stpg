@@ -4,15 +4,12 @@ import {
   ParseUUIDPipe,
   Query,
   Param,
-  UseGuards,
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('analytics')
 @ApiBearerAuth('access-token')
 @Controller('analytics')

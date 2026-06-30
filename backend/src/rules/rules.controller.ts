@@ -8,17 +8,14 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { RulesService } from './rules.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { RuleTargetType } from '@prisma/client';
 import { CreateRuleDto, UpdateRuleDto } from './dto/create-rule.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('rules')
 @ApiBearerAuth('access-token')
 @Controller('rules')

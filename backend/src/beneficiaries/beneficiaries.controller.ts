@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import type { Person } from '@prisma/client';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import { BeneficiariesService } from './beneficiaries.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -19,7 +18,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('beneficiaries')
 @ApiBearerAuth('access-token')
 @Controller('beneficiaries')
-@UseGuards(JwtGuard)
 export class BeneficiariesController {
   constructor(private readonly beneficiariesService: BeneficiariesService) {}
 

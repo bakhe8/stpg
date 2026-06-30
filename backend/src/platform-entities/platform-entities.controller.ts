@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { PlatformEntitiesService } from './platform-entities.service';
 import { SuspendEntityDto } from './dto/suspend-entity.dto';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { PlatformGuard } from '../identity/auth/platform.guard';
 import { CurrentPlatformUser } from '../identity/auth/decorators/current-platform-user.decorator';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
@@ -32,7 +31,7 @@ export class PlatformEntitiesController {
   // ── Platform Endpoints (يتطلب Platform JWT) ──────────────────────
 
   @Get('platform/entities')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   findAll(
     @Query('status') status?: string,
     @Query('page') page?: string,
@@ -49,11 +48,11 @@ export class PlatformEntitiesController {
   }
 
   @Patch('platform/entities/:id/suspend')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   suspend(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SuspendEntityDto,
-    @CurrentPlatformUser() operator: { role: PlatformRole },
+    @CurrentPlatformUser() operator: { id: string; role: PlatformRole },
   ) {
     if (
       operator.role !== PlatformRole.OWNER &&
@@ -61,14 +60,14 @@ export class PlatformEntitiesController {
     ) {
       throw new ForbiddenException('تعليق الكيان يتطلب OWNER أو SUPER_ADMIN');
     }
-    return this.service.suspend(id, dto.reason, dto.statusType);
+    return this.service.suspend(id, dto.reason, dto.statusType, operator.id);
   }
 
   @Patch('platform/entities/:id/activate')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   activate(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentPlatformUser() operator: { role: PlatformRole },
+    @CurrentPlatformUser() operator: { id: string; role: PlatformRole },
   ) {
     if (
       operator.role !== PlatformRole.OWNER &&
@@ -76,13 +75,13 @@ export class PlatformEntitiesController {
     ) {
       throw new ForbiddenException('تفعيل الكيان يتطلب OWNER أو SUPER_ADMIN');
     }
-    return this.service.activate(id);
+    return this.service.activate(id, operator.id);
   }
 
   // ── Platform Endpoints — الاعتراضات ────────────────────────────────
 
   @Get('platform/appeals')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   getSuspensionAppeals(
     @Query('status') status?: string,
     @Query('page') page?: string,
@@ -105,7 +104,7 @@ export class PlatformEntitiesController {
   }
 
   @Patch('platform/appeals/:id/respond')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   @HttpCode(HttpStatus.OK)
   respondToAppeal(
     @Param('id', ParseUUIDPipe) id: string,
@@ -126,7 +125,6 @@ export class PlatformEntitiesController {
   // ── Tenant Endpoint — مدير الكيان يرى من وصل بياناته ──────────────
 
   @Get('entities/:id/platform-access-logs')
-  @UseGuards(JwtGuard)
   async getPlatformAccessLogs(
     @Param('id', ParseUUIDPipe) entityId: string,
     @CurrentUser() user: { id: string; userType: string },

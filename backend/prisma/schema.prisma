@@ -95,6 +95,7 @@ model PlatformSuspensionAppeal {
   createdAt     DateTime  @default(now())
 
   submittedBy Person @relation(fields: [submittedById], references: [id])
+  entity      Entity @relation("PlatformSuspensionAppeals", fields: [entityId], references: [id])
 
   @@index([entityId])
   @@index([status])
@@ -133,6 +134,9 @@ model Person {
   membershipApplications         MembershipApplication[]    @relation("MembershipApplicant")
   membershipApplicationsReviewed MembershipApplication[]    @relation("MembershipReviewer")
   platformSuspensionAppeals      PlatformSuspensionAppeal[]
+  disputesAsInitiator            Dispute[]                  @relation("DisputeInitiator")
+  disputesAsRespondent           Dispute[]                  @relation("DisputeRespondent")
+  disputesAsArbitrator           Dispute[]                  @relation("DisputeArbitrator")
 
   @@map("persons")
 }
@@ -144,12 +148,24 @@ model RefreshToken {
   token     String   @unique
   expiresAt DateTime
   isRevoked Boolean  @default(false)
+  revokedAt DateTime?
   createdAt DateTime @default(now())
 
   person Person @relation(fields: [personId], references: [id])
 
   @@index([personId])
   @@map("refresh_tokens")
+}
+
+/// رمز التحقق المرسل عبر SMS لتسجيل الدخول برقم الجوال
+model OtpCode {
+  phoneNumber String   @id
+  code        String
+  attempts    Int      @default(0)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@map("otp_codes")
 }
 
 /// حساب تسجيل الدخول عبر طرف ثالث (Google, Apple)
@@ -358,19 +374,20 @@ model Entity {
   wallets                Wallet[]
   policy                 EntityPolicy?
   ledgerAccount          LedgerAccount?
-  outgoingRelationships  EntityRelationship[]    @relation("SourceEntity")
-  incomingRelationships  EntityRelationship[]    @relation("TargetEntity")
+  outgoingRelationships  EntityRelationship[]       @relation("SourceEntity")
+  incomingRelationships  EntityRelationship[]       @relation("TargetEntity")
   auditLogs              AuditLog[]
   documents              Document[]
   beneficiaries          Beneficiary[]
   committees             Committee[]
   households             Household[]
-  subEntities            Entity[]                @relation("SubEntity")
-  parentEntity           Entity?                 @relation("SubEntity", fields: [parentEntityId], references: [id])
+  subEntities            Entity[]                   @relation("SubEntity")
+  parentEntity           Entity?                    @relation("SubEntity", fields: [parentEntityId], references: [id])
   walletOwnerships       WalletOwnership[]
   invitations            Invitation[]
   membershipApplications MembershipApplication[]
   supportSessions        SupportSession[]
+  suspensionAppeals      PlatformSuspensionAppeal[] @relation("PlatformSuspensionAppeals")
 
   @@index([parentEntityId])
   @@index([templateId])
@@ -608,6 +625,8 @@ model Subscription {
 
   @@unique([membershipId, governancePathId])
   @@index([governancePathId])
+  @@index([state])
+  @@index([governancePathId, state])
   @@map("subscriptions")
 }
 
@@ -827,7 +846,7 @@ model Dispute {
   governancePathId String? @db.Uuid
 
   // --- أطراف النزاع ---
-  initiatorId  String  @db.Uuid // من فتح النزاع
+  initiatorId  String  @db.Uuid // من فتح النزاع — عضوية داخل الكيان
   respondentId String? @db.Uuid // الطرف الآخر (قد يكون الإدارة)
 
   title       String
@@ -858,7 +877,10 @@ model Dispute {
   updatedAt DateTime @updatedAt
 
   policyVersion        PolicyVersion?        @relation(fields: [policyVersionId], references: [id])
-  disbursementRequest DisbursementRequest? @relation(fields: [disbursementRequestId], references: [id])
+  disbursementRequest  DisbursementRequest?  @relation(fields: [disbursementRequestId], references: [id])
+  initiator            Person                @relation("DisputeInitiator",  fields: [initiatorId],  references: [id])
+  respondent           Person?               @relation("DisputeRespondent", fields: [respondentId], references: [id])
+  arbitrator           Person?               @relation("DisputeArbitrator", fields: [arbitratorId], references: [id])
   documents            Document[]
 
   @@index([entityId])
@@ -895,6 +917,7 @@ model LedgerAccount {
   governancePath GovernancePath? @relation(fields: [governancePathId], references: [id])
   spendingItem   SpendingItem?   @relation(fields: [spendingItemId], references: [id])
   entries        LedgerEntry[]
+  snapshots      BalanceSnapshot[]
 
   @@map("ledger_accounts")
 }
@@ -971,12 +994,14 @@ model LedgerEntry {
 
 /// لقطة الرصيد — أرشفة دورية للأرصدة للتقارير والتدقيق
 model BalanceSnapshot {
-  id        String   @id @default(uuid()) @db.Uuid
-  accountId String   @db.Uuid
-  balance   Decimal  @db.Decimal(15, 2)
+  id        String        @id @default(uuid()) @db.Uuid
+  accountId String        @db.Uuid
+  balance   Decimal       @db.Decimal(15, 2)
   /// الفترة بصيغة YYYY-MM للأرشفة الشهرية
   period    String
-  takenAt   DateTime @default(now())
+  takenAt   DateTime      @default(now())
+
+  account LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId, period])
   @@map("balance_snapshots")
@@ -1060,6 +1085,8 @@ model AuditLog {
   @@index([targetType, targetId])
   @@index([personId])
   @@index([entityId])
+  @@index([createdAt])
+  @@index([entityId, createdAt])
   @@map("audit_logs")
 }
 
@@ -1202,6 +1229,7 @@ model PaymentRecord {
   @@index([subscriptionId])
   @@index([paymentDueId])
   @@index([submittedById])
+  @@index([paymentDueId, status])
   @@map("payment_records")
 }
 
@@ -1795,6 +1823,10 @@ enum NotificationType {
   MEMBERSHIP_APPLICATION_APPROVED
   MEMBERSHIP_APPLICATION_REJECTED
   PLATFORM_ACCESS
+  DISBURSEMENT_REQUESTED // طلب صرف جديد — للمدراء
+  DISBURSEMENT_APPROVED  // اعتماد طلب الصرف — لمقدّم الطلب
+  DISBURSEMENT_REJECTED  // رفض طلب الصرف — لمقدّم الطلب
+  DISBURSEMENT_EXECUTED  // تنفيذ الصرف — للمستفيد
 
   @@map("notification_type")
 }
@@ -1823,15 +1855,20 @@ enum WalletRelationshipType {
 
 /// أنواع أحداث سجل التدقيق
 enum AuditAction {
-  CREATE // إنشاء
-  UPDATE // تعديل
-  DELETE // حذف (منع قانوني — للتسجيل فقط)
-  APPROVE // موافقة
-  REJECT // رفض
-  VOTE // تصويت
-  APPEAL // اعتراض
-  LOGIN // دخول
-  LOGOUT // خروج
+  CREATE    // إنشاء
+  UPDATE    // تعديل
+  DELETE    // حذف (منع قانوني — للتسجيل فقط)
+  APPROVE   // موافقة
+  REJECT    // رفض
+  VOTE      // تصويت
+  APPEAL    // اعتراض
+  LOGIN     // دخول
+  LOGOUT    // خروج
+  DISBURSE  // تنفيذ صرف
+  TRANSFER  // تحويل رصيد
+  SUSPEND   // تعليق كيان أو عضو
+  REINSTATE // إعادة تفعيل
+  EXPEL     // طرد عضو
 
   @@map("audit_action")
 }

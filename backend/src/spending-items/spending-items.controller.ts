@@ -7,12 +7,10 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { SpendingItemsService } from './spending-items.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { CreateSpendingItemDto } from './dto/create-spending-item.dto';
 import { UpdateSpendingItemDto } from './dto/update-spending-item.dto';
@@ -22,7 +20,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('spending-items')
 @ApiBearerAuth('access-token')
 @Controller('spending-items')
-@UseGuards(JwtGuard)
 export class SpendingItemsController {
   constructor(private readonly spendingItemsService: SpendingItemsService) {}
 

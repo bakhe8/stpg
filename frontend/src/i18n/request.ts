@@ -19,6 +19,9 @@ export default getRequestConfig(async () => {
       ...(await import(`../locales/${validLocale}/analytics.json`)).default,
       ...(await import(`../locales/${validLocale}/dashboard.json`)).default,
       ...(await import(`../locales/${validLocale}/reviewCenter.json`)).default,
+      ...(await import(`../locales/${validLocale}/entitySettings.json`)).default,
+      ...(await import(`../locales/${validLocale}/health.json`)).default,
+      ...(await import(`../locales/${validLocale}/platform.json`)).default,
     }
   };
 });

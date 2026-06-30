@@ -35,6 +35,20 @@ export function login(phoneNumber: string, password: string): Promise<AuthRespon
   });
 }
 
+export function sendOtp(phoneNumber: string): Promise<{ message: string }> {
+  return fetchApi<{ message: string }>("/auth/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ phoneNumber }),
+  });
+}
+
+export function verifyOtp(phoneNumber: string, code: string): Promise<AuthResponse> {
+  return fetchApi<AuthResponse>("/auth/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ phoneNumber, code }),
+  });
+}
+
 export function register(data: {
   name: string;
   phoneNumber: string;

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   getMyPaymentDues,
   getMyPaymentRecords,
@@ -46,18 +47,20 @@ interface AttentionItem {
     | "ENTITY_INACTIVE";
 }
 
-function getAttentionLabel(state: AttentionItem["state"]) {
+type PortalT = ReturnType<typeof useTranslations>;
+
+function getAttentionLabel(t: PortalT, state: AttentionItem["state"]) {
   switch (state) {
     case "CONDITIONAL":
-      return "مشروط";
+      return t("attentionConditional");
     case "SUSPENDED":
-      return "موقوف";
+      return t("attentionSuspended");
     case "ENTITY_SUSPENDED":
-      return "الكيان معلّق";
+      return t("attentionEntitySuspended");
     case "ENTITY_READ_ONLY":
-      return "قراءة فقط";
+      return t("attentionEntityReadOnly");
     case "ENTITY_INACTIVE":
-      return "كيان غير نشط";
+      return t("attentionEntityInactive");
   }
 }
 
@@ -101,47 +104,53 @@ function daysPastDue(dueDate: string): number {
   return Math.floor((Date.now() - new Date(dueDate).getTime()) / 86_400_000);
 }
 
-function formatCurrency(amount: number) {
-  return `${new Intl.NumberFormat("ar-SA").format(amount)} ر.س`;
+function formatCurrency(t: PortalT, amount: number) {
+  return t("amountSAR", { amount: new Intl.NumberFormat("ar-SA").format(amount) });
 }
 
-function getSubscriptionStateText(state: Subscription["state"]) {
+function getSubscriptionStateText(t: PortalT, state: Subscription["state"]) {
   switch (state) {
     case "ACTIVE":
-      return "نشط";
+      return t("subStateActive");
     case "CONDITIONAL":
-      return "مشارك بشرط";
+      return t("subStateConditional");
     case "SUSPENDED":
-      return "موقوف";
+      return t("subStateSuspended");
     case "SUPPORTER_ONLY":
-      return "داعم فقط";
+      return t("subStateSupporterOnly");
     case "EXITED":
-      return "منسحب";
+      return t("subStateExited");
     case "INTERESTED":
-      return "مهتم";
+      return t("subStateInterested");
   }
 }
 
-function getPathTypeText(type?: string) {
+function getPathTypeText(t: PortalT, type?: string) {
   switch (type) {
     case "BOARD":
-      return "قرار مجلس";
+      return t("pathTypeBoard");
     case "COMMITTEE":
-      return "قرار لجنة";
+      return t("pathTypeCommittee");
     case "PUBLIC_VOTE":
-      return "تصويت عام";
+      return t("pathTypePublicVote");
     case "INDIVIDUAL_WITH_CAP":
-      return "قرار فردي بسقف";
+      return t("pathTypeIndividualCap");
     case "DONATION_ONLY":
-      return "تبرع فقط";
+      return t("pathTypeDonationOnly");
     case "EMERGENCY_FAST":
-      return "طوارئ سريع ثم مراجعة";
+      return t("pathTypeEmergencyFast");
     default:
-      return "مسار حوكمة";
+      return t("pathTypeDefault");
   }
 }
 
-function RelationshipSummary({ context }: { context: WalletContext }) {
+function RelationshipSummary({
+  t,
+  context,
+}: {
+  t: PortalT;
+  context: WalletContext;
+}) {
   const dueAmount = context.dues
     .filter((due) => due.status === "PENDING" || due.status === "OVERDUE")
     .reduce((sum, due) => sum + Number(due.amountDue), 0);
@@ -155,42 +164,47 @@ function RelationshipSummary({ context }: { context: WalletContext }) {
   return (
     <div className={styles.relationshipPanel}>
       <div className={styles.relationshipLine}>
-        أنت مشترك في <strong>{context.wallet.name}</strong> عبر{" "}
-        <strong>{context.path.name}</strong> داخل{" "}
-        <strong>{context.entity.name}</strong>.
+        {t.rich("relationshipLine", {
+          bold: (chunks) => <strong>{chunks}</strong>,
+          wallet: context.wallet.name,
+          path: context.path.name,
+          entity: context.entity.name,
+        })}
       </div>
       <div className={styles.relationshipGrid}>
         <div className={styles.relationshipItem}>
-          <span className={styles.relationshipLabel}>حالتك</span>
-          <strong>{getSubscriptionStateText(state)}</strong>
+          <span className={styles.relationshipLabel}>{t("yourState")}</span>
+          <strong>{getSubscriptionStateText(t, state)}</strong>
         </div>
         <div className={styles.relationshipItem}>
-          <span className={styles.relationshipLabel}>المسار</span>
-          <strong>{getPathTypeText(context.path.type)}</strong>
+          <span className={styles.relationshipLabel}>{t("yourPath")}</span>
+          <strong>{getPathTypeText(t, context.path.type)}</strong>
         </div>
         <div className={styles.relationshipItem}>
-          <span className={styles.relationshipLabel}>التزامك</span>
+          <span className={styles.relationshipLabel}>
+            {t("yourCommitment")}
+          </span>
           <strong>
-            {amount > 0 ? formatCurrency(amount) : "حسب قرار المسار"}
+            {amount > 0 ? formatCurrency(t, amount) : t("perPathDecision")}
           </strong>
         </div>
         <div className={styles.relationshipItem}>
-          <span className={styles.relationshipLabel}>المستحق الآن</span>
+          <span className={styles.relationshipLabel}>{t("dueNow")}</span>
           <strong>
-            {dueAmount > 0 ? formatCurrency(dueAmount) : "لا يوجد"}
+            {dueAmount > 0 ? formatCurrency(t, dueAmount) : t("noneDue")}
           </strong>
         </div>
       </div>
       <div className={styles.relationshipOutcome}>
         {state === "SUPPORTER_ONLY"
-          ? "أنت داعم فقط في هذا المسار: مساهمتك تدعم المحفظة ولا تمنحك حق استفادة أو طلب صرف."
+          ? t("outcomeSupporterOnly")
           : state === "CONDITIONAL"
-            ? "مشاركتك مشروطة: تظهر لك الالتزامات، لكن حق الاستفادة والتصويت يبقى محدوداً حتى تصبح نشطاً."
+            ? t("outcomeConditional")
             : overdueCount > 0
-              ? `لديك ${overdueCount} مستحق متأخر؛ التأخر قد يؤثر على حق الاستفادة أو التصويت حسب سياسة المسار.`
+              ? t("outcomeOverdue", { count: overdueCount })
               : activeRights > 0
-                ? `يحق لك الاستفادة من ${activeRights} بند صرف في هذا المسار عند تحقق شروط الأهلية.`
-                : "لا توجد بنود استفادة نشطة في هذا المسار حالياً."}
+                ? t("outcomeRights", { count: activeRights })
+                : t("outcomeNoRights")}
       </div>
     </div>
   );
@@ -198,10 +212,12 @@ function RelationshipSummary({ context }: { context: WalletContext }) {
 
 // ── مكوّن: حالة الدفع في المحفظة ─────────────────────────────────────
 function PaymentStatusSection({
+  t,
   dues,
   records,
   pathName,
 }: {
+  t: PortalT;
   dues: PaymentDue[];
   records: PaymentRecord[];
   pathName?: string;
@@ -228,14 +244,15 @@ function PaymentStatusSection({
         <span className={styles.checkIcon}>✓</span>
         <div>
           <div className={styles.paymentCleanTitle}>
-            أنت منتظم في هذا المسار
+            {t("regularStatus")}
           </div>
           {dues.length > 0 && (
             <div className={styles.paymentCleanSub}>
-              آخر دفعة مؤكَّدة · التالية في{" "}
-              {new Date(
-                dues[dues.length - 1]?.dueDate ?? "",
-              ).toLocaleDateString("ar-SA")}
+              {t("lastConfirmed", {
+                date: new Date(
+                  dues[dues.length - 1]?.dueDate ?? "",
+                ).toLocaleDateString("ar-SA"),
+              })}
             </div>
           )}
         </div>
@@ -247,8 +264,8 @@ function PaymentStatusSection({
     <div className={styles.paymentSection}>
       {dues.length > 0 && (
         <RuleSummaryPanel
-          title={`لماذا ظهرت هذه المستحقات؟${pathName ? ` — ${pathName}` : ""}`}
-          summary="هذه المبالغ صدرت بناءً على شروط اشتراكك في هذا المسار. سداد كل فترة في موعدها يحافظ على حقوقك في الاستفادة من المحفظة."
+          title={`${t("ruleTitle")}${pathName ? ` — ${pathName}` : ""}`}
+          summary={t("ruleDesc")}
           icon="ℹ"
         />
       )}
@@ -263,20 +280,22 @@ function PaymentStatusSection({
             <span className={styles.paymentIcon}>🚨</span>
             <div className={styles.paymentBody}>
               <span className={styles.paymentLabel}>
-                متأخرة جداً ({days} يوم) — {d.periodLabel}
+                {t("veryOverdue", { days, period: d.periodLabel })}
               </span>
               <span className={styles.paymentCriticalNote}>
-                قد يُوقَف اشتراكك إذا لم تُسوَّ هذه الدفعة
+                {t("suspensionWarning")}
               </span>
               <span className={styles.paymentAmount}>
-                {Number(d.amountDue).toLocaleString("ar-SA")} ر.س
+                {t("amountSAR", {
+                  amount: Number(d.amountDue).toLocaleString("ar-SA"),
+                })}
               </span>
             </div>
             <Link
               href={`/finance?tab=payment&dueId=${d.id}`}
               className={`${styles.payBtn} ${styles.payBtnCritical}`}
             >
-              ادفع فوراً
+              {t("payNow")}
             </Link>
           </div>
         );
@@ -292,18 +311,23 @@ function PaymentStatusSection({
             <span className={styles.paymentIcon}>⏰</span>
             <div className={styles.paymentBody}>
               <span className={styles.paymentLabel}>
-                فترة سماح ({days} {days === 1 ? "يوم" : "أيام"} من الاستحقاق) —{" "}
-                {d.periodLabel}
+                {t("graceOverdue", {
+                  days,
+                  dayUnit: days === 1 ? t("days") : t("daysAlt"),
+                  period: d.periodLabel,
+                })}
               </span>
               <span className={styles.paymentAmount}>
-                {Number(d.amountDue).toLocaleString("ar-SA")} ر.س
+                {t("amountSAR", {
+                  amount: Number(d.amountDue).toLocaleString("ar-SA"),
+                })}
               </span>
             </div>
             <Link
               href={`/finance?tab=payment&dueId=${d.id}`}
               className={`${styles.payBtn} ${styles.payBtnSecondary}`}
             >
-              ادفع
+              {t("pay")}
             </Link>
           </div>
         );
@@ -319,17 +343,19 @@ function PaymentStatusSection({
             <span className={styles.paymentIcon}>⚠</span>
             <div className={styles.paymentBody}>
               <span className={styles.paymentLabel}>
-                متأخرة ({days} يوماً) — {d.periodLabel}
+                {t("overdue", { days, period: d.periodLabel })}
               </span>
               <span className={styles.paymentAmount}>
-                {Number(d.amountDue).toLocaleString("ar-SA")} ر.س
+                {t("amountSAR", {
+                  amount: Number(d.amountDue).toLocaleString("ar-SA"),
+                })}
               </span>
             </div>
             <Link
               href={`/finance?tab=payment&dueId=${d.id}`}
               className={styles.payBtn}
             >
-              ادفع الآن
+              {t("payNowAlt")}
             </Link>
           </div>
         );
@@ -343,18 +369,22 @@ function PaymentStatusSection({
           <span className={styles.paymentIcon}>📅</span>
           <div className={styles.paymentBody}>
             <span className={styles.paymentLabel}>
-              مستحقة {new Date(d.dueDate).toLocaleDateString("ar-SA")} —{" "}
-              {d.periodLabel}
+              {t("dueOn", {
+                date: new Date(d.dueDate).toLocaleDateString("ar-SA"),
+                period: d.periodLabel,
+              })}
             </span>
             <span className={styles.paymentAmount}>
-              {Number(d.amountDue).toLocaleString("ar-SA")} ر.س
+              {t("amountSAR", {
+                amount: Number(d.amountDue).toLocaleString("ar-SA"),
+              })}
             </span>
           </div>
           <Link
             href={`/finance?tab=payment&dueId=${d.id}`}
             className={`${styles.payBtn} ${styles.payBtnSecondary}`}
           >
-            ادفع
+            {t("pay")}
           </Link>
         </div>
       ))}
@@ -367,13 +397,15 @@ function PaymentStatusSection({
           <span className={styles.paymentIcon}>🕐</span>
           <div className={styles.paymentBody}>
             <span className={styles.paymentLabel}>
-              إثبات دفع ينتظر التأكيد — {r.paymentDue?.periodLabel}
+              {t("proofPending", { period: r.paymentDue?.periodLabel ?? "" })}
             </span>
             <span className={styles.paymentAmount}>
-              {Number(r.amount).toLocaleString("ar-SA")} ر.س
+              {t("amountSAR", {
+                amount: Number(r.amount).toLocaleString("ar-SA"),
+              })}
             </span>
           </div>
-          <span className={styles.waitingBadge}>قيد المراجعة</span>
+          <span className={styles.waitingBadge}>{t("underReview")}</span>
         </div>
       ))}
     </div>
@@ -382,10 +414,12 @@ function PaymentStatusSection({
 
 // ── مكوّن: حقوقي في المحفظة ──────────────────────────────────────────
 function RightsSection({
+  t,
   rights,
   pathId,
   subscriptionState,
 }: {
+  t: PortalT;
   rights: SpendingItem[];
   pathId: string;
   subscriptionState: Subscription["state"];
@@ -396,11 +430,8 @@ function RightsSection({
     return (
       <div className={styles.rightsSection}>
         <div className={styles.rightsBlocked}>
-          <strong>لا توجد حقوق استفادة لهذا الاشتراك</strong>
-          <span>
-            هذا المسار مخصص للدعم فقط، لذلك لا يظهر زر طلب صرف ولا تدخل هذه
-            المساهمة ضمن أهلية الاستفادة.
-          </span>
+          <strong>{t("rightsBlockedSupporterTitle")}</strong>
+          <span>{t("rightsBlockedSupporterDesc")}</span>
         </div>
       </div>
     );
@@ -410,11 +441,8 @@ function RightsSection({
     return (
       <div className={styles.rightsSection}>
         <div className={styles.rightsBlocked}>
-          <strong>حقوقك لم تُفعّل بعد</strong>
-          <span>
-            مشاركتك ما زالت مشروطة. ستظهر بنود الاستفادة وطلبات الصرف بعد تفعيل
-            الاشتراك من إدارة الكيان.
-          </span>
+          <strong>{t("rightsBlockedConditionalTitle")}</strong>
+          <span>{t("rightsBlockedConditionalDesc")}</span>
         </div>
       </div>
     );
@@ -424,8 +452,8 @@ function RightsSection({
     return (
       <div className={styles.rightsSection}>
         <div className={styles.rightsBlocked}>
-          <strong>لا توجد بنود استفادة نشطة</strong>
-          <span>هذا المسار لا يتيح طلب صرف حالياً.</span>
+          <strong>{t("rightsBlockedNoneTitle")}</strong>
+          <span>{t("rightsBlockedNoneDesc")}</span>
         </div>
       </div>
     );
@@ -433,25 +461,30 @@ function RightsSection({
 
   return (
     <div className={styles.rightsSection}>
-      <div className={styles.rightsSectionTitle}>حقوقي في هذا المسار</div>
+      <div className={styles.rightsSectionTitle}>{t("myRights")}</div>
       <div className={styles.rightsGrid}>
         {active.map((item) => (
           <div key={item.id} className={styles.rightItem}>
             <div className={styles.rightName}>{item.name}</div>
             {item.maxAmountPerRequest && (
               <div className={styles.rightMeta}>
-                سقف الطلب: {Number(item.maxAmountPerRequest).toLocaleString()}{" "}
-                ر.س
+                {t("limitPerRequest", {
+                  amount: Number(
+                    item.maxAmountPerRequest,
+                  ).toLocaleString(),
+                })}
               </div>
             )}
             {item.requiresCommitteeApproval && (
-              <div className={styles.rightWarning}>يتطلب موافقة لجنة</div>
+              <div className={styles.rightWarning}>
+                {t("committeeApproval")}
+              </div>
             )}
             <Link
               href={`/disbursement-requests?pathId=${pathId}`}
               className={styles.rightRequestBtn}
             >
-              قدّم طلباً ←
+              {t("submitRequest")}
             </Link>
           </div>
         ))}
@@ -462,6 +495,7 @@ function RightsSection({
 
 // ── الصفحة الرئيسية ───────────────────────────────────────────────────
 export default function PortalPage() {
+  const t = useTranslations("portal");
   const [walletContexts, setWalletContexts] = useState<WalletContext[]>([]);
   const [attentionItems, setAttentionItems] = useState<AttentionItem[]>([]);
   const [myEntities, setMyEntities] = useState<Entity[]>([]);
@@ -606,21 +640,19 @@ export default function PortalPage() {
         setWalletContexts(contexts);
         setAttentionItems(attentions);
       } catch (e) {
-        setError(
-          e instanceof Error ? e.message : "حدث خطأ أثناء تحميل المحافظ",
-        );
+        setError(e instanceof Error ? e.message : t("genericLoadError"));
       } finally {
         setLoading(false);
       }
     }
     void load();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
       <div className={styles.centered}>
         <div className={styles.spinner} />
-        <p>جاري تحميل محافظك...</p>
+        <p>{t("loadingWallets")}</p>
       </div>
     );
   }
@@ -629,7 +661,7 @@ export default function PortalPage() {
     return (
       <div className={styles.page}>
         <header className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>محافظي</h1>
+          <h1 className={styles.pageTitle}>{t("myWallets")}</h1>
         </header>
         <AccessReasonPanel reason="UNKNOWN" detail={error} />
       </div>
@@ -639,20 +671,20 @@ export default function PortalPage() {
   return (
     <div className={styles.page}>
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>محافظي</h1>
-        <p className={styles.pageSubtitle}>التزاماتي وحقوقي في كل صندوق</p>
+        <h1 className={styles.pageTitle}>{t("myWallets")}</h1>
+        <p className={styles.pageSubtitle}>{t("myWalletsDesc")}</p>
       </header>
 
       {attentionItems.length > 0 && (
         <div className={styles.attentionSection}>
-          <div className={styles.attentionTitle}>⚠ اشتراكات تحتاج انتباه</div>
+          <div className={styles.attentionTitle}>{t("subsAttention")}</div>
           {attentionItems.map((item, i) => (
             <div key={i} className={styles.attentionItem}>
               <span className={styles.attentionPath}>
                 {item.entityName} › {item.walletName} › {item.pathName}
               </span>
               <span className={styles.stateBadge} data-state={item.state}>
-                {getAttentionLabel(item.state)}
+                {getAttentionLabel(t, item.state)}
               </span>
             </div>
           ))}
@@ -662,15 +694,13 @@ export default function PortalPage() {
       {walletContexts.length === 0 ? (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>🗂</div>
-          <p className={styles.emptyTitle}>لا توجد اشتراكات فعّالة حالياً</p>
+          <p className={styles.emptyTitle}>{t("emptyTitle")}</p>
           {myEntities.length > 0 ? (
             <>
               <p className={styles.emptyHint}>
-                أنت عضو في{" "}
                 {myEntities.length > 1
-                  ? `${myEntities.length} كيانات`
-                  : `"${myEntities[0].name}"`}{" "}
-                — ادخل على الكيان لتفعيل اشتراك في أحد مساراته.
+                  ? t("emptyHintMultiple", { count: myEntities.length })
+                  : t("emptyHintSingle", { name: myEntities[0].name })}
               </p>
               <div className={styles.emptyEntityList}>
                 {myEntities.map((e) => (
@@ -687,11 +717,9 @@ export default function PortalPage() {
             </>
           ) : (
             <>
-              <p className={styles.emptyHint}>
-                انضم إلى كيان أو أنشئ كياناً جديداً للبدء.
-              </p>
+              <p className={styles.emptyHint}>{t("emptyHintNone")}</p>
               <Link href="/entities" className={styles.emptyLink}>
-                استعرض الكيانات
+                {t("browseEntities")}
               </Link>
             </>
           )}
@@ -708,12 +736,12 @@ export default function PortalPage() {
               <div className={styles.membershipMeta}>
                 <span className={styles.membershipRole}>
                   {ctx.subscription.membership?.role === "FOUNDER"
-                    ? "مؤسس"
+                    ? t("roleFounder")
                     : ctx.subscription.membership?.role === "ADMIN"
-                      ? "مدير"
+                      ? t("roleAdmin")
                       : ctx.subscription.membership?.role === "MEMBER"
-                        ? "عضو"
-                        : "مشارك"}
+                        ? t("roleMember")
+                        : t("roleParticipant")}
                 </span>
                 <span className={styles.membershipSep}>·</span>
                 <span
@@ -724,27 +752,29 @@ export default function PortalPage() {
                   }`}
                 >
                   {ctx.subscription.state === "ACTIVE"
-                    ? "✓ منتظم"
+                    ? t("stateActiveBadge")
                     : ctx.subscription.state === "CONDITIONAL"
-                      ? "⚠ مشروط"
+                      ? t("badgeConditional")
                       : ctx.subscription.state === "SUSPENDED"
-                        ? "موقوف"
+                        ? t("badgeSuspended")
                         : ctx.subscription.state === "SUPPORTER_ONLY"
-                          ? "داعم"
+                          ? t("badgeSupporter")
                           : ctx.subscription.state === "EXITED"
-                            ? "منسحب"
+                            ? t("badgeExited")
                             : ctx.subscription.state === "INTERESTED"
-                              ? "مهتم"
-                              : "—"}
+                              ? t("badgeInterested")
+                              : t("badgeUnknown")}
                 </span>
               </div>
-              <RelationshipSummary context={ctx} />
+              <RelationshipSummary t={t} context={ctx} />
               <PaymentStatusSection
+                t={t}
                 dues={ctx.dues}
                 records={ctx.submittedRecords}
                 pathName={ctx.path.name}
               />
               <RightsSection
+                t={t}
                 rights={ctx.rights}
                 pathId={ctx.path.id}
                 subscriptionState={ctx.subscription.state}

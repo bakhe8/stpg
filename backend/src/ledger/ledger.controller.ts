@@ -6,10 +6,8 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { LedgerService } from './ledger.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { RecordPaymentDto } from './dto/record-payment.dto';
@@ -24,7 +22,6 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('ledger')
 @ApiBearerAuth('access-token')
 @Controller('ledger')

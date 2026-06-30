@@ -1,12 +1,10 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import type { Person } from '@prisma/client';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { ReviewMembershipApplicationDto } from './dto/review-membership-application.dto';
 import { MembershipApplicationsService } from './membership-applications.service';
 
 @Controller('membership-applications')
-@UseGuards(JwtGuard)
 export class MembershipApplicationsController {
   constructor(private readonly service: MembershipApplicationsService) {}
 

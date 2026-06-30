@@ -36,6 +36,7 @@ import { PlatformAuthModule } from './platform-auth/platform-auth.module';
 import { PlatformEntitiesModule } from './platform-entities/platform-entities.module';
 import { PlatformAccessLogModule } from './platform-access-log/platform-access-log.module';
 import { SuspendedEntityGuard } from './common/guards/suspended-entity.guard';
+import { JwtGuard } from './identity/auth/jwt.guard';
 import { PlatformAccessInterceptor } from './platform-access-log/platform-access.interceptor';
 import { TenantContextModule } from './core/tenant-context/tenant-context.module';
 import { TenantContextInterceptor } from './core/tenant-context/tenant-context.interceptor';
@@ -45,6 +46,7 @@ import { TemporalModule } from './temporal/temporal.module';
 import { SupportModule } from './support/support.module';
 import { WorkSurfaceModule } from './work-surface/work-surface.module';
 import { PlatformSurfaceModule } from './platform-surface/platform-surface.module';
+import { AdminModule } from './admin/admin.module';
 
 function parsePositiveInt(value: string | undefined, fallback: number) {
   if (!value) {
@@ -103,11 +105,13 @@ const throttleLimit = parsePositiveInt(
     SupportModule,
     WorkSurfaceModule,
     PlatformSurfaceModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtGuard },
     { provide: APP_GUARD, useClass: SuspendedEntityGuard },
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PlatformAccessInterceptor },

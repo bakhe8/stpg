@@ -1,20 +1,19 @@
-import { Controller, Post, Body, Headers, HttpCode, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Headers, HttpCode, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreateIntentDto, GatewayProvider } from './dto/create-intent.dto';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
-import type { Person } from '@prisma/client';
-import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../identity/auth/jwt.guard';
+import type { Person } from '@prisma/client';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('payments')
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @UseGuards(JwtGuard)
   @ApiBearerAuth('access-token')
   @Post('intent')
   @ApiOperation({ summary: 'Create a payment intent for a specific gateway' })
@@ -22,7 +21,8 @@ export class PaymentsController {
     return this.paymentsService.createIntent(user.id, dto);
   }
 
-  // Webhooks are usually public and rely on signature verification
+  // Webhooks عامة — الحماية عبر التوقيع الرقمي لا JWT
+  @Public()
   @Post('webhook/stripe')
   @HttpCode(200)
   @ApiOperation({ summary: 'Stripe webhook endpoint' })
@@ -39,6 +39,7 @@ export class PaymentsController {
     );
   }
 
+  @Public()
   @Post('webhook/moyasar')
   @HttpCode(200)
   @ApiOperation({ summary: 'Moyasar webhook endpoint' })

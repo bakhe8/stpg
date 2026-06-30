@@ -6,11 +6,9 @@ import {
   HttpStatus,
   Param,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import type { Person } from '@prisma/client';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CreatePathDto } from './dto/create-path.dto';
 import { GovernancePathsService } from './governance-paths.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -18,7 +16,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('governance-paths')
 @ApiBearerAuth('access-token')
 @Controller('wallets')
-@UseGuards(JwtGuard)
 export class WalletPathsController {
   constructor(private readonly pathsService: GovernancePathsService) {}
 

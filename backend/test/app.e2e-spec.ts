@@ -1,5 +1,6 @@
-// Allow dev-login endpoint (NODE_ENV check) and skip prod-only guards
+// Allow dev-login endpoint explicitly for e2e helpers.
 process.env.NODE_ENV = 'development';
+process.env.ENABLE_DEV_LOGIN = 'true';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -7,6 +8,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 jest.setTimeout(30000);
 
@@ -28,6 +30,7 @@ async function devLogin(app: INestApplication<App>): Promise<string> {
 describe('CollectiveTrustOS E2E', () => {
   let app: INestApplication<App>;
   let authHeader: string;
+  let prisma: PrismaService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -57,6 +60,7 @@ describe('CollectiveTrustOS E2E', () => {
     SwaggerModule.setup('api/docs', app, document);
 
     await app.init();
+    prisma = app.get(PrismaService);
 
     // Obtain a real JWT via dev-login (development mode only)
     authHeader = await devLogin(app);
@@ -192,6 +196,24 @@ describe('CollectiveTrustOS E2E', () => {
   // ── Auth: flow ──────────────────────────────────────────────────────────────
 
   describe('Auth: flow', () => {
+    it('POST /auth/dev-login returns 403 when ENABLE_DEV_LOGIN is not true', async () => {
+      const previous = process.env.ENABLE_DEV_LOGIN;
+      delete process.env.ENABLE_DEV_LOGIN;
+
+      try {
+        await request(app.getHttpServer())
+          .post('/auth/dev-login')
+          .send({ username: `e2e_blocked_${Date.now()}` })
+          .expect(403);
+      } finally {
+        if (previous === undefined) {
+          delete process.env.ENABLE_DEV_LOGIN;
+        } else {
+          process.env.ENABLE_DEV_LOGIN = previous;
+        }
+      }
+    });
+
     it('POST /auth/dev-login returns accessToken and refreshToken', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/dev-login')
@@ -201,6 +223,38 @@ describe('CollectiveTrustOS E2E', () => {
       expect(res.body).toHaveProperty('accessToken');
       expect(res.body).toHaveProperty('refreshToken');
       expect(typeof res.body.accessToken).toBe('string');
+    });
+
+    it('POST /auth/refresh rotates refreshToken and rejects reuse', async () => {
+      const loginRes = await request(app.getHttpServer())
+        .post('/auth/dev-login')
+        .send({ username: `e2e_refresh_${Date.now()}` })
+        .expect(200);
+
+      const oldRefreshToken = loginRes.body.refreshToken as string;
+      const oldAccessToken = loginRes.body.accessToken as string;
+
+      const refreshRes = await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken: oldRefreshToken })
+        .expect(200);
+
+      expect(refreshRes.body).toHaveProperty('accessToken');
+      expect(refreshRes.body).toHaveProperty('refreshToken');
+      expect(refreshRes.body.accessToken).not.toBe(oldAccessToken);
+      expect(refreshRes.body.refreshToken).not.toBe(oldRefreshToken);
+
+      await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken: oldRefreshToken })
+        .expect(401);
+
+      const oldRecord = await prisma.refreshToken.findUnique({
+        where: { token: oldRefreshToken },
+      });
+
+      expect(oldRecord?.isRevoked).toBe(true);
+      expect(oldRecord?.revokedAt).toBeInstanceOf(Date);
     });
 
     it('POST /auth/dev-login with empty username → 400', async () => {

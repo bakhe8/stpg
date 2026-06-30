@@ -7,16 +7,13 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('documents')
 @ApiBearerAuth('access-token')
 @Controller('documents')

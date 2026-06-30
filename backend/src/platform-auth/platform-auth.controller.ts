@@ -9,23 +9,25 @@ import {
 import { PlatformAuthService } from './platform-auth.service';
 import { PlatformLoginDto } from './dto/platform-login.dto';
 import { CreatePlatformAccountDto } from './dto/create-platform-account.dto';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { PlatformGuard } from '../identity/auth/platform.guard';
 import { CurrentPlatformUser } from '../identity/auth/decorators/current-platform-user.decorator';
 import { PlatformRole } from '@prisma/client';
 import { AllowPlatform } from '../identity/auth/decorators/allow-platform.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('platform-auth')
 @AllowPlatform()
 export class PlatformAuthController {
   constructor(private readonly service: PlatformAuthService) {}
 
+  @Public()
   @Post('login')
   login(@Body() dto: PlatformLoginDto) {
     return this.service.login(dto.email, dto.password);
   }
 
   // نقطة تهيئة المنصة لأول مرة — محمية بـ bootstrap secret في الـ header
+  @Public()
   @Post('bootstrap')
   bootstrap(
     @Body() body: { email: string; password: string; name: string },
@@ -39,7 +41,7 @@ export class PlatformAuthController {
 
   // إنشاء حسابات Platform — يتطلب OWNER أو SUPER_ADMIN
   @Post('accounts')
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   createAccount(
     @Body() dto: CreatePlatformAccountDto,
     @CurrentPlatformUser() operator: { role: PlatformRole },

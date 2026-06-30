@@ -19,6 +19,7 @@ import styles from "./settings.module.css";
 export default function EntitySettingsPage() {
   const { id } = useParams<{ id: string }>();
   const nav = useTranslations("nav");
+  const t = useTranslations("entitySettings");
 
   const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,9 +74,9 @@ export default function EntitySettingsPage() {
     try {
       const updated = await updateEntity(id, { name, description, bankAccountNumber, bankName });
       setEntity((prev) => (prev ? { ...prev, ...updated } : updated));
-      setSaveMsg({ type: "success", text: "تم حفظ الإعدادات بنجاح" });
+      setSaveMsg({ type: "success", text: t("saveSuccess") });
     } catch (err) {
-      setSaveMsg({ type: "error", text: err instanceof Error ? err.message : "فشل الحفظ" });
+      setSaveMsg({ type: "error", text: err instanceof Error ? err.message : t("saveFailed") });
     } finally {
       setSaving(false);
     }
@@ -86,11 +87,11 @@ export default function EntitySettingsPage() {
     setClosureSubmitting(true);
     try {
       await requestClosure(id, closureReason);
-      setClosureMsg("تم إرسال طلب الإغلاق — ستتولى المنصة مراجعته وإشعارك");
+      setClosureMsg(t("closureSentMsg"));
       setClosureConfirmOpen(false);
       void getClosureChecklist(id).then(setChecklist);
     } catch (err) {
-      setClosureMsg(err instanceof Error ? err.message : "فشل إرسال طلب الإغلاق");
+      setClosureMsg(err instanceof Error ? err.message : t("closureSentFailed"));
     } finally {
       setClosureSubmitting(false);
     }
@@ -105,7 +106,7 @@ export default function EntitySettingsPage() {
   }
 
   if (!entity) {
-    return <div className={styles.error}>لم يُعثر على الكيان</div>;
+    return <div className={styles.error}>{t("entityNotFound")}</div>;
   }
 
   const alreadyRequestedClosure = !!entity.closureStatus;
@@ -120,21 +121,11 @@ export default function EntitySettingsPage() {
   const hasAnyBasicChange =
     hasNameChange || hasDescriptionChange || hasBankChange;
   const impactItems = [
-    hasNameChange
-      ? "سيظهر الاسم الجديد في قوائم الأعضاء، الدعوات، التقارير، وسجل التدقيق بعد الحفظ."
-      : null,
-    hasDescriptionChange
-      ? "تغيير الوصف يوضح الغرض للأعضاء، لكنه لا يغير المحافظ أو المسارات أو الاشتراكات."
-      : null,
-    hasBankChange && bankWillBeComplete
-      ? "اكتمال بيانات البنك يحسن جاهزية التشغيل المالي ومراجعة المنصة، لكنه لا ينقل أو يغير أي رصيد."
-      : null,
-    hasBankChange && !bankWillBeComplete
-      ? "بيانات البنك ستبقى ناقصة؛ قد تظهر حالة انتظار أو نقص جاهزية قبل التشغيل المالي."
-      : null,
-    hasAnyBasicChange
-      ? "لن تتغير صلاحيات الأعضاء أو المستحقات أو الأرصدة بمجرد حفظ هذه البيانات الأساسية."
-      : "لا توجد تغييرات غير محفوظة حالياً. عدّل حقلاً لترى أثره قبل الحفظ.",
+    hasNameChange ? t("impactName") : null,
+    hasDescriptionChange ? t("impactDescription") : null,
+    hasBankChange && bankWillBeComplete ? t("impactBankComplete") : null,
+    hasBankChange && !bankWillBeComplete ? t("impactBankIncomplete") : null,
+    hasAnyBasicChange ? t("impactNoPermissionChange") : t("impactNoneYet"),
   ].filter((item): item is string => Boolean(item));
 
   return (
@@ -144,19 +135,19 @@ export default function EntitySettingsPage() {
           { label: nav("dashboard"), href: "/dashboard" },
           { label: nav("entities"), href: "/entities" },
           { label: entity.name, href: `/entities/${id}` },
-          { label: "إعدادات" },
+          { label: t("breadcrumbSettings") },
         ]}
       />
-      <Link href={`/entities/${id}`} className={styles.back}>← العودة للكيان</Link>
+      <Link href={`/entities/${id}`} className={styles.back}>{t("backToEntity")}</Link>
 
-      <h1 className={styles.title}>إعدادات الكيان</h1>
+      <h1 className={styles.title}>{t("title")}</h1>
 
       {/* ── بيانات الكيان ── */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>البيانات الأساسية</h2>
+        <h2 className={styles.sectionTitle}>{t("basicTitle")}</h2>
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>اسم الكيان</label>
+            <label className={styles.label}>{t("nameLabel")}</label>
             <input
               className={styles.input}
               value={name}
@@ -166,7 +157,7 @@ export default function EntitySettingsPage() {
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>الوصف</label>
+            <label className={styles.label}>{t("descriptionLabel")}</label>
             <textarea
               className={styles.textarea}
               value={description}
@@ -177,7 +168,7 @@ export default function EntitySettingsPage() {
           </div>
           <div className={styles.fieldRow}>
             <div className={styles.field}>
-              <label className={styles.label}>رقم الحساب البنكي</label>
+              <label className={styles.label}>{t("bankAccountLabel")}</label>
               <input
                 className={styles.input}
                 value={bankAccountNumber}
@@ -187,7 +178,7 @@ export default function EntitySettingsPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>البنك</label>
+              <label className={styles.label}>{t("bankNameLabel")}</label>
               <input
                 className={styles.input}
                 value={bankName}
@@ -198,8 +189,8 @@ export default function EntitySettingsPage() {
           </div>
           <div className={styles.impactPreview}>
             <div className={styles.impactHeader}>
-              <strong>أثر الحفظ قبل التنفيذ</strong>
-              <span>{hasAnyBasicChange ? "تغييرات غير محفوظة" : "لا تغيير"}</span>
+              <strong>{t("impactTitle")}</strong>
+              <span>{hasAnyBasicChange ? t("unsavedChanges") : t("noChanges")}</span>
             </div>
             <ul>
               {impactItems.map((item) => (
@@ -213,7 +204,7 @@ export default function EntitySettingsPage() {
             </div>
           )}
           <button className={styles.saveBtn} type="submit" disabled={saving || !isFounderOrAdmin}>
-            {saving ? "جارٍ الحفظ…" : "حفظ التغييرات"}
+            {saving ? t("saving") : t("saveChanges")}
           </button>
         </form>
       </section>
@@ -221,15 +212,19 @@ export default function EntitySettingsPage() {
       {/* ── طلب الإغلاق (للمؤسس والمدير فقط) ── */}
       {isFounderOrAdmin && (
         <section className={`${styles.section} ${styles.dangerSection}`}>
-          <h2 className={styles.sectionTitle}>إغلاق الكيان</h2>
+          <h2 className={styles.sectionTitle}>{t("closureTitle")}</h2>
 
           {alreadyRequestedClosure ? (
             <div className={styles.closureStatus}>
               <div className={styles.closureStatusIcon}>⏳</div>
               <div>
-                <div className={styles.closureStatusLabel}>تم إرسال طلب الإغلاق</div>
+                <div className={styles.closureStatusLabel}>{t("closureRequestSent")}</div>
                 <div className={styles.closureStatusSub}>
-                  بتاريخ {entity.closureRequestedAt ? new Date(entity.closureRequestedAt).toLocaleDateString("ar-SA") : "—"}
+                  {t("closureRequestedOn", {
+                    date: entity.closureRequestedAt
+                      ? new Date(entity.closureRequestedAt).toLocaleDateString("ar-SA")
+                      : "—",
+                  })}
                 </div>
                 {entity.closureReason && (
                   <div className={styles.closureReasonDisplay}>{entity.closureReason}</div>
@@ -238,13 +233,11 @@ export default function EntitySettingsPage() {
             </div>
           ) : (
             <>
-              <p className={styles.dangerNote}>
-                يؤدي طلب الإغلاق إلى تجميد الكيان. يجب استيفاء الشروط أدناه قبل الإغلاق.
-              </p>
+              <p className={styles.dangerNote}>{t("closureWarning")}</p>
 
               {/* Checklist */}
               {checklistLoading ? (
-                <div className={styles.checklistLoading}>جارٍ التحقق من الشروط…</div>
+                <div className={styles.checklistLoading}>{t("checklistLoading")}</div>
               ) : checklist ? (
                 <div className={styles.checklist}>
                   {checklist.checks.map((c) => (
@@ -266,14 +259,14 @@ export default function EntitySettingsPage() {
               )}
 
               <div className={styles.closureReasonField}>
-                <label className={styles.label}>سبب الإغلاق (مطلوب)</label>
+                <label className={styles.label}>{t("closureReasonLabel")}</label>
                 <textarea
                   className={styles.textarea}
                   value={closureReason}
                   onChange={(e) => setClosureReason(e.target.value)}
                   rows={2}
                   maxLength={300}
-                  placeholder="اذكر سبب إغلاق الكيان…"
+                  placeholder={t("closureReasonPlaceholder")}
                 />
               </div>
 
@@ -282,10 +275,10 @@ export default function EntitySettingsPage() {
                 onClick={() => setClosureConfirmOpen(true)}
                 disabled={!checklist?.canClose || !closureReason.trim()}
               >
-                طلب إغلاق الكيان
+                {t("requestClosureBtn")}
               </button>
               {checklist && !checklist.canClose && (
-                <p className={styles.checkHint}>أكمل الشروط أعلاه لتفعيل زر الإغلاق</p>
+                <p className={styles.checkHint}>{t("completeChecksHint")}</p>
               )}
             </>
           )}
@@ -294,9 +287,9 @@ export default function EntitySettingsPage() {
 
       {closureConfirmOpen && (
         <ConfirmActionDialog
-          title="تأكيد طلب إغلاق الكيان"
-          description={`سيُجمَّد الكيان وتُرسل المنصة إشعاراً لجميع الأعضاء. هذا الإجراء يصعب التراجع عنه.`}
-          confirmLabel="تأكيد طلب الإغلاق"
+          title={t("confirmClosureTitle")}
+          description={t("confirmClosureDesc")}
+          confirmLabel={t("confirmClosureBtn")}
           danger
           loading={closureSubmitting}
           onConfirm={() => void handleRequestClosure()}

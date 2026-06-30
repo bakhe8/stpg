@@ -7,13 +7,11 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { CommitteesService } from './committees.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import {
@@ -26,7 +24,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('committees')
 @ApiBearerAuth('access-token')
 @Controller('committees')
-@UseGuards(JwtGuard)
 export class CommitteesController {
   constructor(private readonly committeesService: CommitteesService) {}
 

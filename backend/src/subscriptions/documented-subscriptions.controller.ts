@@ -6,11 +6,9 @@ import {
   HttpStatus,
   Param,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import type { Person } from '@prisma/client';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { SubscribeDto } from './dto/subscribe.dto';
 import { SubscriptionsService } from './subscriptions.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -18,7 +16,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('subscriptions')
 @ApiBearerAuth('access-token')
 @Controller()
-@UseGuards(JwtGuard)
 export class DocumentedSubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 

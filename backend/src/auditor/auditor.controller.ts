@@ -3,17 +3,14 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  UseGuards,
 } from '@nestjs/common';
 import { AuditorService } from './auditor.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 
 @ApiTags('auditor')
 @ApiBearerAuth('access-token')
 @Controller('auditor')
-@UseGuards(JwtGuard)
 export class AuditorController {
   constructor(private readonly auditorService: AuditorService) {}
 

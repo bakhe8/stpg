@@ -6,17 +6,14 @@ import {
   ParseUUIDPipe,
   Patch,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Body, Post } from '@nestjs/common';
 import { SubscribeDto } from './dto/subscribe.dto';
 
-@UseGuards(JwtGuard)
 @ApiTags('notifications')
 @ApiBearerAuth('access-token')
 @Controller('notifications')

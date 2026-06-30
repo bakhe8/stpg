@@ -4,11 +4,13 @@ import {
   DisbursementRequestStatus,
   DisputeStatus,
   EntityPlatformStatus,
+  MemberRole,
   MembershipApplicationStatus,
   PaymentRecordStatus,
   PaymentDueStatus,
   PlatformAccessType,
   PlatformRole,
+  SubscriptionState,
   SupportSessionStatus,
   VoteType,
 } from '@prisma/client';
@@ -292,6 +294,7 @@ async function main() {
         id: true,
         status: true,
         transactionId: true,
+        subscriptionId: true,
       },
     }),
     prisma.paymentRecord.findMany({
@@ -1107,11 +1110,13 @@ async function main() {
       !session.scope.trim() ||
       !entities.some((entity) => entity.id === session.entityId) ||
       !account?.isActive ||
-      ![
-        PlatformRole.SUPPORT,
-        PlatformRole.SUPER_ADMIN,
-        PlatformRole.OWNER,
-      ].includes(account.role) ||
+      !(
+        [
+          PlatformRole.SUPPORT,
+          PlatformRole.SUPER_ADMIN,
+          PlatformRole.OWNER,
+        ] as PlatformRole[]
+      ).includes(account.role) ||
       !hasValidTimeState
     );
   });
@@ -1383,7 +1388,10 @@ async function main() {
   }
 
   const activeMembershipIds = new Set(
-    activeMemberships.map((membership) => membership.id),
+    activeMemberships
+      // المراجع لا يشترك مالياً — دوره رقابي فقط
+      .filter((membership) => membership.role !== MemberRole.AUDITOR)
+      .map((membership) => membership.id),
   );
   const subscribedMembershipIds = new Set(
     subscriptions.map((subscription) => subscription.membership.id),
@@ -1399,6 +1407,23 @@ async function main() {
       'Every active membership must have at least one subscription state in its operational history.',
       activeMembershipsWithoutHistory.length,
       sampleList(activeMembershipsWithoutHistory),
+    );
+  }
+
+  const subscriptionIdsWithDues = new Set(
+    paymentDues.map((due) => due.subscriptionId),
+  );
+  const newcomerActiveSubscriptionsWithoutDues = subscriptions.filter(
+    (subscription) =>
+      subscription.state === SubscriptionState.ACTIVE &&
+      !subscriptionIdsWithDues.has(subscription.id),
+  );
+  if (newcomerActiveSubscriptionsWithoutDues.length === 0) {
+    pushFinding(
+      findings,
+      'error',
+      'NEWCOMER_ACTIVE_SUBSCRIPTION_WITHOUT_DUE_MISSING',
+      'Seed must cover a recently joined ACTIVE subscriber with no PaymentDue rows yet (due to be generated next billing cycle).',
     );
   }
 
@@ -1480,11 +1505,16 @@ async function main() {
     }
   }
 
+  const oneBillingCycleAgo = new Date(
+    seedRuntime.referenceDate.getTime() - 30 * 24 * 60 * 60 * 1000,
+  );
   const billablePersonIds = new Set(
     subscriptions
       .filter(
         (subscription) =>
           subscription.activeAt &&
+          // عضو انضم قبل أقل من دورة فوترة كاملة لا يُتوقع له سجل دفع بعد
+          subscription.activeAt <= oneBillingCycleAgo &&
           subscription.agreedAmount &&
           Number(subscription.agreedAmount) > 0 &&
           !['INTERESTED', 'CONDITIONAL'].includes(subscription.state),
@@ -1923,7 +1953,7 @@ async function main() {
   ) {
     pushFinding(
       findings,
-      'warning',
+      'error',
       'CAMPAIGN_ARCHIVAL_COVERAGE_LOW',
       'No active expired campaign is present to exercise archival flows.',
     );
@@ -1983,6 +2013,20 @@ async function main() {
         `Missing payment due status ${requiredStatus}.`,
       );
     }
+  }
+
+  const confirmedMoyasarPayments = paymentRecords.filter(
+    (record) =>
+      record.paymentMethod === 'MOYASAR' &&
+      record.status === PaymentRecordStatus.CONFIRMED,
+  );
+  if (confirmedMoyasarPayments.length === 0) {
+    pushFinding(
+      findings,
+      'error',
+      'MOYASAR_CONFIRMED_PAYMENT_MISSING',
+      'Seed data must include at least one CONFIRMED Moyasar payment record.',
+    );
   }
 
   const paymentRecordCoverage = new Set(

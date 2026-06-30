@@ -5,21 +5,22 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UseGuards,
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { DevLoginDto } from './dto/dev-login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { OAuthLoginDto } from './dto/oauth-login.dto';
 import { RegisterDeviceTokenDto } from './dto/register-device.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UpdateMeDto } from './dto/update-me.dto';
-import { JwtGuard } from './jwt.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,6 +30,7 @@ export class AuthController {
   @ApiOperation({ summary: 'تسجيل الدخول للمطورين (بيئة التطوير فقط)' })
   @ApiResponse({ status: 200, description: 'تم تسجيل الدخول بنجاح' })
   @ApiResponse({ status: 400, description: 'بيانات غير صحيحة' })
+  @Public()
   @Post('dev-login')
   @HttpCode(HttpStatus.OK)
   async devLogin(@Body() dto: DevLoginDto) {
@@ -46,6 +48,7 @@ export class AuthController {
     status: 400,
     description: 'بيانات غير صحيحة أو رقم الجوال مسجل مسبقاً',
   })
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
@@ -60,10 +63,36 @@ export class AuthController {
     status: 400,
     description: 'رقم الجوال أو كلمة المرور غير صحيحة',
   })
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @ApiOperation({ summary: 'إرسال رمز تحقق (OTP) عبر SMS لرقم الجوال' })
+  @ApiResponse({ status: 200, description: 'تم إرسال رمز التحقق' })
+  @Public()
+  @Post('send-otp')
+  @HttpCode(HttpStatus.OK)
+  async sendOtp(@Body() dto: SendOtpDto) {
+    return this.authService.sendOtp(dto.phoneNumber);
+  }
+
+  @ApiOperation({ summary: 'تأكيد رمز التحقق (OTP) وتسجيل الدخول' })
+  @ApiResponse({
+    status: 200,
+    description: 'تم تسجيل الدخول بنجاح وإصدار رمز الوصول',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'رمز خاطئ أو منتهي أو تجاوز عدد المحاولات',
+  })
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.phoneNumber, dto.code);
   }
 
   @ApiOperation({ summary: 'تسجيل الدخول عبر مزود خارجي (OAuth) - اختياري' })
@@ -72,6 +101,7 @@ export class AuthController {
     description: 'تم المصادقة بنجاح وإصدار رمز الوصول',
   })
   @ApiResponse({ status: 400, description: 'بيانات غير صحيحة' })
+  @Public()
   @Post('oauth')
   @HttpCode(HttpStatus.OK)
   async oauthLogin(@Body() dto: OAuthLoginDto) {
@@ -81,7 +111,7 @@ export class AuthController {
   @ApiOperation({ summary: 'تسجيل جهاز لاستقبال إشعارات Push' })
   @ApiResponse({ status: 200, description: 'تم تسجيل الجهاز بنجاح' })
   @Post('device-token')
-  @UseGuards(JwtGuard)
+
   @HttpCode(HttpStatus.OK)
   async registerDeviceToken(
     @Body() dto: RegisterDeviceTokenDto,
@@ -101,6 +131,7 @@ export class AuthController {
     status: 400,
     description: 'رمز التحديث غير صحيح أو منتهي الصلاحية',
   })
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshTokenDto) {
@@ -111,7 +142,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'تم تسجيل الخروج بنجاح' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
   @Post('logout')
-  @UseGuards(JwtGuard)
+
   @HttpCode(HttpStatus.OK)
   async logout(@Body() dto: RefreshTokenDto, @CurrentUser() person: Person) {
     return this.authService.logout(dto.refreshToken, person.id);
@@ -121,7 +152,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'بيانات المستخدم المصادق' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
   @Get('me')
-  @UseGuards(JwtGuard)
+
   getMe(@CurrentUser() person: Person) {
     return {
       id: person.id,
@@ -139,7 +170,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'تم تحديث البيانات' })
   @ApiResponse({ status: 401, description: 'غير مصادق' })
   @Patch('me')
-  @UseGuards(JwtGuard)
+
   updateMe(@CurrentUser() person: Person, @Body() dto: UpdateMeDto) {
     return this.authService.updateMe(person.id, dto);
   }

@@ -1,8 +1,10 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   DecisionResult,
+  DecisionExecutionStatus,
   DecisionStatus,
   DecisionType,
+  MemberRole,
   SubjectType,
   VoteType,
   VotersScope,
@@ -12,6 +14,7 @@ import { DecisionsService } from './decisions.service';
 
 describe('DecisionsService', () => {
   let prisma: {
+    person: { findUnique: jest.Mock };
     governancePath: { findUnique: jest.Mock };
     entityPolicy: { findUnique: jest.Mock };
     membership: { findFirst: jest.Mock; count: jest.Mock };
@@ -32,6 +35,7 @@ describe('DecisionsService', () => {
 
   beforeEach(() => {
     prisma = {
+      person: { findUnique: jest.fn().mockResolvedValue({ isVerified: true }) },
       governancePath: { findUnique: jest.fn() },
       entityPolicy: { findUnique: jest.fn().mockResolvedValue(null) },
       membership: {
@@ -76,12 +80,16 @@ describe('DecisionsService', () => {
     const mockHouseholdsService = {
       findEntityHouseholds: jest.fn(),
     };
+    const mockLedgerService = {
+      recordTransfer: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new DecisionsService(
       prisma as unknown as PrismaService,
       mockRulesService as never,
       mockSubscriptionsService as never,
       mockHouseholdsService as never,
+      mockLedgerService as never,
     );
   });
 
@@ -135,6 +143,45 @@ describe('DecisionsService', () => {
     );
   });
 
+  it('rejects TREASURER when creating decisions', async () => {
+    prisma.governancePath.findUnique.mockResolvedValue({
+      id: 'path-id',
+      walletId: 'wallet-id',
+      wallet: { entityId: 'entity-id' },
+      policy: null,
+    });
+    prisma.membership.findFirst.mockImplementation(({ where }) => {
+      const roles = where.role?.in ?? [];
+      if (roles.includes(MemberRole.TREASURER)) {
+        return Promise.resolve({ id: 'treasurer-membership' });
+      }
+      return Promise.resolve(null);
+    });
+
+    await expect(
+      service.createDecision('treasurer-id', {
+        type: DecisionType.MODIFY_GOVERNANCE,
+        subjectType: SubjectType.PATH,
+        subjectId: 'path-id',
+        governancePathId: 'path-id',
+        title: 'تعديل الحوكمة',
+        voteType: VoteType.SIMPLE_MAJORITY,
+        votersScope: VotersScope.ALL_MEMBERS,
+        closesAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          personId: 'treasurer-id',
+          role: { in: [MemberRole.ADMIN, MemberRole.FOUNDER] },
+        }),
+      }),
+    );
+    expect(prisma.decision.create).not.toHaveBeenCalled();
+  });
+
   it('marks an overdue decision without quorum as expired', async () => {
     prisma.decision.findUnique.mockResolvedValue({
       id: 'decision-id',
@@ -167,6 +214,101 @@ describe('DecisionsService', () => {
         result: DecisionResult.REJECTED,
       }),
     });
+  });
+
+  it('rejects TREASURER when closing decisions', async () => {
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      subjectType: SubjectType.PATH,
+      subjectId: 'path-id',
+      status: DecisionStatus.OPEN,
+      result: DecisionResult.PENDING,
+      closesAt: new Date(Date.now() + 60_000),
+      quorumPercent: 50,
+      approvalPercent: 51,
+      votersScope: VotersScope.ALL_MEMBERS,
+      governancePathId: 'path-id',
+      voteType: VoteType.ONE_MEMBER_ONE_VOTE,
+      votes: [],
+      governancePath: { wallet: { entityId: 'entity-id' } },
+    });
+    prisma.membership.findFirst.mockImplementation(({ where }) => {
+      const roles = where.role?.in ?? [];
+      if (roles.includes(MemberRole.TREASURER)) {
+        return Promise.resolve({ id: 'treasurer-membership' });
+      }
+      return Promise.resolve(null);
+    });
+
+    await expect(
+      service.closeDecision('decision-id', 'treasurer-id'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          personId: 'treasurer-id',
+          role: { in: [MemberRole.ADMIN, MemberRole.FOUNDER] },
+        }),
+      }),
+    );
+    expect(prisma.decision.update).not.toHaveBeenCalled();
+  });
+
+  it('allows TREASURER to retry execution for an approved decision', async () => {
+    const approvedDecision = {
+      id: 'decision-id',
+      subjectType: SubjectType.ENTITY,
+      subjectId: 'entity-id',
+      decisionType: DecisionType.MODIFY_SUBSCRIPTION,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      executionStatus: DecisionExecutionStatus.FAILED,
+      governancePath: { wallet: { entityId: 'entity-id' } },
+    };
+    prisma.decision.findUnique
+      .mockResolvedValueOnce(approvedDecision)
+      .mockResolvedValueOnce(approvedDecision)
+      .mockResolvedValueOnce({
+        ...approvedDecision,
+        executionStatus: DecisionExecutionStatus.COMPLETED,
+      });
+    prisma.membership.findFirst.mockImplementation(({ where }) => {
+      const roles = where.role?.in ?? [];
+      if (roles.includes(MemberRole.TREASURER)) {
+        return Promise.resolve({ id: 'treasurer-membership' });
+      }
+      return Promise.resolve(null);
+    });
+    prisma.decision.update.mockResolvedValue({
+      ...approvedDecision,
+      executionStatus: DecisionExecutionStatus.COMPLETED,
+    });
+
+    const result = await service.retryExecution('decision-id', 'treasurer-id');
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        executionStatus: DecisionExecutionStatus.COMPLETED,
+      }),
+    );
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          personId: 'treasurer-id',
+          role: {
+            in: [MemberRole.TREASURER, MemberRole.ADMIN, MemberRole.FOUNDER],
+          },
+        }),
+      }),
+    );
+    expect(prisma.decision.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          executionStatus: DecisionExecutionStatus.COMPLETED,
+        }),
+      }),
+    );
   });
 
   it('lists only decisions reachable through an active membership', async () => {
@@ -228,6 +370,91 @@ describe('DecisionsService', () => {
       }),
     );
     expect(prisma.vote.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects an expulsion vote from the membership being expelled', async () => {
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      decisionType: DecisionType.EXPEL_MEMBER,
+      subjectType: SubjectType.MEMBERSHIP,
+      subjectId: 'target-membership-id',
+      status: DecisionStatus.OPEN,
+      result: DecisionResult.PENDING,
+      closesAt: new Date(Date.now() + 60_000),
+      quorumPercent: 50,
+      approvalPercent: 51,
+      votersScope: VotersScope.ALL_MEMBERS,
+      governancePathId: null,
+      voteType: VoteType.ONE_MEMBER_ONE_VOTE,
+      votes: [],
+      governancePath: { wallet: { entityId: 'entity-id' } },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      id: 'target-membership-id',
+    });
+
+    await expect(
+      service.castVote('decision-id', 'target-person-id', {
+        choice: 'REJECT',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          entityId: 'entity-id',
+          personId: 'target-person-id',
+          isActive: true,
+        },
+        select: { id: true },
+      }),
+    );
+    expect(prisma.vote.create).not.toHaveBeenCalled();
+  });
+
+  it('allows other members to vote on an expulsion decision', async () => {
+    const decision = {
+      id: 'decision-id',
+      decisionType: DecisionType.EXPEL_MEMBER,
+      subjectType: SubjectType.MEMBERSHIP,
+      subjectId: 'target-membership-id',
+      status: DecisionStatus.OPEN,
+      result: DecisionResult.PENDING,
+      closesAt: new Date(Date.now() + 60_000),
+      quorumPercent: 50,
+      approvalPercent: 51,
+      votersScope: VotersScope.ALL_MEMBERS,
+      governancePathId: null,
+      voteType: VoteType.ONE_MEMBER_ONE_VOTE,
+      votes: [],
+      governancePath: { wallet: { entityId: 'entity-id' } },
+    };
+    prisma.decision.findUnique
+      .mockResolvedValueOnce(decision)
+      .mockResolvedValueOnce(null);
+    prisma.membership.findFirst.mockResolvedValue({
+      id: 'other-membership-id',
+    });
+    prisma.vote.create.mockResolvedValue({
+      id: 'vote-id',
+      decisionId: 'decision-id',
+      personId: 'other-person-id',
+      choice: 'APPROVE',
+    });
+
+    await service.castVote('decision-id', 'other-person-id', {
+      choice: 'APPROVE',
+    });
+
+    expect(prisma.vote.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          decisionId: 'decision-id',
+          personId: 'other-person-id',
+          choice: 'APPROVE',
+        }),
+      }),
+    );
   });
 
   it('requires an approved amount for DISBURSE_FUNDS decisions', async () => {

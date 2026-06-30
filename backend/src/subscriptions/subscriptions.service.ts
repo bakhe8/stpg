@@ -5,18 +5,23 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { LedgerService } from '../ledger/ledger.service';
 import { RulesService } from '../rules/rules.service';
+import { TenantContextService } from '../core/tenant-context/tenant-context.service';
 import {
   AuditAction,
   GovernancePathType,
   MemberPreference,
   MemberRole,
+  NotificationTargetType,
+  NotificationType,
   PathPolicy,
   PaymentDueStatus,
   PaymentRecordStatus,
+  SubscriptionFrequency,
   SubscriptionState,
   VoteType,
 } from '@prisma/client';
@@ -56,6 +61,7 @@ export class SubscriptionsService {
     private readonly notificationsService: NotificationsService,
     private readonly ledgerService: LedgerService,
     private readonly rulesService: RulesService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async subscribe(pathId: string, requesterId: string, dto: SubscribeDto) {
@@ -1305,5 +1311,125 @@ export class SubscriptionsService {
       },
     });
     return !!m;
+  }
+
+  // ── Cron: توليد PaymentDue شهرياً لكل اشتراك نشط billable ──────
+  @Cron('0 0 1 * *')
+  async generateMonthlyDuesCron() {
+    return this.tenantContext.runInternal(() => this.generateMonthlyDues());
+  }
+
+  async generateMonthlyDues() {
+    const now = new Date();
+    const periodLabel = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const subscriptions = await this.prisma.subscription.findMany({
+      where: { state: { in: [SubscriptionState.ACTIVE, SubscriptionState.SUPPORTER_ONLY] } },
+      include: {
+        membership: { select: { person: { select: { id: true } } } },
+        governancePath: {
+          select: {
+            name: true,
+            wallet: {
+              select: {
+                policy: {
+                  select: { subscriptionAmount: true, subscriptionFrequency: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let created = 0;
+    for (const sub of subscriptions) {
+      const policy = sub.governancePath.wallet.policy;
+      const frequency = policy?.subscriptionFrequency ?? SubscriptionFrequency.MONTHLY;
+      if (frequency !== SubscriptionFrequency.MONTHLY) continue;
+
+      const amountDue = sub.agreedAmount ?? policy?.subscriptionAmount;
+      if (!amountDue || Number(amountDue) <= 0) continue;
+
+      const exists = await this.prisma.paymentDue.findUnique({
+        where: { subscriptionId_periodLabel: { subscriptionId: sub.id, periodLabel } },
+        select: { id: true },
+      });
+      if (exists) continue;
+
+      await this.prisma.paymentDue.create({
+        data: {
+          subscriptionId: sub.id,
+          periodLabel,
+          dueDate: now,
+          amountDue,
+        },
+      });
+
+      await this.notificationsService.create({
+        personId: sub.membership.person.id,
+        type: NotificationType.PAYMENT_DUE,
+        title: 'استحقاق اشتراك',
+        body: `اشتراكك في مسار "${sub.governancePath.name}" مستحق الدفع لشهر ${periodLabel}`,
+        targetType: NotificationTargetType.SUBSCRIPTION,
+        targetId: sub.id,
+      });
+      created += 1;
+    }
+
+    return { created };
+  }
+
+  // ── Cron: تحديث الدفعات المتأخرة إلى OVERDUE يومياً ─────────────
+  @Cron('0 1 * * *')
+  async markOverdueDuesCron() {
+    return this.tenantContext.runInternal(() => this.markOverdueDues());
+  }
+
+  async markOverdueDues() {
+    const now = new Date();
+    const pendingDues = await this.prisma.paymentDue.findMany({
+      where: { status: PaymentDueStatus.PENDING, dueDate: { lt: now } },
+      include: {
+        subscription: {
+          select: {
+            id: true,
+            membership: { select: { person: { select: { id: true } } } },
+            governancePath: {
+              select: {
+                name: true,
+                wallet: { select: { policy: { select: { gracePeriodDays: true } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let overdueCount = 0;
+    for (const due of pendingDues) {
+      const gracePeriodDays =
+        due.subscription.governancePath.wallet.policy?.gracePeriodDays ?? 0;
+      const overdueThreshold = new Date(due.dueDate);
+      overdueThreshold.setDate(overdueThreshold.getDate() + gracePeriodDays);
+      if (overdueThreshold >= now) continue;
+
+      await this.prisma.paymentDue.update({
+        where: { id: due.id },
+        data: { status: PaymentDueStatus.OVERDUE },
+      });
+
+      await this.notificationsService.create({
+        personId: due.subscription.membership.person.id,
+        type: NotificationType.PAYMENT_DUE,
+        title: 'دفعة متأخرة',
+        body: `دفعتك المستحقة في مسار "${due.subscription.governancePath.name}" لشهر ${due.periodLabel} متأخرة عن موعدها`,
+        targetType: NotificationTargetType.SUBSCRIPTION,
+        targetId: due.subscription.id,
+      });
+      overdueCount += 1;
+    }
+
+    return { overdueCount };
   }
 }

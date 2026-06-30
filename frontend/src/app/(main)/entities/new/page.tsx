@@ -479,39 +479,36 @@ export default function EntityWizardPage() {
       <div className={styles.page}>
         <div className={styles.preGate}>
           <div className={styles.preGateIcon}>⚖</div>
-          <h2 className={styles.preGateTitle}>قبل أن تبدأ — مسؤولية إنشاء الصندوق</h2>
-          <p className={styles.preGateSubtitle}>
-            إنشاء كيان يعني تأسيس صندوق مالي اجتماعي يُدار بلوائح ملزمة.
-            اقرأ ما يلي قبل المتابعة:
-          </p>
+          <h2 className={styles.preGateTitle}>{t("preGateTitle")}</h2>
+          <p className={styles.preGateSubtitle}>{t("preGateSubtitle")}</p>
 
           <div className={styles.preGateList}>
             <div className={styles.preGateItem}>
               <span className={styles.preGateNum}>1</span>
               <div>
-                <strong>الصندوق خاص بالأعضاء</strong>
-                <p>البيانات المالية والعضوية مرئية لأعضاء الكيان فقط — ليست علنية للعموم.</p>
+                <strong>{t("preGateItem1Title")}</strong>
+                <p>{t("preGateItem1Body")}</p>
               </div>
             </div>
             <div className={styles.preGateItem}>
               <span className={styles.preGateNum}>2</span>
               <div>
-                <strong>أنت مسؤول أمام أعضائك</strong>
-                <p>بصفتك مؤسساً، أنت المرجع الأول لأي نزاع أو طعن داخل الكيان.</p>
+                <strong>{t("preGateItem2Title")}</strong>
+                <p>{t("preGateItem2Body")}</p>
               </div>
             </div>
             <div className={styles.preGateItem}>
               <span className={styles.preGateNum}>3</span>
               <div>
-                <strong>لا يحق للمنصة تعديل سجلاتك المالية</strong>
-                <p>فريق المنصة لا يملك صلاحية تعديل أي سجل مالي داخل كيانك — كل وصول موثَّق ومرئي لك.</p>
+                <strong>{t("preGateItem3Title")}</strong>
+                <p>{t("preGateItem3Body")}</p>
               </div>
             </div>
             <div className={styles.preGateItem}>
               <span className={styles.preGateNum}>4</span>
               <div>
-                <strong>أنت تملك بياناتك</strong>
-                <p>يمكنك تصدير بيانات كيانك في أي وقت — حتى في حال تعليق الحساب.</p>
+                <strong>{t("preGateItem4Title")}</strong>
+                <p>{t("preGateItem4Body")}</p>
               </div>
             </div>
           </div>
@@ -520,13 +517,13 @@ export default function EntityWizardPage() {
             className={styles.primaryBtn}
             onClick={() => setPreGatePassed(true)}
           >
-            فهمت — ابدأ الإنشاء
+            {t("preGateConfirm")}
           </button>
           <button
             className={styles.secondaryBtn}
             onClick={() => router.back()}
           >
-            رجوع
+            {t("preGateBack")}
           </button>
         </div>
       </div>

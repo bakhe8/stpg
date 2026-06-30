@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   UnauthorizedException,
   BadRequestException,
@@ -13,9 +14,13 @@ import { LoginDto } from './dto/login.dto';
 import { OAuthProvider } from './dto/oauth-login.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SMS_PROVIDER, type SmsProvider } from '../sms/sms-provider.interface';
 
 import { AuditAction, Person, Prisma } from '@prisma/client';
 import { getRefreshTokenSecret } from './jwt-secrets';
+
+const OTP_TTL_MS = 10 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
 
 type OAuthJwtHeader = {
   alg?: string;
@@ -72,12 +77,12 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    @Inject(SMS_PROVIDER) private readonly smsProvider: SmsProvider,
   ) {}
 
   // ── Dev bypass (بيئة التطوير فقط) ─────────────────────────────────
   async devLogin(username: string) {
-    const environment = process.env.NODE_ENV ?? 'development';
-    if (environment !== 'development') {
+    if (process.env.ENABLE_DEV_LOGIN !== 'true') {
       throw new ForbiddenException('الدخول التطويري غير متاح في هذه البيئة');
     }
 
@@ -162,6 +167,61 @@ export class AuthService {
     if (!isMatch) {
       await this.auditFailedLogin(phoneNumber, 'PASSWORD_MISMATCH', person.id);
       throw new BadRequestException('رقم الجوال أو كلمة المرور غير صحيحة');
+    }
+
+    return this.issueTokenPair(person);
+  }
+
+  // ── OTP: تسجيل الدخول برقم الجوال ──────────────────────────────────
+  async sendOtp(phoneNumber: string) {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + OTP_TTL_MS);
+
+    await this.prisma.otpCode.upsert({
+      where: { phoneNumber },
+      create: { phoneNumber, code, expiresAt },
+      update: { code, expiresAt, attempts: 0 },
+    });
+
+    await this.smsProvider.sendOtp(phoneNumber, code);
+
+    return { message: 'تم إرسال رمز التحقق' };
+  }
+
+  async verifyOtp(phoneNumber: string, code: string) {
+    const record = await this.prisma.otpCode.findUnique({
+      where: { phoneNumber },
+    });
+
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('الرمز منتهي');
+    }
+    if (record.attempts >= OTP_MAX_ATTEMPTS) {
+      throw new BadRequestException('تجاوزت عدد المحاولات');
+    }
+    if (record.code !== code) {
+      await this.prisma.otpCode.update({
+        where: { phoneNumber },
+        data: { attempts: { increment: 1 } },
+      });
+      throw new BadRequestException('رمز خاطئ');
+    }
+
+    await this.prisma.otpCode.delete({ where: { phoneNumber } });
+
+    const phoneCandidates = this.getPhoneLoginCandidates(phoneNumber);
+    let person = await this.prisma.person.findFirst({
+      where: { phoneNumber: { in: phoneCandidates } },
+    });
+
+    if (!person) {
+      throw new BadRequestException('لا يوجد حساب مرتبط بهذا الرقم');
+    }
+    if (!person.isVerified) {
+      person = await this.prisma.person.update({
+        where: { id: person.id },
+        data: { isVerified: true },
+      });
     }
 
     return this.issueTokenPair(person);
@@ -502,16 +562,30 @@ export class AuthService {
       throw new UnauthorizedException('رمز التحديث غير صالح أو منتهي');
     }
 
-    const accessToken = this.jwtService.sign(
-      {
-        sub: record.person.id,
-        username: record.person.username,
-        userType: 'tenant',
-      },
-      { expiresIn: '15m' },
-    );
+    const accessToken = this.issueAccessToken(record.person);
+    const newRefreshToken = this.createRefreshToken(record.personId);
+    const revokedAt = new Date();
 
-    return { accessToken };
+    await this.prisma.$transaction(async (tx) => {
+      const revoked = await tx.refreshToken.updateMany({
+        where: { id: record.id, isRevoked: false },
+        data: { isRevoked: true, revokedAt },
+      });
+
+      if (revoked.count !== 1) {
+        throw new UnauthorizedException('رمز التحديث غير صالح أو منتهي');
+      }
+
+      await tx.refreshToken.create({
+        data: {
+          personId: record.personId,
+          token: newRefreshToken,
+          expiresAt: this.refreshTokenExpiresAt(),
+        },
+      });
+    });
+
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
   // ── تسجيل الخروج ───────────────────────────────────────────────────
@@ -527,7 +601,7 @@ export class AuthService {
     await this.prisma.$transaction([
       this.prisma.refreshToken.update({
         where: { token },
-        data: { isRevoked: true },
+        data: { isRevoked: true, revokedAt: new Date() },
       }),
       this.prisma.auditLog.create({
         data: {
@@ -564,25 +638,15 @@ export class AuthService {
   }
 
   private async issueTokenPair(person: Person) {
-    const accessToken = this.jwtService.sign(
-      { sub: person.id, username: person.username, userType: 'tenant' },
-      { expiresIn: '15m' },
-    );
-
-    const refreshToken = this.jwtService.sign(
-      { sub: person.id, jti: randomUUID() },
-      {
-        secret: getRefreshTokenSecret(),
-        expiresIn: '7d',
-      },
-    );
+    const accessToken = this.issueAccessToken(person);
+    const refreshToken = this.createRefreshToken(person.id);
 
     await this.prisma.$transaction([
       this.prisma.refreshToken.create({
         data: {
           personId: person.id,
           token: refreshToken,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          expiresAt: this.refreshTokenExpiresAt(),
         },
       }),
       this.prisma.auditLog.create({
@@ -600,6 +664,32 @@ export class AuthService {
       refreshToken,
       person: { id: person.id, name: person.name, username: person.username },
     };
+  }
+
+  private issueAccessToken(person: Pick<Person, 'id' | 'username'>) {
+    return this.jwtService.sign(
+      {
+        sub: person.id,
+        username: person.username,
+        userType: 'tenant',
+        jti: randomUUID(),
+      },
+      { expiresIn: '15m' },
+    );
+  }
+
+  private createRefreshToken(personId: string) {
+    return this.jwtService.sign(
+      { sub: personId, jti: randomUUID() },
+      {
+        secret: getRefreshTokenSecret(),
+        expiresIn: '7d',
+      },
+    );
+  }
+
+  private refreshTokenExpiresAt() {
+    return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   }
 
   private async auditFailedLogin(

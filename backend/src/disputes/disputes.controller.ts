@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DisputesService } from './disputes.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { OpenDisputeDto } from './dto/open-dispute.dto';
@@ -20,7 +19,6 @@ import {
 } from './dto/resolve-dispute.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('disputes')
 @ApiBearerAuth('access-token')
 @Controller('disputes')

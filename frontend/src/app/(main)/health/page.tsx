@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { getEntities, Entity } from "../../../lib/api/entities";
 import { getEntityHealth } from "../../../lib/api/analytics";
 import { ADMIN_ROLES, hasRole } from "../../../lib/access";
@@ -27,6 +28,7 @@ function pct(n: number) {
 }
 
 export default function HealthPage() {
+  const t = useTranslations("health");
   const [entities, setEntities] = useState<Entity[]>([]);
   const [entityId, setEntityId] = useState("");
   const [indicators, setIndicators] = useState<Indicator[]>([]);
@@ -70,47 +72,57 @@ export default function HealthPage() {
         setIndicators([
           {
             id: "payment_fatigue",
-            title: "إرهاق الدفع",
+            title: t("indPaymentFatigueTitle"),
             value: `${ind.paymentFatigueScore}%`,
             status: statusFromScore(100 - ind.paymentFatigueScore, [40, 70]),
             description:
               adv.paymentFatigue.currentOverdueRate > 0
-                ? `نسبة التأخر الحالية: ${pct(adv.paymentFatigue.currentOverdueRate)} · ${adv.paymentFatigue.overloadedMembers} عضو مثقل`
-                : "لا يوجد تأخر في الدفع",
+                ? t("indPaymentFatigueDescActive", {
+                    rate: pct(adv.paymentFatigue.currentOverdueRate),
+                    members: adv.paymentFatigue.overloadedMembers,
+                  })
+                : t("indPaymentFatigueDescNone"),
           },
           {
             id: "voting_fatigue",
-            title: "إرهاق التصويت",
+            title: t("indVotingFatigueTitle"),
             value: pct(adv.votingFatigue.avgParticipationRate),
             status: adv.votingFatigue.isBelowThreshold ? "warning" : "good",
             description:
               adv.votingFatigue.generalDecisionsCount > 0
-                ? `${adv.votingFatigue.generalDecisionsCount} قرار تصويتي · متوسط المشاركة ${pct(adv.votingFatigue.avgParticipationRate)}`
-                : "لا توجد قرارات تصويتية حديثة",
+                ? t("indVotingFatigueDescActive", {
+                    count: adv.votingFatigue.generalDecisionsCount,
+                    rate: pct(adv.votingFatigue.avgParticipationRate),
+                  })
+                : t("indVotingFatigueDescNone"),
           },
           {
             id: "weak_paths",
-            title: "مسارات الحوكمة الضعيفة",
+            title: t("indWeakPathsTitle"),
             value: String(ind.weakPathsCount),
             status: ind.weakPathsCount === 0 ? "good" : ind.weakPathsCount <= 2 ? "warning" : "critical",
             description:
               adv.weakPaths.paths.length > 0
-                ? `مسارات: ${adv.weakPaths.paths.map((p) => p.name).join("، ")}`
-                : "جميع المسارات نشطة وكافية",
+                ? t("indWeakPathsDescActive", {
+                    names: adv.weakPaths.paths.map((p) => p.name).join("، "),
+                  })
+                : t("indWeakPathsDescNone"),
           },
           {
             id: "zombie_wallets",
-            title: "محافظ شبه ميتة",
+            title: t("indZombieWalletsTitle"),
             value: String(ind.zombieWalletsCount),
             status: ind.zombieWalletsCount === 0 ? "good" : "warning",
             description:
               adv.zombieWallets.length > 0
-                ? `محافظ: ${adv.zombieWallets.map((w) => w.name).join("، ")}`
-                : "جميع المحافظ لها حركة تشغيلية",
+                ? t("indZombieWalletsDescActive", {
+                    names: adv.zombieWallets.map((w) => w.name).join("، "),
+                  })
+                : t("indZombieWalletsDescNone"),
           },
           {
             id: "safety_threshold",
-            title: "الرصيد دون حد الأمان",
+            title: t("indSafetyThresholdTitle"),
             value: String(ind.belowSafetyThresholdCount),
             status:
               ind.belowSafetyThresholdCount === 0
@@ -121,36 +133,45 @@ export default function HealthPage() {
             description:
               adv.belowSafetyThreshold.length > 0
                 ? adv.belowSafetyThreshold
-                    .map((w) => `${w.name}: ${Number(w.balance).toLocaleString("ar-SA")} ر.س`)
+                    .map((w) =>
+                      t("indSafetyThresholdAmount", {
+                        name: w.name,
+                        amount: Number(w.balance).toLocaleString("ar-SA"),
+                      }),
+                    )
                     .join(" · ")
-                : "جميع المحافظ فوق حد الأمان",
+                : t("indSafetyThresholdDescNone"),
           },
           {
             id: "dispute_rate",
-            title: "كثرة الاعتراضات",
+            title: t("indDisputeRateTitle"),
             value: pct(ind.disputeRate),
             status: statusFromScore(1 - ind.disputeRate, [0.5, 0.7]),
-            description:
-              `${adv.disputes.appealsCurrent30} اعتراض · ${adv.disputes.disputesCurrent30} نزاع` +
-              ` في آخر 30 يوم`,
+            description: t("indDisputeRateDesc", {
+              appeals: adv.disputes.appealsCurrent30,
+              disputes: adv.disputes.disputesCurrent30,
+            }),
           },
           {
             id: "out_of_band",
-            title: "قرارات خارج النظام",
+            title: t("indOutOfBandTitle"),
             value: pct(ind.outOfBandRatio),
             status: statusFromScore(1 - ind.outOfBandRatio, [0.5, 0.8]),
             description:
               adv.outOfBandDecisions.outOfBandTransactions > 0
-                ? `${adv.outOfBandDecisions.outOfBandTransactions} تسوية من أصل ${adv.outOfBandDecisions.totalTransactions90} عملية (90 يوم)`
-                : "لا توجد تسويات خارج النظام",
+                ? t("indOutOfBandDescActive", {
+                    out: adv.outOfBandDecisions.outOfBandTransactions,
+                    total: adv.outOfBandDecisions.totalTransactions90,
+                  })
+                : t("indOutOfBandDescNone"),
           },
         ]);
       })
       .catch((e) => {
-        setError(e instanceof Error ? e.message : "فشل تحميل مؤشرات الصحة");
+        setError(e instanceof Error ? e.message : t("loadFailed"));
       })
       .finally(() => setLoading(false));
-  }, [entityId]);
+  }, [entityId, t]);
 
   const scoreColor =
     overallScore === null
@@ -161,12 +182,23 @@ export default function HealthPage() {
       ? "#f59e0b"
       : "#ef4444";
 
+  const overallLevelText =
+    overallLevel === "EXCELLENT"
+      ? t("levelExcellent")
+      : overallLevel === "GOOD"
+      ? t("levelGood")
+      : overallLevel === "FAIR"
+      ? t("levelFair")
+      : overallLevel === "POOR"
+      ? t("levelPoor")
+      : overallLevel ?? t("levelUnknown");
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>مركز صحة الصندوق</h1>
-          <p className={styles.subtitle}>7 مؤشرات تشغيلية لصحة كيانك</p>
+          <h1 className={styles.title}>{t("title")}</h1>
+          <p className={styles.subtitle}>{t("subtitle")}</p>
         </div>
         <select
           className={styles.select}
@@ -175,9 +207,9 @@ export default function HealthPage() {
             setEntityId(e.target.value);
             localStorage.setItem("currentEntityId", e.target.value);
           }}
-          title="اختر كياناً"
+          title={t("selectEntityTitle")}
         >
-          <option value="">— اختر كياناً —</option>
+          <option value="">{t("selectEntityOption")}</option>
           {entities.map((e) => (
             <option key={e.id} value={e.id}>{e.name}</option>
           ))}
@@ -185,7 +217,7 @@ export default function HealthPage() {
       </div>
 
       {!entityId && (
-        <div className={styles.prompt}>اختر كياناً لعرض مؤشرات الصحة التشغيلية</div>
+        <div className={styles.prompt}>{t("selectEntityPrompt")}</div>
       )}
 
       {entityId && loading && (
@@ -204,19 +236,15 @@ export default function HealthPage() {
             </div>
             <div className={styles.overallMeta}>
               <div className={styles.overallLevel} style={{ color: scoreColor }}>
-                {overallLevel === "EXCELLENT" ? "ممتاز"
-                  : overallLevel === "GOOD" ? "جيد"
-                  : overallLevel === "FAIR" ? "مقبول"
-                  : overallLevel === "POOR" ? "ضعيف"
-                  : overallLevel ?? "غير محدد"}
+                {overallLevelText}
               </div>
-              <div className={styles.overallLabel}>درجة الصحة العامة (من 100)</div>
+              <div className={styles.overallLabel}>{t("overallLabel")}</div>
             </div>
           </div>
 
           {alerts.length > 0 && (
             <div className={styles.alertsBox}>
-              <div className={styles.alertsTitle}>⚠ تنبيهات تحتاج إجراء</div>
+              <div className={styles.alertsTitle}>{t("alertsTitle")}</div>
               <ul className={styles.alertsList}>
                 {alerts.map((a, i) => (
                   <li key={i} className={styles.alertItem}>{a}</li>
@@ -235,7 +263,7 @@ export default function HealthPage() {
                 <div className={styles.indicatorValue}>{ind.value}</div>
                 <div className={styles.indicatorDesc}>{ind.description}</div>
                 <div className={styles.statusLabel}>
-                  {ind.status === "good" ? "✓ طبيعي" : ind.status === "warning" ? "⚠ تحذير" : "✗ حرج"}
+                  {ind.status === "good" ? t("statusNormal") : ind.status === "warning" ? t("statusWarning") : t("statusCritical")}
                 </div>
               </div>
             ))}

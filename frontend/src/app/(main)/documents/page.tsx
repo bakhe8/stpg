@@ -16,6 +16,7 @@ import {
   Wallet,
 } from '../../../lib/api/wallets';
 import styles from './documents.module.css';
+import ConfirmActionDialog from '../../../components/shared/ConfirmActionDialog';
 
 const FILE_TYPE_ICONS: Record<string, string> = {
   'application/pdf': '📄',
@@ -65,6 +66,7 @@ export default function DocumentsPage() {
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     fileUrl: '',
@@ -135,13 +137,19 @@ export default function DocumentsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm(t('deleteConfirm'))) return;
+  function handleDelete(id: string) {
+    setDeleteTarget(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
     try {
-      await deleteDocument(id);
-      setDocs((prev) => prev.filter((d) => d.id !== id));
+      await deleteDocument(deleteTarget);
+      setDocs((prev) => prev.filter((d) => d.id !== deleteTarget));
     } catch (err) {
       setMsg(`⚠ ${err instanceof Error ? err.message : t('deleteFailed')}`);
+    } finally {
+      setDeleteTarget(null);
     }
   }
 
@@ -319,6 +327,17 @@ export default function DocumentsPage() {
           })}
         </div>
       ) : null}
+
+      {deleteTarget && (
+        <ConfirmActionDialog
+          title={t('deleteConfirmTitle')}
+          description={t('deleteConfirm')}
+          confirmLabel={t('deleteBtn')}
+          danger
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }

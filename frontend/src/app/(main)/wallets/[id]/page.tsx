@@ -11,6 +11,7 @@ import {
   approveWalletRelationship,
   rejectWalletRelationship,
   createWalletRelationship,
+  getEntityWallets,
   Wallet,
   GovernancePath,
   WalletRelationship,
@@ -141,6 +142,7 @@ export default function WalletDetailPage() {
   >([]);
   const [incomingRels, setIncomingRels] = useState<WalletRelationship[]>([]);
   const [outgoingRels, setOutgoingRels] = useState<WalletRelationship[]>([]);
+  const [entityWallets, setEntityWallets] = useState<Wallet[]>([]);
   const [walletRules, setWalletRules] = useState<Rule[]>([]);
   const [entitySubscriptions, setEntitySubscriptions] = useState<
     Subscription[]
@@ -196,13 +198,14 @@ export default function WalletDetailPage() {
         currentEntity?.myRole === "ADMIN" || currentEntity?.myRole === "FOUNDER";
       const canReadEntityDues =
         canReadEntitySubscriptions || currentEntity?.myRole === "TREASURER";
-      const [subscriptions, dues] = await Promise.all([
+      const [subscriptions, dues, otherWallets] = await Promise.all([
         getSubscriptions(
           canReadEntitySubscriptions ? { entityId: w.entityId } : {},
         ).catch(() => [] as Subscription[]),
         canReadEntityDues
           ? getEntityPaymentDues(w.entityId).catch(() => [] as PaymentDue[])
           : getMyPaymentDues().catch(() => [] as PaymentDue[]),
+        getEntityWallets(w.entityId).catch(() => [] as Wallet[]),
       ]);
       const decisionStats = Object.fromEntries(
         await Promise.all(
@@ -225,6 +228,7 @@ export default function WalletDetailPage() {
       setWalletRules(rules);
       setEntitySubscriptions(subscriptions);
       setEntityPaymentDues(dues);
+      setEntityWallets(otherWallets.filter((ow) => ow.id !== w.id));
     } catch (e) {
       console.error(e);
     } finally {
@@ -1002,15 +1006,23 @@ export default function WalletDetailPage() {
                 >
                   <h4 className={styles.relFormTitle}>{t("createRelTitle")}</h4>
                   <div className={styles.relFormGroup}>
-                    <input
-                      placeholder={t("targetWalletPlaceholder")}
+                    <select
                       required
                       value={newRel.targetWalletId}
                       onChange={(e) =>
                         setNewRel({ ...newRel, targetWalletId: e.target.value })
                       }
                       className={styles.relFormInput}
-                    />
+                      aria-label={t("targetWalletPlaceholder")}
+                      title={t("targetWalletPlaceholder")}
+                    >
+                      <option value="">{t("targetWalletPlaceholder")}</option>
+                      {entityWallets.map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name}
+                        </option>
+                      ))}
+                    </select>
                     <select
                       value={newRel.relationshipType}
                       onChange={(e) => {

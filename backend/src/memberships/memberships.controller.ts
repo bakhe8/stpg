@@ -7,12 +7,10 @@ import {
   Delete,
   Param,
   Body,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { MembershipsService } from './memberships.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
@@ -23,7 +21,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('memberships')
 @ApiBearerAuth('access-token')
 @Controller('memberships')
-@UseGuards(JwtGuard)
 export class MembershipsController {
   constructor(private readonly membershipsService: MembershipsService) {}
 

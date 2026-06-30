@@ -15,6 +15,7 @@ import {
   DecisionType,
   DisbursementRequestStatus,
   MemberRole,
+  SubscriptionState,
 } from '@prisma/client';
 import { buildPrivacyContext, canView } from '../common/privacy.helper';
 import { CreateDisbursementRequestDto } from './dto/create-disbursement-request.dto';
@@ -50,6 +51,22 @@ export class DisbursementRequestsService {
       },
     });
     if (!membership) throw new ForbiddenException('لست عضواً في هذا الكيان');
+
+    // BL-012 — يتطلب اشتراكاً نشطاً في هذا المسار (ACTIVE أو CONDITIONAL فقط)
+    // يمنع: SUPPORTER_ONLY / INTERESTED / SUSPENDED / EXITED
+    const activeSubscription = await this.prisma.subscription.findFirst({
+      where: {
+        membershipId: membership.id,
+        governancePathId: pathId,
+        state: { in: [SubscriptionState.ACTIVE, SubscriptionState.CONDITIONAL] },
+      },
+      select: { id: true },
+    });
+    if (!activeSubscription) {
+      throw new ForbiddenException(
+        'يتطلب تقديم طلب الصرف اشتراكاً نشطاً في هذا المسار',
+      );
+    }
 
     const spendingItem = await this.prisma.spendingItem.findUnique({
       where: { id: dto.spendingItemId },
@@ -115,6 +132,28 @@ export class DisbursementRequestsService {
         },
       },
     });
+
+    const managers = await this.prisma.membership.findMany({
+      where: {
+        entityId: path.wallet.entityId,
+        isActive: true,
+        role: { in: [MemberRole.FOUNDER, MemberRole.ADMIN, MemberRole.TREASURER] },
+        personId: { not: requesterId },
+      },
+      select: { personId: true },
+    });
+    if (managers.length > 0) {
+      await this.prisma.notification.createMany({
+        data: managers.map((m) => ({
+          personId: m.personId,
+          type: 'DISBURSEMENT_REQUESTED',
+          title: 'طلب صرف جديد',
+          body: `طلب صرف بمبلغ ${dto.amount} لـ${beneficiary.displayName} ينتظر المراجعة.`,
+          targetType: 'ENTITY',
+          targetId: path.wallet.entityId,
+        })),
+      });
+    }
 
     return request;
   }
@@ -245,6 +284,17 @@ export class DisbursementRequestsService {
       },
     });
 
+    await this.prisma.notification.create({
+      data: {
+        personId: req.requestedById,
+        type: 'DISBURSEMENT_APPROVED',
+        title: 'تم اعتماد طلب الصرف',
+        body: `اعتُمد طلب الصرف بمبلغ ${req.amount} وينتظر التنفيذ.`,
+        targetType: 'ENTITY',
+        targetId: req.governancePath.wallet.entityId,
+      },
+    });
+
     return updated;
   }
 
@@ -280,6 +330,17 @@ export class DisbursementRequestsService {
       },
     });
 
+    await this.prisma.notification.create({
+      data: {
+        personId: req.requestedById,
+        type: 'DISBURSEMENT_REJECTED',
+        title: 'تعذر اعتماد طلب الصرف',
+        body: dto.reviewerNotes ?? 'راجع إدارة الكيان لمعرفة سبب الرفض.',
+        targetType: 'ENTITY',
+        targetId: req.governancePath.wallet.entityId,
+      },
+    });
+
     return updated;
   }
 
@@ -311,6 +372,19 @@ export class DisbursementRequestsService {
         extra: { transactionId: req.transactionId },
       });
       throw new ConflictException('تم تنفيذ هذا الطلب مسبقاً');
+    }
+    if (req.reviewedById === adminId) {
+      const reason =
+        'لا يمكن للشخص ذاته اعتماد طلب الصرف وتنفيذه (مبدأ الفصل بين المهام)';
+      await this.auditDisbursementFailure({
+        entityId: req.governancePath.wallet.entityId,
+        targetId: req.id,
+        actorId: adminId,
+        operation: 'EXECUTE_DISBURSEMENT',
+        reason,
+        extra: { reviewedById: req.reviewedById },
+      });
+      throw new ForbiddenException(reason);
     }
 
     await this.ensureApprovedDisbursementDecision({
@@ -418,6 +492,20 @@ export class DisbursementRequestsService {
         },
       },
     });
+
+    const beneficiaryPersonId = req.beneficiary?.membership?.personId;
+    if (beneficiaryPersonId) {
+      await this.prisma.notification.create({
+        data: {
+          personId: beneficiaryPersonId,
+          type: 'DISBURSEMENT_EXECUTED',
+          title: 'تم تنفيذ الصرف',
+          body: `تم صرف مبلغ ${this.moneyToDisplay(req.amount)} لصالحك.`,
+          targetType: 'ENTITY',
+          targetId: req.governancePath.wallet.entityId,
+        },
+      });
+    }
 
     return updated;
   }
@@ -569,7 +657,13 @@ export class DisbursementRequestsService {
       where: { id },
       include: {
         beneficiary: {
-          select: { id: true, type: true, displayName: true, annualCap: true },
+          select: {
+            id: true,
+            type: true,
+            displayName: true,
+            annualCap: true,
+            membership: { select: { personId: true } },
+          },
         },
         governancePath: {
           select: {

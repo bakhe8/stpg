@@ -7,13 +7,11 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { EntitiesService } from './entities.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { CreateEntityDto } from './dto/create-entity.dto';
 import { UpdateEntityDto } from './dto/update-entity.dto';
@@ -34,7 +32,6 @@ import {
 @ApiTags('entities')
 @ApiBearerAuth('access-token')
 @Controller('entities')
-@UseGuards(JwtGuard)
 export class EntitiesController {
   constructor(private readonly entitiesService: EntitiesService) {}
 

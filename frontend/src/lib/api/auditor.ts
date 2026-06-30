@@ -41,6 +41,21 @@ export interface AuditorDispute {
   createdAt: string;
 }
 
+export interface AuditorException extends AuditorDecision {
+  description: string | null;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+}
+
+export interface AuditorConflict {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  description: string | null;
+  parties: string[];
+  createdAt: string;
+}
+
 export interface AuditorAuditLog {
   id: string;
   action: string;
@@ -90,11 +105,11 @@ export async function getAuditorDecisions(entityId: string): Promise<AuditorDeci
   return fetchApi(`/auditor/${entityId}/decisions`);
 }
 
-export async function getAuditorExceptions(entityId: string): Promise<AuditorDecision[]> {
+export async function getAuditorExceptions(entityId: string): Promise<AuditorException[]> {
   return fetchApi(`/auditor/${entityId}/exceptions`);
 }
 
-export async function getAuditorConflicts(entityId: string): Promise<AuditorDecision[]> {
+export async function getAuditorConflicts(entityId: string): Promise<AuditorConflict[]> {
   return fetchApi(`/auditor/${entityId}/conflicts`);
 }
 

@@ -50,7 +50,7 @@ export class AuditorService {
 
   async getExceptions(entityId: string, requesterId: string) {
     await this.requireAuditor(entityId, requesterId);
-    return this.prisma.decision.findMany({
+    const decisions = await this.prisma.decision.findMany({
       where: {
         OR: [
           { subjectType: 'ENTITY', subjectId: entityId },
@@ -61,18 +61,54 @@ export class AuditorService {
       },
       orderBy: { id: 'desc' },
     });
+    return decisions.map((d) => ({
+      ...d,
+      severity: this.exceptionSeverity(d),
+    }));
+  }
+
+  private exceptionSeverity(decision: {
+    decisionType: string;
+    voteType: string;
+  }): 'LOW' | 'MEDIUM' | 'HIGH' {
+    if (decision.voteType === 'EMERGENCY_THEN_REVIEW') return 'HIGH';
+    if (
+      ['DISBURSE_FUNDS', 'EXPEL_MEMBER', 'FREEZE_WALLET', 'CLOSE_WALLET'].includes(
+        decision.decisionType,
+      )
+    ) {
+      return 'HIGH';
+    }
+    if (
+      ['TRANSFER_BALANCE', 'MODIFY_GOVERNANCE', 'MERGE_PATHS'].includes(
+        decision.decisionType,
+      )
+    ) {
+      return 'MEDIUM';
+    }
+    return 'LOW';
   }
 
   async getConflicts(entityId: string, requesterId: string) {
     await this.requireAuditor(entityId, requesterId);
-    return this.prisma.dispute.findMany({
+    const disputes = await this.prisma.dispute.findMany({
       where: {
         entityId,
         type: DisputeType.MEMBER_CONFLICT,
         status: DisputeStatus.OPEN,
       },
+      include: {
+        initiator: { select: { id: true, name: true } },
+        respondent: { select: { id: true, name: true } },
+      },
       orderBy: { id: 'desc' },
     });
+    return disputes.map((dispute) => ({
+      ...dispute,
+      parties: [dispute.initiator?.name, dispute.respondent?.name].filter(
+        (name): name is string => Boolean(name),
+      ),
+    }));
   }
 
   async getAppeals(entityId: string, requesterId: string) {

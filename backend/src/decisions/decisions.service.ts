@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RulesService } from '../rules/rules.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { HouseholdsService } from '../households/households.service';
+import { LedgerService } from '../ledger/ledger.service';
 import {
   AuditAction,
   DecisionExecutionStatus,
@@ -33,6 +34,7 @@ export class DecisionsService {
     private readonly rulesService: RulesService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly householdsService: HouseholdsService,
+    private readonly ledgerService: LedgerService,
   ) {}
 
   async createDecision(creatorId: string, dto: CreateDecisionDto) {
@@ -42,7 +44,7 @@ export class DecisionsService {
 
     const context = await this.resolveDecisionContext(dto);
     const entityId = context.entityId;
-    await this.requireAdminOrTreasurer(entityId, creatorId);
+    await this.requireAdmin(entityId, creatorId);
 
     const voteType =
       context.pathPolicy?.voteType ??
@@ -313,7 +315,19 @@ export class DecisionsService {
       throw new BadRequestException('انتهت مدة التصويت');
     }
 
+    // BL-011 — يجب تأكيد رقم الجوال قبل التصويت
+    const voter = await this.prisma.person.findUnique({
+      where: { id: voterId },
+      select: { isVerified: true },
+    });
+    if (!voter?.isVerified) {
+      throw new ForbiddenException(
+        'يجب تأكيد رقم جوالك قبل التصويت — اذهب لإعدادات الملف الشخصي',
+      );
+    }
+
     const entityId = await this.resolveDecisionEntityId(decision);
+    await this.ensureVoterIsNotDecisionSubject(decision, entityId, voterId);
 
     // التحقق من أهلية الناخب
     const eligible = await this.isEligibleVoter(decision, entityId, voterId);
@@ -395,7 +409,7 @@ export class DecisionsService {
     }
 
     const entityId = await this.resolveDecisionEntityId(decision);
-    await this.requireAdminOrTreasurer(entityId, adminId);
+    await this.requireAdmin(entityId, adminId);
 
     const outcome = await this.computeResult(decision, entityId);
     const executionStatus = this.resolveExecutionStatusOnClosure(
@@ -789,6 +803,34 @@ export class DecisionsService {
     }
 
     return true;
+  }
+
+  private async ensureVoterIsNotDecisionSubject(
+    decision: {
+      decisionType: DecisionType;
+      subjectType: SubjectType;
+      subjectId: string;
+    },
+    entityId: string,
+    voterId: string,
+  ) {
+    if (
+      decision.decisionType !== DecisionType.EXPEL_MEMBER ||
+      decision.subjectType !== SubjectType.MEMBERSHIP
+    ) {
+      return;
+    }
+
+    const voterMembership = await this.prisma.membership.findFirst({
+      where: { entityId, personId: voterId, isActive: true },
+      select: { id: true },
+    });
+
+    if (voterMembership?.id === decision.subjectId) {
+      throw new ForbiddenException(
+        'لا يمكنك التصويت على قرار يمسّك مباشرة — رأيك مجروح',
+      );
+    }
   }
 
   private async isEligibleForScope(
@@ -1339,6 +1381,18 @@ export class DecisionsService {
     if (!m) throw new ForbiddenException('يجب أن تكون مديراً أو أمين صندوق');
   }
 
+  private async requireAdmin(entityId: string, personId: string) {
+    const m = await this.prisma.membership.findFirst({
+      where: {
+        entityId,
+        personId,
+        isActive: true,
+        role: { in: [MemberRole.ADMIN, MemberRole.FOUNDER] },
+      },
+    });
+    if (!m) throw new ForbiddenException('يجب أن تكون مديراً للكيان');
+  }
+
   private async requireMember(entityId: string, personId: string) {
     const m = await this.prisma.membership.findFirst({
       where: { entityId, personId, isActive: true },
@@ -1384,6 +1438,16 @@ export class DecisionsService {
             where: { id: decision.subjectId },
             data: { isActive: false },
           });
+          const entityId = await this.resolveDecisionEntityId(decision);
+          await this.prisma.auditLog.create({
+            data: {
+              action: AuditAction.EXPEL,
+              entityId,
+              targetType: 'memberships',
+              targetId: decision.subjectId,
+              newValue: { decisionId: decision.id },
+            },
+          });
           executionStatus = DecisionExecutionStatus.COMPLETED;
         } else {
           executionStatus = DecisionExecutionStatus.COMPLETED;
@@ -1394,6 +1458,42 @@ export class DecisionsService {
             where: { id: decision.subjectId },
             data: { isActive: false },
           });
+          executionStatus = DecisionExecutionStatus.COMPLETED;
+        } else {
+          executionStatus = DecisionExecutionStatus.COMPLETED;
+        }
+      } else if (decision.decisionType === DecisionType.MERGE_PATHS) {
+        if (
+          decision.subjectType === SubjectType.PATH &&
+          decision.governancePathId
+        ) {
+          const sourcePathId = decision.subjectId;
+          const targetPathId = decision.governancePathId;
+
+          await this.prisma.subscription.updateMany({
+            where: { governancePathId: sourcePathId },
+            data: { governancePathId: targetPathId },
+          });
+
+          const sourceAccount = await this.prisma.ledgerAccount.findUnique({
+            where: { governancePathId: sourcePathId },
+          });
+          if (sourceAccount && Number(sourceAccount.balance) > 0) {
+            await this.ledgerService.recordTransfer(decision.createdById, {
+              sourcePathId,
+              targetPathId,
+              amount: Number(sourceAccount.balance),
+              description: `دمج المسار ${sourcePathId} في ${targetPathId}`,
+              reference: `MERGE-${decision.id.slice(0, 8)}`,
+              decisionId: decision.id,
+            });
+          }
+
+          await this.prisma.governancePath.update({
+            where: { id: sourcePathId },
+            data: { isActive: false },
+          });
+
           executionStatus = DecisionExecutionStatus.COMPLETED;
         } else {
           executionStatus = DecisionExecutionStatus.COMPLETED;

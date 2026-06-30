@@ -10,8 +10,14 @@ describe('PaymentsService webhooks', () => {
       updateMany: jest.Mock;
     };
   };
-  let stripeProvider: { verifyWebhook: jest.Mock };
-  let moyasarProvider: { verifyWebhook: jest.Mock };
+  let stripeProvider: {
+    createPaymentIntent: jest.Mock;
+    verifyWebhook: jest.Mock;
+  };
+  let moyasarProvider: {
+    createPaymentIntent: jest.Mock;
+    verifyWebhook: jest.Mock;
+  };
   let service: PaymentsService;
 
   beforeEach(() => {
@@ -21,12 +27,18 @@ describe('PaymentsService webhooks', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
-    stripeProvider = { verifyWebhook: jest.fn() };
-    moyasarProvider = { verifyWebhook: jest.fn() };
+    stripeProvider = {
+      createPaymentIntent: jest.fn(),
+      verifyWebhook: jest.fn(),
+    };
+    moyasarProvider = {
+      createPaymentIntent: jest.fn(),
+      verifyWebhook: jest.fn(),
+    };
     service = new PaymentsService(
       prisma as never,
-      stripeProvider as IPaymentGateway,
-      moyasarProvider as IPaymentGateway,
+      stripeProvider as unknown as IPaymentGateway,
+      moyasarProvider as unknown as IPaymentGateway,
     );
   });
 
@@ -56,7 +68,7 @@ describe('PaymentsService webhooks', () => {
     expect(prisma.paymentRecord.updateMany).not.toHaveBeenCalled();
   });
 
-  it('moves a processing payment record to submitted on a matched success webhook', async () => {
+  it('moves a processing payment record to submitted on a matched success webhook (payment_intent.succeeded)', async () => {
     stripeProvider.verifyWebhook.mockResolvedValue({
       isValid: true,
       transactionId: 'pi_1',
@@ -107,5 +119,126 @@ describe('PaymentsService webhooks', () => {
     });
 
     expect(prisma.paymentRecord.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('moves a processing payment record to rejected on a failed webhook (payment_intent.payment_failed)', async () => {
+    stripeProvider.verifyWebhook.mockResolvedValue({
+      isValid: true,
+      transactionId: 'pi_1',
+      status: 'FAILED',
+      metadata: { paymentDueId: 'due-id' },
+    });
+    prisma.paymentRecord.findUnique.mockResolvedValue({
+      id: 'record-id',
+      amount: 100,
+      paymentDueId: 'due-id',
+      status: PaymentRecordStatus.PROCESSING,
+    });
+
+    await expect(
+      service.handleWebhook(GatewayProvider.STRIPE, '{}', 'signature'),
+    ).resolves.toEqual({ success: true, idempotent: false });
+
+    expect(prisma.paymentRecord.updateMany).toHaveBeenCalledWith({
+      where: { id: 'record-id', status: PaymentRecordStatus.PROCESSING },
+      data: {
+        status: PaymentRecordStatus.REJECTED,
+        reviewerNotes: 'Payment Failed at Gateway',
+      },
+    });
+  });
+
+  it('treats repeated failure webhooks for already-rejected records as idempotent (no double effect)', async () => {
+    stripeProvider.verifyWebhook.mockResolvedValue({
+      isValid: true,
+      transactionId: 'pi_1',
+      status: 'FAILED',
+      metadata: { paymentDueId: 'due-id' },
+    });
+    prisma.paymentRecord.findUnique.mockResolvedValue({
+      id: 'record-id',
+      amount: 100,
+      paymentDueId: 'due-id',
+      status: PaymentRecordStatus.REJECTED,
+    });
+
+    await expect(
+      service.handleWebhook(GatewayProvider.STRIPE, '{}', 'signature'),
+    ).resolves.toEqual({
+      success: true,
+      idempotent: true,
+      status: PaymentRecordStatus.REJECTED,
+    });
+
+    expect(prisma.paymentRecord.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unrecognized gateway transaction id', async () => {
+    stripeProvider.verifyWebhook.mockResolvedValue({
+      isValid: true,
+      transactionId: 'pi_unknown',
+      status: 'SUCCESS',
+    });
+    prisma.paymentRecord.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.handleWebhook(GatewayProvider.STRIPE, '{}', 'signature'),
+    ).resolves.toEqual({ success: false, reason: 'Record not found' });
+
+    expect(prisma.paymentRecord.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('routes Moyasar webhooks through the Moyasar provider and applies the same success transition', async () => {
+    moyasarProvider.verifyWebhook.mockResolvedValue({
+      isValid: true,
+      transactionId: 'moyasar_ch_1',
+      status: 'SUCCESS',
+      metadata: { paymentDueId: 'due-id' },
+      amountMinor: 10000,
+      currency: 'SAR',
+    });
+    prisma.paymentRecord.findUnique.mockResolvedValue({
+      id: 'record-id',
+      amount: 100,
+      paymentDueId: 'due-id',
+      status: PaymentRecordStatus.PROCESSING,
+    });
+
+    await expect(
+      service.handleWebhook(GatewayProvider.MOYASAR, '{}', 'signature'),
+    ).resolves.toEqual({ success: true, idempotent: false });
+
+    expect(stripeProvider.verifyWebhook).not.toHaveBeenCalled();
+    expect(prisma.paymentRecord.updateMany).toHaveBeenCalledWith({
+      where: { id: 'record-id', status: PaymentRecordStatus.PROCESSING },
+      data: { status: PaymentRecordStatus.SUBMITTED },
+    });
+  });
+
+  it('moves a processing Moyasar payment record to rejected on a failed webhook', async () => {
+    moyasarProvider.verifyWebhook.mockResolvedValue({
+      isValid: true,
+      transactionId: 'moyasar_ch_2',
+      status: 'FAILED',
+      metadata: { paymentDueId: 'due-id' },
+    });
+    prisma.paymentRecord.findUnique.mockResolvedValue({
+      id: 'record-id',
+      amount: 100,
+      paymentDueId: 'due-id',
+      status: PaymentRecordStatus.PROCESSING,
+    });
+
+    await expect(
+      service.handleWebhook(GatewayProvider.MOYASAR, '{}', 'signature'),
+    ).resolves.toEqual({ success: true, idempotent: false });
+
+    expect(prisma.paymentRecord.updateMany).toHaveBeenCalledWith({
+      where: { id: 'record-id', status: PaymentRecordStatus.PROCESSING },
+      data: {
+        status: PaymentRecordStatus.REJECTED,
+        reviewerNotes: 'Payment Failed at Gateway',
+      },
+    });
   });
 });

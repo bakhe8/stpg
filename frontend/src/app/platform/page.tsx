@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   activateEntity,
   getAppeals,
@@ -16,30 +17,51 @@ import {
 } from "../../lib/api/platform";
 import styles from "./dashboard.module.css";
 
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: "نشط",
-  SUSPENDED: "معلّق",
-  READ_ONLY: "قراءة فقط",
-  PENDING_REVIEW: "قيد المراجعة",
-};
+type PlatformT = ReturnType<typeof useTranslations<"platform">>;
 
-const ENTITY_TYPE_LABELS: Record<string, string> = {
-  FAMILY: "عائلة",
-  TRIBE: "قبيلة",
-  BUILDING: "عمارة",
-  NEIGHBORHOOD: "حي",
-  COMMUNITY: "مجتمع",
-  CAMPAIGN: "حملة",
-};
+function statusLabel(t: PlatformT, status: string) {
+  switch (status) {
+    case "ACTIVE":
+      return t("statusActive");
+    case "SUSPENDED":
+      return t("statusSuspended");
+    case "READ_ONLY":
+      return t("statusReadOnly");
+    case "PENDING_REVIEW":
+      return t("statusPendingReview");
+    default:
+      return status;
+  }
+}
 
-function actionPriorityLabel(priority: PlatformSurfaceAction["priority"]) {
-  if (priority === "critical") return "حرج";
-  if (priority === "urgent") return "مهم الآن";
-  if (priority === "normal") return "مطلوب";
-  return "للمتابعة";
+function entityTypeLabel(t: PlatformT, type: string) {
+  switch (type) {
+    case "FAMILY":
+      return t("typeFamily");
+    case "TRIBE":
+      return t("typeTribe");
+    case "BUILDING":
+      return t("typeBuilding");
+    case "NEIGHBORHOOD":
+      return t("typeNeighborhood");
+    case "COMMUNITY":
+      return t("typeCommunity");
+    case "CAMPAIGN":
+      return t("typeCampaign");
+    default:
+      return type;
+  }
+}
+
+function actionPriorityLabel(t: PlatformT, priority: PlatformSurfaceAction["priority"]) {
+  if (priority === "critical") return t("priorityCritical");
+  if (priority === "urgent") return t("priorityUrgent");
+  if (priority === "normal") return t("priorityNormal");
+  return t("priorityLow");
 }
 
 export default function PlatformDashboardPage() {
+  const t = useTranslations("platform");
   const router = useRouter();
   const storedAccount = getPlatformAccount();
 
@@ -82,12 +104,12 @@ export default function PlatformDashboardPage() {
         setPendingAppeals(0);
       }
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "تعذر تحميل سطح المنصة");
+      setMessage(err instanceof Error ? err.message : t("loadFailedTitle"));
       void router.push("/platform/login");
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, router]);
+  }, [statusFilter, router, t]);
 
   useEffect(() => {
     const initialStatus = new URLSearchParams(window.location.search).get("status");
@@ -131,14 +153,14 @@ export default function PlatformDashboardPage() {
   }
 
   if (loading && !surface) {
-    return <p className={styles.loadingText}>جاري تحميل سطح المنصة...</p>;
+    return <p className={styles.loadingText}>{t("loading")}</p>;
   }
 
   if (!surface) {
     return (
       <div className={styles.emptySurface}>
-        <strong>تعذر تحميل سطح المنصة</strong>
-        <p>{message ?? "سجل الدخول من جديد."}</p>
+        <strong>{t("loadFailedTitle")}</strong>
+        <p>{message ?? t("loadFailedDefault")}</p>
       </div>
     );
   }
@@ -161,7 +183,7 @@ export default function PlatformDashboardPage() {
         </div>
         {pendingAppeals > 0 ? (
           <Link href="/platform/appeals" className={styles.heroLink}>
-            {pendingAppeals.toLocaleString("ar-SA")} اعتراض معلّق
+            {pendingAppeals.toLocaleString("ar-SA")} {t("pendingAppeal")}
           </Link>
         ) : null}
       </section>
@@ -184,8 +206,8 @@ export default function PlatformDashboardPage() {
       <section className={styles.surfaceSection}>
         <div className={styles.sectionHeader}>
           <div>
-            <h2>المطلوب من حساب المنصة الآن</h2>
-            <p>أوامر تشغيل محددة بدل تصفح كل الصناديق يدويًا.</p>
+            <h2>{t("requiredActionsTitle")}</h2>
+            <p>{t("requiredActionsDesc")}</p>
           </div>
           <span>{surface.requiredActions.length.toLocaleString("ar-SA")}</span>
         </div>
@@ -197,7 +219,7 @@ export default function PlatformDashboardPage() {
                 styles[`actionCard_${action.priority}`] ?? ""
               }`}
             >
-              <span>{actionPriorityLabel(action.priority)}</span>
+              <span>{actionPriorityLabel(t, action.priority)}</span>
               <h3>{action.title}</h3>
               <p>{action.body}</p>
               {action.scopeText ? <em>{action.scopeText}</em> : null}
@@ -216,8 +238,8 @@ export default function PlatformDashboardPage() {
         <section className={styles.surfaceSection}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2>جلسات الدعم النشطة</h2>
-              <p>كل جلسة يجب أن تبقى داخل سببها ونطاقها ووقتها.</p>
+              <h2>{t("activeSupportSessionsTitle")}</h2>
+              <p>{t("activeSupportSessionsDesc")}</p>
             </div>
           </div>
           <div className={styles.supportSessionList}>
@@ -225,7 +247,7 @@ export default function PlatformDashboardPage() {
               <article key={session.id} className={styles.supportSessionCard}>
                 <div>
                   <span>{session.statusLabel}</span>
-                  <h3>{session.entityName ?? "نطاق دعم غير مفتوح بالأسماء"}</h3>
+                  <h3>{session.entityName ?? t("unscopedSupportSession")}</h3>
                   {session.operatorName ? (
                     <p>
                       {session.operatorName} — {session.operatorRoleLabel}
@@ -233,7 +255,7 @@ export default function PlatformDashboardPage() {
                   ) : null}
                 </div>
                 <p>{session.scope}</p>
-                <small>ينتهي: {formatDate(session.expiresAt)}</small>
+                <small>{t("expiresAt", { date: formatDate(session.expiresAt) })}</small>
                 <em>{session.whyShown}</em>
                 {session.cta ? (
                   <Link href={session.cta.href} className={styles.inlineLink}>
@@ -249,7 +271,7 @@ export default function PlatformDashboardPage() {
       <section className={styles.surfaceTwoColumn}>
         <div className={styles.surfacePanel}>
           <div className={styles.sectionHeader}>
-            <h2>مؤشرات مجمعة</h2>
+            <h2>{t("aggregateInsightsTitle")}</h2>
           </div>
           <div className={styles.insightList}>
             {surface.aggregateInsights.map((insight) => (
@@ -271,7 +293,7 @@ export default function PlatformDashboardPage() {
 
         <div className={styles.surfacePanel}>
           <div className={styles.sectionHeader}>
-            <h2>ما يسمح به هذا الدور</h2>
+            <h2>{t("capabilitiesTitle")}</h2>
           </div>
           <div className={styles.capabilityList}>
             {surface.capabilities.map((capability) => (
@@ -283,7 +305,7 @@ export default function PlatformDashboardPage() {
                     : styles.capabilityBlocked
                 }
               >
-                <span>{capability.isAllowed ? "مسموح" : "محجوب"}</span>
+                <span>{capability.isAllowed ? t("allowed") : t("blocked")}</span>
                 <strong>{capability.label}</strong>
                 <p>{capability.reason}</p>
               </article>
@@ -296,8 +318,8 @@ export default function PlatformDashboardPage() {
         <section className={styles.surfaceSection}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2>حالات منصة تحتاج مراجعة</h2>
-              <p>هذه ليست قائمة كل الصناديق؛ فقط الحالات التي تحتاج قرارًا.</p>
+              <h2>{t("entityReviewsTitle")}</h2>
+              <p>{t("entityReviewsDesc")}</p>
             </div>
           </div>
           <div className={styles.reviewList}>
@@ -310,7 +332,7 @@ export default function PlatformDashboardPage() {
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
                 <em>{item.reason}</em>
-                <small>{item.memberCount.toLocaleString("ar-SA")} عضو مرتبط</small>
+                <small>{t("memberCount", { count: item.memberCount.toLocaleString("ar-SA") })}</small>
                 {item.cta ? (
                   <Link href={item.cta.href} className={styles.inlineLink}>
                     {item.cta.label}
@@ -326,8 +348,8 @@ export default function PlatformDashboardPage() {
         <section className={styles.surfaceSection}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2>وصول منصة يحتاج انتباهًا</h2>
-              <p>يظهر الوصول المفتوح أو الطارئ حتى لا يبقى خارج المتابعة.</p>
+              <h2>{t("accessEventsTitle")}</h2>
+              <p>{t("accessEventsDesc")}</p>
             </div>
           </div>
           <div className={styles.accessEventList}>
@@ -338,9 +360,9 @@ export default function PlatformDashboardPage() {
                 <p>{event.body}</p>
                 <em>{event.reason}</em>
                 <small>
-                  {event.operatorName} — {formatDate(event.startedAt)}
+                  {t("operatorAt", { operator: event.operatorName, date: formatDate(event.startedAt) })}
                 </small>
-                {event.needsReview ? <strong>يحتاج مراجعة داخلية</strong> : null}
+                {event.needsReview ? <strong>{t("needsReview")}</strong> : null}
               </article>
             ))}
           </div>
@@ -349,11 +371,8 @@ export default function PlatformDashboardPage() {
 
       {canManageEntities ? (
         <details className={styles.legacyDetails}>
-          <summary>جدول الكيانات التفصيلي عند الحاجة</summary>
-          <p>
-            هذا الجدول لم يعد نقطة البداية. استخدمه بعد أن يحدد السطح ما يحتاج
-            تدخلك.
-          </p>
+          <summary>{t("legacyTableSummary")}</summary>
+          <p>{t("legacyTableHint")}</p>
 
           <div className={styles.filterRow}>
             <select
@@ -361,44 +380,44 @@ export default function PlatformDashboardPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">كل الحالات</option>
-              <option value="ACTIVE">نشط</option>
-              <option value="SUSPENDED">معلّق</option>
-              <option value="READ_ONLY">قراءة فقط</option>
-              <option value="PENDING_REVIEW">قيد المراجعة</option>
+              <option value="">{t("filterAllStatuses")}</option>
+              <option value="ACTIVE">{t("statusActive")}</option>
+              <option value="SUSPENDED">{t("statusSuspended")}</option>
+              <option value="READ_ONLY">{t("statusReadOnly")}</option>
+              <option value="PENDING_REVIEW">{t("statusPendingReview")}</option>
             </select>
             <span className={styles.legacyCount}>
-              {total.toLocaleString("ar-SA")} نتيجة
+              {t("resultsCount", { count: total.toLocaleString("ar-SA") })}
             </span>
           </div>
 
           {loading ? (
-            <p className={styles.loadingText}>جاري التحميل...</p>
+            <p className={styles.loadingText}>{t("loadingShort")}</p>
           ) : (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>اسم الكيان</th>
-                    <th>النوع</th>
-                    <th>الأعضاء</th>
-                    <th>الحالة</th>
-                    <th>تاريخ الإنشاء</th>
-                    <th>إجراء</th>
+                    <th>{t("colEntityName")}</th>
+                    <th>{t("colType")}</th>
+                    <th>{t("colMembers")}</th>
+                    <th>{t("colStatus")}</th>
+                    <th>{t("colCreatedAt")}</th>
+                    <th>{t("colAction")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {entities.map((entity) => (
                     <tr key={entity.id}>
                       <td>{entity.name}</td>
-                      <td>{ENTITY_TYPE_LABELS[entity.type] ?? entity.type}</td>
+                      <td>{entityTypeLabel(t, entity.type)}</td>
                       <td>{entity._count.memberships}</td>
                       <td>
                         <span
                           className={styles.statusBadge}
                           data-status={entity.platformStatus}
                         >
-                          {STATUS_LABELS[entity.platformStatus]}
+                          {statusLabel(t, entity.platformStatus)}
                         </span>
                       </td>
                       <td>
@@ -412,7 +431,7 @@ export default function PlatformDashboardPage() {
                             disabled={actionLoading === entity.id}
                             onClick={() => void handleSuspend(entity)}
                           >
-                            تعليق
+                            {t("suspend")}
                           </button>
                         ) : (
                           <button
@@ -420,7 +439,7 @@ export default function PlatformDashboardPage() {
                             disabled={actionLoading === entity.id}
                             onClick={() => void handleActivate(entity)}
                           >
-                            تفعيل
+                            {t("activate")}
                           </button>
                         )}
                       </td>
@@ -436,26 +455,26 @@ export default function PlatformDashboardPage() {
       {suspendDialog && (
         <div className={styles.modalOverlay} onClick={() => setSuspendDialog(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>تعليق كيان: {suspendDialog.entity.name}</h3>
-            <p className={styles.modalHint}>يجب إدخال سبب واضح (5 أحرف على الأقل) يُحفظ في سجل التدقيق.</p>
+            <h3 className={styles.modalTitle}>{t("suspendEntityTitle", { name: suspendDialog.entity.name })}</h3>
+            <p className={styles.modalHint}>{t("suspendHint")}</p>
             <textarea
               className={styles.modalTextarea}
               value={suspendDialog.reason}
               onChange={(e) => setSuspendDialog((d) => d && { ...d, reason: e.target.value })}
-              placeholder="سبب التعليق..."
+              placeholder={t("suspendReasonPlaceholder")}
               rows={3}
               autoFocus
             />
             <div className={styles.modalActions}>
               <button className={styles.modalCancelBtn} onClick={() => setSuspendDialog(null)}>
-                إلغاء
+                {t("cancel")}
               </button>
               <button
                 className={styles.modalDangerBtn}
                 disabled={suspendDialog.reason.trim().length < 5 || !!actionLoading}
                 onClick={() => void confirmSuspend()}
               >
-                {actionLoading ? "جاري التعليق..." : "تعليق الكيان"}
+                {actionLoading ? t("suspending") : t("suspendEntityBtn")}
               </button>
             </div>
           </div>
@@ -465,21 +484,23 @@ export default function PlatformDashboardPage() {
       {activateTarget && (
         <div className={styles.modalOverlay} onClick={() => setActivateTarget(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>تفعيل الكيان</h3>
+            <h3 className={styles.modalTitle}>{t("activateEntityTitle")}</h3>
             <p className={styles.modalBody}>
-              هل تريد تفعيل <strong>{activateTarget.name}</strong> من جديد؟
-              سيُسمح للأعضاء بالوصول فور التفعيل.
+              {t.rich("activateConfirmBody", {
+                name: activateTarget.name,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
             <div className={styles.modalActions}>
               <button className={styles.modalCancelBtn} onClick={() => setActivateTarget(null)}>
-                إلغاء
+                {t("cancel")}
               </button>
               <button
                 className={styles.modalSafeBtn}
                 disabled={!!actionLoading}
                 onClick={() => void confirmActivate()}
               >
-                {actionLoading ? "جاري التفعيل..." : "تفعيل الكيان"}
+                {actionLoading ? t("activating") : t("activateEntityBtn")}
               </button>
             </div>
           </div>

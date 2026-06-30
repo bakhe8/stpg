@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  AuditAction,
   EntityPlatformStatus,
   PlatformRole,
   SupportSessionStatus,
@@ -82,6 +83,7 @@ export class PlatformEntitiesService {
     entityId: string,
     reason: string,
     statusType: EntityPlatformStatus,
+    operatorId: string,
   ) {
     if (statusType === EntityPlatformStatus.ACTIVE) {
       throw new BadRequestException(
@@ -101,6 +103,16 @@ export class PlatformEntitiesService {
         platformStatus: statusType,
         suspendedAt: new Date(),
         suspendedReason: reason,
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        action: AuditAction.SUSPEND,
+        entityId,
+        targetType: 'entities',
+        targetId: entityId,
+        newValue: { statusType, reason, platformOperatorId: operatorId },
       },
     });
 
@@ -126,14 +138,14 @@ export class PlatformEntitiesService {
     return updated;
   }
 
-  async activate(entityId: string) {
+  async activate(entityId: string, operatorId: string) {
     const entity = await this.prisma.entity.findUnique({
       where: { id: entityId },
       select: { id: true },
     });
     if (!entity) throw new NotFoundException('الكيان غير موجود');
 
-    return this.prisma.entity.update({
+    const updated = await this.prisma.entity.update({
       where: { id: entityId },
       data: {
         platformStatus: EntityPlatformStatus.ACTIVE,
@@ -141,6 +153,18 @@ export class PlatformEntitiesService {
         suspendedReason: null,
       },
     });
+
+    await this.prisma.auditLog.create({
+      data: {
+        action: AuditAction.REINSTATE,
+        entityId,
+        targetType: 'entities',
+        targetId: entityId,
+        newValue: { platformOperatorId: operatorId },
+      },
+    });
+
+    return updated;
   }
 
   async getPlatformAccessLogs(entityId: string) {

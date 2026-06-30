@@ -8,19 +8,16 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { EntityRelationshipsService } from './entity-relationships.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { CreateEntityRelationshipDto } from './dto/create-entity-relationship.dto';
 import { UpdateEntityRelationshipDto } from './dto/update-entity-relationship.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('entity-relationships')
 @ApiBearerAuth('access-token')
 @Controller('entity-relationships')

@@ -87,6 +87,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-too-in-production}
       SMS_PROVIDER: mock
+      ENABLE_DEV_LOGIN: ${ENABLE_DEV_LOGIN:-true}
       ENABLE_QUEUES: "true"
       REDIS_HOST: redis
       REDIS_PORT: 6379

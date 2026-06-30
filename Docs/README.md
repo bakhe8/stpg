@@ -3,6 +3,10 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
+**الحالة الحالية:** الإصدار التشغيلي `2.1` بتاريخ 2026-06-30.  
+مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
+سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
 ---
 
 ## هيكل التوثيق
@@ -72,10 +76,19 @@
 |---|---|
 | [Deployment_Decisions.md](08_Production_Readiness/Deployment_Decisions.md) | قرار الاستضافة والتشغيل والنسخ الاحتياطي للإنتاج |
 | [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md) | تقرير تنفيذ تدقيق منطق العمل — النسخة الأولى |
-| [**AUDIT_REPORT_v2.md ⭐**](08_Production_Readiness/AUDIT_REPORT_v2.md) | **تقرير التدقيق المحدَّث (2026-06-29):** ما تم إصلاحه ✅ وما يمنع الإطلاق ❌ ومشاكل جديدة 🆕 |
-| [**BACKLOG.md ⭐**](08_Production_Readiness/BACKLOG.md) | **Backlog التنفيذي الكامل:** 42 مهمة بمعايير قبول قابلة للاختبار — نقطة البداية لكل مطوّر |
+| [AUDIT_REPORT_v2.md](08_Production_Readiness/AUDIT_REPORT_v2.md) | تقرير تدقيق تاريخي بتاريخ 2026-06-29؛ superseded عند التعارض |
+| [**BACKLOG.md ⭐**](08_Production_Readiness/BACKLOG.md) | **مرجع الإغلاق الحالي:** 42 مهمة مغلقة كـ `Fixed / Verified` أو `Verified` |
 
 ---
+
+### 🧭 [09_Improvement](09_Improvement/) — تحسين تجربة الصندوق
+| الوثيقة | الوصف |
+|---|---|
+| [00_README.md](09_Improvement/00_README.md) | فهرس حالة 09 وترتيب القراءة والتنفيذ |
+| [01_FUND_EXPERIENCE_TRANSITION_PLAN.md](09_Improvement/01_FUND_EXPERIENCE_TRANSITION_PLAN.md) | الخطة الرئيسية لتحويل واجهة المستخدم إلى صندوق / حملة |
+| [02_CAPABILITY_PRESERVATION_AUDIT.md](09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md) | جرد القدرات التي يجب حفظها بعد التبسيط |
+| [03_PREFLIGHT_GAPS_AND_COMPATIBILITY_AUDIT.md](09_Improvement/03_PREFLIGHT_GAPS_AND_COMPATIBILITY_AUDIT.md) | فجوات ما قبل التنفيذ ومخاطر التوافق |
+| [04_PHASE_A_PREFLIGHT_BACKLOG.md](09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md) | أول backlog تنفيذي بعد إغلاق 08 |
 
 ---
 
@@ -84,8 +97,10 @@
 | الملف | الوصف |
 |---|---|
 | [**../CONTRIBUTING.md ⭐**](../CONTRIBUTING.md) | **دليل المطوّر:** إعداد البيئة + هيكل المشروع + كيف تختار مهمتك |
-| [08_Production_Readiness/AUDIT_REPORT_v2.md](08_Production_Readiness/AUDIT_REPORT_v2.md) | حالة المشروع: ما يعمل وما لا يعمل |
-| [08_Production_Readiness/BACKLOG.md](08_Production_Readiness/BACKLOG.md) | 42 مهمة جاهزة للتنفيذ بترتيب الأولوية |
+| [REPOSITORY_STATE.md](REPOSITORY_STATE.md) | الحالة التشغيلية الحالية ونقطة البداية قبل 09 |
+| [RELEASE_NOTES.md](RELEASE_NOTES.md) | سجل الإصدارات التشغيلية للمستودع |
+| [08_Production_Readiness/BACKLOG.md](08_Production_Readiness/BACKLOG.md) | مرجع إغلاق 08 |
+| [09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md](09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md) | أول backlog مفتوح بعد 08 |
 
 ---
 
@@ -105,18 +120,18 @@
 
 ---
 
-## حالة التنفيذ الحالية (27 يونيو 2026)
+## حالة التنفيذ الحالية (30 يونيو 2026)
 
 | المكوّن | الحالة |
 |---|---|
-| Backend | Build + lint + unit/security tests ناجحة |
-| Frontend | Build + lint ناجحان |
-| Prisma Schema + Migrations | محدثة، مع migration لتشديد RLS |
-| Docker Images | تم بناؤها وتشغيل smoke test محلي |
-| Security Regression Tests | تغطي `/transfers`، support، ledger، balance transfer، OAuth، payments |
-| Production Readiness | كود المخاطر مغلق؛ يلزم أسرار production واختبارات provider live قبل الإطلاق |
+| Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
+| Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
+| Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
+| Improvement 09 | موثق وجاهز للبدء من Phase A |
+| أول عمل مفتوح | `09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md` |
+| قاعدة التنفيذ | لا نبني تجربة الصندوق الجديدة قبل إغلاق Phase A |
 
-> للتفصيل الحالي: [BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md](08_Production_Readiness/BUSINESS_LOGIC_AUDIT_ACTION_PLAN.md)
+> للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
 
 ---
 

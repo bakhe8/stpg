@@ -8,13 +8,11 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { SubscribeDto } from './dto/subscribe.dto';
 import type { Person } from '@prisma/client';
@@ -33,7 +31,6 @@ import {
 @ApiTags('subscriptions')
 @ApiBearerAuth('access-token')
 @Controller('subscriptions')
-@UseGuards(JwtGuard)
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 

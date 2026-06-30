@@ -294,6 +294,29 @@
 
 .roleSelect:focus { border-color: var(--accent-primary); }
 
+/* ── Filter Bar ── */
+.filterBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 220px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.searchInput:focus { border-color: var(--accent-primary); }
+
 /* ── Reject Inline ── */
 .rejectInline {
   display: flex;

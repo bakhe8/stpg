@@ -1,0 +1,27 @@
+# Release Notes - CollectiveTrustOS
+
+## 2.1 - 2026-06-30
+
+**النوع:** Repository state / documentation baseline  
+**الحالة:** جاهز لبدء `Docs/09_Improvement` من Phase A
+
+### ما تغير
+
+- تثبيت حالة المستودع الحالية في `Docs/REPOSITORY_STATE.md`.
+- تحديث `Docs/README.md` ليعرض الإصدار التشغيلي `2.1`.
+- تحديث `Docs/08_Production_Readiness/BACKLOG.md` من `2.0` إلى `2.1` كمرجع إغلاق 08.
+- تعليم `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` كوثيقة تاريخية superseded عند التعارض.
+- ترتيب `Docs/09_Improvement` كحزمة تنفيذية تبدأ من `00_README.md` وتنتهي بـ Phase A backlog.
+
+### المعنى العملي
+
+- Production readiness 08 مغلق من ناحية backlog.
+- `AUDIT_REPORT_v2.md` لا يستخدم كحالة حالية للمشروع.
+- أول عمل مفتوح بعد 08 هو `Docs/09_Improvement/04_PHASE_A_PREFLIGHT_BACKLOG.md`.
+- تنفيذ 09 لم يبدأ بعد.
+- لا توجد هجرة schema أو تعديل runtime ضمن هذا الإصدار؛ هذا إصدار تثبيت حالة قبل التنفيذ.
+
+### ملاحظات
+
+لم يتم رفع نسخ `backend/package.json` أو `frontend/package.json` في هذا الإصدار، لأن المشروع لا يملك حتى الآن سياسة إصدار منتج موحدة في الجذر. الإصدار `2.1` هنا هو إصدار تشغيلي لتوثيق حالة المستودع.
+

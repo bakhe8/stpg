@@ -132,6 +132,7 @@ function AdvancedTool({ tool }: { tool: AdvancedToolLink }) {
 }
 
 function ContextSummaryCard({ item }: { item: ContextSurfaceSummary }) {
+  const t = useTranslations("dashboard");
   return (
     <article className={styles.surfaceContextCard}>
       <div className={styles.surfaceContextCardHeader}>
@@ -143,16 +144,16 @@ function ContextSummaryCard({ item }: { item: ContextSurfaceSummary }) {
       </div>
       <div className={styles.surfaceContextStats}>
         <div>
-          <span>المال</span>
+          <span>{t("surfaceMoney")}</span>
           <strong>{item.moneyText}</strong>
         </div>
         <div>
-          <span>الاستفادة</span>
+          <span>{t("surfaceBenefit")}</span>
           <strong>{item.benefitText}</strong>
         </div>
         <div>
-          <span>ما يهمك</span>
-          <strong>{item.attentionText ?? "لا يوجد تنبيه"}</strong>
+          <span>{t("surfaceAttention")}</span>
+          <strong>{item.attentionText ?? t("surfaceNoAlert")}</strong>
         </div>
       </div>
     </article>
@@ -164,6 +165,7 @@ function FinanceSummaryPanel({
 }: {
   summary: WorkSurface["financeSummary"];
 }) {
+  const t = useTranslations("dashboard");
   const metrics = [
     {
       label: "دفعات تنتظر المطابقة",
@@ -196,7 +198,7 @@ function FinanceSummaryPanel({
     <section className={styles.surfaceFinancePanel}>
       <div className={styles.surfaceSectionHeader}>
         <div>
-          <h2>المال الذي يحتاجك الآن</h2>
+          <h2>{t("financeSectionTitle")}</h2>
           <p>مطابقة وتنفيذ وتفسير، بدون فتح الدفتر الخام.</p>
         </div>
         <span className={styles.surfaceCount}>
@@ -668,6 +670,7 @@ function SharedBenefitSummaryPanel({
 
 export default function DashboardPage() {
   const tCommon = useTranslations("common");
+  const t = useTranslations("dashboard");
   const [surface, setSurface] = useState<WorkSurface | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -734,7 +737,7 @@ export default function DashboardPage() {
       >
         <div>
           <span className={styles.surfaceKicker}>
-            مرحباً {surface.person.displayName}
+            {t("welcomeName", { name: surface.person.displayName })}
           </span>
           <h1>{surface.primaryMessage.title}</h1>
           {surface.primaryMessage.body ? (
@@ -824,7 +827,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className={styles.surfaceDone}>
-            لا يوجد إجراء مطلوب منك الآن.
+            {t("requiredActionsNone")}
           </div>
         )}
       </section>

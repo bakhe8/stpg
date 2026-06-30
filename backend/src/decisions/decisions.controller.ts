@@ -7,10 +7,8 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { DecisionsService } from './decisions.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { CreateDecisionDto } from './dto/create-decision.dto';
@@ -22,7 +20,6 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('decisions')
 @ApiBearerAuth('access-token')
 @Controller('decisions')
@@ -142,6 +139,19 @@ export class DecisionsController {
   @ApiResponse({ status: 404, description: 'القرار غير موجود' })
   @Post(':id/retry-execution')
   retryExecution(
+    @CurrentUser() user: Person,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.decisionsService.retryExecution(id, user.id);
+  }
+
+  @ApiOperation({ summary: 'تنفيذ أثر قرار معتمد أو إعادة محاولة التنفيذ' })
+  @ApiResponse({ status: 201, description: 'تم التنفيذ أو إعادة المحاولة' })
+  @ApiResponse({ status: 401, description: 'غير مصادق' })
+  @ApiResponse({ status: 403, description: 'غير مصرح' })
+  @ApiResponse({ status: 404, description: 'القرار غير موجود' })
+  @Post(':id/execute')
+  executeDecision(
     @CurrentUser() user: Person,
     @Param('id', ParseUUIDPipe) id: string,
   ) {

@@ -131,10 +131,11 @@ export default function PathDetailPage() {
 
         const canManage =
           entity?.myRole === "FOUNDER" || entity?.myRole === "ADMIN";
+        const isAuditor = entity?.myRole === "AUDITOR";
         setCanManagePath(canManage);
-        setCanViewSubscriptions(canManage);
+        setCanViewSubscriptions(canManage || isAuditor);
 
-        if (canManage) {
+        if (canManage || isAuditor) {
           const subs = await getSubscriptions({ pathId: id }).catch(() => []);
           if (!cancelled) setSubscriptions(subs);
         } else {

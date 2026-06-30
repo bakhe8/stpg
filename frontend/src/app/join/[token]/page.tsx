@@ -14,12 +14,12 @@ import { getToken } from '../../../lib/api';
 import styles from './join.module.css';
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {
-  FUND: 'صندوق',
-  TRIBE: 'قبيلة',
   FAMILY: 'عائلة',
-  COOPERATIVE: 'تعاونية',
-  ASSOCIATION: 'جمعية',
-  COMMITTEE: 'لجنة',
+  TRIBE: 'قبيلة',
+  BUILDING: 'عمارة',
+  NEIGHBORHOOD: 'حي',
+  COMMUNITY: 'جماعة',
+  CAMPAIGN: 'حملة',
 };
 
 // ── مكوّن: معاينة الكيان ──────────────────────────────────────────────

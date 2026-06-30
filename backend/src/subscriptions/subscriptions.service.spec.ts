@@ -68,6 +68,7 @@ describe('SubscriptionsService payment records', () => {
       notificationsService as unknown as NotificationsService,
       ledgerService as unknown as LedgerService,
       rulesService as unknown as RulesService,
+      { runInternal: (cb: () => unknown) => cb() } as never,
     );
   });
 

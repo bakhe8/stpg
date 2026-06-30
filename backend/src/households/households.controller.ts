@@ -6,12 +6,10 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { HouseholdsService } from './households.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import {
   CreateHouseholdDto,
@@ -23,7 +21,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('households')
 @ApiBearerAuth('access-token')
 @Controller('households')
-@UseGuards(JwtGuard)
 export class HouseholdsController {
   constructor(private readonly householdsService: HouseholdsService) {}
 

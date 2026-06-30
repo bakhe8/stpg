@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import { BalanceTransferRequestsService } from './balance-transfer-requests.service';
 import {
@@ -13,11 +12,9 @@ import {
   ReviewTransferDto,
 } from './dto/balance-transfer.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 
 @ApiTags('balance-transfers')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard)
 @Controller('balance-transfer-requests')
 export class BalanceTransferRequestsController {
   constructor(

@@ -7,10 +7,8 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { WalletRelationshipsService } from './wallet-relationships.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { CreateWalletRelationshipDto } from './dto/create-wallet-relationship.dto';
@@ -18,7 +16,6 @@ import { UpdateWalletRelationshipDto } from './dto/update-wallet-relationship.dt
 import { RejectWalletRelationshipDto } from './dto/reject-wallet-relationship.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('wallet-relationships')
 @ApiBearerAuth('access-token')
 @Controller('wallet-relationships')

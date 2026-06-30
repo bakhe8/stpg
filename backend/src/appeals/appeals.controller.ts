@@ -10,14 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AppealsService } from './appeals.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import type { Person } from '@prisma/client';
 import { FileAppealDto } from './dto/file-appeal.dto';
 import { RespondAppealDto } from './dto/respond-appeal.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @ApiTags('appeals')
 @ApiBearerAuth('access-token')
 @Controller('appeals')

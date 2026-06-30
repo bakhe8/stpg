@@ -17,7 +17,6 @@
     "seed:restore": "ts-node --transpile-only prisma/seed-restore.ts",
     "seed:rollback": "ts-node --transpile-only prisma/seed-restore.ts",
     "seed:smoke-logins": "ts-node --transpile-only prisma/seed-login-smoke.ts",
-    "seed:templates": "ts-node --transpile-only prisma/seed-templates.ts",
     "seed:validate": "ts-node --transpile-only prisma/seed-validate.ts",
     "seed:validate:docker": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/seed-validate-docker.ps1",
     "start": "nest start",

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   BeneficiaryType,
   DecisionResult,
@@ -14,7 +14,8 @@ import { DisbursementRequestsService } from './disbursement-requests.service';
 describe('DisbursementRequestsService beneficiaries', () => {
   let prisma: {
     governancePath: { findUnique: jest.Mock };
-    membership: { findFirst: jest.Mock };
+    membership: { findFirst: jest.Mock; findMany: jest.Mock };
+    subscription: { findFirst: jest.Mock };
     spendingItem: { findUnique: jest.Mock };
     beneficiary: {
       findFirst: jest.Mock;
@@ -30,6 +31,7 @@ describe('DisbursementRequestsService beneficiaries', () => {
     decision: { findUnique: jest.Mock };
     ledgerAccount: { findUnique: jest.Mock };
     auditLog: { create: jest.Mock };
+    notification: { create: jest.Mock; createMany: jest.Mock };
   };
   let ledgerService: { recordDisbursement: jest.Mock };
   let service: DisbursementRequestsService;
@@ -37,7 +39,10 @@ describe('DisbursementRequestsService beneficiaries', () => {
   beforeEach(() => {
     prisma = {
       governancePath: { findUnique: jest.fn() },
-      membership: { findFirst: jest.fn() },
+      membership: { findFirst: jest.fn(), findMany: jest.fn().mockResolvedValue([]) },
+      subscription: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'subscription-id' }),
+      },
       spendingItem: { findUnique: jest.fn() },
       beneficiary: {
         findFirst: jest.fn(),
@@ -53,6 +58,10 @@ describe('DisbursementRequestsService beneficiaries', () => {
       decision: { findUnique: jest.fn() },
       ledgerAccount: { findUnique: jest.fn() },
       auditLog: { create: jest.fn().mockResolvedValue({}) },
+      notification: {
+        create: jest.fn().mockResolvedValue({}),
+        createMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
     };
     ledgerService = {
       recordDisbursement: jest.fn(),
@@ -261,6 +270,112 @@ describe('DisbursementRequestsService beneficiaries', () => {
 
     expect(prisma.ledgerAccount.findUnique).not.toHaveBeenCalled();
     expect(ledgerService.recordDisbursement).not.toHaveBeenCalled();
+  });
+
+  it('rejects execution by the same person who approved the request', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      beneficiaryId: 'beneficiary-id',
+      beneficiary: { annualCap: null },
+      amount: { toString: () => '300.00' },
+      description: 'صرف علاجي',
+      attachments: [],
+      status: DisbursementRequestStatus.APPROVED,
+      transactionId: null,
+      decisionId: 'decision-id',
+      reviewedById: 'same-admin-id',
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+
+    await expect(
+      service.executeRequest('request-id', 'same-admin-id', {}),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(prisma.decision.findUnique).not.toHaveBeenCalled();
+    expect(prisma.ledgerAccount.findUnique).not.toHaveBeenCalled();
+    expect(ledgerService.recordDisbursement).not.toHaveBeenCalled();
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          newValue: expect.objectContaining({
+            operation: 'EXECUTE_DISBURSEMENT',
+            failed: true,
+            reviewedById: 'same-admin-id',
+          }),
+        }),
+      }),
+    );
+  });
+
+  it('allows a different authorized person to execute an approved request', async () => {
+    prisma.disbursementRequest.findUnique.mockResolvedValue({
+      id: 'request-id',
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      beneficiaryId: 'beneficiary-id',
+      beneficiary: { annualCap: null },
+      amount: { toString: () => '300.00' },
+      description: 'صرف علاجي',
+      attachments: ['invoice.pdf'],
+      status: DisbursementRequestStatus.APPROVED,
+      transactionId: null,
+      decisionId: 'decision-id',
+      reviewedById: 'reviewer-id',
+      governancePath: {
+        wallet: { entityId: 'entity-id' },
+      },
+    });
+    prisma.membership.findFirst.mockResolvedValue({
+      role: MemberRole.TREASURER,
+    });
+    prisma.decision.findUnique.mockResolvedValue({
+      id: 'decision-id',
+      decisionType: DecisionType.DISBURSE_FUNDS,
+      status: DecisionStatus.CLOSED,
+      result: DecisionResult.APPROVED,
+      governancePathId: 'path-id',
+      spendingItemId: 'spending-item-id',
+      amount: { toString: () => '300.00' },
+    });
+    prisma.ledgerAccount.findUnique.mockResolvedValue({
+      balance: { toString: () => '1000.00' },
+    });
+    ledgerService.recordDisbursement.mockResolvedValue({
+      id: 'transaction-id',
+    });
+    prisma.disbursementRequest.update.mockResolvedValue({
+      id: 'request-id',
+      status: DisbursementRequestStatus.EXECUTED,
+      transactionId: 'transaction-id',
+    });
+
+    const result = await service.executeRequest('request-id', 'executor-id', {
+      reference: 'bank-transfer-1',
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: DisbursementRequestStatus.EXECUTED,
+        transactionId: 'transaction-id',
+      }),
+    );
+    expect(ledgerService.recordDisbursement).toHaveBeenCalledWith(
+      'executor-id',
+      expect.objectContaining({
+        pathId: 'path-id',
+        spendingItemId: 'spending-item-id',
+        decisionId: 'decision-id',
+        amount: 300,
+        reference: 'bank-transfer-1',
+      }),
+    );
   });
 
   it('compares ledger balances as money values before execution', async () => {

@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SupportService } from './support.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { PlatformGuard } from '../identity/auth/platform.guard';
 import { AllowPlatform } from '../identity/auth/decorators/allow-platform.decorator';
 import { CurrentPlatformUser } from '../identity/auth/decorators/current-platform-user.decorator';
@@ -23,7 +22,6 @@ export class SupportController {
 
   @Get('sessions/:entityId')
   @AllowPlatform()
-  @UseGuards(JwtGuard)
   async getSessions(
     @Param('entityId', ParseUUIDPipe) entityId: string,
     @CurrentUser()
@@ -38,7 +36,7 @@ export class SupportController {
 
   @Post('entities/:entityId/sessions')
   @AllowPlatform()
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   async createSession(
     @Param('entityId', ParseUUIDPipe) entityId: string,
     @CurrentPlatformUser() operator: { id: string; role: PlatformRole },
@@ -62,7 +60,7 @@ export class SupportController {
 
   @Post('entities/:entityId/sessions/:id/revoke')
   @AllowPlatform()
-  @UseGuards(JwtGuard, PlatformGuard)
+  @UseGuards(PlatformGuard)
   async revokeSession(
     @Param('entityId', ParseUUIDPipe) entityId: string,
     @Param('id', ParseUUIDPipe) sessionId: string,

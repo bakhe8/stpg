@@ -108,6 +108,9 @@ export default function MembersPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("ALL");
+
   // inline actions
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState("");
@@ -186,8 +189,18 @@ export default function MembersPage({
   if (!entity) return null;
 
   const manage = canManage(entity.myRole);
-  const activeMembers = members.filter((m) => m.isActive);
-  const inactiveMembers = members.filter((m) => !m.isActive);
+  const allRoles = Array.from(new Set(members.map((m) => m.role)));
+  const matchesFilter = (m: EntityMember) => {
+    if (roleFilter !== "ALL" && m.role !== roleFilter) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.trim().toLowerCase();
+    return (
+      m.person.name.toLowerCase().includes(q) ||
+      m.person.username.toLowerCase().includes(q)
+    );
+  };
+  const activeMembers = members.filter((m) => m.isActive).filter(matchesFilter);
+  const inactiveMembers = members.filter((m) => !m.isActive).filter(matchesFilter);
   const formatMoney = (amount: number) =>
     `${amount.toLocaleString("ar-SA", { maximumFractionDigits: 0 })} ر.س`;
   const buildMemberDisputeHref = (member: EntityMember) => {
@@ -373,7 +386,31 @@ export default function MembersPage({
         </div>
       )}
 
-      
+      <div className={styles.filterBar}>
+        <input
+          type="search"
+          className={styles.searchInput}
+          placeholder={t("memberSearchPlaceholder")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select
+          className={styles.roleSelect}
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          aria-label={t("memberRoleFilterLabel")}
+          title={t("memberRoleFilterLabel")}
+        >
+          <option value="ALL">{t("memberRoleFilterAll")}</option>
+          {allRoles.map((r) => (
+            <option key={r} value={r}>
+              {getRoleLabel(r)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+
       {applications.length > 0 && (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>
@@ -463,6 +500,11 @@ export default function MembersPage({
       
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t("activeMembersTitle")}</h2>
+        {members.length > 0 &&
+          activeMembers.length === 0 &&
+          inactiveMembers.length === 0 && (
+            <p className={styles.memberNoPaths}>{t("memberFilterNoResults")}</p>
+          )}
         <div className={styles.cardList}>
           {activeMembers.map((m) => (
             <div key={m.id} className={styles.memberCard}>
@@ -501,7 +543,7 @@ export default function MembersPage({
                     className={styles.ghostBtn}
                     onClick={() => setEditingRoleId(null)}
                   >
-                    إلغاء
+                    {t("cancel")}
                   </button>
                 </div>
               ) : (

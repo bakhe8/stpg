@@ -439,7 +439,7 @@ export class LedgerService {
 
         await tx.auditLog.create({
           data: {
-            action: AuditAction.CREATE,
+            action: AuditAction.DISBURSE,
             personId: adminId,
             entityId,
             targetType: 'ledger_transactions',
@@ -524,18 +524,28 @@ export class LedgerService {
     const decision = await this.prisma.decision.findUnique({
       where: { id: dto.decisionId },
     });
+    const isMergeDecision = decision?.decisionType === DecisionType.MERGE_PATHS;
+    const decisionSourceMatches = isMergeDecision
+      ? decision?.subjectId === dto.sourcePathId
+      : decision?.governancePathId === dto.sourcePathId;
+
     if (
       !decision ||
-      decision.decisionType !== DecisionType.TRANSFER_BALANCE ||
+      (decision.decisionType !== DecisionType.TRANSFER_BALANCE &&
+        !isMergeDecision) ||
       decision.status !== DecisionStatus.CLOSED ||
       decision.result !== DecisionResult.APPROVED ||
-      decision.governancePathId !== dto.sourcePathId
+      !decisionSourceMatches
     ) {
       throw new BadRequestException(
-        'يتطلب التحويل قرار TRANSFER_BALANCE مغلقاً ومعتمداً ومطابقاً',
+        'يتطلب التحويل قرار TRANSFER_BALANCE أو MERGE_PATHS مغلقاً ومعتمداً ومطابقاً',
       );
     }
-    if (decision.amount !== null && Number(decision.amount) !== dto.amount) {
+    if (
+      !isMergeDecision &&
+      decision.amount !== null &&
+      Number(decision.amount) !== dto.amount
+    ) {
       throw new BadRequestException(
         'مبلغ التحويل لا يطابق مبلغ القرار المعتمد',
       );
@@ -598,7 +608,7 @@ export class LedgerService {
 
       await tx.auditLog.create({
         data: {
-          action: AuditAction.CREATE,
+          action: AuditAction.TRANSFER,
           personId: adminId,
           entityId,
           targetType: 'ledger_transactions',
@@ -664,6 +674,17 @@ export class LedgerService {
       original.type === LedgerTransactionType.REVERSAL
     ) {
       throw new BadRequestException('لا يمكن عكس هذه العملية');
+    }
+
+    // BL-036 — حد زمني على العكس (قابل للتكوين عبر REVERSAL_WINDOW_DAYS)
+    const windowDays = parseInt(process.env.REVERSAL_WINDOW_DAYS ?? '90', 10);
+    const daysSince = Math.floor(
+      (Date.now() - original.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (daysSince > windowDays) {
+      throw new BadRequestException(
+        `لا يمكن عكس معاملة أقدم من ${windowDays} يوماً (مضى ${daysSince} يوماً)`,
+      );
     }
 
     const entityIds = new Set(

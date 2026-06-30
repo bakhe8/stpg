@@ -7,12 +7,10 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { GovernancePathsService } from './governance-paths.service';
-import { JwtGuard } from '../identity/auth/jwt.guard';
 import { CurrentUser } from '../identity/auth/decorators/current-user.decorator';
 import { CreatePathDto } from './dto/create-path.dto';
 import { UpdatePathDto } from './dto/update-path.dto';
@@ -24,7 +22,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('governance-paths')
 @ApiBearerAuth('access-token')
 @Controller('paths')
-@UseGuards(JwtGuard)
 export class GovernancePathsController {
   constructor(private readonly pathsService: GovernancePathsService) {}
 
