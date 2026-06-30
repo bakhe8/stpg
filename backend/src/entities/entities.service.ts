@@ -13,7 +13,6 @@ import {
   MemberRole,
   MembershipApplicationStatus,
   EntityType,
-  GovernancePathType,
 } from '@prisma/client';
 import { CreateEntityDto } from './dto/create-entity.dto';
 import { UpdateEntityDto } from './dto/update-entity.dto';
@@ -27,6 +26,11 @@ import {
 import { toJsonValue } from '../prisma/json-value';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TenantContextService } from '../core/tenant-context/tenant-context.service';
+import {
+  type NormalizedEntityTemplate,
+  normalizeEntityTemplate,
+  TemplateValidationError,
+} from './entity-template-schema';
 
 @Injectable()
 export class EntitiesService {
@@ -53,12 +57,27 @@ export class EntitiesService {
       throw new ForbiddenException('يجب تفعيل حسابك أولاً قبل إنشاء كيان');
     }
 
-    let template = null;
-    if (dto.templateId) {
-      template = await this.prisma.entityTemplate.findUnique({
-        where: { id: dto.templateId },
-      });
-      if (!template) throw new Error('Template not found');
+    const template = dto.templateId
+      ? await this.prisma.entityTemplate.findUnique({
+          where: { id: dto.templateId },
+        })
+      : null;
+    if (dto.templateId && !template) {
+      throw new NotFoundException('القالب غير موجود');
+    }
+
+    let templateSetup: NormalizedEntityTemplate | null = null;
+    if (template) {
+      try {
+        templateSetup = normalizeEntityTemplate(template);
+      } catch (error) {
+        if (error instanceof TemplateValidationError) {
+          throw new BadRequestException(
+            `القالب غير صالح للتشغيل: ${error.findings.join('؛ ')}`,
+          );
+        }
+        throw error;
+      }
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -68,10 +87,14 @@ export class EntitiesService {
           type: dto.type,
           description: dto.description,
           logoUrl: dto.logoUrl,
+          templateId: template?.id,
+          enabledModules:
+            template?.enabledModules === null ||
+            template?.enabledModules === undefined
+              ? undefined
+              : toJsonValue(template.enabledModules),
           policy: {
-            create: template?.defaultPolicy
-              ? (template.defaultPolicy as Record<string, unknown>)
-              : {},
+            create: templateSetup?.policy ?? {},
           },
           ledgerAccount: { create: { type: LedgerAccountType.ENTITY } },
           memberships: {
@@ -81,45 +104,117 @@ export class EntitiesService {
         include: { policy: true },
       });
 
-      // Create default wallets from template
-      const createdWallets = [];
-      if (template?.defaultWallets) {
-        const wallets = template.defaultWallets as {
-          name: string;
-          type?: string;
-          id?: string;
-        }[];
-        for (const w of wallets) {
-          const wallet = await tx.wallet.create({
-            data: {
-              name: String(w.name),
-              entityId: entity.id,
-              description: w.type === 'RESERVE' ? 'احتياطية' : 'أساسية',
-              ledgerAccount: { create: { type: LedgerAccountType.WALLET } },
+      const createdWallets: Array<{
+        id: string;
+        tempId?: string;
+        currency?: string;
+      }> = [];
+      for (const walletTemplate of templateSetup?.wallets ?? []) {
+        const wallet = await tx.wallet.create({
+          data: {
+            name: walletTemplate.name,
+            entityId: entity.id,
+            description: walletTemplate.description,
+            benefitType: walletTemplate.benefitType,
+            policy: { create: walletTemplate.policy },
+            ledgerAccount: {
+              create: {
+                type: LedgerAccountType.WALLET,
+                currency: walletTemplate.currency,
+              },
             },
-          });
-          createdWallets.push({ ...wallet, tempId: w.id }); // keep tempId for path binding
-        }
+          },
+          include: { policy: true },
+        });
+        createdWallets.push({
+          id: wallet.id,
+          tempId: walletTemplate.tempId,
+          currency: walletTemplate.currency,
+        });
+
+        await tx.auditLog.create({
+          data: {
+            action: AuditAction.CREATE,
+            personId: creatorId,
+            entityId: entity.id,
+            targetType: 'wallets',
+            targetId: wallet.id,
+            newValue: {
+              name: wallet.name,
+              benefitType: wallet.benefitType,
+              templateId: template?.id,
+            },
+          },
+        });
       }
 
-      // Create default paths from template
-      if (template?.defaultPaths && createdWallets.length > 0) {
-        const paths = template.defaultPaths as {
-          name: string;
-          walletTempId?: string;
-          type?: GovernancePathType;
-          rules?: unknown[];
-        }[];
-        for (const p of paths) {
-          // If the path binds to a specific wallet by tempId
-          const boundWallet = p.walletTempId
-            ? createdWallets.find((cw) => cw.tempId === p.walletTempId)
-            : createdWallets[0];
-          await tx.governancePath.create({
+      for (const pathTemplate of templateSetup?.paths ?? []) {
+        const boundWallet = pathTemplate.walletTempId
+          ? createdWallets.find(
+              (wallet) => wallet.tempId === pathTemplate.walletTempId,
+            )
+          : createdWallets[0];
+
+        if (!boundWallet) {
+          throw new BadRequestException(
+            'لا يمكن إنشاء مسار القالب بدون محفظة مرتبطة',
+          );
+        }
+
+        const pathCurrency = pathTemplate.currency ?? boundWallet.currency;
+        const path = await tx.governancePath.create({
+          data: {
+            name: pathTemplate.name,
+            type: pathTemplate.type,
+            description: pathTemplate.description,
+            walletId: boundWallet.id,
+            policy: { create: pathTemplate.policy },
+            ledgerAccount: {
+              create: { type: LedgerAccountType.PATH, currency: pathCurrency },
+            },
+            spendingItems:
+              pathTemplate.spendingItems.length > 0
+                ? {
+                    create: pathTemplate.spendingItems.map((item) => ({
+                      ...item.data,
+                      ledgerAccount: {
+                        create: {
+                          type: LedgerAccountType.SPENDING_ITEM,
+                          currency: item.currency ?? pathCurrency,
+                        },
+                      },
+                    })),
+                  }
+                : undefined,
+          },
+          include: { policy: true, spendingItems: true },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            action: AuditAction.CREATE,
+            personId: creatorId,
+            entityId: entity.id,
+            targetType: 'governance_paths',
+            targetId: path.id,
+            newValue: {
+              name: path.name,
+              type: path.type,
+              walletId: boundWallet.id,
+              templateId: template?.id,
+            },
+          },
+        });
+
+        for (const item of path.spendingItems) {
+          await tx.auditLog.create({
             data: {
-              name: String(p.name),
-              type: p.type || 'BOARD',
-              walletId: boundWallet ? boundWallet.id : createdWallets[0].id,
+              action: AuditAction.CREATE,
+              personId: creatorId,
+              entityId: entity.id,
+              targetType: 'spending_items',
+              targetId: item.id,
+              newValue: { name: item.name, templateId: template?.id },
             },
           });
         }

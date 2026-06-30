@@ -60,6 +60,9 @@ export interface EntityTemplate {
   name: string;
   type: string;
   description?: string;
+  icon?: string | null;
+  enabledModules?: string[] | null;
+  suggestedGoals?: { name?: string; icon?: string }[] | null;
   defaultPolicy?: Record<string, unknown> | null;
   defaultWallets?: Record<string, unknown>[] | null;
   defaultPaths?: Record<string, unknown>[] | null;

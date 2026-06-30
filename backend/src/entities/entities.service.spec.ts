@@ -1,5 +1,11 @@
-import { ForbiddenException } from '@nestjs/common';
-import { EntityType } from '@prisma/client';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  EntityType,
+  GovernancePathType,
+  LedgerAccountType,
+  VoteType,
+  WalletBenefitType,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TenantContextService } from '../core/tenant-context/tenant-context.service';
@@ -78,14 +84,14 @@ describe('EntitiesService', () => {
           logoUrl?: string;
         };
       }) =>
-      Promise.resolve({
-        id: 'entity-id',
-        name: data.name,
-        type: data.type,
-        description: data.description,
-        logoUrl: data.logoUrl,
-        policy: { id: 'policy-id' },
-      }),
+        Promise.resolve({
+          id: 'entity-id',
+          name: data.name,
+          type: data.type,
+          description: data.description,
+          logoUrl: data.logoUrl,
+          policy: { id: 'policy-id' },
+        }),
     );
 
     await expect(
@@ -118,6 +124,166 @@ describe('EntitiesService', () => {
         }),
       }),
     );
+  });
+
+  it('applies a template as operational wallets, paths, policies, ledgers, and audits', async () => {
+    prisma.person.findUnique.mockResolvedValue({
+      id: 'creator-id',
+      isVerified: true,
+    });
+    prisma.entityTemplate.findUnique.mockResolvedValue({
+      id: 'template-id',
+      name: 'Aid template',
+      enabledModules: ['payments', 'decisions'],
+      defaultPolicy: {
+        requiresMemberApproval: true,
+        allowedGovernanceTypes: [GovernancePathType.COMMITTEE],
+      },
+      defaultWallets: [
+        {
+          id: 'aid',
+          name: 'Aid wallet',
+          benefitType: WalletBenefitType.SEPARABLE,
+          policy: { minimumActiveMonths: 1 },
+        },
+      ],
+      defaultPaths: [
+        {
+          id: 'aid-committee',
+          name: 'Aid committee',
+          walletTempId: 'aid',
+          type: GovernancePathType.COMMITTEE,
+          spendingItems: [{ name: 'Medical aid', requiredDocuments: [] }],
+        },
+      ],
+    });
+    prisma.entity.create.mockImplementation(
+      ({ data }: { data: { name: string; type: EntityType } }) =>
+        Promise.resolve({
+          id: 'entity-id',
+          name: data.name,
+          type: data.type,
+          policy: { id: 'policy-id' },
+        }),
+    );
+    prisma.wallet.create.mockResolvedValue({
+      id: 'wallet-id',
+      name: 'Aid wallet',
+      benefitType: WalletBenefitType.SEPARABLE,
+      policy: { id: 'wallet-policy-id' },
+    });
+    prisma.governancePath.create.mockResolvedValue({
+      id: 'path-id',
+      name: 'Aid committee',
+      type: GovernancePathType.COMMITTEE,
+      policy: { id: 'path-policy-id' },
+      spendingItems: [{ id: 'spending-item-id', name: 'Medical aid' }],
+    });
+
+    await service.createEntity('creator-id', {
+      name: 'Template fund',
+      type: EntityType.COMMUNITY,
+      templateId: 'template-id',
+    });
+
+    expect(prisma.entity.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        name: 'Template fund',
+        templateId: 'template-id',
+        enabledModules: ['payments', 'decisions'],
+        policy: {
+          create: expect.objectContaining({
+            requiresMemberApproval: true,
+            allowedGovernanceTypes: [GovernancePathType.COMMITTEE],
+          }),
+        },
+      }),
+      include: { policy: true },
+    });
+    expect(prisma.wallet.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: 'Aid wallet',
+          benefitType: WalletBenefitType.SEPARABLE,
+          policy: {
+            create: expect.objectContaining({ minimumActiveMonths: 1 }),
+          },
+          ledgerAccount: {
+            create: expect.objectContaining({ type: LedgerAccountType.WALLET }),
+          },
+        }),
+        include: { policy: true },
+      }),
+    );
+    expect(prisma.governancePath.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          walletId: 'wallet-id',
+          name: 'Aid committee',
+          type: GovernancePathType.COMMITTEE,
+          policy: {
+            create: expect.objectContaining({
+              voteType: VoteType.COMMITTEE_APPROVAL,
+            }),
+          },
+          ledgerAccount: {
+            create: expect.objectContaining({ type: LedgerAccountType.PATH }),
+          },
+          spendingItems: {
+            create: [
+              expect.objectContaining({
+                name: 'Medical aid',
+                ledgerAccount: {
+                  create: expect.objectContaining({
+                    type: LedgerAccountType.SPENDING_ITEM,
+                  }),
+                },
+              }),
+            ],
+          },
+        }),
+        include: { policy: true, spendingItems: true },
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ targetType: 'wallets' }),
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ targetType: 'governance_paths' }),
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ targetType: 'spending_items' }),
+      }),
+    );
+  });
+
+  it('rejects an invalid template before creating an entity', async () => {
+    prisma.person.findUnique.mockResolvedValue({
+      id: 'creator-id',
+      isVerified: true,
+    });
+    prisma.entityTemplate.findUnique.mockResolvedValue({
+      id: 'template-id',
+      name: 'Legacy template',
+      defaultPolicy: { requireApproval: true },
+      defaultWallets: null,
+      defaultPaths: null,
+    });
+
+    await expect(
+      service.createEntity('creator-id', {
+        name: 'Broken template fund',
+        type: EntityType.COMMUNITY,
+        templateId: 'template-id',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.entity.create).not.toHaveBeenCalled();
   });
 
   it('does not expose an entity to a non-member', async () => {

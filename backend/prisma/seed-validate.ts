@@ -26,6 +26,10 @@ import {
   seedStoryDefinitions,
   type SeedStoryRequirements,
 } from './seed-stories';
+import {
+  normalizeEntityTemplate,
+  TemplateValidationError,
+} from '../src/entities/entity-template-schema';
 
 type ValidationFinding = {
   severity: 'error' | 'warning';
@@ -203,6 +207,7 @@ async function main() {
     disputes,
     entityRelationships,
     walletRelationships,
+    entityTemplates,
   ] = await Promise.all([
     prisma.person.count(),
     prisma.person.findMany({
@@ -589,7 +594,42 @@ async function main() {
         hasOversightRights: true,
       },
     }),
+    prisma.entityTemplate.findMany({
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        sortOrder: true,
+        defaultPolicy: true,
+        defaultWallets: true,
+        defaultPaths: true,
+      },
+    }),
   ]);
+
+  const invalidTemplateFindings = entityTemplates.flatMap((template) => {
+    try {
+      normalizeEntityTemplate(template);
+      return [];
+    } catch (error) {
+      if (error instanceof TemplateValidationError) {
+        return error.findings.map(
+          (finding) => `${template.name} (${template.id}): ${finding}`,
+        );
+      }
+      throw error;
+    }
+  });
+  if (invalidTemplateFindings.length > 0) {
+    pushFinding(
+      findings,
+      'error',
+      'ENTITY_TEMPLATE_SCHEMA_INVALID',
+      'Entity templates must match the normalized setup schema before they can be used in fund creation.',
+      invalidTemplateFindings.length,
+      sampleList(invalidTemplateFindings, 5),
+    );
+  }
 
   const pendingClosureEntities = entities.filter(
     (entity) => entity.closureStatus === 'PENDING_CLOSURE',

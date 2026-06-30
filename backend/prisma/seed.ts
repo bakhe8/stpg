@@ -1403,27 +1403,62 @@ householdDefinitions.push(...generatedExtraHouseholds);
 const entityTemplates = [
   {
     id: entityTemplateId('standard-family'),
-    name: 'صندوق عائلة قياسي',
-    type: 'FAMILY',
+    name: 'صندوق مخصص',
+    type: 'COMMUNITY',
     description:
-      'قالب افتراضي لإنشاء صندوق عائلة مع محفظة رئيسية واحتياطية ومسار حوكمة.',
+      'نقطة بداية مرنة بصندوق ومحفظة ومسار قرار واحد، ويمكن توسيعها لاحقا.',
+    icon: '🧭',
+    isActive: true,
+    sortOrder: 10,
+    enabledModules: ['payments', 'decisions', 'audit'] as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'اشتراكات أساسية', icon: '💳' },
+      { name: 'مصروفات مشتركة', icon: '📌' },
+    ] as Prisma.InputJsonValue,
     defaultPolicy: {
-      requireApproval: true,
-      minApprovalPercentage: 50,
+      allowOpenMembership: false,
+      requiresMemberApproval: true,
+      allowMultiplePaths: true,
+      allowSubEntities: false,
+      allowEntityRelations: true,
+      allowedGovernanceTypes: ['BOARD', 'COMMITTEE', 'PUBLIC_VOTE'],
+      defaultVoteType: 'SIMPLE_MAJORITY',
+      decisionQuorumPercent: 50,
+      defaultTransparency: 'VISIBLE_TO_PARTICIPANTS',
+      allowAppeals: true,
+      appealTimeoutDays: 14,
+      extraRules: { templateKey: 'CUSTOM_FUND' },
     } as Prisma.InputJsonValue,
     defaultWallets: [
-      { id: 'w1', name: 'المحفظة الرئيسية', type: 'MAIN', currency: 'SAR' },
       {
-        id: 'w2',
-        name: 'المحفظة الاحتياطية',
-        type: 'RESERVE',
+        id: 'main',
+        name: 'المحفظة الرئيسية',
+        description: 'محفظة البداية للصندوق.',
+        benefitType: 'SEPARABLE',
         currency: 'SAR',
+        policy: {
+          subscriptionFrequency: 'MONTHLY',
+          gracePeriodDays: 30,
+          minimumActiveMonths: 3,
+          exitNoticeDays: 30,
+          exitRefundPolicy: 'NO_REFUND',
+        },
       },
     ] as Prisma.InputJsonValue,
     defaultPaths: [
       {
-        name: 'المسار القياسي للمصروفات',
-        walletTempId: 'w1',
+        id: 'main-board',
+        name: 'مسار القرار الأساسي',
+        walletTempId: 'main',
+        type: 'BOARD',
+        policy: {
+          voteType: 'COMMITTEE_APPROVAL',
+          quorumPercent: 50,
+          approvalPercent: 51,
+          votingDurationHours: 72,
+          allowAppeals: true,
+          appealWindowDays: 7,
+        },
         rules: [
           { threshold: 0, requiredApprovals: 2 },
           { threshold: 10000, requiredApprovals: 3 },
@@ -1433,23 +1468,236 @@ const entityTemplates = [
   },
   {
     id: entityTemplateId('cooperative-community'),
-    name: 'جمعية تعاونية',
+    name: 'صندوق تكافل',
     type: 'COMMUNITY',
     description:
-      'قالب للجمعيات التعاونية مع التركيز على الاشتراكات والمحافظ المتعددة.',
+      'مناسب للمساعدات الاجتماعية والعلاجية والحالات التي تحتاج مستندات وخصوصية أعلى.',
+    icon: '🤝',
+    isActive: true,
+    sortOrder: 20,
+    enabledModules: [
+      'payments',
+      'decisions',
+      'beneficiaries',
+      'documents',
+      'audit',
+    ] as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'مساعدات علاجية', icon: '🏥' },
+      { name: 'دعم حالات طارئة', icon: '⚕️' },
+    ] as Prisma.InputJsonValue,
     defaultPolicy: {
-      requireApproval: true,
-      minApprovalPercentage: 75,
+      allowOpenMembership: false,
+      requiresMemberApproval: true,
+      allowMultiplePaths: true,
+      allowSubEntities: false,
+      allowEntityRelations: true,
+      allowedGovernanceTypes: ['COMMITTEE', 'BOARD', 'EMERGENCY_FAST'],
+      defaultVoteType: 'COMMITTEE_APPROVAL',
+      decisionQuorumPercent: 60,
+      defaultTransparency: 'VISIBLE_TO_COMMITTEE',
+      allowAppeals: true,
+      appealTimeoutDays: 14,
+      extraRules: { templateKey: 'MUTUAL_AID' },
     } as Prisma.InputJsonValue,
     defaultWallets: [
-      { id: 'w1', name: 'محفظة الاشتراكات', type: 'MAIN', currency: 'SAR' },
-      { id: 'w2', name: 'محفظة الاستثمارات', type: 'RESERVE', currency: 'SAR' },
+      {
+        id: 'aid',
+        name: 'محفظة التكافل',
+        description: 'للمساعدات والحالات المؤهلة.',
+        benefitType: 'SEPARABLE',
+        currency: 'SAR',
+        policy: {
+          subscriptionFrequency: 'MONTHLY',
+          gracePeriodDays: 30,
+          minimumActiveMonths: 1,
+          beneficiaryTransparency: 'VISIBLE_TO_COMMITTEE',
+          exitRefundPolicy: 'NO_REFUND',
+        },
+      },
     ] as Prisma.InputJsonValue,
     defaultPaths: [
       {
-        name: 'مسار الاستثمار',
-        walletTempId: 'w2',
-        rules: [{ threshold: 0, requiredApprovals: 5 }],
+        id: 'aid-committee',
+        name: 'مسار لجنة التكافل',
+        walletTempId: 'aid',
+        type: 'COMMITTEE',
+        policy: {
+          voteType: 'COMMITTEE_APPROVAL',
+          requiresDocuments: true,
+          quorumPercent: 60,
+          approvalPercent: 67,
+          votingDurationHours: 72,
+          allowAppeals: true,
+          appealWindowDays: 7,
+        },
+        spendingItems: [
+          {
+            id: 'medical-aid',
+            name: 'مساعدة علاجية',
+            description: 'مساعدة للحالات العلاجية الموثقة.',
+            eligibilityCriteria: { requiresMedicalReport: true },
+            requiredDocuments: ['تقرير طبي', 'فاتورة أو عرض تكلفة'],
+            maxAmountPerRequest: '5000.00',
+            maxAmountPerYear: '12000.00',
+            privacyLevel: 'VISIBLE_TO_COMMITTEE',
+            requiresCommitteeApproval: true,
+            allowsException: true,
+          },
+        ],
+      },
+    ] as Prisma.InputJsonValue,
+  },
+  {
+    id: entityTemplateId('shared-services'),
+    name: 'صندوق خدمات مشتركة',
+    type: 'COMMUNITY',
+    description:
+      'للصيانة والحراسة والمصاعد والخدمات التي ينتفع منها الجميع بشكل مشترك.',
+    icon: '🛠️',
+    isActive: true,
+    sortOrder: 30,
+    enabledModules: [
+      'payments',
+      'decisions',
+      'maintenance',
+      'documents',
+      'audit',
+    ] as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'صيانة دورية', icon: '🔧' },
+      { name: 'حراسة وخدمات', icon: '🧾' },
+    ] as Prisma.InputJsonValue,
+    defaultPolicy: {
+      allowOpenMembership: false,
+      requiresMemberApproval: true,
+      allowMultiplePaths: true,
+      allowSubEntities: false,
+      allowEntityRelations: true,
+      allowedGovernanceTypes: ['COMMITTEE', 'PUBLIC_VOTE'],
+      defaultVoteType: 'ONE_MEMBER_ONE_VOTE',
+      decisionQuorumPercent: 50,
+      defaultTransparency: 'PUBLIC_TO_MEMBERS',
+      allowAppeals: true,
+      appealTimeoutDays: 14,
+      extraRules: { templateKey: 'SHARED_SERVICES' },
+    } as Prisma.InputJsonValue,
+    defaultWallets: [
+      {
+        id: 'services',
+        name: 'محفظة الخدمات المشتركة',
+        description: 'للمصاريف التي تخص المجموعة كلها.',
+        benefitType: 'SHARED',
+        currency: 'SAR',
+        policy: {
+          subscriptionFrequency: 'MONTHLY',
+          gracePeriodDays: 15,
+          minimumActiveMonths: 0,
+          balanceTransparency: 'PUBLIC_TO_MEMBERS',
+          transactionTransparency: 'PUBLIC_TO_MEMBERS',
+          beneficiaryTransparency: 'PUBLIC_TO_MEMBERS',
+          exitRefundPolicy: 'NO_REFUND',
+        },
+      },
+    ] as Prisma.InputJsonValue,
+    defaultPaths: [
+      {
+        id: 'services-committee',
+        name: 'مسار لجنة الخدمات',
+        walletTempId: 'services',
+        type: 'COMMITTEE',
+        policy: {
+          voteType: 'COMMITTEE_APPROVAL',
+          requiresDocuments: true,
+          quorumPercent: 50,
+          approvalPercent: 51,
+          votingDurationHours: 72,
+          allowAppeals: true,
+          appealWindowDays: 7,
+        },
+        spendingItems: [
+          {
+            id: 'maintenance',
+            name: 'صيانة وخدمات',
+            description: 'مصروفات الصيانة والتشغيل الدورية.',
+            eligibilityCriteria: { sharedBenefit: true },
+            requiredDocuments: ['عرض سعر أو فاتورة'],
+            maxAmountPerRequest: '8000.00',
+            maxAmountPerYear: '30000.00',
+            privacyLevel: 'PUBLIC_TO_MEMBERS',
+            requiresCommitteeApproval: true,
+            allowsException: false,
+          },
+        ],
+      },
+    ] as Prisma.InputJsonValue,
+  },
+  {
+    id: entityTemplateId('supporter-only'),
+    name: 'صندوق داعمين فقط',
+    type: 'COMMUNITY',
+    description:
+      'لجمع تبرعات أو مساهمات داعمة دون إنشاء حق استفادة تلقائي للدافعين.',
+    icon: '🎗️',
+    isActive: true,
+    sortOrder: 40,
+    enabledModules: [
+      'payments',
+      'decisions',
+      'documents',
+      'audit',
+    ] as Prisma.InputJsonValue,
+    suggestedGoals: [
+      { name: 'تبرعات عامة', icon: '💛' },
+      { name: 'دعم حالات', icon: '📄' },
+    ] as Prisma.InputJsonValue,
+    defaultPolicy: {
+      allowOpenMembership: false,
+      requiresMemberApproval: true,
+      allowMultiplePaths: true,
+      allowSubEntities: false,
+      allowEntityRelations: true,
+      allowedGovernanceTypes: ['DONATION_ONLY', 'COMMITTEE'],
+      defaultVoteType: 'INDIVIDUAL_WITH_CAP',
+      decisionQuorumPercent: 50,
+      defaultTransparency: 'VISIBLE_TO_PARTICIPANTS',
+      allowAppeals: true,
+      appealTimeoutDays: 14,
+      extraRules: { templateKey: 'SUPPORTER_ONLY' },
+    } as Prisma.InputJsonValue,
+    defaultWallets: [
+      {
+        id: 'donations',
+        name: 'محفظة الدعم',
+        description: 'مساهمات داعمة بلا حق استفادة تلقائي.',
+        benefitType: 'SEPARABLE',
+        currency: 'SAR',
+        policy: {
+          subscriptionAmount: null,
+          subscriptionFrequency: 'MONTHLY',
+          gracePeriodDays: 0,
+          minimumActiveMonths: 0,
+          exitRefundPolicy: 'NO_REFUND',
+          beneficiaryTransparency: 'VISIBLE_TO_COMMITTEE',
+        },
+      },
+    ] as Prisma.InputJsonValue,
+    defaultPaths: [
+      {
+        id: 'donation-only',
+        name: 'مسار الداعمين',
+        walletTempId: 'donations',
+        type: 'DONATION_ONLY',
+        policy: {
+          voteType: 'INDIVIDUAL_WITH_CAP',
+          individualSpendingCap: '1000.00',
+          requiresDocuments: true,
+          quorumPercent: 50,
+          approvalPercent: 51,
+          votingDurationHours: 72,
+          allowAppeals: true,
+          appealWindowDays: 7,
+        },
       },
     ] as Prisma.InputJsonValue,
   },
@@ -10078,7 +10326,8 @@ const documents = [
     key: 'doc_tribe_death_certificate',
     uploadedByKey: 'abdulrahman_tribe',
     name: 'شهادة وفاة - ملف قبلي 12',
-    fileUrl: 'https://seed.collectivetrust.local/docs/tribe-death-certificate.pdf',
+    fileUrl:
+      'https://seed.collectivetrust.local/docs/tribe-death-certificate.pdf',
     fileType: 'PDF',
     fileSize: 42110,
     entityKey: 'tribe_sahm',
@@ -10668,8 +10917,10 @@ async function seedEntityTemplates() {
         icon: (item as { icon?: string }).icon,
         isActive: (item as { isActive?: boolean }).isActive ?? true,
         sortOrder: (item as { sortOrder?: number }).sortOrder ?? 0,
-        enabledModules: (item as { enabledModules?: Prisma.InputJsonValue }).enabledModules,
-        suggestedGoals: (item as { suggestedGoals?: Prisma.InputJsonValue }).suggestedGoals,
+        enabledModules: (item as { enabledModules?: Prisma.InputJsonValue })
+          .enabledModules,
+        suggestedGoals: (item as { suggestedGoals?: Prisma.InputJsonValue })
+          .suggestedGoals,
         defaultPolicy: item.defaultPolicy,
         defaultWallets: item.defaultWallets,
         defaultPaths: item.defaultPaths,
@@ -10807,7 +11058,9 @@ async function cleanupRetiredSeedRows() {
 }
 
 async function seedTreasurerSurfaceFixtures() {
-  const familyDecisionId = decisionId('decision_family_guard_ready_for_execution');
+  const familyDecisionId = decisionId(
+    'decision_family_guard_ready_for_execution',
+  );
   const tribeDecisionId = decisionId(
     'decision_tribe_death_support_blocked_balance',
   );
@@ -10937,7 +11190,9 @@ async function seedTreasurerSurfaceFixtures() {
   });
 
   await prisma.disbursementRequest.upsert({
-    where: { id: seedId('disbursement-request', 'req_family_guard_approved_ready') },
+    where: {
+      id: seedId('disbursement-request', 'req_family_guard_approved_ready'),
+    },
     update: {
       governancePathId: pathId('family_services_vote'),
       spendingItemId: spendingItemId('si_guard_services'),
@@ -11039,7 +11294,6 @@ async function seedTreasurerSurfaceFixtures() {
       createdAt: daysAgo(4),
     } as never,
   });
-
 }
 
 async function seedCommitteeSurfaceFixtures() {
@@ -11125,8 +11379,7 @@ async function seedCommitteeSurfaceFixtures() {
       closesAt: daysFromNow(2),
       closedAt: null,
       attachments: makeDocIds('doc_neighborhood_lighting_map'),
-      notes:
-        'حالة SLC-06: طارق لم يصوت بعد، ويحيى صوّت فيرى ما بقي بعد صوته.',
+      notes: 'حالة SLC-06: طارق لم يصوت بعد، ويحيى صوّت فيرى ما بقي بعد صوته.',
       createdAt: daysAgo(2),
     },
   ];
@@ -11220,8 +11473,7 @@ async function main() {
   await seedEntityTemplates();
   await cleanupRetiredSeedRows();
 
-  const platformPassword =
-    process.env.SEED_PLATFORM_PASSWORD ?? '123456';
+  const platformPassword = process.env.SEED_PLATFORM_PASSWORD ?? '123456';
   const platformPasswordHash = await bcrypt.hash(platformPassword, 12);
   const seedUserPassword = process.env.SEED_USER_PASSWORD ?? '123456';
   const seedUserPasswordHash = await bcrypt.hash(seedUserPassword, 12);

@@ -7,7 +7,8 @@ export class EntityTemplatesService {
 
   async findAll() {
     return this.prisma.entityTemplate.findMany({
-      orderBy: { createdAt: 'desc' },
+      where: { isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 }

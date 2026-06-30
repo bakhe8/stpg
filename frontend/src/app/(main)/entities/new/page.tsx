@@ -10,7 +10,6 @@ import {
 } from "@/lib/api/entities";
 import { createInvitation } from "@/lib/api/invitations";
 import styles from "./wizard.module.css";
-import { ENTITY_TYPE_KEYS } from "../../../../lib/enum-labels";
 
 interface WizardState {
   type: string;
@@ -22,7 +21,6 @@ interface WizardState {
 export default function EntityWizardPage() {
   const router = useRouter();
   const t = useTranslations("entities");
-  const tEnums = useTranslations("enums");
   const [step, setStep] = useState(0);
   const [preGatePassed, setPreGatePassed] = useState(false);
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
@@ -162,23 +160,46 @@ export default function EntityWizardPage() {
           <span className={styles.templateName}>{t("noTemplateOption")}</span>
           <span className={styles.templateDesc}>{t("noTemplateDesc")}</span>
         </button>
-        {templates.map((tpl) => (
-          <button
-            key={tpl.id}
-            className={`${styles.templateCard} ${state.templateId === tpl.id ? styles.templateCardSelected : ""}`}
-            onClick={() => setState({ ...state, templateId: tpl.id })}
-          >
-            <span className={styles.templateName}>{tpl.name}</span>
-            <span className={styles.templateType}>
-              {ENTITY_TYPE_KEYS[tpl.type]
-                ? tEnums(ENTITY_TYPE_KEYS[tpl.type] as Parameters<typeof tEnums>[0])
-                : tpl.type}
-            </span>
-            {tpl.description && (
-              <span className={styles.templateDesc}>{tpl.description}</span>
-            )}
-          </button>
-        ))}
+        {templates.map((tpl) => {
+          const walletCount = tpl.defaultWallets?.length ?? 0;
+          const pathCount = tpl.defaultPaths?.length ?? 0;
+          const moduleCount = tpl.enabledModules?.length ?? 0;
+          const suggestedGoals = (tpl.suggestedGoals ?? [])
+            .filter((goal) => goal.name)
+            .slice(0, 3);
+
+          return (
+            <button
+              key={tpl.id}
+              className={`${styles.templateCard} ${state.templateId === tpl.id ? styles.templateCardSelected : ""}`}
+              onClick={() => setState({ ...state, templateId: tpl.id })}
+            >
+              <span className={styles.templateHeader}>
+                {tpl.icon && <span className={styles.templateIcon}>{tpl.icon}</span>}
+                <span className={styles.templateName}>{tpl.name}</span>
+              </span>
+              {tpl.description && (
+                <span className={styles.templateDesc}>{tpl.description}</span>
+              )}
+              <span className={styles.templateMeta}>
+                {t("templateWallets", { count: walletCount })}
+                {" · "}
+                {t("templatePaths", { count: pathCount })}
+                {moduleCount > 0 ? ` · ${t("templateModules", { count: moduleCount })}` : ""}
+              </span>
+              {suggestedGoals.length > 0 && (
+                <span className={styles.templateGoals}>
+                  {suggestedGoals.map((goal) => (
+                    <span key={`${tpl.id}-${goal.name}`} className={styles.templateGoal}>
+                      {goal.icon ? `${goal.icon} ` : ""}
+                      {goal.name}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

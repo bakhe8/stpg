@@ -29,7 +29,7 @@ docker run --rm `
   -e "SEED_RESET_ALLOW_NON_LOCAL=true" `
   -v "${backendDir}:/workspace:ro" `
   node:22-alpine `
-  sh -lc "mkdir -p /tmp/stgp-backend && cp /workspace/package*.json /tmp/stgp-backend/ && cp /workspace/tsconfig*.json /tmp/stgp-backend/ && cp /workspace/prisma.config.ts /tmp/stgp-backend/ && cp -a /workspace/prisma /tmp/stgp-backend/prisma && cd /tmp/stgp-backend && npm ci --include=dev --quiet && npx prisma generate && npm run seed:fresh -- --print-db-identity --expected-db-name stgp_dev --expected-db-port 5432"
+  sh -lc "mkdir -p /tmp/stgp-backend/src/entities && cp /workspace/package*.json /tmp/stgp-backend/ && cp /workspace/tsconfig*.json /tmp/stgp-backend/ && cp /workspace/prisma.config.ts /tmp/stgp-backend/ && cp -a /workspace/prisma /tmp/stgp-backend/prisma && cp /workspace/src/entities/entity-template-schema.ts /tmp/stgp-backend/src/entities/entity-template-schema.ts && cd /tmp/stgp-backend && npm ci --include=dev --quiet && npx prisma generate && npm run seed:fresh -- --print-db-identity --expected-db-name stgp_dev --expected-db-port 5432"
 if ($LASTEXITCODE -ne 0) {
   throw "Docker seed reset failed with exit code $LASTEXITCODE."
 }
