@@ -1,11 +1,17 @@
 import { ForbiddenException } from '@nestjs/common';
+import { EntityType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { TenantContextService } from '../core/tenant-context/tenant-context.service';
 import { EntitiesService } from './entities.service';
 
 describe('EntitiesService', () => {
   let prisma: {
-    entity: { findUnique: jest.Mock; findMany: jest.Mock };
+    person: { findUnique: jest.Mock; findFirst: jest.Mock; create: jest.Mock };
+    entity: { create: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock };
+    entityTemplate: { findUnique: jest.Mock };
+    wallet: { create: jest.Mock };
+    governancePath: { create: jest.Mock };
     membership: {
       findFirst: jest.Mock;
       findMany: jest.Mock;
@@ -18,11 +24,20 @@ describe('EntitiesService', () => {
     $transaction: jest.Mock;
   };
   let notifications: { createBulk: jest.Mock };
+  let tenantContext: { runInternal: jest.Mock };
   let service: EntitiesService;
 
   beforeEach(() => {
     prisma = {
-      entity: { findUnique: jest.fn(), findMany: jest.fn() },
+      person: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        create: jest.fn(),
+      },
+      entity: { create: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
+      entityTemplate: { findUnique: jest.fn() },
+      wallet: { create: jest.fn() },
+      governancePath: { create: jest.fn() },
       membership: {
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -37,9 +52,71 @@ describe('EntitiesService', () => {
       ),
     };
     notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    tenantContext = {
+      runInternal: jest.fn((callback: () => unknown) => callback()),
+    };
     service = new EntitiesService(
       prisma as unknown as PrismaService,
       notifications as unknown as NotificationsService,
+      tenantContext as unknown as TenantContextService,
+    );
+  });
+
+  it('creates an entity with the low-level create contract only', async () => {
+    prisma.person.findUnique.mockResolvedValue({
+      id: 'creator-id',
+      isVerified: true,
+    });
+    prisma.entity.create.mockImplementation(
+      ({
+        data,
+      }: {
+        data: {
+          name: string;
+          type: EntityType;
+          description?: string;
+          logoUrl?: string;
+        };
+      }) =>
+      Promise.resolve({
+        id: 'entity-id',
+        name: data.name,
+        type: data.type,
+        description: data.description,
+        logoUrl: data.logoUrl,
+        policy: { id: 'policy-id' },
+      }),
+    );
+
+    await expect(
+      service.createEntity('creator-id', {
+        name: 'Family Fund',
+        type: EntityType.FAMILY,
+        description: 'Internal family fund',
+      }),
+    ).resolves.toMatchObject({
+      id: 'entity-id',
+      name: 'Family Fund',
+      type: EntityType.FAMILY,
+    });
+
+    expect(prisma.entity.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        name: 'Family Fund',
+        type: EntityType.FAMILY,
+        description: 'Internal family fund',
+        policy: { create: {} },
+      }),
+      include: { policy: true },
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          personId: 'creator-id',
+          entityId: 'entity-id',
+          targetType: 'entities',
+        }),
+      }),
     );
   });
 

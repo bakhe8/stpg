@@ -209,7 +209,27 @@
     "transparencyTitle": "Transparency settings",
     "defaultTransparency": "Default transparency level",
     "defaultTransparencyHint": "Applied to new wallets and paths unless specified otherwise",
-    "impactTitle": "Impact of this change"
+    "impactTitle": "Impact of this change",
+    "voteTypeLabels": {
+      "oneMemberOneVote": "One member, one vote",
+      "oneFamilyOneVote": "One family, one vote",
+      "subscribersOnly": "Subscribers only",
+      "byContribution": "By contribution",
+      "simpleMajority": "Simple majority",
+      "twoThirds": "Two-thirds majority",
+      "secret": "Secret vote",
+      "committeeApproval": "Committee approval",
+      "individualWithCap": "Individual with cap",
+      "emergencyThenReview": "Emergency, then review"
+    },
+    "transparencyLabels": {
+      "publicToMembers": "Visible to all members",
+      "visibleToParticipants": "Visible to participants only",
+      "visibleToCommittee": "Visible to committee only",
+      "visibleToAuditor": "Visible to auditor only",
+      "hiddenSensitive": "Hidden for sensitive data",
+      "aggregatedOnly": "Aggregated only"
+    }
   },
   "member": {
     "familyVoteWarning": "Warning: this decision requires a vote from all family members"

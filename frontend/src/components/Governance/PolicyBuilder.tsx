@@ -19,18 +19,25 @@ interface Props {
 type DraftPolicy = Partial<EntityPolicy>;
 
 const TRANSPARENCY_LABELS: Record<string, string> = {
-  PUBLIC:                  "public",
+  PUBLIC_TO_MEMBERS:       "publicToMembers",
   VISIBLE_TO_PARTICIPANTS: "visibleToParticipants",
   VISIBLE_TO_COMMITTEE:    "visibleToCommittee",
   VISIBLE_TO_AUDITOR:      "visibleToAuditor",
   HIDDEN_SENSITIVE:        "hiddenSensitive",
+  AGGREGATED_ONLY:         "aggregatedOnly",
 };
 
 const VOTE_TYPE_LABELS: Record<string, string> = {
-  SIMPLE_MAJORITY: "simpleMajority",
-  TWO_THIRDS:      "twoThirds",
-  UNANIMOUS:       "unanimous",
-  WEIGHTED:        "weighted",
+  ONE_MEMBER_ONE_VOTE:   "oneMemberOneVote",
+  ONE_FAMILY_ONE_VOTE:   "oneFamilyOneVote",
+  SUBSCRIBERS_ONLY:      "subscribersOnly",
+  BY_CONTRIBUTION:       "byContribution",
+  SIMPLE_MAJORITY:       "simpleMajority",
+  TWO_THIRDS:            "twoThirds",
+  SECRET:                "secret",
+  COMMITTEE_APPROVAL:    "committeeApproval",
+  INDIVIDUAL_WITH_CAP:   "individualWithCap",
+  EMERGENCY_THEN_REVIEW: "emergencyThenReview",
 };
 
 export default function PolicyBuilder({ entityId }: Props) {

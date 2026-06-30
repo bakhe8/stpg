@@ -78,6 +78,36 @@
 6. `allowedGovernanceTypes` له default واضح في قاعدة البيانات ولا يكسر إنشاء مسار حوكمة.
 7. توجد اختبارات regression تثبت النقاط أعلاه.
 
+## حالة التنفيذ - 2026-06-30
+
+**الحالة:** منفذة على الفرع `work/09-phase-a-preflight`.
+
+ما تم:
+
+- `A-001`: أضيفت اختبارات DTO وخدمة الإنشاء وخدمة مسارات الحوكمة.
+- `A-002`: لم تعد الواجهة ترسل `defaultGovernanceType` أو `allowMultiplePaths` إلى `POST /entities`.
+- `A-003`: أزيل خيار `FRIENDS` من شاشة إنشاء الكيان ومن label قائمة الكيانات.
+- `A-004`: أزيلت خطوة الحوكمة الافتراضية من legacy wizard حتى لا يدعي المستخدم حفظ إعداد غير محفوظ.
+- `A-005`: استبدلت قيم التصويت غير المدعومة في الواجهة بقيم `VoteType` الفعلية.
+- `A-006`: استبدلت `PUBLIC` بـ `PUBLIC_TO_MEMBERS` وأضيف `AGGREGATED_ONLY` في واجهة السياسة.
+- `A-007`: أضيف default صريح لـ `allowedGovernanceTypes` في Prisma schema ومigration، مع guard في الخدمة.
+
+التحقق:
+
+- `npm test -- create-entity.dto.spec.ts entities.service.spec.ts governance-paths.service.spec.ts --runInBand` — نجح، 3 suites و11 tests.
+- `npx prisma validate` — نجح.
+- JSON parse لترجمات `ar/en common/admin` — نجح.
+- `npm run build` في `backend` — نجح.
+- `npm run build` في `frontend` — نجح.
+- `npm run lint` في `frontend` — نجح.
+- static search لقيم `FRIENDS`, `UNANIMOUS`, `WEIGHTED`, و`PUBLIC` داخل كود الواجهة والباكند — لا توجد استخدامات مخالفة، باستثناء اختبار DTO الذي يتعمد إرسال `defaultGovernanceType`.
+
+ملاحظة seed validation:
+
+- `npm run seed:validate:docker` وصل إلى قاعدة `stgp_dev` الصحيحة داخل شبكة Docker، لكنه فشل بسبب حالة seed/DB قائمة: `MOYASAR_CONFIRMED_PAYMENT_MISSING`.
+- هذا الفشل ليس من نطاق Phase A ولا من التعديلات الحالية.
+- لم يتم تشغيل `seed:reset:docker` لأن ذلك يعيد ضبط قاعدة dev ويمس بيانات الجهاز المحلية.
+
 ## ترتيب التنفيذ المقترح
 
 | الترتيب | التذكرة | السبب |

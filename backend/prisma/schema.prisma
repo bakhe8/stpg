@@ -407,7 +407,7 @@ model EntityPolicy {
   allowEntityRelations   Boolean @default(true) // هل يسمح بالربط مع كيانات أخرى؟
 
   // --- أنواع الحوكمة المسموح بها في هذا الكيان ---
-  allowedGovernanceTypes GovernancePathType[]
+  allowedGovernanceTypes GovernancePathType[] @default([])
 
   // --- سياسات القرار الافتراضية ---
   defaultVoteType       VoteType @default(SIMPLE_MAJORITY)

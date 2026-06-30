@@ -697,7 +697,7 @@
       "allowedVoteTypes": "أنواع التصويت المسموحة للقرار",
       "voteType_SIMPLE_MAJORITY": "الأغلبية البسيطة",
       "voteType_TWO_THIRDS": "أغلبية الثلثين",
-      "voteType_UNANIMOUS": "الإجماع",
+      "voteType_BY_CONTRIBUTION": "حسب حجم المساهمة",
       "allowTransfer": "السماح بالتحويلات",
       "sameWalletOnly": "التحويل داخل نفس المحفظة فقط",
       "minAgreedAmount": "الحد الأدنى للاشتراك المتفق عليه (ر.س)",

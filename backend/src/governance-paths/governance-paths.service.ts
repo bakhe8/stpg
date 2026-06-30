@@ -39,10 +39,10 @@ export class GovernancePathsService {
     const entityPolicy = await this.prisma.entityPolicy.findUnique({
       where: { entityId: wallet.entityId },
     });
+    const allowedGovernanceTypes = entityPolicy?.allowedGovernanceTypes ?? [];
     if (
-      entityPolicy &&
-      entityPolicy.allowedGovernanceTypes.length > 0 &&
-      !entityPolicy.allowedGovernanceTypes.includes(dto.type)
+      allowedGovernanceTypes.length > 0 &&
+      !allowedGovernanceTypes.includes(dto.type)
     ) {
       throw new ForbiddenException(
         'نوع الحوكمة هذا غير مسموح به في سياسة الكيان',

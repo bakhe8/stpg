@@ -689,7 +689,7 @@
       "allowedVoteTypes": "Allowed vote types for decisions",
       "voteType_SIMPLE_MAJORITY": "Simple Majority",
       "voteType_TWO_THIRDS": "Two-Thirds Majority",
-      "voteType_UNANIMOUS": "Unanimous",
+      "voteType_BY_CONTRIBUTION": "By Contribution",
       "allowTransfer": "Allow Transfers",
       "sameWalletOnly": "Internal wallet transfers only",
       "minAgreedAmount": "Minimum agreed subscription amount (SAR)",

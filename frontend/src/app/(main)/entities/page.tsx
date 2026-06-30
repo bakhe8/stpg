@@ -117,7 +117,6 @@ export default function EntitiesPage() {
     NEIGHBORHOOD: t("typeNeighborhood"),
     COMMUNITY: t("typeCommunity"),
     CAMPAIGN: t("typeCampaign"),
-    FRIENDS: t("typeFriends"),
   };
 
   const roleLabel = (role?: string | null) => {

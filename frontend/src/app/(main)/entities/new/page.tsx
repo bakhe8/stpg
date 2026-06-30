@@ -16,9 +16,7 @@ interface WizardState {
   type: string;
   name: string;
   description: string;
-  governanceType: string;
   templateId: string;
-  allowMultiplePaths: boolean;
 }
 
 export default function EntityWizardPage() {
@@ -40,23 +38,13 @@ export default function EntityWizardPage() {
     { value: "BUILDING", label: t("typeBuilding2"), icon: "🏢", desc: t("typeBuildingDesc") },
     { value: "NEIGHBORHOOD", label: t("typeNeighborhood2"), icon: "🏘️", desc: t("typeNeighborhoodDesc") },
     { value: "TRIBE", label: t("typeTribe2"), icon: "⚜️", desc: t("typeTribeDesc") },
-    { value: "FRIENDS", label: t("typeFriends"), icon: "🤝", desc: t("typeFriendsDesc") },
     { value: "CAMPAIGN", label: t("typeCampaign2"), icon: "📣", desc: t("typeCampaignDesc") },
-  ];
-
-  const GOVERNANCE_TYPES = [
-    { value: "BOARD", label: t("govBoard"), desc: t("govBoardDesc") },
-    { value: "COMMITTEE", label: t("govCommittee"), desc: t("govCommitteeDesc") },
-    { value: "PUBLIC_VOTE", label: t("govPublicVote"), desc: t("govPublicVoteDesc") },
-    { value: "INDIVIDUAL_WITH_CAP", label: t("govIndividual"), desc: t("govIndividualDesc") },
   ];
 
   const STEPS = [
     t("wizardStep0"),
     t("wizardStep1"),
-    t("wizardStep2"),
     t("wizardStep3"),
-    t("wizardStep4"),
     t("wizardStep5"),
   ];
 
@@ -64,9 +52,7 @@ export default function EntityWizardPage() {
     type: "",
     name: "",
     description: "",
-    governanceType: "BOARD",
     templateId: "",
-    allowMultiplePaths: false,
   });
 
   useEffect(() => {
@@ -107,8 +93,6 @@ export default function EntityWizardPage() {
         type: state.type,
         description: state.description.trim() || undefined,
         templateId: state.templateId || undefined,
-        defaultGovernanceType: state.governanceType || undefined,
-        allowMultiplePaths: state.allowMultiplePaths,
       }) as { id: string };
       setCreatedEntityId(result.id);
       setStep(STEPS.length);
@@ -166,25 +150,6 @@ export default function EntityWizardPage() {
     </div>
   );
 
-  const renderStep2 = () => (
-    <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>{t("wizardGovTitle")}</h2>
-      <p className={styles.stepHint}>{t("wizardGovHint")}</p>
-      <div className={styles.govGrid}>
-        {GOVERNANCE_TYPES.map((g) => (
-          <button
-            key={g.value}
-            className={`${styles.govCard} ${state.governanceType === g.value ? styles.govCardSelected : ""}`}
-            onClick={() => setState({ ...state, governanceType: g.value })}
-          >
-            <span className={styles.govLabel}>{g.label}</span>
-            <span className={styles.govDesc}>{g.desc}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   const renderStep3 = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>{t("wizardTemplateTitle")}</h2>
@@ -218,36 +183,6 @@ export default function EntityWizardPage() {
     </div>
   );
 
-  const renderStep4 = () => (
-    <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>{t("wizardMultiPathTitle")}</h2>
-      <p className={styles.stepHint}>
-        {t("wizardMultiPathHint")}
-      </p>
-      <div className={styles.toggleRow}>
-        <button
-          className={`${styles.toggleBtn} ${!state.allowMultiplePaths ? styles.toggleSelected : ""}`}
-          onClick={() => setState({ ...state, allowMultiplePaths: false })}
-        >
-          <span className={styles.emojiIcon}>👤</span>
-          {t("singlePath")}
-          <span className={styles.toggleNote}>{t("singlePathNote")}</span>
-        </button>
-        <button
-          className={`${styles.toggleBtn} ${state.allowMultiplePaths ? styles.toggleSelected : ""}`}
-          onClick={() => setState({ ...state, allowMultiplePaths: true })}
-        >
-          <span className={styles.emojiIcon}>👥</span>
-          {t("multiPath")}
-          <span className={styles.toggleNote}>{t("multiPathNote")}</span>
-        </button>
-      </div>
-      <p className={styles.typeCardDesc}>
-        {t("wizardMultiPathHint2")}
-      </p>
-    </div>
-  );
-
   const renderStep5 = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>{t("wizardReviewTitle")}</h2>
@@ -256,9 +191,7 @@ export default function EntityWizardPage() {
           { label: t("reviewType"), value: ENTITY_TYPES.find((et) => et.value === state.type)?.label ?? state.type },
           { label: t("reviewName"), value: state.name },
           { label: t("reviewDescription"), value: state.description || "—" },
-          { label: t("reviewGovernance"), value: GOVERNANCE_TYPES.find((g) => g.value === state.governanceType)?.label ?? state.governanceType },
           { label: t("reviewTemplate"), value: state.templateId ? (templates.find((tpl) => tpl.id === state.templateId)?.name ?? state.templateId) : t("reviewNoTemplate") },
-          { label: t("reviewMultiPath"), value: state.allowMultiplePaths ? t("reviewAllowed") : t("reviewNotAllowed") },
         ].map((row) => (
           <div key={row.label} className={styles.reviewRow}>
             <span className={styles.reviewLabel}>{row.label}</span>
@@ -333,21 +266,6 @@ export default function EntityWizardPage() {
               {state.templateId
                 ? t("setupMapWalletTemplate")
                 : t("setupMapWalletManual")}
-            </strong>
-          </div>
-          <div>
-            <span>{t("setupMapGovernance")}</span>
-            <strong>
-              {GOVERNANCE_TYPES.find((g) => g.value === state.governanceType)
-                ?.label ?? state.governanceType}
-            </strong>
-          </div>
-          <div>
-            <span>{t("setupMapPaths")}</span>
-            <strong>
-              {state.allowMultiplePaths
-                ? t("setupMapMultiPath")
-                : t("setupMapSinglePath")}
             </strong>
           </div>
         </div>
@@ -450,7 +368,7 @@ export default function EntityWizardPage() {
     </div>
   );
 
-  const stepRenderers = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
+  const stepRenderers = [renderStep0, renderStep1, renderStep3, renderStep5];
   const isLastStep = step === STEPS.length - 1;
   const isDone = step === STEPS.length;
 

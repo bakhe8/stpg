@@ -98,7 +98,7 @@ export function RuleDesigner({ ruleType, ruleData, onChange, t }: RuleDesignerPr
           <div className={styles.designerFieldGroup}>
             <label className={styles.designerLabel}>{t("designer.allowedVoteTypes")}</label>
             <div className={styles.designerCheckboxGroup}>
-              {["SIMPLE_MAJORITY", "TWO_THIRDS", "UNANIMOUS"].map((vt) => (
+              {["SIMPLE_MAJORITY", "TWO_THIRDS", "BY_CONTRIBUTION"].map((vt) => (
                 <label key={vt} className={styles.designerCheckboxLabel}>
                   <input
                     type="checkbox"

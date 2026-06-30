@@ -209,7 +209,27 @@
     "transparencyTitle": "إعدادات الشفافية",
     "defaultTransparency": "مستوى الشفافية الافتراضي",
     "defaultTransparencyHint": "يُطبَّق على المحافظ والمسارات الجديدة ما لم يُحدَّد بشكل مختلف",
-    "impactTitle": "تأثير هذا التغيير"
+    "impactTitle": "تأثير هذا التغيير",
+    "voteTypeLabels": {
+      "oneMemberOneVote": "صوت لكل عضو",
+      "oneFamilyOneVote": "صوت لكل أسرة",
+      "subscribersOnly": "المشتركون فقط",
+      "byContribution": "حسب حجم المساهمة",
+      "simpleMajority": "أغلبية بسيطة",
+      "twoThirds": "أغلبية الثلثين",
+      "secret": "تصويت سري",
+      "committeeApproval": "موافقة اللجنة",
+      "individualWithCap": "قرار فردي بسقف",
+      "emergencyThenReview": "قرار عاجل ثم مراجعة"
+    },
+    "transparencyLabels": {
+      "publicToMembers": "ظاهر لكل الأعضاء",
+      "visibleToParticipants": "ظاهر للمشاركين فقط",
+      "visibleToCommittee": "ظاهر للجنة فقط",
+      "visibleToAuditor": "ظاهر للمراجع فقط",
+      "hiddenSensitive": "مخفي للبيانات الحساسة",
+      "aggregatedOnly": "إجمالي فقط"
+    }
   },
   "member": {
     "familyVoteWarning": "تنبيه: هذا القرار يتطلب تصويت جميع أعضاء الأسرة"
