@@ -2782,7 +2782,8 @@ export class WorkSurfaceService {
       blocked.push({
         id: 'unverified-account',
         title: 'بعض الإجراءات متوقفة حتى توثيق الحساب',
-        reason: 'يلزم توثيق الحساب قبل إنشاء كيانات أو تنفيذ إجراءات حساسة.',
+        reason:
+          'يلزم توثيق الحساب قبل إنشاء صناديق أو حملات أو تنفيذ إجراءات حساسة.',
         canFix: true,
         fixCta: { label: 'راجع الملف الشخصي', href: '/profile' },
       });
@@ -3080,7 +3081,7 @@ export class WorkSurfaceService {
       });
       pushTool({
         href: '/health',
-        label: 'صحة الكيانات',
+        label: 'صحة الصناديق والحملات',
         reason: 'لفحص جاهزية الصناديق ومشاكل الإعداد النادرة.',
         requiredRole: 'FOUNDER',
       });

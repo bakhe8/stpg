@@ -1,5 +1,31 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.14 - 2026-07-01
+
+**النوع:** Phase E wider visual and role audit
+**الحالة:** E-005 منفذة؛ تدقيق الأدوار الواسع مرّ على 18 مستخدم seed بدون مشاكل
+
+### ما تغير
+
+- عُزز `frontend/scripts/ux-role-audit.spec.cjs` حتى يستخدم dev-login عبر API مباشرة بدلاً من تفاعل هش مع زر دخول المطورين.
+- عُدل فحص framework overlay حتى لا يعتبر زر Next Dev Tools في بيئة التطوير خطأً.
+- أضيف فحص دائم لأي ظهور مرئي عربي لـ `كيان/كيانات` داخل audit الأدوار.
+- نُظفت بقايا سطح العمل في الباكند:
+  - `صحة الكيانات` أصبحت `صحة الصناديق والحملات`.
+  - `إنشاء كيانات` أصبحت `إنشاء صناديق أو حملات`.
+
+### المعنى العملي
+
+تدقيق E-005 صار بوابة عملية بعد تنظيف المصطلحات: يفحص سطح العمل اليومي والروابط المتقدمة والـ mobile bottom nav والقيود حسب الدور، ويتأكد أن النص المرئي لا يعيد مصطلح "كيان" للمستخدم.
+
+### التحقق
+
+- `npm run build` في backend
+- `npm run lint` في frontend
+- `npm run test:ux:roles` على 18 مستخدم seed: 18/18 passed، 0 issues
+- Browser check على `/login -> dev user -> /dashboard` بدون console errors
+- إعادة بناء وتشغيل حاوية backend حتى يعكس endpoint `/work-surface/me` النصوص الجديدة
+
 ## 2.13 - 2026-07-01
 
 **النوع:** Phase E legal/privacy terminology review

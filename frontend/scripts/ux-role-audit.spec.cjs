@@ -198,13 +198,30 @@ async function gotoWithRetry(page, url, options) {
 }
 
 async function login(page, username) {
-  await gotoWithRetry(page, `${BASE_URL}/login`, {
+  const response = await fetch(`${API_URL}/auth/dev-login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username }),
+  });
+  if (!response.ok) {
+    throw new Error(`dev login for ${username} returned ${response.status}`);
+  }
+  const session = await response.json();
+  if (!session?.accessToken || !session?.refreshToken || !session?.person?.id) {
+    throw new Error(`dev login for ${username} returned an invalid session`);
+  }
+
+  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+  await page.evaluate((payload) => {
+    localStorage.setItem("accessToken", payload.accessToken);
+    localStorage.setItem("refreshToken", payload.refreshToken);
+    localStorage.setItem("personId", payload.person.id);
+    localStorage.setItem("personName", payload.person.name);
+    document.cookie = `accessToken=${payload.accessToken}; path=/; max-age=900; samesite=lax`;
+  }, session);
+  await gotoWithRetry(page, `${BASE_URL}/dashboard`, {
     waitUntil: "domcontentloaded",
   });
-  await page.getByRole("button", { name: /دخول المطورين|Developer/i }).click();
-  await page.locator("#username-input").fill(username);
-  await page.getByRole("button", { name: /دخول تطويري|Dev/i }).click();
-  await page.waitForURL("**/dashboard", { timeout: 30000 });
   await page.waitForLoadState("domcontentloaded");
   await page.waitForSelector("aside nav", { timeout: 15000 });
   await page.waitForTimeout(900);
@@ -289,10 +306,11 @@ async function inspectPage(page) {
       );
     const overlayDom = Boolean(
       document.querySelector(
-        "nextjs-portal, [data-nextjs-dialog-overlay], [data-nextjs-toast]",
+        "[data-nextjs-dialog-overlay], [data-nextjs-error-overlay]",
       ),
     );
     const rawPlaceholder = /\{[a-zA-Z][a-zA-Z0-9_]*\}/.test(text);
+    const legacyEntityTerm = /(^|[^\p{L}])كيانات?([^\p{L}]|$)/u.test(text);
     const horizontalOverflow = Math.max(0, doc.scrollWidth - doc.clientWidth);
     const clickables = Array.from(
       document.querySelectorAll(
@@ -356,6 +374,7 @@ async function inspectPage(page) {
       bodyTextLength: text.length,
       overlay: overlayText || overlayDom,
       rawPlaceholder,
+      legacyEntityTerm,
       horizontalOverflow,
       smallTargets: smallTargets.slice(0, 25),
     };
@@ -686,6 +705,9 @@ function addInspectionIssues(issues, question, inspection, detail) {
   }
   if (inspection.rawPlaceholder) {
     addIssue(issues, question, "raw-placeholder", detail);
+  }
+  if (inspection.legacyEntityTerm) {
+    addIssue(issues, question, "legacy-entity-term-visible", detail);
   }
   if (inspection.horizontalOverflow > 2) {
     addIssue(issues, question, "horizontal-overflow", {
