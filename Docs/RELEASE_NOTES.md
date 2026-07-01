@@ -1,5 +1,32 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.18 - 2026-07-01
+
+**النوع:** Phase F first-run setup guidance
+**الحالة:** F-002 منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`.
+- بعد إنشاء صندوق من المسار الجديد، ينتقل المستخدم إلى صفحة الصندوق مع `created=1&start=empty|template`.
+- أضيفت لوحة `أول تشغيل` داخل صفحة الصندوق لتوضيح أن `ابدأ فارغا` مقصود وليس حالة ناقصة.
+- تعرض اللوحة أول بند ناقص في setup checklist كخطوة تالية مقترحة.
+- تم تحديث `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.18`.
+
+### المعنى العملي
+
+المؤسس يستطيع البدء بصندوق خفيف بدون فهم كل التفاصيل وقت الإنشاء، ثم يكمل المحافظ والمسارات والقواعد من داخل الصندوق. العمق التشغيلي بقي متاحا ولم يتغير schema أو API أو routes.
+
+### التحقق
+
+- `npm run lint`
+- `npm run build`
+- `npm run test:phase-d:create-flow`: 3 passed.
+- `npm run test:ux:roles`: 1 passed، ويغطي 18 مستخدم seed.
+- Browser desktop على first-run empty fund: لوحة أول تشغيل والخطوة التالية ظاهرتان، 0 console errors.
+- Browser mobile `390x844`: لوحة أول تشغيل وزر `إنشاء محفظة` ظاهران، 0 console errors.
+- `git diff --check`
+
 ## 2.17 - 2026-07-01
 
 **النوع:** Phase F capability evidence pack

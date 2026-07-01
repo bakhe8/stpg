@@ -52,6 +52,7 @@ const ROLE_MAP: Record<string, string> = {
 };
 
 type SetupChecklistAction = "settings" | "wallets" | "path" | "invite";
+type FirstRunStartMode = "empty" | "template";
 
 function formatCurrency(amount: number, currency = "SAR") {
   return new Intl.NumberFormat("ar-SA", { style: "currency", currency }).format(
@@ -208,6 +209,8 @@ export default function EntityDetailPage() {
   const [walletCreating, setWalletCreating] = useState(false);
   const [walletMsg, setWalletMsg] = useState<string | null>(null);
   const [setupPathCount, setSetupPathCount] = useState<number | null>(null);
+  const [firstRunStartMode, setFirstRunStartMode] =
+    useState<FirstRunStartMode | null>(null);
   const [walletForm, setWalletForm] = useState<{
     name: string;
     description: string;
@@ -251,8 +254,14 @@ export default function EntityDetailPage() {
   }
 
   useEffect(() => {
-    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    const params = new URLSearchParams(window.location.search);
+    const requestedTab = params.get("tab");
     if (requestedTab === "wallets") setTab("wallets");
+    if (params.get("created") === "1") {
+      setFirstRunStartMode(
+        params.get("start") === "template" ? "template" : "empty",
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -617,11 +626,14 @@ export default function EntityDetailPage() {
     },
   ];
   const setupDoneCount = setupChecklistItems.filter((item) => item.done).length;
+  const setupOpenItems = setupChecklistItems.filter((item) => !item.done);
+  const nextSetupItem = setupOpenItems[0];
   const showSetupChecklist =
     canManage &&
     !isActionDisabled &&
     !isCampaignEntity &&
     setupDoneCount < setupChecklistItems.length;
+  const showFirstRunGuide = showSetupChecklist && firstRunStartMode !== null;
   const pendingReviewItems = [
     {
       label: t("pendingReviewReasonLabel"),
@@ -1116,12 +1128,53 @@ export default function EntityDetailPage() {
                 </span>
               </div>
 
+              {showFirstRunGuide && (
+                <div className={styles.firstRunGuide}>
+                  <div className={styles.firstRunGuideText}>
+                    <span className={styles.firstRunGuideEyebrow}>
+                      {t("firstRunGuideEyebrow")}
+                    </span>
+                    <strong>
+                      {t(
+                        firstRunStartMode === "template"
+                          ? "firstRunGuideTemplateTitle"
+                          : "firstRunGuideEmptyTitle",
+                      )}
+                    </strong>
+                    <p>
+                      {t(
+                        firstRunStartMode === "template"
+                          ? "firstRunGuideTemplateBody"
+                          : "firstRunGuideEmptyBody",
+                      )}
+                    </p>
+                  </div>
+
+                  {nextSetupItem && (
+                    <div className={styles.firstRunNextAction}>
+                      <span>{t("firstRunGuideNextLabel")}</span>
+                      <strong>{nextSetupItem.title}</strong>
+                      <p>{nextSetupItem.detail}</p>
+                      {renderSetupAction(
+                        nextSetupItem.action,
+                        nextSetupItem.actionLabel,
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className={styles.setupChecklistGrid}>
                 {setupChecklistItems.map((item) => (
                   <div
                     key={item.key}
                     className={styles.setupChecklistItem}
                     data-state={item.done ? "done" : "open"}
+                    data-priority={
+                      !item.done && item.key === nextSetupItem?.key
+                        ? "next"
+                        : undefined
+                    }
                   >
                     <span className={styles.setupChecklistIcon}>
                       {item.done ? "✓" : "•"}

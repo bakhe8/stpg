@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.17`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.18`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -36,6 +36,7 @@
 | 11 | `11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` | تنظيف لغة الواجهة من "كيان" إلى صندوق/حملة |
 | 12 | `12_POST_PHASE_E_NEXT_BACKLOG.md` | الترشيح التنفيذي الصغير بعد إغلاق Phase E |
 | 13 | `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md` | دليل F-001 لحفظ القدرات بعد default switch |
+| 14 | `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md` | إغلاق F-002: إرشاد أول تشغيل بعد إنشاء الصندوق |
 
 ## ترتيب التنفيذ
 
@@ -123,7 +124,9 @@ Phase E بدأت بعد default switch لتنظيف لغة المنتج الظا
 
 أول بند كان `F-001`: إثبات حفظ القدرات بعد أن أصبح مسار صندوق/حملة هو default. تم إغلاقه في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`.
 
-العمل التالي المرشح هو `F-002`: تحسين first-run/setup guidance بعد إنشاء الصندوق بناء على الأدلة، بدون تغيير schema أو routes.
+تم إغلاق `F-002` في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`: تحسين first-run/setup guidance بعد إنشاء الصندوق، خصوصا `ابدأ فارغا`، بدون تغيير schema أو routes.
+
+العمل التالي المرشح هو `F-003`: Advanced Settings Access Audit.
 
 ## قواعد الحماية
 

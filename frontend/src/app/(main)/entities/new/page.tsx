@@ -260,7 +260,8 @@ function FundCreateFlow({ onUseLegacy }: { onUseLegacy: () => void }) {
         profileLabel:
           profileKey && selectedProfileLabel ? selectedProfileLabel : undefined,
       })) as { id: string };
-      router.push(`/entities/${fund.id}`);
+      const startMode = templateId ? "template" : "empty";
+      router.push(`/entities/${fund.id}?created=1&start=${startMode}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("createEntityFailed"));
     } finally {
