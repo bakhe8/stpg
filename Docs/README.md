@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.19` بتاريخ 2026-07-01.
+**الحالة الحالية:** الإصدار التشغيلي `2.20` بتاريخ 2026-07-01.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -100,6 +100,7 @@
 | [13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md](09_Improvement/13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md) | إغلاق F-001: دليل حفظ القدرات بعد default switch |
 | [14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md](09_Improvement/14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md) | إغلاق F-002: إرشاد أول تشغيل بعد إنشاء الصندوق |
 | [15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md](09_Improvement/15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md) | إغلاق F-003: تدقيق وصول الإعدادات المتقدمة |
+| [16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md](09_Improvement/16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md) | إغلاق F-004: مصفوفة قدرات القوالب |
 
 ---
 
@@ -138,8 +139,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit |
-| أول عمل مرشح | F-004: Template Capability Matrix |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit؛ F-004 أغلقت template capability matrix |
+| أول عمل مرشح | F-005: Legacy and URL Hygiene Watch |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)

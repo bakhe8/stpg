@@ -1,5 +1,30 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.20 - 2026-07-01
+
+**النوع:** Phase F template capability matrix
+**الحالة:** F-004 منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md`.
+- ثبتت الوثيقة أن القوالب نقاط بداية تشغيلية، وليست قيودا دائمة على قدرات الصندوق.
+- غطت المصفوفة `ابدأ فارغا`، صندوق مخصص، صندوق تكافل، صندوق خدمات مشتركة، صندوق داعمين فقط، وحملة مرتبطة بصندوق أب.
+- ثبتت الوثيقة أن `templateId` مرجع تاريخي، وأن `profileKey/profileLabel` وصف اختياري، وأن `enabledModules` metadata حاليا لا gate تشغيلي.
+- تم تحديث `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.20`.
+
+### المعنى العملي
+
+المؤسس يستطيع البدء فارغا أو من قالب، ثم يوسع الصندوق لاحقا لكل القدرات الموجودة: محافظ متعددة، `SHARED/SEPARABLE`، تصويت، لجان، قواعد، صرف، تدقيق، علاقات، نزاعات، وحملات. الحملة بقيت مسارا منفصلا عن قوالب الصندوق لأنها مرتبطة بصندوق أب ولها lifecycle مؤقت.
+
+### التحقق
+
+- قراءة seed/schema/service المرتبطة بالقوالب والحملات.
+- فحص استخدام `enabledModules`: لا يوجد استخدام حالي كقيد تشغيلي.
+- `npm run test:phase-d:parity` في backend.
+- `npm run seed:validate:docker` في backend.
+- `git diff --check`.
+
 ## 2.19 - 2026-07-01
 
 **النوع:** Phase F advanced settings access audit
