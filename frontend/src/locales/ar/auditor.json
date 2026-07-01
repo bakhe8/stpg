@@ -2,8 +2,8 @@
   "auditor": {
     "title": "لوحة المراجع",
     "sectionOperations": "العمليات المالية والتشغيلية",
-    "chooseEntity": "اختر الكيان",
-    "chooseEntityPrompt": "الرجاء تحديد كيان لعرض بيانات المراجعة",
+    "chooseEntity": "اختر الصندوق",
+    "chooseEntityPrompt": "الرجاء تحديد صندوق لعرض بيانات المراجعة",
     "tabOperations": "العمليات المالية",
     "tabDocuments": "المستندات",
     "tabDecisions": "القرارات",
@@ -22,7 +22,7 @@
     "opTypeProjectContribution": "مساهمة مشروع",
     "opTypeDisbursement": "صرف",
     "opTypeTransfer": "تحويل",
-    "opTypeEntitySupport": "دعم كيان",
+    "opTypeEntitySupport": "دعم صندوق",
     "opTypeAdjustment": "تسوية",
     "opTypeCorrection": "تصحيح",
     "opTypeReversal": "عكس عملية",
@@ -42,9 +42,9 @@
     "colParties": "الأطراف",
     "noExceptions": "لا توجد استثناءات مسجلة",
     "noConflicts": "لا توجد حالات تعارض مصالح",
-    "severityHigh": "عالية",
-    "severityMedium": "متوسطة",
-    "severityLow": "منخفضة",
+    "severityHigh": "عال",
+    "severityMedium": "متوسط",
+    "severityLow": "منخفض",
     "colAppeal": "الاعتراض",
     "colStatus": "الحالة",
     "noAppeals": "لا توجد اعتراضات مفتوحة",
@@ -55,14 +55,11 @@
     "auditLogEmpty": "لا توجد أحداث تدقيق ضمن الفلاتر الحالية.",
     "auditLogDayCount": "{count} حدث",
     "systemActor": "النظام",
-    "severityHigh": "عال",
-    "severityMedium": "متوسط",
-    "severityLow": "منخفض",
     "timelineContext": "السياق",
     "timelineEffect": "الأثر",
     "linkedRecords": "السجلات المرتبطة",
     "loadFailed": "فشل تحميل البيانات",
-    "prompt": "اختر كياناً أو مساراً لاستعراض التقرير"
+    "prompt": "اختر صندوقاً أو مساراً لاستعراض التقرير"
   },
   "visibilityWarning": "هذه البيانات مرئية للمراجع المالي فقط — لا تظهر لبقية الأعضاء"
 }

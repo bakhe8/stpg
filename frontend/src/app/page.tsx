@@ -49,7 +49,7 @@ const AUTOMATION_PROMISES = [
   {
     label: 'B',
     title: 'المال لا يختلط',
-    desc: 'فصل الكيانات والمحافظ والمسارات يحدث آلياً، ويظهر للمستخدم فقط الأثر الذي يخصه.',
+    desc: 'فصل الصناديق والمحافظ والمسارات يحدث آلياً، ويظهر للمستخدم فقط الأثر الذي يخصه.',
   },
   {
     label: 'C',
@@ -159,7 +159,7 @@ export default async function Home() {
           <p className={styles.eyebrow}>منصة تختصر الدور ولا تعرض التعقيد</p>
           <h1 className={styles.heroTitle}>كل دور يرى ما يهمه فقط</h1>
           <p className={styles.heroLead}>
-            CollectiveTrustOS لا يطلب من العضو فهم الكيان والمحفظة والمسار والقواعد.
+            CollectiveTrustOS لا يطلب من العضو فهم الصندوق والمحفظة والمسار والقواعد.
             النظام يحوّل ذلك إلى أشياء بسيطة: ماذا عليّ الآن؟ ماذا أستفيد؟ وماذا حدث في الصندوق؟
           </p>
           <div className={styles.heroActions}>

@@ -230,7 +230,7 @@ function ActionItemCard({
   );
 }
 
-// ── كرت الكيان المبسّط (بدون analytics) ─────────────────────────────
+// ── كرت الصندوق المبسّط (بدون analytics) ─────────────────────────────
 function EntityCard({ entity }: { entity: Entity }) {
   const tEnums = useTranslations("enums");
   const tEntities = useTranslations("entities");
@@ -456,7 +456,7 @@ export default function LegacyDashboardPage() {
             </strong>
             <p className={styles.suspendedBannerNote}>
               لا يمكنك الاستفادة من هذه المسارات حتى تُعاد تفعيل اشتراكاتك.
-              تواصل مع إدارة الكيان.
+              تواصل مع إدارة الصندوق.
             </p>
           </div>
           <Link href="/portal" className={styles.overlapLink}>
@@ -483,7 +483,7 @@ export default function LegacyDashboardPage() {
             عضويتك التشغيلية
           </span>
           <strong>
-            تظهر لك الالتزامات والحقوق حسب الكيان والمحفظة والمسار وحالة
+            تظهر لك الالتزامات والحقوق حسب الصندوق والمحفظة والمسار وحالة
             الاشتراك.
           </strong>
         </div>
@@ -660,7 +660,7 @@ export default function LegacyDashboardPage() {
               <div className={styles.beneficiaryTitle}>
                 أنت مستفيد في{" "}
                 {entities.filter((e) => e.myRole === "BENEFICIARY").length > 1
-                  ? `${entities.filter((e) => e.myRole === "BENEFICIARY").length} كيانات`
+                  ? `${entities.filter((e) => e.myRole === "BENEFICIARY").length} صناديق`
                   : `"${entities.find((e) => e.myRole === "BENEFICIARY")?.name ?? ""}"`}
               </div>
               <div className={styles.beneficiaryDesc}>

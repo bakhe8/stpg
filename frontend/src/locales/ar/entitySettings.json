@@ -1,10 +1,10 @@
 {
   "entitySettings": {
     "breadcrumbSettings": "إعدادات",
-    "backToEntity": "← العودة للكيان",
-    "title": "إعدادات الكيان",
+    "backToEntity": "← العودة للصندوق",
+    "title": "إعدادات الصندوق",
     "basicTitle": "البيانات الأساسية",
-    "nameLabel": "اسم الكيان",
+    "nameLabel": "اسم الصندوق",
     "descriptionLabel": "الوصف",
     "bankAccountLabel": "رقم الحساب البنكي",
     "bankNameLabel": "البنك",
@@ -21,20 +21,20 @@
     "saveFailed": "فشل الحفظ",
     "saving": "جارٍ الحفظ…",
     "saveChanges": "حفظ التغييرات",
-    "closureTitle": "إغلاق الكيان",
+    "closureTitle": "إغلاق الصندوق",
     "closureRequestSent": "تم إرسال طلب الإغلاق",
     "closureRequestedOn": "بتاريخ {date}",
     "closureSentMsg": "تم إرسال طلب الإغلاق — ستتولى المنصة مراجعته وإشعارك",
     "closureSentFailed": "فشل إرسال طلب الإغلاق",
-    "closureWarning": "يؤدي طلب الإغلاق إلى تجميد الكيان. يجب استيفاء الشروط أدناه قبل الإغلاق.",
+    "closureWarning": "يؤدي طلب الإغلاق إلى تجميد الصندوق. يجب استيفاء الشروط أدناه قبل الإغلاق.",
     "checklistLoading": "جارٍ التحقق من الشروط…",
     "closureReasonLabel": "سبب الإغلاق (مطلوب)",
-    "closureReasonPlaceholder": "اذكر سبب إغلاق الكيان…",
-    "requestClosureBtn": "طلب إغلاق الكيان",
+    "closureReasonPlaceholder": "اذكر سبب إغلاق الصندوق…",
+    "requestClosureBtn": "طلب إغلاق الصندوق",
     "completeChecksHint": "أكمل الشروط أعلاه لتفعيل زر الإغلاق",
-    "confirmClosureTitle": "تأكيد طلب إغلاق الكيان",
-    "confirmClosureDesc": "سيُجمَّد الكيان وتُرسل المنصة إشعاراً لجميع الأعضاء. هذا الإجراء يصعب التراجع عنه.",
+    "confirmClosureTitle": "تأكيد طلب إغلاق الصندوق",
+    "confirmClosureDesc": "سيُجمَّد الصندوق وتُرسل المنصة إشعاراً لجميع الأعضاء. هذا الإجراء يصعب التراجع عنه.",
     "confirmClosureBtn": "تأكيد طلب الإغلاق",
-    "entityNotFound": "لم يُعثر على الكيان"
+    "entityNotFound": "لم يُعثر على الصندوق"
   }
 }

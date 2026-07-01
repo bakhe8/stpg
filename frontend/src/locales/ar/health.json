@@ -1,10 +1,10 @@
 {
   "health": {
     "title": "مركز صحة الصندوق",
-    "subtitle": "7 مؤشرات تشغيلية لصحة كيانك",
-    "selectEntityTitle": "اختر كياناً",
-    "selectEntityOption": "— اختر كياناً —",
-    "selectEntityPrompt": "اختر كياناً لعرض مؤشرات الصحة التشغيلية",
+    "subtitle": "7 مؤشرات تشغيلية لصحة صندوقك",
+    "selectEntityTitle": "اختر صندوقاً",
+    "selectEntityOption": "— اختر صندوقاً —",
+    "selectEntityPrompt": "اختر صندوقاً لعرض مؤشرات الصحة التشغيلية",
     "loadFailed": "فشل تحميل مؤشرات الصحة",
     "overallLabel": "درجة الصحة العامة (من 100)",
     "levelExcellent": "ممتاز",

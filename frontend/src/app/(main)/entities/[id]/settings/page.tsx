@@ -142,7 +142,7 @@ export default function EntitySettingsPage() {
 
       <h1 className={styles.title}>{t("title")}</h1>
 
-      {/* ── بيانات الكيان ── */}
+      {/* ── بيانات الصندوق ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t("basicTitle")}</h2>
         <form onSubmit={handleSave} className={styles.form}>

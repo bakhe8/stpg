@@ -35,7 +35,7 @@ const FIELD_LABELS_AR: Record<string, string> = {
   reference: "المرجع",
   phone: "رقم الجوال",
   password: "كلمة المرور",
-  entityId: "الكيان",
+  entityId: "الصندوق",
   walletId: "المحفظة",
   pathId: "المسار",
   governancePathId: "المسار",

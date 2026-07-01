@@ -4,7 +4,7 @@
     "dailySurface": "حالتك الآن",
     "legacyDashboard": "الواجهة القديمة",
     "portal": "اشتراكاتي",
-    "entities": "الكيانات",
+    "entities": "الصناديق",
     "finance": "المالية",
     "subscriptions": "الاشتراكات",
     "decisions": "القرارات",
@@ -32,7 +32,7 @@
     "user": "مستخدم",
     "logout": "تسجيل الخروج",
     "menu": "القائمة",
-    "joinOrCreateHint": "انضم لكيان أو أنشئ كياناً لرؤية المزيد من الأدوات",
+    "joinOrCreateHint": "انضم لصندوق أو أنشئ صندوقاً لرؤية المزيد من الأدوات",
     "defaultInitial": "م",
     "health": "الصحة"
   },
@@ -44,7 +44,7 @@
     "active": "نشط",
     "inactive": "موقوف",
     "noData": "لا توجد بيانات",
-    "chooseEntity": "— اختر كياناً —",
+    "chooseEntity": "— اختر صندوقاً —",
     "chooseWallet": "— اختر محفظة —",
     "choosePath": "— اختر مساراً —",
     "submit": "إرسال",
@@ -90,10 +90,10 @@
     "appTitle": "CollectiveTrustOS",
     "appDescription": "منصة لإدارة الثقة الجماعية والصناديق العائلية",
     "loginTitle": "تسجيل الدخول | CollectiveTrustOS",
-    "loginDescription": "سجل الدخول إلى حسابك في منصة CollectiveTrustOS لإدارة المحافظ والكيانات الخاصة بك"
+    "loginDescription": "سجل الدخول إلى حسابك في منصة CollectiveTrustOS لإدارة المحافظ والصناديق الخاصة بك"
   },
   "search": {
-    "placeholder": "بحث (عن كيان، محفظة، قرار، ...)",
+    "placeholder": "بحث (عن صندوق، محفظة، قرار، ...)",
     "noResults": "لا توجد نتائج مطابقة"
   },
   "status": {
@@ -122,8 +122,8 @@
     "ruleExplanation": "لماذا يظهر لك هذا الطلب؟"
   },
   "accessReason": {
-    "notMemberTitle": "لست عضواً في هذا الكيان",
-    "notMemberBody": "يتطلب هذا الإجراء عضوية فعّالة في الكيان.",
+    "notMemberTitle": "لست عضواً في هذا الصندوق",
+    "notMemberBody": "يتطلب هذا الإجراء عضوية فعّالة في الصندوق.",
     "notSubscribedTitle": "غير مشترك في هذا المسار",
     "notSubscribedBody": "يتطلب هذا الإجراء الاشتراك في المسار المناسب داخل المحفظة.",
     "waitingPeriodTitle": "فترة الانتظار لم تنتهِ بعد",
@@ -133,7 +133,7 @@
     "insufficientRoleBody": "هذا الإجراء يتطلب دوراً أعلى مما تملكه حالياً.",
     "insufficientRoleBodyRole": "هذا الإجراء يتطلب دور {requiredRole}.",
     "suspendedTitle": "حسابك موقوف",
-    "suspendedBody": "تم تعليق صلاحياتك مؤقتاً. تواصل مع مسؤول الكيان.",
+    "suspendedBody": "تم تعليق صلاحياتك مؤقتاً. تواصل مع مسؤول الصندوق.",
     "pendingReviewTitle": "طلبك قيد المراجعة",
     "pendingReviewBody": "لا يمكنك اتخاذ هذا الإجراء حتى تنتهي مراجعة طلبك.",
     "unknownTitle": "الوصول مقيّد",
@@ -156,9 +156,9 @@
     "difference": "الفرق"
   },
   "platformBanner": {
-    "suspendedTitle": "هذا الكيان موقوف من المنصة",
-    "readOnlyTitle": "هذا الكيان في وضع القراءة فقط",
-    "pendingReviewTitle": "هذا الكيان قيد المراجعة",
+    "suspendedTitle": "هذا الصندوق موقوف من المنصة",
+    "readOnlyTitle": "هذا الصندوق في وضع القراءة فقط",
+    "pendingReviewTitle": "هذا الصندوق قيد المراجعة",
     "suspendedType": "تعليق كامل",
     "readOnlyType": "قراءة فقط",
     "pendingReviewType": "قيد المراجعة",
@@ -184,7 +184,7 @@
   },
   "policyBuilder": {
     "loading": "جارٍ تحميل إعدادات السياسة…",
-    "empty": "لا توجد سياسة لهذا الكيان",
+    "empty": "لا توجد سياسة لهذا الصندوق",
     "saving": "جارٍ الحفظ…",
     "cancel": "إلغاء",
     "days": "يوم",

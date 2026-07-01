@@ -4,7 +4,7 @@
     "dailySurface": "Your Now",
     "legacyDashboard": "Legacy Dashboard",
     "portal": "My Subscriptions",
-    "entities": "Entities",
+    "entities": "Funds",
     "finance": "Finance",
     "subscriptions": "Subscriptions",
     "decisions": "Decisions",
@@ -32,7 +32,7 @@
     "user": "User",
     "logout": "Log Out",
     "menu": "Menu",
-    "joinOrCreateHint": "Join or create an entity to see more tools",
+    "joinOrCreateHint": "Join or create a fund to see more tools",
     "defaultInitial": "U",
     "health": "Health"
   },
@@ -44,7 +44,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "noData": "No data available",
-    "chooseEntity": "— Select an entity —",
+    "chooseEntity": "— Select a fund —",
     "chooseWallet": "— Select a wallet —",
     "choosePath": "— Select a path —",
     "submit": "Submit",
@@ -90,10 +90,10 @@
     "appTitle": "CollectiveTrustOS",
     "appDescription": "A platform for collective trust and social fund governance",
     "loginTitle": "Login | CollectiveTrustOS",
-    "loginDescription": "Sign in to your CollectiveTrustOS account to manage wallets and entities"
+    "loginDescription": "Sign in to your CollectiveTrustOS account to manage wallets and funds"
   },
   "search": {
-    "placeholder": "Search (entity, wallet, decision, ...)",
+    "placeholder": "Search (fund, wallet, decision, ...)",
     "noResults": "No matching results"
   },
   "status": {
@@ -122,8 +122,8 @@
     "ruleExplanation": "Why is this request shown to you?"
   },
   "accessReason": {
-    "notMemberTitle": "You are not a member of this entity",
-    "notMemberBody": "This action requires active membership in the entity.",
+    "notMemberTitle": "You are not a member of this fund",
+    "notMemberBody": "This action requires active membership in the fund.",
     "notSubscribedTitle": "Not subscribed to this path",
     "notSubscribedBody": "This action requires a subscription to the appropriate path within the wallet.",
     "waitingPeriodTitle": "Waiting period has not ended yet",
@@ -133,7 +133,7 @@
     "insufficientRoleBody": "This action requires a higher role than you currently have.",
     "insufficientRoleBodyRole": "This action requires the {requiredRole} role.",
     "suspendedTitle": "Your account is suspended",
-    "suspendedBody": "Your permissions have been temporarily suspended. Contact the entity administrator.",
+    "suspendedBody": "Your permissions have been temporarily suspended. Contact the fund administrator.",
     "pendingReviewTitle": "Your request is under review",
     "pendingReviewBody": "You cannot take this action until your request review is complete.",
     "unknownTitle": "Access restricted",
@@ -156,9 +156,9 @@
     "difference": "Difference"
   },
   "platformBanner": {
-    "suspendedTitle": "This entity is suspended by the platform",
-    "readOnlyTitle": "This entity is in read-only mode",
-    "pendingReviewTitle": "This entity is under platform review",
+    "suspendedTitle": "This fund is suspended by the platform",
+    "readOnlyTitle": "This fund is in read-only mode",
+    "pendingReviewTitle": "This fund is under platform review",
     "suspendedType": "Full suspension",
     "readOnlyType": "Read only",
     "pendingReviewType": "Under review",
@@ -184,7 +184,7 @@
   },
   "policyBuilder": {
     "loading": "Loading policy settings…",
-    "empty": "No policy found for this entity",
+    "empty": "No policy found for this fund",
     "saving": "Saving…",
     "cancel": "Cancel",
     "days": "days",

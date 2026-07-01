@@ -98,7 +98,7 @@ export default function RulesPage() {
   }
 
   const TARGET_TYPE_LABELS: Record<string, string> = {
-    ENTITY: 'مستوى الكيان',
+    ENTITY: 'مستوى الصندوق',
     WALLET: 'مستوى المحفظة',
     PATH: 'مستوى المسار',
   };
@@ -510,7 +510,7 @@ export default function RulesPage() {
               setEvalResult(null);
             }}
           >
-            <option value="">— اختر كياناً —</option>
+              <option value="">— اختر صندوقاً —</option>
             {entities.map((entity) => (
               <option key={entity.id} value={entity.id}>
                 {entity.name}
@@ -562,7 +562,7 @@ export default function RulesPage() {
               }}
             >
               <option value="ENTITY" disabled={!entityId}>
-                نطاق الكيان
+                نطاق الصندوق
               </option>
               <option value="WALLET" disabled={!walletId}>
                 نطاق المحفظة

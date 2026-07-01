@@ -512,7 +512,7 @@ export default function PortalPage() {
           getMyPaymentRecords().catch(() => [] as PaymentRecord[]),
         ]);
 
-        // بناء خريطة الكيانات
+    // بناء خريطة الصناديق
         const entityMap = new Map(entities.map((e) => [e.id, e]));
 
         // الاشتراكات التي يجب أن يرى العضو سياقها التشغيلي.
@@ -525,7 +525,7 @@ export default function PortalPage() {
           return entity ? isReadableEntity(entity) : false;
         });
 
-        // اشتراكات تحتاج انتباه بسبب حالة الاشتراك أو حالة الكيان نفسه
+    // اشتراكات تحتاج انتباه بسبب حالة الاشتراك أو حالة الصندوق نفسه
         const problemSubs = subscriptions.filter((s) => {
           const entityId = s.membership?.entityId;
           const entity = entityId ? entityMap.get(entityId) : undefined;

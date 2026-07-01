@@ -1,7 +1,7 @@
 {
   "analytics": {
     "title": "Operational Analytics",
-    "chooseEntity": "Choose Entity",
+    "chooseEntity": "Choose Fund",
     "loading": "Loading...",
     "loadError": "An error occurred while loading data",
     "noData": "No data available",

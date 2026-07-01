@@ -1,10 +1,10 @@
 {
   "health": {
     "title": "Fund Health Center",
-    "subtitle": "7 operational indicators for your entity's health",
-    "selectEntityTitle": "Select an entity",
-    "selectEntityOption": "— Select an entity —",
-    "selectEntityPrompt": "Select an entity to view operational health indicators",
+    "subtitle": "7 operational indicators for your fund's health",
+    "selectEntityTitle": "Select a fund",
+    "selectEntityOption": "— Select a fund —",
+    "selectEntityPrompt": "Select a fund to view operational health indicators",
     "loadFailed": "Failed to load health indicators",
     "overallLabel": "Overall health score (out of 100)",
     "levelExcellent": "Excellent",

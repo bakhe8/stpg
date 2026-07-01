@@ -1,5 +1,30 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.10 - 2026-07-01
+
+**النوع:** Phase E UI terminology cleanup
+**الحالة:** E-001 منفذة؛ تنظيف لغة الواجهة مع بقاء الباكند والعقود الداخلية كما هي
+
+### ما تغير
+
+- بدأت Phase E بعد إغلاق D-011.
+- استبدلت قيم الترجمة الظاهرة من `كيان/Entity` إلى `صندوق/Fund` أو `صندوق أو حملة` حسب السياق.
+- حُدّثت النصوص المباشرة في صفحات الواجهة العامة، الانضمام، المحافظ، الاشتراكات، الاعتراضات، وقواعد المشاركة.
+- حُدّثت تسمية التحقق الظاهرة لـ `entityId` إلى `الصندوق`.
+- حُدّثت توقعات اختبارات UX smoke وrole audit لتطابق لغة المنتج الجديدة.
+- أضيفت وثيقة `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md`.
+
+### المعنى العملي
+
+المستخدم العادي يرى الآن لغة `صندوق/حملة` بدلا من "كيان"، بينما بقيت `Entity`, `/entities`, `EntityType`, `X-Entity-ID`, وقاعدة البيانات بدون تغيير. العمل التالي هو E-002 لجعل الشاشات المشتركة تعرض "حملة" ديناميكيا عندما يكون السجل حملة.
+
+### التحقق
+
+- `npm run test:phase-d:create-flow`
+- `npm run lint`
+- `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false npm run build`
+- `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=true npm run build`
+
 ## 2.9 - 2026-07-01
 
 **النوع:** Phase D default switch

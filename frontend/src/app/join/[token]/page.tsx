@@ -22,7 +22,7 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   CAMPAIGN: 'حملة',
 };
 
-// ── مكوّن: معاينة الكيان ──────────────────────────────────────────────
+// ── مكوّن: معاينة الصندوق ──────────────────────────────────────────────
 function EntityPreview({ preview }: { preview: InvitationPreview }) {
   return (
     <div className={styles.entityCard}>
@@ -146,7 +146,7 @@ export default function JoinPage() {
         <div className={`${styles.panel} ${styles.successPanel}`}>
           <div className={styles.successIcon}>⏳</div>
           <h2 className={styles.title}>تم إرسال طلب انضمامك لـ {joinedEntityName}</h2>
-          <p className={styles.muted}>طلبك الآن بانتظار مراجعة الإدارة والموافقة عليه بناءً على قواعد الكيان.</p>
+          <p className={styles.muted}>طلبك الآن بانتظار مراجعة الإدارة والموافقة عليه بناءً على قواعد الصندوق.</p>
 
           {isUnverified && (
             <div className={styles.warning}>
@@ -200,7 +200,7 @@ export default function JoinPage() {
             </div>
           </div>
           <p className={styles.preJoinNote}>
-            إرسال الطلب هو الخطوة الأولى. بناءً على قواعد الكيان، قد يتطلب طلبك موافقة المشرفين لتفعيل عضويتك.
+            إرسال الطلب هو الخطوة الأولى. بناءً على قواعد الصندوق، قد يتطلب طلبك موافقة المشرفين لتفعيل عضويتك.
           </p>
         </div>
 
@@ -252,7 +252,7 @@ export default function JoinPage() {
           )}
 
           <div className={styles.field}>
-            <label className={styles.label}>ما علاقتك بالكيان؟</label>
+            <label className={styles.label}>ما علاقتك بالصندوق؟</label>
             <input
               type="text"
               value={relationshipDescription}

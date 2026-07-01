@@ -57,7 +57,7 @@ export default function RegisterForm() {
         <header className={styles.header}>
           <h1 className={styles.title}>إنشاء حساب</h1>
           <p className={styles.subtitle}>
-            سجّل حسابك ثم انضم لكيانك عبر رابط الدعوة
+            سجّل حسابك ثم انضم لصندوقك عبر رابط الدعوة
           </p>
         </header>
 

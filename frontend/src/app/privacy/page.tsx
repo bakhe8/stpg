@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           <p className={styles.sectionText}>نجمع البيانات الضرورية لتشغيل الخدمة فقط، وتشمل:</p>
           <ul className={styles.list}>
             <li><strong>بيانات الهوية:</strong> الاسم الكامل، رقم الجوال</li>
-            <li><strong>بيانات العضوية:</strong> الكيانات التي تنتمي إليها، الدور، تاريخ الانضمام</li>
+            <li><strong>بيانات العضوية:</strong> الصناديق أو الحملات التي تنتمي إليها، الدور، تاريخ الانضمام</li>
             <li><strong>البيانات المالية:</strong> سجلات الاشتراكات والمدفوعات والصرف المرتبطة بحسابك</li>
             <li><strong>بيانات الاستخدام:</strong> سجلات النشاط لأغراض التدقيق والأمان</li>
           </ul>
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>٢. كيف نستخدم بياناتك</h2>
           <ul className={styles.list}>
-            <li>تمكينك من إدارة عضويتك والمشاركة في كيانك</li>
+            <li>تمكينك من إدارة عضويتك والمشاركة في صندوقك أو حملتك</li>
             <li>إرسال الإشعارات المتعلقة بالقرارات والمدفوعات والطلبات</li>
             <li>تدقيق العمليات وضمان سلامة البيانات المالية</li>
             <li>تحسين أداء المنصة وتجربة المستخدم</li>
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
           <h2 className={styles.sectionTitle}>٣. مشاركة البيانات</h2>
           <p className={styles.sectionText}>لا نشارك بياناتك الشخصية مع أطراف خارجية باستثناء:</p>
           <ul className={styles.list}>
-            <li><strong>مدراء الكيان الذي تنتمي إليه:</strong> يرون بيانات العضوية الضرورية لإدارة الكيان</li>
+            <li><strong>مدراء الصندوق أو الحملة التي تنتمي إليها:</strong> يرون بيانات العضوية الضرورية للإدارة</li>
             <li><strong>مزودي البنية التحتية:</strong> استضافة الخوادم بضمانات تعاقدية للخصوصية</li>
             <li><strong>الجهات القانونية:</strong> عند الإلزام القانوني فقط</li>
           </ul>

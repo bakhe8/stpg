@@ -151,7 +151,7 @@ function MembershipApplicationsTab({
       {approveTarget && (
         <ConfirmActionDialog
           title="قبول طلب الانضمام"
-          description="سيُصبح مقدم الطلب عضواً نشطاً في الكيان."
+          description="سيُصبح مقدم الطلب عضواً نشطاً في الصندوق."
           confirmLabel="تأكيد القبول"
           loading={busy === approveTarget}
           onConfirm={() => void approve(approveTarget)}

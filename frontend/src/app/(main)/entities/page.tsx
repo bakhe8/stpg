@@ -334,7 +334,7 @@ export default function EntitiesPage() {
                   key={e.id}
                   className={`${styles.row} ${styles.rowDisabled}`}
                   aria-disabled="true"
-                  title="هذا الكيان معلّق حالياً"
+                  title="هذا الصندوق معلّق حالياً"
                 >
                   {rowContent}
                 </div>

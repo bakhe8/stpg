@@ -334,7 +334,7 @@ async function expectNewCreateChoice(page) {
   await expect(fundChoiceButton(page)).toBeVisible();
   await expect(campaignChoiceButton(page)).toBeVisible();
   await expect(page.getByRole("button", { name: /استخدام النموذج القديم|Use legacy form/i })).toBeVisible();
-  await expect(page.getByText(/اختر نوع الكيان|Choose entity type/i)).toHaveCount(0);
+  await expect(page.getByText(/اختر نوع الصندوق|Choose fund type/i)).toHaveCount(0);
 }
 
 test.describe.configure({ mode: "serial" });
@@ -352,7 +352,7 @@ test.describe("Phase D create flow feature flag smoke", () => {
       });
       await passPreGateIfPresent(page);
 
-      await expect(page.getByText(/اختر نوع الكيان|Choose entity type/i)).toBeVisible();
+      await expect(page.getByText(/اختر نوع الصندوق|Choose fund type/i)).toBeVisible();
       await expect(page.getByRole("button", { name: /عائلة|Family/i })).toBeVisible();
       await expect(page.getByRole("button", { name: /عمارة|Building/i })).toBeVisible();
       await expect(page.getByRole("button", { name: /حي|Neighborhood/i })).toBeVisible();

@@ -1,8 +1,8 @@
 # Repository State - CollectiveTrustOS
 
-**الإصدار التشغيلي:** 2.9
+**الإصدار التشغيلي:** 2.10
 **التاريخ:** 2026-07-01
-**الحالة:** Production readiness 08 closed; Improvement 09 Phase D default switch completed
+**الحالة:** Production readiness 08 closed; Improvement 09 Phase E terminology cleanup started
 **سجل الإصدار:** `Docs/RELEASE_NOTES.md`
 
 ## الغرض
@@ -18,8 +18,8 @@
 | Production readiness 08 | مغلق تنفيذيا حسب `Docs/08_Production_Readiness/BACKLOG.md` |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011 |
-| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا |
+| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E بدأت بتنظيف لغة الواجهة في E-001 وتم التحقق منها |
+| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر وتحققت بالفحص والبناء. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا |
 
 ## مصادر الحقيقة
 
@@ -28,8 +28,8 @@
 | هل 08 مغلق؟ | `Docs/08_Production_Readiness/BACKLOG.md` |
 | ما حالة تقرير التدقيق v2؟ | `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` مع ملاحظة أنه superseded |
 | ما الخطة التالية؟ | `Docs/09_Improvement/00_README.md` |
-| ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/10_PHASE_D_DEFAULT_SWITCH.md` |
-| ما العمل التالي؟ | backlog لاحق منفصل لتنظيف مصطلح "كيان" من الواجهة العادية |
+| ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` |
+| ما العمل التالي؟ | `E-002` داخل `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` |
 | ما القدرات التي لا يجوز خسارتها؟ | `Docs/09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md` |
 
 ## قرار الانتقال إلى 09
@@ -50,9 +50,10 @@
 - D-009 أضافت parity pack backend يغطي القدرات الأساسية قبل أي default switch.
 - D-010 أضافت UX smoke test للعلمين يثبت بقاء legacy flow عند تعطيل العلم وظهور صندوق/حملة عند تفعيله.
 - D-011 جعلت مسار صندوق/حملة هو default، مع بقاء `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` كمسار rollback.
+- E-001 نظفت النصوص الظاهرة في الواجهة والترجمات من مصطلح "كيان" لصالح "صندوق/حملة"، بدون تغيير `Entity` أو routes أو schema.
 - لم نغير routes، ولم نحذف `EntityType`.
 
-## شرط قبل إغلاق Phase D
+## بوابات أغلقت قبل default switch
 
 قبل جعل المسار الجديد default، يجب اعتبار هذه الحالة هي نقطة البداية:
 

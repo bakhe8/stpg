@@ -79,7 +79,7 @@ export default function PlatformAppealsPage() {
         <div>
           <h1 className={styles.pageTitle}>اعتراضات التعليق</h1>
           <p className={styles.pageSubtitle}>
-            {total} اعتراض — مدراء الكيانات يعترضون على قرارات التعليق
+            {total} اعتراض — مدراء الصناديق يعترضون على قرارات التعليق
           </p>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function PlatformAppealsPage() {
                     </span>
                     <span className={styles.sep}>·</span>
                     <span className={styles.entityId}>
-                      الكيان: {appeal.entityId.slice(0, 8)}…
+                      الصندوق: {appeal.entityId.slice(0, 8)}…
                     </span>
                     <span className={styles.sep}>·</span>
                     <span className={styles.date}>

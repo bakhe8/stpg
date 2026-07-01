@@ -2,8 +2,8 @@
   "auditor": {
     "title": "Auditor Dashboard",
     "sectionOperations": "Financial and operational activity",
-    "chooseEntity": "Choose Entity",
-    "chooseEntityPrompt": "Please select an entity to view audit data",
+    "chooseEntity": "Choose Fund",
+    "chooseEntityPrompt": "Please select a fund to view audit data",
     "tabOperations": "Financial Operations",
     "tabDocuments": "Documents",
     "tabDecisions": "Decisions",
@@ -22,7 +22,7 @@
     "opTypeProjectContribution": "Project Contribution",
     "opTypeDisbursement": "Disbursement",
     "opTypeTransfer": "Transfer",
-    "opTypeEntitySupport": "Entity Support",
+    "opTypeEntitySupport": "Fund Support",
     "opTypeAdjustment": "Adjustment",
     "opTypeCorrection": "Correction",
     "opTypeReversal": "Reversal",
@@ -55,14 +55,11 @@
     "auditLogEmpty": "No audit events match the current filters.",
     "auditLogDayCount": "{count} event(s)",
     "systemActor": "System",
-    "severityHigh": "High",
-    "severityMedium": "Medium",
-    "severityLow": "Low",
     "timelineContext": "Context",
     "timelineEffect": "Effect",
     "linkedRecords": "Linked records",
     "loadFailed": "Failed to load data",
-    "prompt": "Select an entity or path to view the report"
+    "prompt": "Select a fund or path to view the report"
   },
   "visibilityWarning": "This data is visible to the financial auditor only — it is not shown to other members"
 }

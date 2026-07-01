@@ -110,7 +110,7 @@ export default function WalletsPage() {
           value={selectedEntity}
           onChange={(e) => setSelectedEntity(e.target.value)}
         >
-          <option value="">جميع الكيانات</option>
+          <option value="">جميع الصناديق</option>
           {entities.map((e) => (
             <option key={e.id} value={e.id}>{e.name}</option>
           ))}
@@ -134,8 +134,8 @@ export default function WalletsPage() {
 
       {filtered.length === 0 ? (
         <div className={styles.empty}>
-          <p>لا توجد محافظ بعد. أنشئ كياناً ثم أضف محفظة من صفحة الكيان.</p>
-          <Link href="/entities" className={styles.emptyLink}>تصفح الكيانات ←</Link>
+          <p>لا توجد محافظ بعد. أنشئ صندوقاً ثم أضف محفظة من صفحة الصندوق.</p>
+          <Link href="/entities" className={styles.emptyLink}>تصفح الصناديق ←</Link>
         </div>
       ) : (
         <div className={styles.grid}>

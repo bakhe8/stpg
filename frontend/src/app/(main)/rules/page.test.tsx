@@ -60,7 +60,7 @@ describe('Rules page template flows', () => {
     vi.clearAllMocks();
 
     getEntities.mockResolvedValue([
-      { id: 'entity-1', name: 'الكيان 1', myRole: 'ADMIN' },
+    { id: 'entity-1', name: 'الصندوق 1', myRole: 'ADMIN' },
     ]);
     getEntityWallets.mockResolvedValue([{ id: 'wallet-1', name: 'المحفظة 1' }]);
     getWalletPaths.mockResolvedValue([{ id: 'path-1', name: 'المسار 1' }]);

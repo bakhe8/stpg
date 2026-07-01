@@ -83,7 +83,7 @@ export default function ProfilePage() {
           <div className={styles.bannerIcon}>⚠</div>
           <div className={styles.bannerBody}>
             <strong>{t('activationBannerTitle')}</strong>
-            <p>حسابك ما زال بانتظار تفعيل العضوية من قبل إدارة الكيان.</p>
+            <p>حسابك ما زال بانتظار تفعيل العضوية من قبل إدارة الصندوق.</p>
           </div>
         </div>
       )}

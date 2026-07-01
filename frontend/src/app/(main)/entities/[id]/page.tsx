@@ -878,7 +878,7 @@ export default function EntityDetailPage() {
                 {healthPct < 70 && (
                   <div className={styles.healthTooltipHint}>
                     {healthPct < 40
-                      ? "الكيان بحاجة إلى اهتمام عاجل — راجع المدفوعات والاشتراكات"
+                      ? "الصندوق بحاجة إلى اهتمام عاجل — راجع المدفوعات والاشتراكات"
                       : "يمكن تحسين الصحة بتسوية المدفوعات المعلقة"}
                   </div>
                 )}

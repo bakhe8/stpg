@@ -1,10 +1,10 @@
 {
   "entitySettings": {
     "breadcrumbSettings": "Settings",
-    "backToEntity": "← Back to entity",
-    "title": "Entity Settings",
+    "backToEntity": "← Back to fund",
+    "title": "Fund Settings",
     "basicTitle": "Basic Information",
-    "nameLabel": "Entity name",
+    "nameLabel": "Fund name",
     "descriptionLabel": "Description",
     "bankAccountLabel": "Bank account number",
     "bankNameLabel": "Bank",
@@ -21,20 +21,20 @@
     "saveFailed": "Save failed",
     "saving": "Saving…",
     "saveChanges": "Save changes",
-    "closureTitle": "Close Entity",
+    "closureTitle": "Close Fund",
     "closureRequestSent": "Closure request sent",
     "closureRequestedOn": "On {date}",
     "closureSentMsg": "Closure request sent — the platform will review it and notify you",
     "closureSentFailed": "Failed to send closure request",
-    "closureWarning": "Requesting closure will freeze the entity. The conditions below must be met before closing.",
+    "closureWarning": "Requesting closure will freeze the fund. The conditions below must be met before closing.",
     "checklistLoading": "Checking conditions…",
     "closureReasonLabel": "Closure reason (required)",
-    "closureReasonPlaceholder": "State the reason for closing the entity…",
-    "requestClosureBtn": "Request entity closure",
+    "closureReasonPlaceholder": "State the reason for closing the fund…",
+    "requestClosureBtn": "Request fund closure",
     "completeChecksHint": "Complete the conditions above to enable the closure button",
-    "confirmClosureTitle": "Confirm entity closure request",
-    "confirmClosureDesc": "The entity will be frozen and the platform will notify all members. This action is hard to reverse.",
+    "confirmClosureTitle": "Confirm fund closure request",
+    "confirmClosureDesc": "The fund will be frozen and the platform will notify all members. This action is hard to reverse.",
     "confirmClosureBtn": "Confirm closure request",
-    "entityNotFound": "Entity not found"
+    "entityNotFound": "Fund not found"
   }
 }

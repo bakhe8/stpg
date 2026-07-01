@@ -30,7 +30,7 @@
     "ruleDisbursementsTitle": "Why are you approving disbursements?",
     "ruleDisbursementsDesc": "Disbursement requests require authorized approval before execution. Your review ensures alignment with approved spending items.",
     "ruleDisputesTitle": "Why are you reviewing these disputes?",
-    "ruleDisputesDesc": "As arbitrator or admin, you are responsible for resolving open disputes in accordance with entity regulations.",
+    "ruleDisputesDesc": "As arbitrator or admin, you are responsible for resolving open disputes in accordance with fund regulations.",
     "amountSAR": "{amount} SAR",
     "referencePrefix": "Reference: {ref}",
     "confirm": "Confirm",
