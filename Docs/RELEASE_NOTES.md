@@ -1,5 +1,30 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.21 - 2026-07-01
+
+**النوع:** Phase F legacy and URL hygiene watch
+**الحالة:** F-005 منفذة ومتحقق منها؛ Phase F مغلقة
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md`.
+- ثبتت الوثيقة أن `/entities` يبقى المسار التوافقي القائم، وأن `/funds` لا يضاف الآن كـ alias أو redirect أو rewrite.
+- ثبتت أن `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` يبقى rollback للنموذج القديم.
+- سجلت الوثيقة أن ظهور `/entities` المتبقي محصور في URL/links، بينما النص الظاهر للمستخدم يبقى صندوق/حملة.
+- تم تحديث `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.21`.
+
+### المعنى العملي
+
+التجربة الجديدة مستقرة كمسار افتراضي، والمسار القديم ما زال قابلًا للرجوع عبر الفلاق. لا يوجد تغيير API أو schema أو route alias. أي `/funds` لاحق يجب أن يكون حزمة مستقلة additive ويحافظ على `/entities`.
+
+### التحقق
+
+- فحص `frontend/next.config.ts`: لا rewrites أو redirects.
+- فحص عدم وجود route `/funds`.
+- بحث focused عن `/funds` في كود الواجهة والباكند.
+- `npm run test:phase-d:create-flow` في frontend: 3 passed.
+- `git diff --check`.
+
 ## 2.20 - 2026-07-01
 
 **النوع:** Phase F template capability matrix
