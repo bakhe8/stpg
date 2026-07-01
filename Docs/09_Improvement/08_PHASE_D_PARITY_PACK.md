@@ -87,9 +87,9 @@ npm run test:phase-d:parity
 - حملات.
 - علاقات بين صناديق ومحافظ.
 
-## المتبقي بعد D-009
+## ما حدث بعد D-009
 
-قبل أي default switch:
+أغلقت البوابات اللاحقة في:
 
 1. `D-010`: UX smoke test للعلمين `flag off` و`flag on`.
-2. `D-011`: قرار إداري/منتجي بجعل المسار الجديد default أو إبقائه خلف flag فترة أطول.
+2. `D-011`: جعل مسار صندوق/حملة default مع بقاء `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` كمسار rollback.

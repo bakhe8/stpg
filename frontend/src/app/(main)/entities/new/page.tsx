@@ -31,7 +31,7 @@ type OperationalTemplateProfile = {
 };
 
 const FUND_CREATE_FLOW_ENABLED =
-  process.env.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW === "true";
+  process.env.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW !== "false";
 
 export default function EntityWizardPage() {
   const [useLegacyOverride, setUseLegacyOverride] = useState(false);

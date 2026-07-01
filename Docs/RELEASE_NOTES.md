@@ -1,5 +1,23 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.9 - 2026-07-01
+
+**النوع:** Phase D default switch
+**الحالة:** D-011 منفذة؛ مسار صندوق/حملة أصبح default مع rollback للفلاق
+
+### ما تغير
+
+- أصبح مسار إنشاء صندوق/حملة هو الافتراضي داخل `/entities/new`.
+- أصبحت قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` هي مسار rollback المؤقت للنموذج القديم.
+- أضيف `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=true` إلى `.env.example` و`.env.production.example`.
+- حُدّث `frontend/README.md` ليصف الفلاق كسلوك rollback.
+- توسع اختبار `npm run test:phase-d:create-flow` ليغطي default/empty value بالإضافة إلى `true` و`false`.
+- أضيفت وثيقة `Docs/09_Improvement/10_PHASE_D_DEFAULT_SWITCH.md`.
+
+### المعنى العملي
+
+تجربة المستخدم الطبيعية أصبحت تبدأ بسؤال صندوق أو حملة، مع بقاء النموذج القديم متاحا عند الحاجة عبر `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false`. لم يتغير الباكند أو قاعدة البيانات أو routes في هذا الإصدار.
+
 ## 2.8 - 2026-07-01
 
 **النوع:** Phase D UX smoke tests

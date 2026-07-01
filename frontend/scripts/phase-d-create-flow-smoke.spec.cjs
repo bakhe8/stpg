@@ -9,6 +9,7 @@ const FRONTEND_ROOT = path.resolve(__dirname, "..");
 const API_URL = process.env.API_URL || "http://localhost:3001/api";
 const LEGACY_PORT = Number(process.env.PHASE_D_LEGACY_PORT || 3100);
 const NEW_FLOW_PORT = Number(process.env.PHASE_D_NEW_PORT || 3333);
+const DEFAULT_FLOW_PORT = Number(process.env.PHASE_D_DEFAULT_PORT || 3100);
 const USERNAME = process.env.PHASE_D_SMOKE_USER || "seed.ahmed.family";
 const STAMP = new Date().toISOString().replace(/[:.]/g, "-");
 const OUT_DIR =
@@ -145,27 +146,42 @@ async function stopProcess(child) {
 }
 
 async function withNextServer({ port, enableFundFlow }, callback) {
-  assertValidPort(port, enableFundFlow ? "PHASE_D_NEW_PORT" : "PHASE_D_LEGACY_PORT");
+  const portName =
+    enableFundFlow === false
+      ? "PHASE_D_LEGACY_PORT"
+      : enableFundFlow === true
+        ? "PHASE_D_NEW_PORT"
+        : "PHASE_D_DEFAULT_PORT";
+  assertValidPort(port, portName);
 
   if (!(await isPortFree(port))) {
     throw new Error(
       `Port ${port} is already in use. Stop that listener or set ${
-        enableFundFlow ? "PHASE_D_NEW_PORT" : "PHASE_D_LEGACY_PORT"
+        portName
       } to a free port allowed by backend CORS.`,
     );
   }
 
   const logs = [];
   const { command, args } = nextCommandArgs(port);
+  const childEnv = {
+    ...process.env,
+    API_URL,
+    NEXT_PUBLIC_API_URL: API_URL,
+    NEXT_PUBLIC_ENABLE_DEV_LOGIN: "true",
+  };
+
+  if (enableFundFlow === false) {
+    childEnv.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW = "false";
+  } else if (enableFundFlow === true) {
+    childEnv.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW = "true";
+  } else {
+    childEnv.NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW = "";
+  }
+
   const child = spawn(command, args, {
     cwd: FRONTEND_ROOT,
-    env: {
-      ...process.env,
-      API_URL,
-      NEXT_PUBLIC_API_URL: API_URL,
-      NEXT_PUBLIC_ENABLE_DEV_LOGIN: "true",
-      NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW: enableFundFlow ? "true" : "false",
-    },
+    env: childEnv,
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -313,6 +329,14 @@ function campaignChoiceButton(page) {
     .filter({ hasText: /مبادرة مؤقتة|time-limited initiative/i });
 }
 
+async function expectNewCreateChoice(page) {
+  await expect(page.getByText(/ماذا تريد أن تنشئ|What do you want to create/i)).toBeVisible();
+  await expect(fundChoiceButton(page)).toBeVisible();
+  await expect(campaignChoiceButton(page)).toBeVisible();
+  await expect(page.getByRole("button", { name: /استخدام النموذج القديم|Use legacy form/i })).toBeVisible();
+  await expect(page.getByText(/اختر نوع الكيان|Choose entity type/i)).toHaveCount(0);
+}
+
 test.describe.configure({ mode: "serial" });
 test.use({ locale: "ar-SA", viewport: { width: 1280, height: 900 } });
 
@@ -363,11 +387,7 @@ test.describe("Phase D create flow feature flag smoke", () => {
       });
       await passPreGateIfPresent(page);
 
-      await expect(page.getByText(/ماذا تريد أن تنشئ|What do you want to create/i)).toBeVisible();
-      await expect(fundChoiceButton(page)).toBeVisible();
-      await expect(campaignChoiceButton(page)).toBeVisible();
-      await expect(page.getByRole("button", { name: /استخدام النموذج القديم|Use legacy form/i })).toBeVisible();
-      await expect(page.getByText(/اختر نوع الكيان|Choose entity type/i)).toHaveCount(0);
+      await expectNewCreateChoice(page);
       const choiceInspection = await expectHealthyRenderedPage(page, "flag-on choice screen");
       const choiceScreenshot = await writeScreenshot(page, "flag-on-choice");
 
@@ -398,6 +418,34 @@ test.describe("Phase D create flow feature flag smoke", () => {
         apiUrl: API_URL,
         screenshots: [choiceScreenshot, fundScreenshot, campaignScreenshot],
         inspections: [choiceInspection, fundInspection, campaignInspection],
+        healthIssues,
+      });
+    });
+
+    expect(healthIssues).toEqual([]);
+  });
+
+  test("default value uses the new fund and campaign choice screen", async ({
+    page,
+  }) => {
+    test.setTimeout(140000);
+    const healthIssues = collectPageHealth(page, "default");
+
+    await withNextServer({ port: DEFAULT_FLOW_PORT, enableFundFlow: undefined }, async (baseUrl) => {
+      await login(page, baseUrl);
+      await gotoWithRetry(page, `${baseUrl}/entities/new`, {
+        waitUntil: "domcontentloaded",
+      });
+      await passPreGateIfPresent(page);
+
+      await expectNewCreateChoice(page);
+      const inspection = await expectHealthyRenderedPage(page, "default choice screen");
+      const screenshot = await writeScreenshot(page, "default-choice");
+      await writeSummary("default", {
+        baseUrl,
+        apiUrl: API_URL,
+        screenshot,
+        inspection,
         healthIssues,
       });
     });

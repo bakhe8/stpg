@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.8`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.9`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -32,6 +32,7 @@
 | 7 | `07_PHASE_D_PARALLEL_CREATE_FLOW.md` | المسار الموازي لإنشاء صندوق/حملة خلف feature flag |
 | 8 | `08_PHASE_D_PARITY_PACK.md` | حزمة parity قبل جعل المسار الجديد default |
 | 9 | `09_PHASE_D_UX_SMOKE_TESTS.md` | اختبار دخان واجهي للعلمين قبل قرار default switch |
+| 10 | `10_PHASE_D_DEFAULT_SWITCH.md` | قرار جعل المسار الجديد default مع rollback للفلاق |
 
 ## ترتيب التنفيذ
 
@@ -89,7 +90,8 @@ Phase D بدأت بشرائح صغيرة خلف feature flag:
 - القوالب تظهر في مسار الصندوق الجديد كاختيارات تشغيلية مفهومة بدلا من تفاصيل تقنية، مع بقاء `templateId` وسلوك Phase B كما هو.
 - أضيف parity pack backend يغطي القدرات الأساسية قبل أي default switch.
 - أضيف UX smoke test للعلمين يثبت بقاء legacy flow عند تعطيل العلم وظهور صندوق/حملة عند تفعيله.
-- المتبقي في Phase D: قرار default switch فقط.
+- أصبح مسار صندوق/حملة هو default. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا للنموذج القديم.
+- Phase D مغلقة من ناحية default switch.
 
 ## قواعد الحماية
 
@@ -111,4 +113,5 @@ Phase D بدأت بشرائح صغيرة خلف feature flag:
 - Phase C كاملة: مصدر profile الاختياري وتفويض الإعدادات المتقدمة.
 - feature flag ومسار رجوع.
 - parity pack يغطي التصويت، اللجان، المال، التدقيق، الصرف، الاشتراكات، النزاعات، الحملات، والمحافظ المتعددة.
-- UX smoke test للعلمين: flag off وflag on.
+- UX smoke test للفلاق صراحة وللوضع الافتراضي.
+- قرار default switch مع rollback واضح.
