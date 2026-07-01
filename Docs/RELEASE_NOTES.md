@@ -1,5 +1,21 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.7 - 2026-07-01
+
+**النوع:** Phase D parity pack
+**الحالة:** D-009 منفذة؛ المسار الجديد لا يزال خلف feature flag وليس default
+
+### ما تغير
+
+- أضيف اختبار `backend/src/entities/phase-d-parity.spec.ts`.
+- أضيف script باسم `npm run test:phase-d:parity` في backend.
+- توسع اختبار `EntitiesService` ليثبت إنشاء الحملة كـ `CAMPAIGN` مرتبطة بصندوق أب، بدون المرور بمنطق القوالب.
+- أضيفت وثيقة `Docs/09_Improvement/08_PHASE_D_PARITY_PACK.md`.
+
+### المعنى العملي
+
+أصبح لدينا parity gate واضح قبل أي قرار default switch. الحزمة تثبت تغطية التصويت، اللجان، المال، الصرف، الاشتراكات، النزاعات، الحملات، المحافظ المتعددة، والعلاقات. المتبقي في Phase D: UX smoke tests للعلمين ثم قرار المنتج.
+
 ## 2.6 - 2026-06-30
 
 **النوع:** Phase D fund template choice simplification

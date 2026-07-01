@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.6`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.7`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -30,6 +30,7 @@
 | 5 | `05_PHASE_B_TEMPLATE_NORMALIZATION.md` | تطبيع القوالب وتطبيقها التشغيلي |
 | 6 | `06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md` | مصدر profile الاختياري وتفويض الإعدادات المتقدمة |
 | 7 | `07_PHASE_D_PARALLEL_CREATE_FLOW.md` | المسار الموازي لإنشاء صندوق/حملة خلف feature flag |
+| 8 | `08_PHASE_D_PARITY_PACK.md` | حزمة parity قبل جعل المسار الجديد default |
 
 ## ترتيب التنفيذ
 
@@ -85,7 +86,8 @@ Phase D بدأت بشرائح صغيرة خلف feature flag:
 - صندوق بلا قالب أو صندوق غير مكتمل يظهر له setup checklist بعد الإنشاء في صفحة الصندوق.
 - شاشة الحملة تعرض خريطة تشغيلية للحملة بدون توسيع عقد backend الحالي.
 - القوالب تظهر في مسار الصندوق الجديد كاختيارات تشغيلية مفهومة بدلا من تفاصيل تقنية، مع بقاء `templateId` وسلوك Phase B كما هو.
-- المتبقي في Phase D: parity pack وUX smoke tests قبل أي default switch.
+- أضيف parity pack backend يغطي القدرات الأساسية قبل أي default switch.
+- المتبقي في Phase D: UX smoke tests ثم قرار default switch.
 
 ## قواعد الحماية
 

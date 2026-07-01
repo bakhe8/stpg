@@ -3,6 +3,7 @@ import {
   EntityType,
   GovernancePathType,
   LedgerAccountType,
+  MemberRole,
   VoteType,
   WalletBenefitType,
 } from '@prisma/client';
@@ -126,6 +127,10 @@ describe('EntitiesService', () => {
         type: EntityType.FAMILY,
         description: 'Internal family fund',
         policy: { create: {} },
+        ledgerAccount: { create: { type: LedgerAccountType.ENTITY } },
+        memberships: {
+          create: { personId: 'creator-id', role: MemberRole.FOUNDER },
+        },
       }),
       include: { policy: true },
     });
@@ -272,6 +277,97 @@ describe('EntitiesService', () => {
     expect(prisma.auditLog.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ targetType: 'spending_items' }),
+      }),
+    );
+  });
+
+  it('creates campaigns as parent-bound lifecycle records without template setup', async () => {
+    const campaignEndsAt = '2100-01-15T00:00:00.000Z';
+    prisma.entity.findUnique.mockResolvedValue({
+      id: 'parent-id',
+      isActive: true,
+    });
+    prisma.membership.findFirst.mockResolvedValue({ id: 'founder-member' });
+    prisma.entity.create.mockImplementation(
+      ({
+        data,
+      }: {
+        data: {
+          name: string;
+          type: EntityType;
+          parentEntityId?: string;
+          isCampaign?: boolean;
+          campaignEndsAt?: Date | null;
+        };
+      }) =>
+        Promise.resolve({
+          id: 'campaign-id',
+          name: data.name,
+          type: data.type,
+          parentEntityId: data.parentEntityId,
+          isCampaign: data.isCampaign,
+          campaignEndsAt: data.campaignEndsAt,
+        }),
+    );
+
+    await expect(
+      service.createCampaign('parent-id', 'creator-id', {
+        name: 'Medical campaign',
+        description: 'Temporary treatment support',
+        campaignEndsAt,
+      }),
+    ).resolves.toMatchObject({
+      id: 'campaign-id',
+      name: 'Medical campaign',
+      type: EntityType.CAMPAIGN,
+      parentEntityId: 'parent-id',
+      isCampaign: true,
+    });
+
+    expect(prisma.membership.findFirst).toHaveBeenCalledWith({
+      where: {
+        entityId: 'parent-id',
+        personId: 'creator-id',
+        isActive: true,
+        role: { in: [MemberRole.ADMIN, MemberRole.FOUNDER] },
+      },
+    });
+    expect(prisma.entity.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        name: 'Medical campaign',
+        type: EntityType.CAMPAIGN,
+        description: 'Temporary treatment support',
+        parentEntityId: 'parent-id',
+        isCampaign: true,
+        policy: { create: {} },
+        ledgerAccount: { create: { type: LedgerAccountType.ENTITY } },
+        memberships: {
+          create: { personId: 'creator-id', role: MemberRole.FOUNDER },
+        },
+      }),
+    });
+    expect(
+      (
+        prisma.entity.create.mock.calls[0][0] as {
+          data: { campaignEndsAt: Date };
+        }
+      ).data.campaignEndsAt.toISOString(),
+    ).toBe(campaignEndsAt);
+    expect(prisma.wallet.create).not.toHaveBeenCalled();
+    expect(prisma.governancePath.create).not.toHaveBeenCalled();
+    expect(prisma.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          personId: 'creator-id',
+          entityId: 'campaign-id',
+          targetType: 'entities',
+          targetId: 'campaign-id',
+          newValue: {
+            name: 'Medical campaign',
+            isCampaign: true,
+            parentEntityId: 'parent-id',
+          },
+        }),
       }),
     );
   });
