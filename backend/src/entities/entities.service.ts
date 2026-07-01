@@ -244,7 +244,7 @@ export class EntitiesService {
         policy: true,
         memberships: {
           where: { personId: requesterId, isActive: true },
-          select: { id: true, role: true },
+          select: { id: true, role: true, canManageAdvancedSettings: true },
           take: 1,
         },
         _count: { select: { memberships: { where: { isActive: true } } } },
@@ -257,6 +257,8 @@ export class EntitiesService {
       ...visibleEntity,
       myMembershipId: memberships[0]?.id ?? null,
       myRole: memberships[0]?.role ?? null,
+      canManageAdvancedSettings:
+        memberships[0]?.canManageAdvancedSettings ?? false,
     };
   }
 
@@ -268,7 +270,12 @@ export class EntitiesService {
       include: {
         memberships: {
           where: { personId, isActive: true },
-          select: { id: true, role: true, joinedAt: true },
+          select: {
+            id: true,
+            role: true,
+            joinedAt: true,
+            canManageAdvancedSettings: true,
+          },
           take: 1,
         },
         _count: { select: { memberships: { where: { isActive: true } } } },
@@ -300,6 +307,8 @@ export class EntitiesService {
       ...entity,
       myMembershipId: memberships[0]?.id ?? null,
       myRole: memberships[0]?.role ?? null,
+      canManageAdvancedSettings:
+        memberships[0]?.canManageAdvancedSettings ?? false,
     }));
   }
 

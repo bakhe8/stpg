@@ -55,6 +55,13 @@ export function hasRole(entity: Entity, roles: readonly MemberRole[]) {
   );
 }
 
+export function hasAdvancedSettingsAccess(entity: Entity) {
+  return (
+    isOperationalEntity(entity) &&
+    (entity.myRole === "FOUNDER" || entity.canManageAdvancedSettings === true)
+  );
+}
+
 export function hasAnyRole(
   entities: Entity[],
   roles: readonly MemberRole[],
@@ -67,4 +74,8 @@ export function filterEntitiesByRoles(
   roles: readonly MemberRole[],
 ) {
   return entities.filter((entity) => hasRole(entity, roles));
+}
+
+export function filterEntitiesByAdvancedSettingsAccess(entities: Entity[]) {
+  return entities.filter(hasAdvancedSettingsAccess);
 }

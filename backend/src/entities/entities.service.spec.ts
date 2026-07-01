@@ -412,7 +412,13 @@ describe('EntitiesService', () => {
     prisma.entity.findUnique.mockResolvedValue({
       id: 'entity-id',
       name: 'Entity',
-      memberships: [{ id: 'membership-id', role: 'TREASURER' }],
+      memberships: [
+        {
+          id: 'membership-id',
+          role: 'TREASURER',
+          canManageAdvancedSettings: false,
+        },
+      ],
       _count: { memberships: 8 },
     });
     prisma.membership.findFirst.mockResolvedValue({ id: 'membership-id' });
@@ -422,6 +428,7 @@ describe('EntitiesService', () => {
       name: 'Entity',
       myMembershipId: 'membership-id',
       myRole: 'TREASURER',
+      canManageAdvancedSettings: false,
       _count: { memberships: 8 },
     });
   });
@@ -431,7 +438,13 @@ describe('EntitiesService', () => {
       {
         id: 'entity-id',
         name: 'Entity',
-        memberships: [{ id: 'membership-id', role: 'MEMBER' }],
+        memberships: [
+          {
+            id: 'membership-id',
+            role: 'MEMBER',
+            canManageAdvancedSettings: true,
+          },
+        ],
         _count: { memberships: 3 },
       },
     ]);
@@ -442,6 +455,7 @@ describe('EntitiesService', () => {
         name: 'Entity',
         myMembershipId: 'membership-id',
         myRole: 'MEMBER',
+        canManageAdvancedSettings: true,
         _count: { memberships: 3 },
       },
     ]);

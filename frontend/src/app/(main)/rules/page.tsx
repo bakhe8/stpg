@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getEntities, Entity } from "../../../lib/api/entities";
-import { ADMIN_ROLES, filterEntitiesByRoles } from "../../../lib/access";
+import { filterEntitiesByAdvancedSettingsAccess } from "../../../lib/access";
 import { useTranslations } from "next-intl";
 import {
   getEntityWallets,
@@ -194,7 +194,9 @@ export default function RulesPage() {
 
   useEffect(() => {
     getEntities()
-      .then((items) => setEntities(filterEntitiesByRoles(items, ADMIN_ROLES)))
+      .then((items) =>
+        setEntities(filterEntitiesByAdvancedSettingsAccess(items)),
+      )
       .catch(() => {});
   }, []);
 

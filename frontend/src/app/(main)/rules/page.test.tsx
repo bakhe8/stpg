@@ -4,6 +4,7 @@ import { describe, beforeEach, expect, it, vi } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import RulesPage from './page';
 import adminMessages from '../../../locales/ar/admin.json';
+import commonMessages from '../../../locales/ar/common.json';
 
 const {
   getEntities,
@@ -60,7 +61,7 @@ describe('Rules page template flows', () => {
     vi.clearAllMocks();
 
     getEntities.mockResolvedValue([
-    { id: 'entity-1', name: 'الصندوق 1', myRole: 'ADMIN' },
+      { id: 'entity-1', name: 'الصندوق 1', myRole: 'FOUNDER' },
     ]);
     getEntityWallets.mockResolvedValue([{ id: 'wallet-1', name: 'المحفظة 1' }]);
     getWalletPaths.mockResolvedValue([{ id: 'path-1', name: 'المسار 1' }]);
@@ -75,7 +76,10 @@ describe('Rules page template flows', () => {
     render(
       <NextIntlClientProvider
         locale="ar"
-        messages={{ rules: adminMessages.rules }}
+        messages={{
+          rules: adminMessages.rules,
+          accessReason: commonMessages.accessReason,
+        }}
       >
         <RulesPage />
       </NextIntlClientProvider>,
@@ -131,6 +135,47 @@ describe('Rules page template flows', () => {
         }),
       );
     });
+  });
+
+  it('allows delegated advanced settings managers without an admin role', async () => {
+    getEntities.mockResolvedValue([
+      {
+        id: 'entity-1',
+        name: 'الصندوق 1',
+        myRole: 'MEMBER',
+        canManageAdvancedSettings: true,
+      },
+    ]);
+
+    await selectContext();
+
+    expect(screen.getByRole('button', { name: 'قواعد المسار' })).toBeInTheDocument();
+  });
+
+  it('does not expose the rules surface to operational roles without delegation', async () => {
+    getEntities.mockResolvedValue([
+      {
+        id: 'entity-1',
+        name: 'الصندوق 1',
+        myRole: 'TREASURER',
+        canManageAdvancedSettings: false,
+      },
+    ]);
+
+    render(
+      <NextIntlClientProvider
+        locale="ar"
+        messages={{
+          rules: adminMessages.rules,
+          accessReason: commonMessages.accessReason,
+        }}
+      >
+        <RulesPage />
+      </NextIntlClientProvider>,
+    );
+
+    await screen.findByText('صلاحياتك غير كافية');
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 
   it('disables direct creation for duplicate template rule', async () => {

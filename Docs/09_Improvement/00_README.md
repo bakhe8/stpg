@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.18`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.19`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -37,6 +37,7 @@
 | 12 | `12_POST_PHASE_E_NEXT_BACKLOG.md` | الترشيح التنفيذي الصغير بعد إغلاق Phase E |
 | 13 | `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md` | دليل F-001 لحفظ القدرات بعد default switch |
 | 14 | `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md` | إغلاق F-002: إرشاد أول تشغيل بعد إنشاء الصندوق |
+| 15 | `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md` | إغلاق F-003: تدقيق وصول الإعدادات المتقدمة |
 
 ## ترتيب التنفيذ
 
@@ -126,7 +127,9 @@ Phase E بدأت بعد default switch لتنظيف لغة المنتج الظا
 
 تم إغلاق `F-002` في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`: تحسين first-run/setup guidance بعد إنشاء الصندوق، خصوصا `ابدأ فارغا`، بدون تغيير schema أو routes.
 
-العمل التالي المرشح هو `F-003`: Advanced Settings Access Audit.
+تم إغلاق `F-003` في `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`: مطابقة واجهة `/rules` مع صلاحية الإعدادات المتقدمة المستقلة.
+
+العمل التالي المرشح هو `F-004`: Template Capability Matrix.
 
 ## قواعد الحماية
 

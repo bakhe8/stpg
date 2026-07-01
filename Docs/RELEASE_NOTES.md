@@ -1,5 +1,32 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.19 - 2026-07-01
+
+**النوع:** Phase F advanced settings access audit
+**الحالة:** F-003 منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`.
+- أصبح `findById` و`findMyEntities` يعيدان `canManageAdvancedSettings` للعضوية الحالية.
+- أصبحت صفحة `/rules` تعتمد على صلاحية الإعدادات المتقدمة المستقلة، وليس `ADMIN_ROLES`.
+- يستطيع المفوض المتقدم غير المدير الوصول إلى القواعد والسياسة.
+- لا يحصل أمين الصندوق أو المراجع أو عضو اللجنة على وصول تلقائي بدون تفويض.
+- تم تحديث `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.19`.
+
+### المعنى العملي
+
+صار العمق التشغيلي في القواعد والسياسات متاحا للمؤسس ومن يفوضه فقط. الدور التشغيلي المالي أو الرقابي لا يكفي وحده للوصول إلى سياسة الصندوق أو تعديل القواعد.
+
+### التحقق
+
+- Backend targeted tests: 3 suites، 31 tests passed.
+- Frontend rules tests: 1 file، 5 tests passed.
+- `npm run lint` في frontend.
+- `npm run build` في backend.
+- `npm run build` في frontend.
+- Browser: المؤسس يرى `/rules`، أمين الصندوق غير المفوض لا يراها، وأمين الصندوق نفسه يراها بعد تفويض مؤقت ثم أُعيد التفويض إلى false.
+
 ## 2.18 - 2026-07-01
 
 **النوع:** Phase F first-run setup guidance

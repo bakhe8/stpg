@@ -25,6 +25,7 @@ export interface Entity {
   description?: string | null;
   profileKey?: string | null;
   profileLabel?: string | null;
+  canManageAdvancedSettings?: boolean;
 }
 
 export interface EntityMember {
