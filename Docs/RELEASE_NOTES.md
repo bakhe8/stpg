@@ -1,5 +1,21 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.8 - 2026-07-01
+
+**النوع:** Phase D UX smoke tests
+**الحالة:** D-010 منفذة؛ المسار الجديد لا يزال خلف feature flag وليس default
+
+### ما تغير
+
+- أضيف اختبار `frontend/scripts/phase-d-create-flow-smoke.spec.cjs`.
+- أضيف script باسم `npm run test:phase-d:create-flow` في frontend.
+- الاختبار يشغل Next dev server مؤقتا بحالتين: flag off وflag on.
+- أضيفت وثيقة `Docs/09_Improvement/09_PHASE_D_UX_SMOKE_TESTS.md`.
+
+### المعنى العملي
+
+أصبح لدينا UX smoke gate قابل للإعادة قبل قرار default switch. الاختبار يثبت أن إطفاء العلم يبقي شاشة الإنشاء القديمة، وأن تفعيله يظهر صندوق/حملة مع بقاء زر الرجوع للنموذج القديم، ويثبت عرض بدء الصندوق وخريطة تشغيل الحملة. المتبقي في Phase D: قرار المنتج `D-011`.
+
 ## 2.7 - 2026-07-01
 
 **النوع:** Phase D parity pack

@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.7` بتاريخ 2026-07-01.
+**الحالة الحالية:** الإصدار التشغيلي `2.8` بتاريخ 2026-07-01.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -93,6 +93,7 @@
 | [06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md](09_Improvement/06_PHASE_C_PROFILE_AND_ADVANCED_SETTINGS.md) | مصدر profile الاختياري وتفويض الإعدادات المتقدمة |
 | [07_PHASE_D_PARALLEL_CREATE_FLOW.md](09_Improvement/07_PHASE_D_PARALLEL_CREATE_FLOW.md) | المسار الموازي لإنشاء صندوق/حملة خلف feature flag |
 | [08_PHASE_D_PARITY_PACK.md](09_Improvement/08_PHASE_D_PARITY_PACK.md) | حزمة parity قبل جعل المسار الجديد default |
+| [09_PHASE_D_UX_SMOKE_TESTS.md](09_Improvement/09_PHASE_D_UX_SMOKE_TESTS.md) | اختبار دخان واجهي للعلمين قبل قرار default switch |
 
 ---
 
@@ -124,16 +125,16 @@
 
 ---
 
-## حالة التنفيذ الحالية (30 يونيو 2026)
+## حالة التنفيذ الحالية (1 يوليو 2026)
 
 | المكوّن | الحالة |
 |---|---|
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D بدأت وD-006/D-007/D-008/D-009 منفذة |
-| أول عمل مفتوح | D-010 UX smoke tests للعلمين |
-| قاعدة التنفيذ | لا نجعل المسار الجديد default قبل D-010 وقرار D-011 |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D بدأت وD-006/D-007/D-008/D-009/D-010 منفذة |
+| أول عمل مفتوح | D-011 قرار default switch |
+| قاعدة التنفيذ | لا نجعل المسار الجديد default قبل قرار D-011 |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
 

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:visual-identity": "node scripts/check-visual-identity.mjs",
+    "test:phase-d:create-flow": "playwright test scripts/phase-d-create-flow-smoke.spec.cjs --reporter=line --workers=1",
     "test:ux:roles": "playwright test scripts/ux-role-audit.spec.cjs --reporter=line --workers=1",
     "test:ux:roles:install": "playwright install chromium",
     "test": "vitest run",
