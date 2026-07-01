@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.15` بتاريخ 2026-07-01.
+**الحالة الحالية:** الإصدار التشغيلي `2.16` بتاريخ 2026-07-01.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -96,6 +96,7 @@
 | [09_PHASE_D_UX_SMOKE_TESTS.md](09_Improvement/09_PHASE_D_UX_SMOKE_TESTS.md) | اختبار دخان واجهي للعلمين قبل قرار default switch |
 | [10_PHASE_D_DEFAULT_SWITCH.md](09_Improvement/10_PHASE_D_DEFAULT_SWITCH.md) | قرار جعل مسار صندوق/حملة default مع rollback للنموذج القديم |
 | [11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md](09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md) | تنظيف لغة الواجهة من "كيان" إلى صندوق/حملة بدون تغيير الباكند |
+| [12_POST_PHASE_E_NEXT_BACKLOG.md](09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md) | الترشيح التنفيذي التالي بعد إغلاق Phase E: حفظ القدرات وتهذيب تجربة ما بعد default |
 
 ---
 
@@ -107,7 +108,7 @@
 | [REPOSITORY_STATE.md](REPOSITORY_STATE.md) | الحالة التشغيلية الحالية ونقطة البداية قبل 09 |
 | [RELEASE_NOTES.md](RELEASE_NOTES.md) | سجل الإصدارات التشغيلية للمستودع |
 | [08_Production_Readiness/BACKLOG.md](08_Production_Readiness/BACKLOG.md) | مرجع إغلاق 08 |
-| [09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md](09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md) | backlog الحالي بعد default switch |
+| [09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md](09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md) | الترشيح الحالي بعد إغلاق Phase E |
 
 ---
 
@@ -134,8 +135,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006 |
-| أول عمل مفتوح | لا يوجد بند مفتوح داخل Phase E |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ الترشيح التالي موثق |
+| أول عمل مرشح | F-001: Capability Preservation Evidence Pack بعد default switch |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)

@@ -1,5 +1,25 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.16 - 2026-07-01
+
+**النوع:** Post Phase E recommended backlog
+**الحالة:** توثيق ترشيح العمل التالي بعد إغلاق Phase E
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md`.
+- ثبتت الوثيقة أن العمل التالي المرشح هو Phase F صغيرة بعنوان `Post-default UX and Capability Hardening`.
+- أول بند مرشح هو `F-001`: تحويل جرد حفظ القدرات إلى evidence pack عملي بعد default switch.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` حتى تشير إلى المرجع الجديد.
+
+### المعنى العملي
+
+لا نبدأ بإعادة تسمية داخلية أو `/funds` alias أو migration. نبدأ بتثبيت أن تجربة صندوق/حملة الافتراضية لا تخسر التصويت، اللجان، المحافظ، المسارات، الاشتراكات، الصرف، التدقيق، النزاعات، الحملات، والعلاقات.
+
+### التحقق
+
+- `git diff --check`
+
 ## 2.15 - 2026-07-01
 
 **النوع:** Phase E route alias decision
