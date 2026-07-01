@@ -1,14 +1,18 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { getPlatformAccount, platformLogout } from '../../lib/api/platform';
-import styles from './platform.module.css';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  getPlatformAccount,
+  platformLogout,
+  type PlatformAccount,
+} from "../../lib/api/platform";
+import styles from "./platform.module.css";
 
-const BASE_NAV_LINKS = [{ href: '/platform', label: 'سطح المنصة', icon: '⬡' }];
+const BASE_NAV_LINKS = [{ href: "/platform", label: "سطح المنصة", icon: "⬡" }];
 const MANAGER_NAV_LINKS = [
-  { href: '/platform/appeals', label: 'الاعتراضات', icon: '⚖' },
+  { href: "/platform/appeals", label: "الاعتراضات", icon: "⚖" },
 ];
 
 export default function PlatformLayout({
@@ -18,26 +22,28 @@ export default function PlatformLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const account = !isLoginPath(pathname) ? getPlatformAccount() : null;
+  const [account, setAccount] = useState<PlatformAccount | null>(null);
   const canReviewAppeals =
-    account?.role === 'OWNER' || account?.role === 'SUPER_ADMIN';
+    account?.role === "OWNER" || account?.role === "SUPER_ADMIN";
   const navLinks = canReviewAppeals
     ? [...BASE_NAV_LINKS, ...MANAGER_NAV_LINKS]
     : BASE_NAV_LINKS;
 
   useEffect(() => {
-    const isLoginPage = pathname === '/platform/login';
+    const isLoginPage = pathname === "/platform/login";
     const nextAccount = getPlatformAccount();
+    setAccount(isLoginPage ? null : nextAccount);
     if (!nextAccount && !isLoginPage) {
-      void router.push('/platform/login');
+      void router.push("/platform/login");
     }
   }, [pathname, router]);
 
-  const isLoginPage = pathname === '/platform/login';
+  const isLoginPage = pathname === "/platform/login";
 
   function handleLogout() {
     platformLogout();
-    void router.push('/platform/login');
+    setAccount(null);
+    void router.push("/platform/login");
   }
 
   return (
@@ -45,7 +51,9 @@ export default function PlatformLayout({
       <div className={styles.platformBanner}>
         <span className={styles.platformBannerIcon}>◇</span>
         <div className={styles.platformBrand}>
-          <strong className={styles.platformBannerTitle}>CollectiveTrustOS</strong>
+          <strong className={styles.platformBannerTitle}>
+            CollectiveTrustOS
+          </strong>
           <span className={styles.platformBannerCaption}>إدارة المنصة</span>
         </div>
         {!isLoginPage && (
@@ -61,7 +69,7 @@ export default function PlatformLayout({
               key={link.href}
               href={link.href}
               className={`${styles.platformNavLink} ${
-                pathname === link.href ? styles.platformNavLinkActive : ''
+                pathname === link.href ? styles.platformNavLinkActive : ""
               }`}
             >
               <span>{link.icon}</span>
@@ -73,8 +81,4 @@ export default function PlatformLayout({
       <main className={styles.platformMain}>{children}</main>
     </div>
   );
-}
-
-function isLoginPath(pathname: string) {
-  return pathname === '/platform/login';
 }

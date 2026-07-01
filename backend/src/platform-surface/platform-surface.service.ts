@@ -79,7 +79,9 @@ export class PlatformSurfaceService {
       this.findVisibleSupportSessions(operator.id, role, now),
       canManageEntities ? this.findEntityReviews() : Promise.resolve([]),
       canManageEntities ? this.findPendingAppealActions() : Promise.resolve([]),
-      isAnalyst ? Promise.resolve([]) : this.findAccessEvents(operator.id, role),
+      isAnalyst
+        ? Promise.resolve([])
+        : this.findAccessEvents(operator.id, role),
     ]);
 
     const aggregateInsights = this.buildAggregateInsights({
@@ -151,10 +153,15 @@ export class PlatformSurfaceService {
 
   private async countEntitiesByStatus() {
     const entries = await Promise.all(
-      PLATFORM_STATUSES.map(async (status) => [
-        status,
-        await this.prisma.entity.count({ where: { platformStatus: status } }),
-      ] as const),
+      PLATFORM_STATUSES.map(
+        async (status) =>
+          [
+            status,
+            await this.prisma.entity.count({
+              where: { platformStatus: status },
+            }),
+          ] as const,
+      ),
     );
     return Object.fromEntries(entries) as Record<EntityPlatformStatus, number>;
   }
@@ -172,7 +179,9 @@ export class PlatformSurfaceService {
       where: {
         status: SupportSessionStatus.ACTIVE,
         expiresAt: { gt: now },
-        ...(role === PlatformRole.SUPPORT ? { platformAccountId: operatorId } : {}),
+        ...(role === PlatformRole.SUPPORT
+          ? { platformAccountId: operatorId }
+          : {}),
       },
       include: {
         entity: {
@@ -230,7 +239,7 @@ export class PlatformSurfaceService {
     const entities = entityIds.length
       ? await this.prisma.entity.findMany({
           where: { id: { in: entityIds } },
-          select: { id: true, name: true, platformStatus: true },
+          select: { id: true, name: true, type: true, platformStatus: true },
         })
       : [];
     const entityById = new Map(entities.map((entity) => [entity.id, entity]));
@@ -239,7 +248,9 @@ export class PlatformSurfaceService {
       const entity = entityById.get(appeal.entityId);
       return {
         id: appeal.id,
-        title: `اعتراض ينتظر رد المنصة: ${entity?.name ?? 'صندوق غير محدد'}`,
+        title: `اعتراض ينتظر رد المنصة: ${
+          entity?.name ?? 'صندوق/حملة غير محددة'
+        }`,
         body: `${appeal.submittedBy.name}: ${this.truncate(appeal.reason, 140)}`,
         scopeText: `الحالة الحالية: ${
           entity ? this.platformStatusLabel(entity.platformStatus) : 'غير محددة'
@@ -271,20 +282,25 @@ export class PlatformSurfaceService {
   }
 
   private presentSupportSession(
-    session: Awaited<ReturnType<PlatformSurfaceService['findVisibleSupportSessions']>>[number],
+    session: Awaited<
+      ReturnType<PlatformSurfaceService['findVisibleSupportSessions']>
+    >[number],
     operatorId: string,
     role: PlatformRole,
   ): PlatformSurfaceSupportSessionDto {
     const isOwnSession = session.platformAccountId === operatorId;
     const canOpenEntity =
-      role !== PlatformRole.ANALYST && (role !== PlatformRole.SUPPORT || isOwnSession);
+      role !== PlatformRole.ANALYST &&
+      (role !== PlatformRole.SUPPORT || isOwnSession);
 
     return {
       id: session.id,
       entityId: canOpenEntity ? session.entityId : undefined,
       entityName: canOpenEntity ? session.entity.name : undefined,
       operatorName:
-        role === PlatformRole.SUPPORT ? undefined : session.platformAccount.name,
+        role === PlatformRole.SUPPORT
+          ? undefined
+          : session.platformAccount.name,
       operatorRoleLabel:
         role === PlatformRole.SUPPORT
           ? undefined
@@ -303,7 +319,9 @@ export class PlatformSurfaceService {
   }
 
   private presentEntityReview(
-    entity: Awaited<ReturnType<PlatformSurfaceService['findEntityReviews']>>[number],
+    entity: Awaited<
+      ReturnType<PlatformSurfaceService['findEntityReviews']>
+    >[number],
     role: PlatformRole,
   ): PlatformSurfaceEntityReviewDto {
     const canAct = this.canManageEntities(role);
@@ -324,16 +342,21 @@ export class PlatformSurfaceService {
       memberCount: entity._count.memberships,
       reason,
       title: `${entity.name}: ${statusLabel}`,
-      body: this.entityReviewBody(entity.platformStatus),
+      body: this.entityReviewBody(entity.platformStatus, entity.type),
       canAct,
       cta: canAct
-        ? { label: 'راجع الحالة', href: `/platform?status=${entity.platformStatus}` }
+        ? {
+            label: 'راجع الحالة',
+            href: `/platform?status=${entity.platformStatus}`,
+          }
         : undefined,
     };
   }
 
   private presentAccessEvent(
-    event: Awaited<ReturnType<PlatformSurfaceService['findAccessEvents']>>[number],
+    event: Awaited<
+      ReturnType<PlatformSurfaceService['findAccessEvents']>
+    >[number],
   ): PlatformSurfaceAccessEventDto {
     return {
       id: event.id,
@@ -374,7 +397,7 @@ export class PlatformSurfaceService {
           id: 'analyst-aggregate-only',
           priority: 'info',
           title: 'اعمل على المؤشرات المجمعة فقط',
-          body: 'هذا الحساب لا يرى أسماء صناديق أو أشخاص داخل سطح التشغيل اليومي.',
+          body: 'هذا الحساب لا يرى أسماء صناديق أو حملات أو أشخاص داخل سطح التشغيل اليومي.',
           scopeText: 'النطاق: جودة تشغيلية مجمعة بلا بيانات شخصية.',
           expectedAfterAction:
             'إذا احتجت حالة بعينها، اطلب من مشرف المنصة فتح مسار دعم مبرر.',
@@ -389,7 +412,7 @@ export class PlatformSurfaceService {
             id: 'support-no-active-sessions',
             priority: 'info',
             title: 'لا توجد جلسة دعم نشطة باسمك',
-            body: 'لا تحتاج فتح الكيانات من الواجهة اليومية. انتظر جلسة محددة بزمن ونطاق واضح.',
+            body: 'لا تحتاج فتح الصناديق أو الحملات من الواجهة اليومية. انتظر جلسة محددة بزمن ونطاق واضح.',
             expectedAfterAction:
               'عند فتح جلسة دعم ستظهر هنا مع سببها ونطاقها ووقت انتهائها.',
           },
@@ -417,7 +440,7 @@ export class PlatformSurfaceService {
         body: appeal.body,
         scopeText: appeal.scopeText,
         expectedAfterAction:
-          'بعد الرد يجب أن يعرف مدير الصندوق هل تمت المراجعة أم حُسم الاعتراض.',
+          'بعد الرد يجب أن يعرف مدير الصندوق/الحملة هل تمت المراجعة أم حُسم الاعتراض.',
         cta: appeal.cta,
       });
     }
@@ -429,12 +452,17 @@ export class PlatformSurfaceService {
       actions.push({
         id: 'platform-pending-review-entities',
         priority: 'normal',
-        title: `${pendingReviewCount.toLocaleString('ar-SA')} صندوق قيد المراجعة`,
-        body: 'لا تعاملها كصناديق تشغيلية كاملة حتى يكتمل سبب المراجعة.',
+        title: `${pendingReviewCount.toLocaleString(
+          'ar-SA',
+        )} صندوق/حملة قيد المراجعة`,
+        body: 'لا تعاملها كتجارب تشغيلية كاملة حتى يكتمل سبب المراجعة.',
         scopeText: 'النطاق: حالة المنصة، وليس تفاصيل المال أو الأعضاء.',
         expectedAfterAction:
-          'بعد المراجعة إمّا يعاد الصندوق إلى ACTIVE أو يظهر سبب واضح للمؤسس.',
-        cta: { label: 'صفّ حالة المراجعة', href: '/platform?status=PENDING_REVIEW' },
+          'بعد المراجعة إمّا يعاد السجل إلى ACTIVE أو يظهر سبب واضح للمؤسس.',
+        cta: {
+          label: 'صفّ حالة المراجعة',
+          href: '/platform?status=PENDING_REVIEW',
+        },
       });
     }
 
@@ -457,7 +485,7 @@ export class PlatformSurfaceService {
         id: 'platform-no-required-actions',
         priority: 'info',
         title: 'لا يوجد تدخل منصة عاجل الآن',
-        body: 'راقب المؤشرات والجلسات النشطة فقط. لا تفتح تفاصيل صندوق بلا سبب.',
+        body: 'راقب المؤشرات والجلسات النشطة فقط. لا تفتح تفاصيل صندوق أو حملة بلا سبب.',
         expectedAfterAction:
           'أي حالة جديدة ستظهر هنا كإجراء محدد بدل جدول عام طويل.',
       });
@@ -481,7 +509,7 @@ export class PlatformSurfaceService {
         id: 'aggregate-operational-health',
         title: 'الصحة التشغيلية العامة',
         body: input.isAnalyst
-          ? 'مؤشر مجمع فقط: لا يعرض أسماء صناديق أو أعضاء.'
+          ? 'مؤشر مجمع فقط: لا يعرض أسماء صناديق أو حملات أو أعضاء.'
           : 'ملخص سريع قبل فتح الحالات التفصيلية.',
         value: input.statusCounts.ACTIVE,
         tone: 'positive',
@@ -489,7 +517,7 @@ export class PlatformSurfaceService {
       {
         id: 'aggregate-review-load',
         title: 'عبء المراجعة',
-        body: 'صناديق قيد المراجعة أو معلقة أو قراءة فقط.',
+        body: 'صناديق/حملات قيد المراجعة أو معلقة أو قراءة فقط.',
         value:
           input.statusCounts.PENDING_REVIEW +
           input.statusCounts.SUSPENDED +
@@ -533,7 +561,7 @@ export class PlatformSurfaceService {
     return [
       {
         id: 'total-entities',
-        label: 'الصناديق المسجلة',
+        label: 'الصناديق والحملات المسجلة',
         value: input.totalEntities,
         caption:
           input.role === PlatformRole.ANALYST
@@ -558,7 +586,9 @@ export class PlatformSurfaceService {
       {
         id: 'support-sessions',
         label:
-          input.role === PlatformRole.SUPPORT ? 'جلساتك النشطة' : 'جلسات دعم نشطة',
+          input.role === PlatformRole.SUPPORT
+            ? 'جلساتك النشطة'
+            : 'جلسات دعم نشطة',
         value:
           input.role === PlatformRole.SUPPORT
             ? input.visibleSupportSessionCount
@@ -575,7 +605,7 @@ export class PlatformSurfaceService {
         id: 'pending-appeals',
         label: 'اعتراضات تنتظر الرد',
         value: input.pendingAppealCount,
-        caption: 'لا تغلق حتى يصل رد مفهوم للصندوق',
+        caption: 'لا تغلق حتى يصل رد مفهوم لصاحب الصندوق/الحملة',
         tone: input.pendingAppealCount > 0 ? 'attention' : 'positive',
       },
       {
@@ -598,8 +628,9 @@ export class PlatformSurfaceService {
       return {
         tone: 'neutral' as PlatformSurfaceTone,
         title: 'سطح مؤشرات مجمعة فقط',
-        body: 'ترى صحة التشغيل كأرقام واتجاهات، لا كقوائم أشخاص أو صناديق.',
-        nextStep: 'استخدم المؤشرات لتحديد نمط المشكلة، ثم اطلب مسار مراجعة مبرر عند الحاجة.',
+        body: 'ترى صحة التشغيل كأرقام واتجاهات، لا كقوائم أشخاص أو صناديق أو حملات.',
+        nextStep:
+          'استخدم المؤشرات لتحديد نمط المشكلة، ثم اطلب مسار مراجعة مبرر عند الحاجة.',
       };
     }
 
@@ -608,19 +639,23 @@ export class PlatformSurfaceService {
         return {
           tone: 'neutral' as PlatformSurfaceTone,
           title: 'لا توجد جلسة دعم باسمك الآن',
-          body: 'الواجهة اليومية لا تفتح لك الصناديق بلا جلسة محددة.',
-          nextStep: 'انتظر جلسة دعم مبررة أو اطلب من مشرف المنصة فتح نطاق واضح.',
+          body: 'الواجهة اليومية لا تفتح لك الصناديق أو الحملات بلا جلسة محددة.',
+          nextStep:
+            'انتظر جلسة دعم مبررة أو اطلب من مشرف المنصة فتح نطاق واضح.',
         };
       }
       return {
         tone: 'attention' as PlatformSurfaceTone,
         title: 'لديك جلسة دعم محددة النطاق',
         body: 'اعمل داخل السبب والنطاق والوقت الظاهر فقط.',
-        nextStep: 'لا تفتح بيانات خارج النطاق المكتوب، وأغلق العمل عند انتهاء التذكرة.',
+        nextStep:
+          'لا تفتح بيانات خارج النطاق المكتوب، وأغلق العمل عند انتهاء التذكرة.',
       };
     }
 
-    const firstCritical = actions.find((action) => action.priority === 'critical');
+    const firstCritical = actions.find(
+      (action) => action.priority === 'critical',
+    );
     if (firstCritical) {
       return {
         tone: 'blocked' as PlatformSurfaceTone,
@@ -630,13 +665,16 @@ export class PlatformSurfaceService {
       };
     }
 
-    const reviewLoad = insights.find((insight) => insight.id === 'aggregate-review-load');
+    const reviewLoad = insights.find(
+      (insight) => insight.id === 'aggregate-review-load',
+    );
     if ((reviewLoad?.value ?? 0) > 0) {
       return {
         tone: 'attention' as PlatformSurfaceTone,
         title: 'هناك حالات منصة تحتاج قرارًا واضحًا',
-        body: 'ابدأ بالاعتراضات والمراجعات بدل تصفح كل جدول الكيانات.',
-        nextStep: 'عالج الحالة التي يطلبها النظام ثم اترك التفاصيل كأداة عند الحاجة.',
+        body: 'ابدأ بالاعتراضات والمراجعات بدل تصفح كل جدول الصناديق والحملات.',
+        nextStep:
+          'عالج الحالة التي يطلبها النظام ثم اترك التفاصيل كأداة عند الحاجة.',
       };
     }
 
@@ -644,11 +682,14 @@ export class PlatformSurfaceService {
       tone: 'positive' as PlatformSurfaceTone,
       title: 'تشغيل المنصة مستقر الآن',
       body: 'لا توجد حالة عاجلة. راقب المؤشرات وجلسات الدعم فقط.',
-      nextStep: 'لا تفتح تفاصيل صندوق إلا إذا ظهر سبب محدد أو تذكرة دعم.',
+      nextStep:
+        'لا تفتح تفاصيل صندوق أو حملة إلا إذا ظهر سبب محدد أو تذكرة دعم.',
     };
   }
 
-  private buildCapabilities(role: PlatformRole): PlatformSurfaceCapabilityDto[] {
+  private buildCapabilities(
+    role: PlatformRole,
+  ): PlatformSurfaceCapabilityDto[] {
     const canManage = this.canManageEntities(role);
     const isSupport = role === PlatformRole.SUPPORT;
     const isAnalyst = role === PlatformRole.ANALYST;
@@ -656,7 +697,7 @@ export class PlatformSurfaceService {
     return [
       {
         key: 'MANAGE_ENTITY_STATUS',
-        label: 'تغيير حالة صندوق',
+        label: 'تغيير حالة صندوق/حملة',
         isAllowed: canManage,
         reason: canManage
           ? 'مسموح لأن الحساب OWNER أو SUPER_ADMIN.'
@@ -696,7 +737,7 @@ export class PlatformSurfaceService {
       },
       {
         key: 'VIEW_ENTITY_NAMES',
-        label: 'أسماء الصناديق',
+        label: 'أسماء الصناديق والحملات',
         isAllowed: !isAnalyst,
         reason: isAnalyst
           ? 'المحلل يرى أرقامًا فقط حتى لا ينكشف سياق شخصي أو حساس.'
@@ -709,7 +750,7 @@ export class PlatformSurfaceService {
     const tools: PlatformSurfaceResponseDto['advancedTools'] = [
       {
         href: '/platform',
-        label: 'جدول الكيانات التفصيلي',
+        label: 'جدول الصناديق والحملات التفصيلي',
         reason: 'للفرز والمراجعة بعد معرفة الحالة المطلوبة من السطح.',
         requiredRole: 'ANY' as const,
       },
@@ -736,17 +777,22 @@ export class PlatformSurfaceService {
     return 3;
   }
 
-  private entityReviewBody(status: EntityPlatformStatus) {
+  private entityReviewBody(status: EntityPlatformStatus, type: EntityType) {
+    const target = this.entityPointer(type);
     if (status === EntityPlatformStatus.PENDING_REVIEW) {
-      return 'هذا الصندوق لا يجب أن يظهر كتشغيل مكتمل قبل اكتمال المراجعة.';
+      return `${target} لا يجب أن يظهر كتجربة تشغيل مكتملة قبل اكتمال المراجعة.`;
     }
     if (status === EntityPlatformStatus.SUSPENDED) {
-      return 'هذا الصندوق مقيد؛ يجب أن يعرف مديره سبب التعليق وما المطلوب للعودة.';
+      return `${target} مقيد؛ يجب أن يعرف المسؤول عنه سبب التعليق وما المطلوب للعودة.`;
     }
     if (status === EntityPlatformStatus.READ_ONLY) {
-      return 'هذا الصندوق للمتابعة فقط؛ لا تضف إجراءات تشغيلية جديدة له.';
+      return `${target} للمتابعة فقط؛ لا تضف إجراءات تشغيلية جديدة له.`;
     }
     return 'لا توجد حالة مراجعة خاصة.';
+  }
+
+  private entityPointer(type: EntityType) {
+    return type === EntityType.CAMPAIGN ? 'هذه الحملة' : 'هذا الصندوق';
   }
 
   private platformRoleLabel(role: PlatformRole) {
@@ -806,6 +852,8 @@ export class PlatformSurfaceService {
   }
 
   private truncate(value: string, maxLength: number) {
-    return value.length > maxLength ? `${value.slice(0, maxLength - 3)}...` : value;
+    return value.length > maxLength
+      ? `${value.slice(0, maxLength - 3)}...`
+      : value;
   }
 }

@@ -1,8 +1,8 @@
 # Repository State - CollectiveTrustOS
 
-**الإصدار التشغيلي:** 2.11
+**الإصدار التشغيلي:** 2.12
 **التاريخ:** 2026-07-01
-**الحالة:** Production readiness 08 closed; Improvement 09 Phase E terminology cleanup through E-002 verified
+**الحالة:** Production readiness 08 closed; Improvement 09 Phase E terminology cleanup through E-003 verified
 **سجل الإصدار:** `Docs/RELEASE_NOTES.md`
 
 ## الغرض
@@ -18,8 +18,8 @@
 | Production readiness 08 | مغلق تنفيذيا حسب `Docs/08_Production_Readiness/BACKLOG.md` |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 وE-002 وتم التحقق منهما |
-| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا |
+| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 وE-002 وE-003 وتم التحقق منها |
+| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`، وE-003 ثبتت لغة أدوات المنصة على صندوق/حملة مع إبقاء `Entity` داخليا. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا |
 
 ## مصادر الحقيقة
 
@@ -29,7 +29,7 @@
 | ما حالة تقرير التدقيق v2؟ | `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` مع ملاحظة أنه superseded |
 | ما الخطة التالية؟ | `Docs/09_Improvement/00_README.md` |
 | ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` |
-| ما العمل التالي؟ | `E-003` داخل `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` |
+| ما العمل التالي؟ | `E-004` داخل `Docs/09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` |
 | ما القدرات التي لا يجوز خسارتها؟ | `Docs/09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md` |
 
 ## قرار الانتقال إلى 09
@@ -52,6 +52,7 @@
 - D-011 جعلت مسار صندوق/حملة هو default، مع بقاء `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` كمسار rollback.
 - E-001 نظفت النصوص الظاهرة في الواجهة والترجمات من مصطلح "كيان" لصالح "صندوق/حملة"، بدون تغيير `Entity` أو routes أو schema.
 - E-002 جعلت أهم الشاشات المشتركة تختار صياغة صندوق/حملة ديناميكيا من `isCampaign` أو `type === "CAMPAIGN"`، بدون تغيير الباكند أو schema.
+- E-003 طبقت نفس القرار على أدوات المنصة ونصوص `PlatformSurfaceService`، مع إبقاء `PlatformEntity` و`Entity` كعقود داخلية.
 - لم نغير routes، ولم نحذف `EntityType`.
 
 ## بوابات أغلقت قبل default switch

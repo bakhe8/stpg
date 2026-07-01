@@ -79,7 +79,7 @@ export default function PlatformAppealsPage() {
         <div>
           <h1 className={styles.pageTitle}>اعتراضات التعليق</h1>
           <p className={styles.pageSubtitle}>
-            {total} اعتراض — مدراء الصناديق يعترضون على قرارات التعليق
+            {total} اعتراض — مسؤولو الصناديق والحملات يعترضون على قرارات التعليق
           </p>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function PlatformAppealsPage() {
             className={`${styles.filterBtn} ${statusFilter === s ? styles.filterBtnActive : ""}`}
             onClick={() => setStatusFilter(s)}
           >
-            {s === "" ? "الكل" : STATUS_LABELS[s]?.label ?? s}
+            {s === "" ? "الكل" : (STATUS_LABELS[s]?.label ?? s)}
           </button>
         ))}
       </div>
@@ -126,17 +126,14 @@ export default function PlatformAppealsPage() {
                     </span>
                     <span className={styles.sep}>·</span>
                     <span className={styles.entityId}>
-                      الصندوق: {appeal.entityId.slice(0, 8)}…
+                      الصندوق/الحملة: {appeal.entityId.slice(0, 8)}…
                     </span>
                     <span className={styles.sep}>·</span>
                     <span className={styles.date}>
                       {new Date(appeal.createdAt).toLocaleDateString("ar-SA")}
                     </span>
                   </div>
-                  <span
-                    className={styles.statusBadge}
-                    data-color={st?.color}
-                  >
+                  <span className={styles.statusBadge} data-color={st?.color}>
                     {st?.label ?? appeal.status}
                   </span>
                 </div>
@@ -152,7 +149,9 @@ export default function PlatformAppealsPage() {
                     <p className={styles.reasonText}>{appeal.response}</p>
                     {appeal.resolvedAt && (
                       <span className={styles.resolvedDate}>
-                        {new Date(appeal.resolvedAt).toLocaleDateString("ar-SA")}
+                        {new Date(appeal.resolvedAt).toLocaleDateString(
+                          "ar-SA",
+                        )}
                       </span>
                     )}
                   </div>
@@ -193,7 +192,8 @@ export default function PlatformAppealsPage() {
 
                 {appeal.status === "PENDING" && !canRespondToAppeals && (
                   <div className={styles.readOnlyNotice}>
-                    هذا الحساب يتابع الاعتراض فقط؛ الرد يتطلب OWNER أو SUPER_ADMIN.
+                    هذا الحساب يتابع الاعتراض فقط؛ الرد يتطلب OWNER أو
+                    SUPER_ADMIN.
                   </div>
                 )}
               </div>

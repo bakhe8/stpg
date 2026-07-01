@@ -15,6 +15,7 @@ import {
   type PlatformSurface,
   type PlatformSurfaceAction,
 } from "../../lib/api/platform";
+import { isCampaignRecord } from "../../lib/entity-display";
 import styles from "./dashboard.module.css";
 
 type PlatformT = ReturnType<typeof useTranslations<"platform">>;
@@ -53,7 +54,10 @@ function entityTypeLabel(t: PlatformT, type: string) {
   }
 }
 
-function actionPriorityLabel(t: PlatformT, priority: PlatformSurfaceAction["priority"]) {
+function actionPriorityLabel(
+  t: PlatformT,
+  priority: PlatformSurfaceAction["priority"],
+) {
   if (priority === "critical") return t("priorityCritical");
   if (priority === "urgent") return t("priorityUrgent");
   if (priority === "normal") return t("priorityNormal");
@@ -73,11 +77,19 @@ export default function PlatformDashboardPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [pendingAppeals, setPendingAppeals] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
-  const [suspendDialog, setSuspendDialog] = useState<{ entity: PlatformEntity; reason: string } | null>(null);
-  const [activateTarget, setActivateTarget] = useState<PlatformEntity | null>(null);
+  const [suspendDialog, setSuspendDialog] = useState<{
+    entity: PlatformEntity;
+    reason: string;
+  } | null>(null);
+  const [activateTarget, setActivateTarget] = useState<PlatformEntity | null>(
+    null,
+  );
 
   const canManageEntities =
-    surface?.account.role === "OWNER" || surface?.account.role === "SUPER_ADMIN";
+    surface?.account.role === "OWNER" ||
+    surface?.account.role === "SUPER_ADMIN";
+  const targetKindLabel = (entity: PlatformEntity) =>
+    t(isCampaignRecord(entity) ? "targetCampaign" : "targetFund");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -112,7 +124,9 @@ export default function PlatformDashboardPage() {
   }, [statusFilter, router, t]);
 
   useEffect(() => {
-    const initialStatus = new URLSearchParams(window.location.search).get("status");
+    const initialStatus = new URLSearchParams(window.location.search).get(
+      "status",
+    );
     if (initialStatus && !statusFilter) {
       setStatusFilter(initialStatus);
       return;
@@ -132,7 +146,11 @@ export default function PlatformDashboardPage() {
     if (!suspendDialog || suspendDialog.reason.trim().length < 5) return;
     setActionLoading(suspendDialog.entity.id);
     try {
-      await suspendEntity(suspendDialog.entity.id, suspendDialog.reason.trim(), "SUSPENDED");
+      await suspendEntity(
+        suspendDialog.entity.id,
+        suspendDialog.reason.trim(),
+        "SUSPENDED",
+      );
       await load();
     } finally {
       setActionLoading(null);
@@ -255,7 +273,9 @@ export default function PlatformDashboardPage() {
                   ) : null}
                 </div>
                 <p>{session.scope}</p>
-                <small>{t("expiresAt", { date: formatDate(session.expiresAt) })}</small>
+                <small>
+                  {t("expiresAt", { date: formatDate(session.expiresAt) })}
+                </small>
                 <em>{session.whyShown}</em>
                 {session.cta ? (
                   <Link href={session.cta.href} className={styles.inlineLink}>
@@ -305,7 +325,9 @@ export default function PlatformDashboardPage() {
                     : styles.capabilityBlocked
                 }
               >
-                <span>{capability.isAllowed ? t("allowed") : t("blocked")}</span>
+                <span>
+                  {capability.isAllowed ? t("allowed") : t("blocked")}
+                </span>
                 <strong>{capability.label}</strong>
                 <p>{capability.reason}</p>
               </article>
@@ -332,7 +354,11 @@ export default function PlatformDashboardPage() {
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
                 <em>{item.reason}</em>
-                <small>{t("memberCount", { count: item.memberCount.toLocaleString("ar-SA") })}</small>
+                <small>
+                  {t("memberCount", {
+                    count: item.memberCount.toLocaleString("ar-SA"),
+                  })}
+                </small>
                 {item.cta ? (
                   <Link href={item.cta.href} className={styles.inlineLink}>
                     {item.cta.label}
@@ -360,7 +386,10 @@ export default function PlatformDashboardPage() {
                 <p>{event.body}</p>
                 <em>{event.reason}</em>
                 <small>
-                  {t("operatorAt", { operator: event.operatorName, date: formatDate(event.startedAt) })}
+                  {t("operatorAt", {
+                    operator: event.operatorName,
+                    date: formatDate(event.startedAt),
+                  })}
                 </small>
                 {event.needsReview ? <strong>{t("needsReview")}</strong> : null}
               </article>
@@ -453,28 +482,47 @@ export default function PlatformDashboardPage() {
       ) : null}
 
       {suspendDialog && (
-        <div className={styles.modalOverlay} onClick={() => setSuspendDialog(null)}>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setSuspendDialog(null)}
+        >
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>{t("suspendEntityTitle", { name: suspendDialog.entity.name })}</h3>
+            <h3 className={styles.modalTitle}>
+              {t("suspendEntityTitle", {
+                kind: targetKindLabel(suspendDialog.entity),
+                name: suspendDialog.entity.name,
+              })}
+            </h3>
             <p className={styles.modalHint}>{t("suspendHint")}</p>
             <textarea
               className={styles.modalTextarea}
               value={suspendDialog.reason}
-              onChange={(e) => setSuspendDialog((d) => d && { ...d, reason: e.target.value })}
+              onChange={(e) =>
+                setSuspendDialog((d) => d && { ...d, reason: e.target.value })
+              }
               placeholder={t("suspendReasonPlaceholder")}
               rows={3}
               autoFocus
             />
             <div className={styles.modalActions}>
-              <button className={styles.modalCancelBtn} onClick={() => setSuspendDialog(null)}>
+              <button
+                className={styles.modalCancelBtn}
+                onClick={() => setSuspendDialog(null)}
+              >
                 {t("cancel")}
               </button>
               <button
                 className={styles.modalDangerBtn}
-                disabled={suspendDialog.reason.trim().length < 5 || !!actionLoading}
+                disabled={
+                  suspendDialog.reason.trim().length < 5 || !!actionLoading
+                }
                 onClick={() => void confirmSuspend()}
               >
-                {actionLoading ? t("suspending") : t("suspendEntityBtn")}
+                {actionLoading
+                  ? t("suspending")
+                  : t("suspendEntityBtn", {
+                      kind: targetKindLabel(suspendDialog.entity),
+                    })}
               </button>
             </div>
           </div>
@@ -482,9 +530,16 @@ export default function PlatformDashboardPage() {
       )}
 
       {activateTarget && (
-        <div className={styles.modalOverlay} onClick={() => setActivateTarget(null)}>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setActivateTarget(null)}
+        >
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>{t("activateEntityTitle")}</h3>
+            <h3 className={styles.modalTitle}>
+              {t("activateEntityTitle", {
+                kind: targetKindLabel(activateTarget),
+              })}
+            </h3>
             <p className={styles.modalBody}>
               {t.rich("activateConfirmBody", {
                 name: activateTarget.name,
@@ -492,7 +547,10 @@ export default function PlatformDashboardPage() {
               })}
             </p>
             <div className={styles.modalActions}>
-              <button className={styles.modalCancelBtn} onClick={() => setActivateTarget(null)}>
+              <button
+                className={styles.modalCancelBtn}
+                onClick={() => setActivateTarget(null)}
+              >
                 {t("cancel")}
               </button>
               <button
@@ -500,7 +558,11 @@ export default function PlatformDashboardPage() {
                 disabled={!!actionLoading}
                 onClick={() => void confirmActivate()}
               >
-                {actionLoading ? t("activating") : t("activateEntityBtn")}
+                {actionLoading
+                  ? t("activating")
+                  : t("activateEntityBtn", {
+                      kind: targetKindLabel(activateTarget),
+                    })}
               </button>
             </div>
           </div>

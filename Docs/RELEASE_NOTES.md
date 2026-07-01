@@ -1,5 +1,29 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.12 - 2026-07-01
+
+**النوع:** Phase E platform/operator terminology
+**الحالة:** E-003 منفذة؛ أدوات المنصة تستخدم صندوق/حملة في الواجهة وتبقي Entity داخلياً
+
+### ما تغير
+
+- أصبحت لوحة `/platform` تصف الجداول والمراجعات كصناديق وحملات بدلاً من الصناديق فقط.
+- أصبحت أزرار ومودالات تعليق/تفعيل السجل تختار `fund/campaign` أو `الصندوق/الحملة` حسب `type`.
+- أصبحت صفحة اعتراضات التعليق تستخدم صياغة عامة `الصندوق/الحملة` لأن endpoint الاعتراض لا يرسل نوع السجل.
+- نُظفت نصوص `PlatformSurfaceService` القادمة من الباكند من عبارات `جدول الكيانات` وعبارات تفترض أن كل سجل صندوق.
+- بقيت أسماء `PlatformEntity`, `Entity`, `/platform/entities`, و`/entities` كما هي داخلياً.
+
+### المعنى العملي
+
+مشرف المنصة يرى نفس لغة المنتج البشرية: صندوق/حملة. أما المصطلحات الداخلية فتظل في الكود والـ API حتى لا نفتح تغييراً جذرياً غير مطلوب.
+
+### التحقق
+
+- `npm run build` في backend
+- `npm run lint` في frontend
+- `NEXT_PUBLIC_API_URL='http://localhost:3001/api' NEXT_PUBLIC_ENABLE_DEV_LOGIN='true' NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW='true' npm run build`
+- Playwright rendered mock للوحة المنصة
+
 ## 2.11 - 2026-07-01
 
 **النوع:** Phase E dynamic fund/campaign labels
