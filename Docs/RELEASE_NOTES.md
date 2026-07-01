@@ -1,5 +1,31 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.17 - 2026-07-01
+
+**النوع:** Phase F capability evidence pack
+**الحالة:** F-001 منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`.
+- ثبتت الوثيقة أدلة حفظ القدرات بعد default switch.
+- تم تحديث `Docs/09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md` لتعليم F-001 كمغلقة.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.17`.
+
+### المعنى العملي
+
+المسار الافتراضي `صندوق/حملة` لم يحذف قدرات التصويت، اللجان، المحافظ، المسارات، الاشتراكات، الدفع، الصرف، التدقيق، النزاعات، الحملات، العلاقات، أو سطح الأدوار اليومي. لا توجد فجوة blocking، والعمل التالي المرشح هو `F-002`.
+
+### التحقق
+
+- Browser smoke على `/login -> dev login -> /dashboard`: لا توجد console errors.
+- `npm run test:phase-d:parity`: 2 suites، 12 tests passed.
+- backend targeted tests: 15 suites، 88 tests passed.
+- `npm run test:phase-d:create-flow`: 3 passed.
+- `npm run test:ux:roles`: 18/18 users، 0 issues.
+- `npm run seed:validate:docker`: passed.
+- `git diff --check`
+
 ## 2.16 - 2026-07-01
 
 **النوع:** Post Phase E recommended backlog

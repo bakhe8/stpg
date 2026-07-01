@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.16`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.17`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -35,6 +35,7 @@
 | 10 | `10_PHASE_D_DEFAULT_SWITCH.md` | قرار جعل المسار الجديد default مع rollback للفلاق |
 | 11 | `11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md` | تنظيف لغة الواجهة من "كيان" إلى صندوق/حملة |
 | 12 | `12_POST_PHASE_E_NEXT_BACKLOG.md` | الترشيح التنفيذي الصغير بعد إغلاق Phase E |
+| 13 | `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md` | دليل F-001 لحفظ القدرات بعد default switch |
 
 ## ترتيب التنفيذ
 
@@ -120,7 +121,9 @@ Phase E بدأت بعد default switch لتنظيف لغة المنتج الظا
 
 `Post-default UX and Capability Hardening`.
 
-أول بند مرشح هو `F-001`: إثبات حفظ القدرات بعد أن أصبح مسار صندوق/حملة هو default. الهدف أن نثبت أن الصندوق الجديد لا يزال يستطيع الوصول إلى التصويت، اللجان، المحافظ، المسارات، الاشتراكات، الصرف، التدقيق، النزاعات، الحملات، والعلاقات قبل أن نحسن تجربة first-run أو نفتح قرارات أكبر.
+أول بند كان `F-001`: إثبات حفظ القدرات بعد أن أصبح مسار صندوق/حملة هو default. تم إغلاقه في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`.
+
+العمل التالي المرشح هو `F-002`: تحسين first-run/setup guidance بعد إنشاء الصندوق بناء على الأدلة، بدون تغيير schema أو routes.
 
 ## قواعد الحماية
 

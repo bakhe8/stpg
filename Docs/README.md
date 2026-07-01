@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.16` بتاريخ 2026-07-01.
+**الحالة الحالية:** الإصدار التشغيلي `2.17` بتاريخ 2026-07-01.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -97,6 +97,7 @@
 | [10_PHASE_D_DEFAULT_SWITCH.md](09_Improvement/10_PHASE_D_DEFAULT_SWITCH.md) | قرار جعل مسار صندوق/حملة default مع rollback للنموذج القديم |
 | [11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md](09_Improvement/11_PHASE_E_UI_TERMINOLOGY_CLEANUP.md) | تنظيف لغة الواجهة من "كيان" إلى صندوق/حملة بدون تغيير الباكند |
 | [12_POST_PHASE_E_NEXT_BACKLOG.md](09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md) | الترشيح التنفيذي التالي بعد إغلاق Phase E: حفظ القدرات وتهذيب تجربة ما بعد default |
+| [13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md](09_Improvement/13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md) | إغلاق F-001: دليل حفظ القدرات بعد default switch |
 
 ---
 
@@ -135,8 +136,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ الترشيح التالي موثق |
-| أول عمل مرشح | F-001: Capability Preservation Evidence Pack بعد default switch |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack |
+| أول عمل مرشح | F-002: First-run Setup Guidance Polish |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
