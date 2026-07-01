@@ -23,6 +23,7 @@ import {
   getMembershipPreferences,
   MemberPreference,
 } from "../../../lib/api/memberships";
+import { isCampaignRecord } from "../../../lib/entity-display";
 import styles from "./subscriptions.module.css";
 import RuleSummaryPanel from "../../../components/Governance/RuleSummaryPanel";
 
@@ -95,6 +96,11 @@ export default function SubscriptionsPage() {
     notes: "",
   });
   const selectedEntity = entities.find((entity) => entity.id === selectedId);
+  const selectedIsCampaign = isCampaignRecord(selectedEntity);
+  const scopedSubscriptionKey = (
+    fundKey: Parameters<typeof t>[0],
+    campaignKey: Parameters<typeof t>[0],
+  ) => (selectedIsCampaign ? campaignKey : fundKey);
   const activeCount = subscriptions.filter((s) => s.state === "ACTIVE").length;
   const conditionalCount = subscriptions.filter(
     (s) => s.state === "CONDITIONAL",
@@ -329,11 +335,11 @@ export default function SubscriptionsPage() {
           <div className={styles.relationshipHeader}>
             <div>
               <h2 className={styles.relationshipTitle}>
-                {t("relationshipTitle")}
+                {t(scopedSubscriptionKey("relationshipTitle", "campaignRelationshipTitle"))}
               </h2>
               <p className={styles.relationshipText}>
-                {t("relationshipText", {
-                  entity: selectedEntity?.name ?? t("entityFallback"),
+                {t(scopedSubscriptionKey("relationshipText", "campaignRelationshipText"), {
+                  entity: selectedEntity?.name ?? t(scopedSubscriptionKey("entityFallback", "campaignFallback")),
                 })}
               </p>
             </div>
@@ -363,7 +369,7 @@ export default function SubscriptionsPage() {
           <p className={styles.relationshipOutcome}>
             {subscriptions.length > 0
               ? t("relationshipOutcome")
-              : t("relationshipNoSubs")}
+              : t(scopedSubscriptionKey("relationshipNoSubs", "campaignRelationshipNoSubs"))}
           </p>
           {preferences && (
             <div className={styles.preferencePanel}>
@@ -495,7 +501,7 @@ export default function SubscriptionsPage() {
                   <div className={styles.termsBox}>
                     <RuleSummaryPanel
                       title={`شروط المشاركة في: ${selectedPath.name}`}
-                      summary={`باشتراكك في هذا المسار تقر بما يلي:\n• الاشتراك وفق المبلغ المتفق عليه في كل فترة دفع\n• الخضوع لآلية الحوكمة المعتمدة في الصندوق\n• إمكانية إيقاف الاشتراك عند التأخر المتكرر\n• أن حق الاستفادة مرتبط بالنظام الداخلي للصندوق`}
+                      summary={t(scopedSubscriptionKey("termsSummary", "campaignTermsSummary"))}
                       icon="📜"
                     />
                     <label className={styles.termsCheck}>

@@ -35,6 +35,15 @@
     "confirmClosureTitle": "تأكيد طلب إغلاق الصندوق",
     "confirmClosureDesc": "سيُجمَّد الصندوق وتُرسل المنصة إشعاراً لجميع الأعضاء. هذا الإجراء يصعب التراجع عنه.",
     "confirmClosureBtn": "تأكيد طلب الإغلاق",
-    "entityNotFound": "لم يُعثر على الصندوق"
+    "entityNotFound": "لم يُعثر على الصندوق",
+    "backToCampaign": "← العودة للحملة",
+    "campaignTitle": "إعدادات الحملة",
+    "campaignNameLabel": "اسم الحملة",
+    "campaignClosureTitle": "إغلاق الحملة",
+    "campaignClosureWarning": "يؤدي طلب الإغلاق إلى تجميد الحملة. يجب استيفاء الشروط أدناه قبل الإغلاق.",
+    "campaignClosureReasonPlaceholder": "اذكر سبب إغلاق الحملة…",
+    "requestCampaignClosureBtn": "طلب إغلاق الحملة",
+    "confirmCampaignClosureTitle": "تأكيد طلب إغلاق الحملة",
+    "confirmCampaignClosureDesc": "ستُجمَّد الحملة وتُرسل المنصة إشعاراً لجميع الأعضاء. هذا الإجراء يصعب التراجع عنه."
   }
 }

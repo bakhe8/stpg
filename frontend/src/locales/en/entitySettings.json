@@ -35,6 +35,15 @@
     "confirmClosureTitle": "Confirm fund closure request",
     "confirmClosureDesc": "The fund will be frozen and the platform will notify all members. This action is hard to reverse.",
     "confirmClosureBtn": "Confirm closure request",
-    "entityNotFound": "Fund not found"
+    "entityNotFound": "Fund not found",
+    "backToCampaign": "← Back to campaign",
+    "campaignTitle": "Campaign Settings",
+    "campaignNameLabel": "Campaign name",
+    "campaignClosureTitle": "Close Campaign",
+    "campaignClosureWarning": "Requesting closure will freeze the campaign. The conditions below must be met before closing.",
+    "campaignClosureReasonPlaceholder": "State the reason for closing the campaign…",
+    "requestCampaignClosureBtn": "Request campaign closure",
+    "confirmCampaignClosureTitle": "Confirm campaign closure request",
+    "confirmCampaignClosureDesc": "The campaign will be frozen and the platform will notify all members. This action is hard to reverse."
   }
 }

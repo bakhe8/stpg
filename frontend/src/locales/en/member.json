@@ -142,10 +142,10 @@
     "stateSuspended": "Suspended",
     "stateExited": "Exited",
     "stateSupporterOnly": "Supporter",
-    "prompt": "Select a fund to view subscriptions",
+    "prompt": "Select a fund or campaign to view subscriptions",
     "entityFallback": "this fund",
     "relationshipTitle": "Your operational relationship in this fund",
-    "relationshipText": "These subscriptions define your obligations and rights inside {fund}: which wallet you participate in, and through which governance path.",
+    "relationshipText": "These subscriptions define your obligations and rights inside {entity}: which wallet you participate in, and through which governance path.",
     "relationshipActive": "Active",
     "relationshipConditional": "Conditional",
     "relationshipSupporterOnly": "Supporter only",
@@ -198,7 +198,13 @@
     "pathTypeIndividual": "Individual with cap",
     "pathTypeDonation": "Donation only",
     "pathTypeEmergency": "Fast emergency",
-    "pathTypeGeneral": "Governance path"
+    "pathTypeGeneral": "Governance path",
+    "campaignFallback": "this campaign",
+    "campaignRelationshipTitle": "Your operational relationship in this campaign",
+    "campaignRelationshipText": "These subscriptions define your obligations and rights inside {entity}: which wallet you participate in, and through which governance path.",
+    "campaignRelationshipNoSubs": "No subscriptions yet; campaign membership does not grant wallet rights until it is linked to a path.",
+    "termsSummary": "By subscribing to this path, you acknowledge:\n- The subscription follows the agreed amount for each payment period\n- You are subject to the fund governance mechanism\n- Repeated delay may suspend the subscription\n- Benefit rights are tied to the fund internal rules",
+    "campaignTermsSummary": "By subscribing to this path, you acknowledge:\n- The subscription follows the agreed amount for each payment period\n- You are subject to the campaign governance mechanism\n- Repeated delay may suspend the subscription\n- Benefit rights are tied to the campaign internal rules"
   },
   "decisions": {
     "title": "Decisions & Voting",

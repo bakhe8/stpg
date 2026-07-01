@@ -12,6 +12,7 @@ import {
   Entity,
   ClosureChecklist,
 } from "../../../../../lib/api/entities";
+import { isCampaignRecord } from "../../../../../lib/entity-display";
 import ConfirmActionDialog from "../../../../../components/shared/ConfirmActionDialog";
 import Breadcrumbs from "../../../../../components/shared/Breadcrumbs";
 import styles from "./settings.module.css";
@@ -110,6 +111,11 @@ export default function EntitySettingsPage() {
   }
 
   const alreadyRequestedClosure = !!entity.closureStatus;
+  const isCampaign = isCampaignRecord(entity);
+  const scopedSettingKey = (
+    fundKey: Parameters<typeof t>[0],
+    campaignKey: Parameters<typeof t>[0],
+  ) => (isCampaign ? campaignKey : fundKey);
   const hasNameChange = name.trim() !== entity.name;
   const hasDescriptionChange = description.trim() !== (entity.description ?? "");
   const hasBankChange =
@@ -138,16 +144,16 @@ export default function EntitySettingsPage() {
           { label: t("breadcrumbSettings") },
         ]}
       />
-      <Link href={`/entities/${id}`} className={styles.back}>{t("backToEntity")}</Link>
+      <Link href={`/entities/${id}`} className={styles.back}>{t(scopedSettingKey("backToEntity", "backToCampaign"))}</Link>
 
-      <h1 className={styles.title}>{t("title")}</h1>
+      <h1 className={styles.title}>{t(scopedSettingKey("title", "campaignTitle"))}</h1>
 
-      {/* ── بيانات الصندوق ── */}
+      {/* ── بيانات الصندوق / الحملة ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t("basicTitle")}</h2>
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>{t("nameLabel")}</label>
+            <label className={styles.label}>{t(scopedSettingKey("nameLabel", "campaignNameLabel"))}</label>
             <input
               className={styles.input}
               value={name}
@@ -212,7 +218,7 @@ export default function EntitySettingsPage() {
       {/* ── طلب الإغلاق (للمؤسس والمدير فقط) ── */}
       {isFounderOrAdmin && (
         <section className={`${styles.section} ${styles.dangerSection}`}>
-          <h2 className={styles.sectionTitle}>{t("closureTitle")}</h2>
+          <h2 className={styles.sectionTitle}>{t(scopedSettingKey("closureTitle", "campaignClosureTitle"))}</h2>
 
           {alreadyRequestedClosure ? (
             <div className={styles.closureStatus}>
@@ -233,7 +239,7 @@ export default function EntitySettingsPage() {
             </div>
           ) : (
             <>
-              <p className={styles.dangerNote}>{t("closureWarning")}</p>
+              <p className={styles.dangerNote}>{t(scopedSettingKey("closureWarning", "campaignClosureWarning"))}</p>
 
               {/* Checklist */}
               {checklistLoading ? (
@@ -266,7 +272,7 @@ export default function EntitySettingsPage() {
                   onChange={(e) => setClosureReason(e.target.value)}
                   rows={2}
                   maxLength={300}
-                  placeholder={t("closureReasonPlaceholder")}
+                  placeholder={t(scopedSettingKey("closureReasonPlaceholder", "campaignClosureReasonPlaceholder"))}
                 />
               </div>
 
@@ -275,7 +281,7 @@ export default function EntitySettingsPage() {
                 onClick={() => setClosureConfirmOpen(true)}
                 disabled={!checklist?.canClose || !closureReason.trim()}
               >
-                {t("requestClosureBtn")}
+                {t(scopedSettingKey("requestClosureBtn", "requestCampaignClosureBtn"))}
               </button>
               {checklist && !checklist.canClose && (
                 <p className={styles.checkHint}>{t("completeChecksHint")}</p>
@@ -287,8 +293,8 @@ export default function EntitySettingsPage() {
 
       {closureConfirmOpen && (
         <ConfirmActionDialog
-          title={t("confirmClosureTitle")}
-          description={t("confirmClosureDesc")}
+          title={t(scopedSettingKey("confirmClosureTitle", "confirmCampaignClosureTitle"))}
+          description={t(scopedSettingKey("confirmClosureDesc", "confirmCampaignClosureDesc"))}
           confirmLabel={t("confirmClosureBtn")}
           danger
           loading={closureSubmitting}

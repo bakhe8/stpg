@@ -13,6 +13,7 @@ import {
 import { getEntityWallets } from "../../../lib/api/wallets";
 import { getDecisions, Decision } from "../../../lib/api/decisions";
 import { isReadableEntity } from "../../../lib/access";
+import { isCampaignRecord } from "../../../lib/entity-display";
 import styles from "./entities.module.css";
 
 interface EntityOperationalSummary {
@@ -133,20 +134,25 @@ export default function EntitiesPage() {
     entity: Entity,
     summary: EntityOperationalSummary,
   ) => {
+    const scopedKey = (
+      fundKey: Parameters<typeof t>[0],
+      campaignKey: Parameters<typeof t>[0],
+    ) => (isCampaignRecord(entity) ? campaignKey : fundKey);
+
     if (entity.platformStatus === "PENDING_REVIEW") {
-      return t("operationalPendingReview");
+      return t(scopedKey("operationalPendingReview", "operationalCampaignPendingReview"));
     }
     if (entity.platformStatus === "SUSPENDED") {
-      return t("operationalSuspended");
+      return t(scopedKey("operationalSuspended", "operationalCampaignSuspended"));
     }
     if (entity.platformStatus === "READ_ONLY") {
-      if (entity.isCampaign || entity.type === "CAMPAIGN") {
+      if (isCampaignRecord(entity)) {
         return t("operationalCampaignClosed");
       }
       return t("operationalReadOnly");
     }
     if (summary.overdueAmount > 0 && summary.pendingVoteCount > 0) {
-      return t("operationalOverdueAndPendingVotes", {
+      return t(scopedKey("operationalOverdueAndPendingVotes", "operationalCampaignOverdueAndPendingVotes"), {
         amount: formatCurrency(summary.overdueAmount),
         count: summary.pendingVoteCount,
       });
@@ -157,7 +163,7 @@ export default function EntitiesPage() {
       });
     }
     if (summary.pendingVoteCount > 0) {
-      return t("operationalPendingVoteHint", {
+      return t(scopedKey("operationalPendingVoteHint", "operationalCampaignPendingVoteHint"), {
         count: summary.pendingVoteCount,
       });
     }
@@ -168,14 +174,14 @@ export default function EntitiesPage() {
       summary.supporterOnlySubscriptions > 0 &&
       summary.activeSubscriptions === 0
     ) {
-      return t("operationalSupporterOnly");
+      return t(scopedKey("operationalSupporterOnly", "operationalCampaignSupporterOnly"));
     }
     if (summary.activeSubscriptions > 0) {
-      return t("operationalActive", {
+      return t(scopedKey("operationalActive", "operationalCampaignActive"), {
         count: summary.activeSubscriptions,
       });
     }
-    return t("operationalNoSubscription");
+    return t(scopedKey("operationalNoSubscription", "operationalCampaignNoSubscription"));
   };
 
   const load = useCallback(async () => {
@@ -334,7 +340,7 @@ export default function EntitiesPage() {
                   key={e.id}
                   className={`${styles.row} ${styles.rowDisabled}`}
                   aria-disabled="true"
-                  title="هذا الصندوق معلّق حالياً"
+                  title={isCampaignRecord(e) ? t("campaignSuspendedTitle") : t("fundSuspendedTitle")}
                 >
                   {rowContent}
                 </div>

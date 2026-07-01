@@ -1,5 +1,27 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.11 - 2026-07-01
+
+**النوع:** Phase E dynamic fund/campaign labels
+**الحالة:** E-002 منفذة؛ الشاشات المشتركة تفرق بين الصندوق والحملة من بيانات السجل
+
+### ما تغير
+
+- أضيف helper واجهي لاشتقاق سياق الحملة من `isCampaign` أو `type === "CAMPAIGN"`.
+- أصبحت قائمة الصناديق، صفحة تفاصيل الصندوق/الحملة، إعدادات الصندوق/الحملة، وصفحة الاشتراكات تستخدم صياغة ديناميكية بين صندوق وحملة.
+- أضيفت مفاتيح ترجمة عربية وإنجليزية للحملة في حالات التشغيل، العلاقة، المعلومات، المحافظ، الإعدادات، والاشتراكات.
+- بقيت `Entity`, `/entities`, `EntityType`, `X-Entity-ID`, والـ schema بدون تغيير.
+
+### المعنى العملي
+
+تجربة المستخدم لم تعد تفرض كلمة "صندوق" على حملة فعلية في أهم الشاشات المشتركة. التغيير واجهي فقط ويحافظ على العمق التشغيلي الحالي.
+
+### التحقق
+
+- `npm run lint`
+- `NEXT_PUBLIC_API_URL='http://localhost:3001/api' NEXT_PUBLIC_ENABLE_DEV_LOGIN='true' NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW='true' npm run build`
+- Playwright rendered mock على `http://localhost:3333/entities` لحملة `isCampaign=true`
+
 ## 2.10 - 2026-07-01
 
 **النوع:** Phase E UI terminology cleanup

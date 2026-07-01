@@ -37,6 +37,7 @@ import {
   PaymentDue,
 } from "../../../../lib/api/subscriptions";
 import { ADMIN_ROLES, OVERSIGHT_ROLES, hasRole } from "../../../../lib/access";
+import { isCampaignRecord } from "../../../../lib/entity-display";
 import { createInvitation } from "../../../../lib/api/invitations";
 import PlatformStatusBanner from "../../../../components/shared/PlatformStatusBanner";
 import styles from "./entity-detail.module.css";
@@ -505,6 +506,11 @@ export default function EntityDetailPage() {
   const overdueAmount = myPaymentDues
     .filter((due) => due.status === "OVERDUE")
     .reduce((sum, due) => sum + Number(due.amountDue ?? 0), 0);
+  const isCampaignEntity = isCampaignRecord(entity);
+  const scopedEntityKey = (
+    fundKey: Parameters<typeof t>[0],
+    campaignKey: Parameters<typeof t>[0],
+  ) => (isCampaignEntity ? campaignKey : fundKey);
   const primaryRelationshipText =
     overdueAmount > 0
       ? t("relationshipOverdue", { amount: formatCurrency(overdueAmount) })
@@ -512,12 +518,12 @@ export default function EntityDetailPage() {
         ? t("relationshipConditional")
         : supporterOnlyOwnSubscriptions.length > 0 &&
             activeOwnSubscriptions.length === 0
-          ? t("relationshipSupporterOnly")
+          ? t(scopedEntityKey("relationshipSupporterOnly", "campaignRelationshipSupporterOnly"))
           : activeOwnSubscriptions.length > 0
             ? t("relationshipActive", {
                 count: activeOwnSubscriptions.length,
               })
-            : t("relationshipNoSubscription");
+            : t(scopedEntityKey("relationshipNoSubscription", "campaignRelationshipNoSubscription"));
   const visibleTabs = [
     "overview",
     "wallets",
@@ -534,7 +540,6 @@ export default function EntityDetailPage() {
   const isActionDisabled =
     entity.platformStatus === "SUSPENDED" ||
     entity.platformStatus === "READ_ONLY";
-  const isCampaignEntity = entity.isCampaign || entity.type === "CAMPAIGN";
   const campaignEnded =
     !!entity.campaignEndsAt && new Date(entity.campaignEndsAt) <= new Date();
   const showCampaignClosedPanel =
@@ -727,13 +732,13 @@ export default function EntityDetailPage() {
           <div className={styles.pendingReviewHeader}>
             <div>
               <span className={styles.pendingReviewEyebrow}>
-                {t("pendingReviewEyebrow")}
+                {t(scopedEntityKey("pendingReviewEyebrow", "campaignPendingReviewEyebrow"))}
               </span>
               <h2 className={styles.pendingReviewTitle}>
-                {t("pendingReviewTitle")}
+                {t(scopedEntityKey("pendingReviewTitle", "campaignPendingReviewTitle"))}
               </h2>
               <p className={styles.pendingReviewText}>
-                {t("pendingReviewBody")}
+                {t(scopedEntityKey("pendingReviewBody", "campaignPendingReviewBody"))}
               </p>
             </div>
             <span className={styles.pendingReviewBadge}>
@@ -878,7 +883,7 @@ export default function EntityDetailPage() {
                 {healthPct < 70 && (
                   <div className={styles.healthTooltipHint}>
                     {healthPct < 40
-                      ? "الصندوق بحاجة إلى اهتمام عاجل — راجع المدفوعات والاشتراكات"
+                      ? t(scopedEntityKey("healthUrgentHint", "campaignHealthUrgentHint"))
                       : "يمكن تحسين الصحة بتسوية المدفوعات المعلقة"}
                   </div>
                 )}
@@ -933,10 +938,10 @@ export default function EntityDetailPage() {
         <div className={styles.relationshipHeader}>
           <div>
             <h2 className={styles.relationshipTitle}>
-              {t("relationshipTitle")}
+              {t(scopedEntityKey("relationshipTitle", "campaignRelationshipTitle"))}
             </h2>
             <p className={styles.relationshipText}>
-              {t("relationshipWhyText", { role: roleText })}
+              {t(scopedEntityKey("relationshipWhyText", "campaignRelationshipWhyText"), { role: roleText })}
             </p>
           </div>
           <Link href="/portal" className={styles.relationshipAction}>
@@ -976,7 +981,7 @@ export default function EntityDetailPage() {
         {relationshipSubscriptions.length > 0 ? (
           <div className={styles.relationshipPathList}>
             <div className={styles.relationshipPathListHeader}>
-              <strong>{t("relationshipMapTitle")}</strong>
+              <strong>{t(scopedEntityKey("relationshipMapTitle", "campaignRelationshipMapTitle"))}</strong>
               <span>{t("relationshipMapHint")}</span>
             </div>
             {relationshipSubscriptions.map((subscription) => {
@@ -1134,7 +1139,7 @@ export default function EntityDetailPage() {
 
           <div className={styles.overviewGrid}>
             <div className={styles.infoCard}>
-              <h3 className={styles.cardTitle}>{t("infoCardTitle")}</h3>
+              <h3 className={styles.cardTitle}>{t(scopedEntityKey("infoCardTitle", "campaignInfoCardTitle"))}</h3>
               <div className={styles.infoRow}>
                 <span>{t("infoStatus")}</span>
                 <span>{entity.isActive ? t("active") : t("inactive")}</span>
@@ -1322,7 +1327,7 @@ export default function EntityDetailPage() {
         <div className={styles.tabStack}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle}>{t("walletSectionTitle")}</h2>
+              <h2 className={styles.sectionTitle}>{t(scopedEntityKey("walletSectionTitle", "campaignWalletSectionTitle"))}</h2>
               <p className={styles.sectionHint}>{t("walletSectionHint")}</p>
             </div>
             {canManage && !isActionDisabled && (
@@ -1444,8 +1449,8 @@ export default function EntityDetailPage() {
             ))}
             {wallets.length === 0 && (
               <div className={styles.emptyStatePanel}>
-                <h3>{t("noWalletsTitle")}</h3>
-                <p>{t("noWalletsBody")}</p>
+                <h3>{t(scopedEntityKey("noWalletsTitle", "campaignNoWalletsTitle"))}</h3>
+                <p>{t(scopedEntityKey("noWalletsBody", "campaignNoWalletsBody"))}</p>
                 {canManage && !isActionDisabled && (
                   <button
                     type="button"
