@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.14` بتاريخ 2026-07-01.
+**الحالة الحالية:** الإصدار التشغيلي `2.15` بتاريخ 2026-07-01.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -134,8 +134,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 وE-002 وE-003 وE-004 وE-005 |
-| أول عمل مفتوح | E-006: قرار alias اختياري للمسارات |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006 |
+| أول عمل مفتوح | لا يوجد بند مفتوح داخل Phase E |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
