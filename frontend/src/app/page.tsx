@@ -5,92 +5,92 @@ import { redirect } from 'next/navigation';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'CollectiveTrustOS | كل دور يرى ما يهمه فقط',
+  title: 'CollectiveTrustOS | نظام تشغيل للصناديق والحملات',
   description:
-    'منصة تختصر إدارة الصناديق الجماعية: العضو يرى المطلوب منه وما يحق له، والإدارة ترى الاستثناءات، والنظام يتولى القواعد والحوكمة والتدقيق في الخلفية.',
+    'منصة تشغل الصناديق والحملات بقواعد حوكمة، فصل مالي، صلاحيات دقيقة، وسجل تدقيق يحفظ الثقة بدون تشغيل يدوي مرهق.',
 };
 
-const MEMBER_QUESTIONS = [
-  'كم مطلوب مني هذا الشهر؟',
-  'هل يحق لي الاستفادة من هذه المحفظة؟',
-  'هل يوجد قرار يهمني فعلاً؟',
-  'ما آخر شيء حدث في الصندوق بدون تفاصيل مرهقة؟',
+const TRUST_SIGNALS = [
+  'حوكمة قابلة للتدقيق من أول قرار',
+  'فصل مالي بين الصناديق والحملات والمحافظ',
+  'صلاحيات دقيقة حسب الدور والسياق',
+  'سجل دائم للمدفوعات والقرارات والاعتراضات',
 ] as const;
 
-const MEMBER_VIEW = [
+const SYSTEM_CAPABILITIES = [
   {
     label: '01',
-    title: 'المطلوب منك الآن',
-    desc: 'مستحقاتك، آخر موعد، وطريقة الدفع. لا قوائم مالية طويلة ولا مصطلحات داخلية.',
+    title: 'محرك حوكمة',
+    desc: 'تصويت، لجان، صلاحيات، اعتراضات، ومسارات قرار تعمل كقواعد واضحة قابلة للتتبع.',
   },
   {
     label: '02',
-    title: 'ما يحق لك',
-    desc: 'هل أنت مؤهل للاستفادة؟ هل أنت داعم فقط؟ هل عضويتك معلقة؟ تظهر النتيجة مباشرة بلغة مفهومة.',
+    title: 'فصل مالي حقيقي',
+    desc: 'الصندوق، الحملة، المحفظة، والمسار المالي تبقى منفصلة حتى عندما تتداخل العضويات والمساهمات.',
   },
   {
     label: '03',
-    title: 'ما يحدث في الصندوق',
-    desc: 'ملخص قصير للقرارات والأحداث المهمة فقط، مع إمكانية فتح التفاصيل عند الحاجة.',
+    title: 'تشغيل اشتراكات ومدفوعات',
+    desc: 'استحقاقات، سجلات دفع، مراجعة مالية، ومتأخرات مرتبطة بالعضوية والمسار الصحيح.',
   },
   {
     label: '04',
-    title: 'تنبيه عند وجود إجراء',
-    desc: 'لا يدخل العضو ليبحث وسط الصفحات. النظام يبرز له ما ينتظر موافقته أو دفعه أو مراجعته.',
+    title: 'حملات مرتبطة بالصناديق',
+    desc: 'حملات مؤقتة لها مدة وسياق وصرف مستقل، بدون خلطها مع التشغيل الدائم للصندوق.',
   },
 ] as const;
 
-const AUTOMATION_PROMISES = [
+const SECURITY_PROMISES = [
   {
     label: 'A',
-    title: 'القواعد تعمل خلف الكواليس',
-    desc: 'النظام يحسب الأهلية والالتزامات حسب العلاقة الصحيحة، لكن لا يجبر العضو على فهم كل قاعدة.',
+    title: 'الصلاحية لا تعتمد على الثقة الشخصية',
+    desc: 'كل قدرة مرتبطة بالدور والعضوية والسياق، فلا يحصل أمين الصندوق أو المدقق أو العضو على أكثر مما يحتاجه.',
   },
   {
     label: 'B',
-    title: 'المال لا يختلط',
-    desc: 'فصل الصناديق والمحافظ والمسارات يحدث آلياً، ويظهر للمستخدم فقط الأثر الذي يخصه.',
+    title: 'الأثر المالي محفوظ',
+    desc: 'كل مدفوع، صرف، تحويل، أو علاقة بين محافظ يترك أثراً يمكن مراجعته بدلاً من الاعتماد على ملفات متفرقة.',
   },
   {
     label: 'C',
-    title: 'الاستثناءات تصل لصاحب الدور',
-    desc: 'المدير يرى ما يحتاج قراراً، أمين الصندوق يرى ما يحتاج اعتماداً، والمدقق يرى ما يحتاج مراجعة.',
+    title: 'القرار له مسار واضح',
+    desc: 'القواعد تحدد من يصوت، من يراجع، ومن يعتمد، مع سجل يثبت الحالة والنتيجة والتصعيد.',
   },
   {
     label: 'D',
-    title: 'التفاصيل موجودة وليست مزعجة',
-    desc: 'السجل والتدقيق والقرارات محفوظة، لكنها لا تزاحم الواجهة اليومية لمن لا يحتاجها.',
+    title: 'حدود قانونية وتشغيلية أوضح',
+    desc: 'المنصة تنظم الصندوق أو الحملة ولا تدعي إنشاء صفة قانونية؛ المسؤولية والشفافية تبقى واضحة.',
   },
 ] as const;
 
-const ROLE_VIEWS = [
-  ['العضو', 'يدفع، يعرف حقه، ويتابع ملخص الصندوق.'],
-  ['المسؤول', 'يرى الطلبات والاستثناءات بدل تصفح كل البيانات.'],
-  ['أمين الصندوق', 'يراجع المدفوعات التي تحتاج إجراء والأثر المالي قبل الاعتماد.'],
-  ['المدقق', 'يرى التسلسل والمخاطر بدون صلاحية تعديل.'],
-  ['المؤسس', 'يضبط القواعد ويتابع صحة الصندوق لا كل حركة صغيرة.'],
+const PLATFORM_LAYERS = [
+  ['الصندوق', 'سياسات، أعضاء، اشتراكات، محافظ، ومسارات حوكمة.'],
+  ['الحملة', 'تشغيل مؤقت مرتبط بهدف ومدة وسياق صرف مستقل.'],
+  ['المحفظة', 'فصل أموال حسب المنفعة، الاستحقاق، والعلاقة.'],
+  ['المسار', 'قرار أو لجنة أو تصويت أو صرف بضوابطه الخاصة.'],
+  ['التدقيق', 'أحداث، مستندات، قرارات، واعتراضات قابلة للمراجعة.'],
 ] as const;
 
-const REAL_SCENARIOS = [
+const OPERATING_MODES = [
   {
-    title: 'عضو في جمعية',
-    context: 'لا يريد رؤية audit أو finance أو كل القرارات.',
-    outcome: 'يرى: عليك 100 ر.س، يحق لك الاستفادة من الطوارئ، ولا يوجد تصويت مطلوب الآن.',
+    title: 'صندوق عائلة أو حي',
+    context: 'اشتراكات، متأخرات، محافظ منفصلة، وقرارات مشاركة.',
+    outcome: 'النظام يربط العضوية والالتزام والاستفادة والقرار في سجل واحد.',
   },
   {
-    title: 'أمين صندوق',
-    context: 'لا يحتاج البحث في كل السجلات لمعرفة ما يجب عمله.',
-    outcome: 'يرى المدفوعات غير المطابقة، المتأخرات الحرجة، والصرف الجاهز للاعتماد.',
+    title: 'صندوق خدمات مشتركة',
+    context: 'مصعد، حراسة، صيانة، ومصاريف يستفيد منها الجميع.',
+    outcome: 'المنصة تفصل المنفعة المشتركة وتتابع السداد والصرف والاعتراضات.',
   },
   {
-    title: 'مدير جمعية',
-    context: 'لا يريد إدارة الصندوق كملف Excel كبير.',
-    outcome: 'يرى الاستثناءات: طلبات معلقة، قرارات تحتاج حسم، أعضاء يحتاجون متابعة.',
+    title: 'حملة علاج أو دعم',
+    context: 'تبرعات محددة المدة وهدف صرف لا يجب أن يختلط بالصندوق الأب.',
+    outcome: 'الحملة تعمل كمسار مستقل مع رقابة وسجل صرف وتاريخ إغلاق.',
   },
   {
-    title: 'مدقق',
-    context: 'لا يدخل لتشغيل العمل اليومي.',
-    outcome: 'يرى Timeline مختصر للمخاطر والتغييرات المهمة، ويفتح التفاصيل عند الحاجة فقط.',
+    title: 'إدارة ورقابة',
+    context: 'مؤسس، مدير، أمين صندوق، مدقق، لجنة، وأعضاء بدخول مختلف.',
+    outcome: 'كل دور يحصل على صلاحياته من النظام لا من مشاركة كلمات مرور أو ملفات.',
   },
 ] as const;
 
@@ -109,9 +109,9 @@ export default async function Home() {
             <span>CollectiveTrustOS</span>
           </Link>
           <nav className={styles.navLinks} aria-label="روابط صفحة الهبوط">
-            <a href="#member" className={styles.navLink}>للعضو</a>
-            <a href="#roles" className={styles.navLink}>الأدوار</a>
-            <a href="#behind" className={styles.navLink}>خلف الكواليس</a>
+            <a href="#capabilities" className={styles.navLink}>القدرات</a>
+            <a href="#operations" className={styles.navLink}>التشغيل</a>
+            <a href="#security" className={styles.navLink}>الأمان</a>
             <Link href="/login" className={styles.navCta}>تسجيل الدخول</Link>
           </nav>
         </div>
@@ -121,85 +121,85 @@ export default async function Home() {
         <div className={styles.heroBackdrop} aria-hidden="true">
           <div className={styles.productMap}>
             <div className={styles.mapHeader}>
-              <span>واجهتك اليوم</span>
-              <strong>لا يوجد إجراء معقد</strong>
+              <span>منظومة الثقة</span>
+              <strong>تشغيل مضبوط لا يعتمد على الذاكرة</strong>
             </div>
             <div className={styles.mapGrid}>
               <div className={styles.mapPanel}>
-                <span className={styles.panelLabel}>المطلوب</span>
-                <strong>100 ر.س قبل 30 يونيو</strong>
-                <small>زر دفع واحد، لا حاجة لفهم الحسابات.</small>
+                <span className={styles.panelLabel}>حوكمة</span>
+                <strong>تصويت، لجان، اعتراضات</strong>
+                <small>قرارات لها قواعد وحالة وسجل مراجعة.</small>
               </div>
               <div className={styles.mapPanel}>
-                <span className={styles.panelLabel}>الاستفادة</span>
-                <strong>مؤهل للطوارئ</strong>
-                <small>النظام حسبها من اشتراكك وحالتك.</small>
+                <span className={styles.panelLabel}>مال</span>
+                <strong>محافظ ومسارات منفصلة</strong>
+                <small>لا يختلط صندوق دائم بحملة مؤقتة أو صرف محدد.</small>
               </div>
               <div className={styles.mapPanel}>
-                <span className={styles.panelLabel}>ما يحدث</span>
-                <strong>تم اعتماد صيانة المصعد</strong>
-                <small>ملخص فقط، والتفاصيل متاحة عند الطلب.</small>
+                <span className={styles.panelLabel}>أمان</span>
+                <strong>صلاحيات حسب الدور</strong>
+                <small>كل إجراء محكوم بعضوية وسياق وقدرة محددة.</small>
               </div>
               <div className={styles.mapPanel}>
-                <span className={styles.panelLabel}>تنبيه</span>
-                <strong>لا يوجد تصويت مطلوب</strong>
-                <small>لن نعرض لك قرارات لا تخصك.</small>
+                <span className={styles.panelLabel}>تشغيل</span>
+                <strong>صناديق وحملات من نفس النظام</strong>
+                <small>قوالب بداية لا تقفل القدرات لاحقاً.</small>
               </div>
             </div>
             <div className={styles.mapLedger}>
-              <span>خطوتك التالية</span>
-              <strong>ادفع الاشتراك</strong>
-              <span>حالة العضوية</span>
-              <strong>نشط</strong>
+              <span>المحرك</span>
+              <strong>قواعد وسياسات</strong>
+              <span>الدليل</span>
+              <strong>تدقيق دائم</strong>
             </div>
           </div>
         </div>
 
         <div className={styles.heroInner}>
-          <p className={styles.eyebrow}>منصة تختصر الدور ولا تعرض التعقيد</p>
-          <h1 className={styles.heroTitle}>كل دور يرى ما يهمه فقط</h1>
+          <h1 className={styles.heroTitle}>CollectiveTrustOS</h1>
           <p className={styles.heroLead}>
-            CollectiveTrustOS لا يطلب من العضو فهم الصندوق والمحفظة والمسار والقواعد.
-            النظام يحوّل ذلك إلى أشياء بسيطة: ماذا عليّ الآن؟ ماذا أستفيد؟ وماذا حدث في الصندوق؟
+            نظام تشغيل للصناديق والحملات الجماعية. يدير القواعد، المال، الصلاحيات،
+            القرارات، الاعتراضات، والتدقيق في طبقة واحدة حتى تعمل المجموعة بثقة
+            بدون ملفات متفرقة أو متابعة يدوية.
           </p>
           <div className={styles.heroActions}>
-            <Link href="/login" className={styles.primaryAction}>الدخول للتجربة</Link>
+            <Link href="/login" className={styles.primaryAction}>الدخول للنظام</Link>
             <Link href="/join" className={styles.secondaryAction}>إنشاء حساب</Link>
           </div>
-          <dl className={styles.heroSignals} aria-label="ما الذي تختصره الواجهة">
+          <dl className={styles.heroSignals} aria-label="قوة النظام">
             <div>
-              <dt>للعضو</dt>
-              <dd>دفع، استفادة، ملخص.</dd>
+              <dt>حوكمة</dt>
+              <dd>مسارات قرار وتصويت ولجان قابلة للتتبع.</dd>
             </div>
             <div>
-              <dt>للإدارة</dt>
-              <dd>استثناءات وقرارات فقط.</dd>
+              <dt>أمان</dt>
+              <dd>صلاحيات دقيقة وسجل أحداث لا يعتمد على الذاكرة.</dd>
             </div>
             <div>
-              <dt>للنظام</dt>
-              <dd>قواعد، فصل أموال، وتدقيق آلي.</dd>
+              <dt>تشغيل</dt>
+              <dd>صناديق، حملات، محافظ، ومدفوعات من نفس المنظومة.</dd>
             </div>
           </dl>
         </div>
       </section>
 
-      <section className={styles.trustStrip} aria-label="أسئلة العضو اليومية">
-        {MEMBER_QUESTIONS.map((question) => (
-          <span key={question}>{question}</span>
+      <section className={styles.trustStrip} aria-label="إشارات الثقة">
+        {TRUST_SIGNALS.map((signal) => (
+          <span key={signal}>{signal}</span>
         ))}
       </section>
 
-      <section className={styles.layersSection} id="member">
+      <section className={styles.layersSection} id="capabilities">
         <div className={styles.sectionIntro}>
-          <p className={styles.sectionKicker}>واجهة العضو</p>
-          <h2>العضو لا يدخل ليشغّل النظام. يدخل ليعرف المطلوب منه.</h2>
+          <p className={styles.sectionKicker}>القدرات</p>
+          <h2>منصة واحدة تشغل الصندوق كاملاً.</h2>
           <p>
-            إذا كان العضو يحتاج قراءة كل التفاصيل، فالمنتج فشل في اختصار العمل.
-            التفاصيل موجودة عند الحاجة، لكن الشاشة اليومية تبدأ من الإجراء والفائدة.
+            CollectiveTrustOS ليس صفحة عضوية أو جدول مدفوعات فقط. هو طبقة تشغيل
+            كاملة تجمع الحوكمة والمال والصلاحيات والتدقيق في نموذج واحد.
           </p>
         </div>
         <div className={styles.layersGrid}>
-          {MEMBER_VIEW.map((item) => (
+          {SYSTEM_CAPABILITIES.map((item) => (
             <article key={item.title} className={styles.layerCard}>
               <span>{item.label}</span>
               <h3>{item.title}</h3>
@@ -209,13 +209,13 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={styles.storiesSection} id="roles">
+      <section className={styles.storiesSection} id="operations">
         <div className={styles.sectionIntro}>
-          <p className={styles.sectionKicker}>اختصار حسب الدور</p>
-          <h2>نفس الصندوق، لكن ليست نفس الواجهة لكل شخص.</h2>
+          <p className={styles.sectionKicker}>طريقة التشغيل</p>
+          <h2>مصمم للصناديق التي تتحول من اتفاق شفهي إلى نظام موثوق.</h2>
         </div>
         <div className={styles.storyGrid}>
-          {REAL_SCENARIOS.map((story) => (
+          {OPERATING_MODES.map((story) => (
             <article key={story.title} className={styles.storyCard}>
               <h3>{story.title}</h3>
               <p>{story.context}</p>
@@ -225,17 +225,17 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={styles.governanceSection} id="behind">
+      <section className={styles.governanceSection} id="security">
         <div className={styles.governanceCopy}>
-          <p className={styles.sectionKicker}>خلف الكواليس</p>
-          <h2>التعقيد موجود، لكنه ليس واجهة المستخدم اليومية.</h2>
+          <p className={styles.sectionKicker}>الأمان والثقة</p>
+          <h2>الأمان هنا ليس تسجيل دخول فقط.</h2>
           <p>
-            القواعد، أهلية الاستفادة، فصل الأموال، القرار، الاعتراض، والتدقيق يجب أن تعمل آلياً
-            وتظهر فقط عندما يحتاج الدور الحالي إلى قرار أو مراجعة أو تفسير.
+            الثقة في الصندوق تأتي من فصل الأموال، وضوح الصلاحيات، قابلية القرار للتدقيق،
+            وحفظ الأثر المالي والتشغيلي. لذلك صمم النظام ليمنع الخلط قبل أن يحدث.
           </p>
         </div>
         <div className={styles.layersGrid}>
-          {AUTOMATION_PROMISES.map((item) => (
+          {SECURITY_PROMISES.map((item) => (
             <article key={item.title} className={styles.layerCard}>
               <span>{item.label}</span>
               <h3>{item.title}</h3>
@@ -247,11 +247,11 @@ export default async function Home() {
 
       <section className={styles.rolesSection}>
         <div className={styles.sectionIntro}>
-          <p className={styles.sectionKicker}>قاعدة الواجهة</p>
-          <h2>كل دور يبدأ من قائمة قصيرة: ما الذي ينتظرني الآن؟</h2>
+          <p className={styles.sectionKicker}>طبقات النظام</p>
+          <h2>القوة في النموذج: صندوق، حملة، محفظة، مسار، وتدقيق.</h2>
         </div>
         <div className={styles.rolesList}>
-          {ROLE_VIEWS.map(([role, promise]) => (
+          {PLATFORM_LAYERS.map(([role, promise]) => (
             <div key={role} className={styles.roleRow}>
               <strong>{role}</strong>
               <span>{promise}</span>
@@ -262,11 +262,11 @@ export default async function Home() {
 
       <section className={styles.finalCta}>
         <div>
-          <p className={styles.sectionKicker}>الهدف ليس عرض كل شيء. الهدف إنجاز ما يلزم.</p>
-          <h2>منصة تجعل الصندوق مفهوماً للمستخدم البسيط، ومضبوطاً لمن يديره.</h2>
+          <p className={styles.sectionKicker}>جاهزية تشغيلية</p>
+          <h2>نظام واحد يجمع الحوكمة والمال والأمان بدل تشغيل الصندوق عبر ملفات ومحادثات.</h2>
         </div>
         <div className={styles.finalActions}>
-          <Link href="/login" className={styles.primaryAction}>الدخول للتجربة</Link>
+          <Link href="/login" className={styles.primaryAction}>الدخول للنظام</Link>
           <Link href="/join" className={styles.secondaryAction}>إنشاء حساب</Link>
         </div>
       </section>

@@ -228,13 +228,14 @@
 
 .heroTitle {
   margin: 18px 0 0;
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: clamp(2.7rem, 5vw, 4.1rem);
   line-height: 0.92;
   font-weight: 900;
   letter-spacing: 0;
   color: var(--text-primary);
   max-width: 100%;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 .heroLead {
@@ -677,7 +678,7 @@
 
   .heroTitle {
     text-align: right;
-    font-size: clamp(2.1rem, 11vw, 3.2rem);
+    font-size: clamp(2.15rem, 9vw, 2.55rem);
     line-height: 1;
   }
 
