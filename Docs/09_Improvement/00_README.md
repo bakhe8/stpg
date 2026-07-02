@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.22`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.23`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -41,6 +41,7 @@
 | 16 | `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md` | إغلاق F-004: مصفوفة قدرات القوالب |
 | 17 | `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` | إغلاق F-005: مراقبة legacy وURL hygiene |
 | 18 | `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md` | فتح Phase G: قبول المنتج وقرار release candidate |
+| 19 | `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
 
 ## ترتيب التنفيذ
 
@@ -140,7 +141,9 @@ Phase F مغلقة.
 
 تم فتح Phase G في `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md`: قبول المنتج كرحلات كاملة قبل أي ميزة جديدة أو route alias.
 
-العمل التالي هو `G-001`: تجهيز acceptance inventory وأدلة التشغيل.
+تم إغلاق Phase G في `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` بقرار `RC_READY_WITH_POLISH`: لا توجد blockers، والقوالب والحملة والعضو والأدوار والحوكمة قبلت المنتج مع ملاحظات polish تشغيلية.
+
+العمل التالي، إذا بدأ، يجب أن يكون backlog polish منفصل مبني على تقرير القبول، وليس ميزة جديدة غير مرتبطة.
 
 ## قواعد الحماية
 

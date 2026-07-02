@@ -1,5 +1,36 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.23 - 2026-07-02
+
+**النوع:** Phase G product acceptance report
+**الحالة:** Phase G منفذة؛ القرار `RC_READY_WITH_POLISH`
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`.
+- تم تشغيل قبول المنتج على رحلات: صندوق فارغ، صندوق من القوالب الأربعة، حملة مرتبطة بصندوق أب، العضو والاشتراك والدفع، الأدوار التشغيلية، والحوكمة والتدقيق والنزاعات.
+- أُصلح رفض `templateId` من نوع UUID v5 في `CreateEntityDto` باستخدام `@IsUUID('all')` مع اختبار مخصص.
+- أُصلح `seed-validate` حتى يميز seed الرسمي ذي UUID v5 عن سجلات قبول runtime، فلا تفشل بوابات seed بسبب صناديق أنشأها التطبيق أثناء القبول.
+- أُصلح Docker frontend بإضافة `HOSTNAME=0.0.0.0` حتى يرد Next standalone عبر Docker port mapping على `localhost:3000`.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/09_Improvement/18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.23`.
+
+### المعنى العملي
+
+تجربة `صندوق / حملة` الافتراضية أصبحت مقبولة كمرشح إصدار. لا توجد blockers تمنع إنشاء الصندوق أو الحملة أو الوصول للعمق التشغيلي. أي عمل تالٍ يجب أن يكون backlog polish منفصل مبني على تقرير القبول.
+
+### التحقق
+
+- `npm test -- entities/dto/create-entity.dto.spec.ts --runInBand` في backend: 4 passed.
+- `npm run test:phase-d:parity` في backend: 12 passed.
+- `npm run build` في backend.
+- API acceptance لصندوق فارغ، القوالب الأربعة، والحملة.
+- API acceptance للعضو والأدوار والحوكمة.
+- `docker compose build frontend`، ويتضمن `next build`.
+- `npm run test:phase-d:create-flow` في frontend: 3 passed.
+- `npm run test:ux:roles` في frontend: 1 passed على 18 مستخدم seed.
+- `npm run seed:validate:docker` في backend بعد كل الاختبارات: passed.
+- `git diff --check`.
+
 ## 2.22 - 2026-07-02
 
 **النوع:** Phase G product acceptance backlog

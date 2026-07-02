@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.22` بتاريخ 2026-07-02.
+**الحالة الحالية:** الإصدار التشغيلي `2.23` بتاريخ 2026-07-02.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -103,6 +103,7 @@
 | [16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md](09_Improvement/16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md) | إغلاق F-004: مصفوفة قدرات القوالب |
 | [17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md](09_Improvement/17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md) | إغلاق F-005: مراقبة legacy وURL hygiene |
 | [18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md](09_Improvement/18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md) | فتح Phase G: قبول المنتج وقرار release candidate |
+| [19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md](09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md) | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
 
 ---
 
@@ -114,7 +115,7 @@
 | [REPOSITORY_STATE.md](REPOSITORY_STATE.md) | الحالة التشغيلية الحالية ونقطة البداية قبل 09 |
 | [RELEASE_NOTES.md](RELEASE_NOTES.md) | سجل الإصدارات التشغيلية للمستودع |
 | [08_Production_Readiness/BACKLOG.md](08_Production_Readiness/BACKLOG.md) | مرجع إغلاق 08 |
-| [09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md](09_Improvement/12_POST_PHASE_E_NEXT_BACKLOG.md) | الترشيح الحالي بعد إغلاق Phase E |
+| [09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md](09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md) | تقرير قبول المنتج الحالي وقرار release candidate |
 
 ---
 
@@ -141,8 +142,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit؛ F-004 أغلقت template capability matrix؛ F-005 أغلقت legacy URL hygiene؛ Phase G مفتوحة لقبول المنتج |
-| أول عمل مرشح | G-001: Acceptance Inventory and Evidence Harness |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit؛ F-004 أغلقت template capability matrix؛ F-005 أغلقت legacy URL hygiene؛ Phase G أغلقت قبول المنتج بقرار `RC_READY_WITH_POLISH` |
+| أول عمل مرشح | backlog polish منفصل عند الحاجة، مبني على `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)
