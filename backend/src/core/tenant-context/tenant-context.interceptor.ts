@@ -69,6 +69,10 @@ export class TenantContextInterceptor implements NestInterceptor {
   }
 
   private extractEntityId(request: RequestWithTenantHints): string | undefined {
+    if (this.isTopLevelEntityCreate(request)) {
+      return undefined;
+    }
+
     const headerValue = this.firstString(request.headers['x-entity-id']);
     const queryValue = this.firstString(request.query?.entityId);
     const paramValue = this.firstString(request.params?.entityId);
@@ -89,14 +93,17 @@ export class TenantContextInterceptor implements NestInterceptor {
     return undefined;
   }
 
+  private isTopLevelEntityCreate(request: RequestWithTenantHints) {
+    if (request.method !== 'POST') return false;
+    const segments = this.routeSegments(request);
+    return segments.length === 1 && segments[0] === 'entities';
+  }
+
   private entityRouteId(request: RequestWithTenantHints): string | undefined {
     const id = request.params?.id;
     if (!id) return undefined;
 
-    const segments = request.originalUrl
-      ?.split('?')[0]
-      .split('/')
-      .filter(Boolean);
+    const segments = this.routeSegments(request);
     if (segments?.[0] !== 'entities') return undefined;
     if (
       request.method === 'POST' &&
@@ -106,6 +113,12 @@ export class TenantContextInterceptor implements NestInterceptor {
     }
 
     return id;
+  }
+
+  private routeSegments(request: RequestWithTenantHints) {
+    const segments =
+      request.originalUrl?.split('?')[0].split('/').filter(Boolean) ?? [];
+    return segments[0] === 'api' ? segments.slice(1) : segments;
   }
 
   private async hasActiveMembership(

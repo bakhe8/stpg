@@ -13,6 +13,7 @@ import {
   MemberRole,
   MembershipApplicationStatus,
   EntityType,
+  Prisma,
 } from '@prisma/client';
 import { CreateEntityDto } from './dto/create-entity.dto';
 import { UpdateEntityDto } from './dto/update-entity.dto';
@@ -81,6 +82,8 @@ export class EntitiesService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      await this.setTransactionTenantContext(tx, creatorId);
+
       const entity = await tx.entity.create({
         data: {
           name: dto.name,
@@ -654,6 +657,8 @@ export class EntitiesService {
     await this.requireAdminOrFounder(parentId, creatorId);
 
     return this.prisma.$transaction(async (tx) => {
+      await this.setTransactionTenantContext(tx, creatorId, parentId);
+
       const entity = await tx.entity.create({
         data: {
           name: dto.name,
@@ -793,6 +798,8 @@ export class EntitiesService {
     await this.requireAdminOrFounder(parentId, creatorId);
 
     return this.prisma.$transaction(async (tx) => {
+      await this.setTransactionTenantContext(tx, creatorId, parentId);
+
       const campaign = await tx.entity.create({
         data: {
           name: dto.name,
@@ -965,6 +972,20 @@ export class EntitiesService {
     });
     if (!membership)
       throw new ForbiddenException('يجب أن تكون مديراً أو مؤسساً للكيان');
+  }
+
+  private async setTransactionTenantContext(
+    tx: Prisma.TransactionClient,
+    personId: string,
+    entityId = '',
+  ) {
+    await tx.$executeRaw`
+      SELECT
+        set_config('app.current_entity_id', ${entityId}, true),
+        set_config('app.current_person_id', ${personId}, true),
+        set_config('app.current_platform_account_id', '', true),
+        set_config('app.internal_access', '', true)
+    `;
   }
 
   private async requireAdvancedSettingsManager(

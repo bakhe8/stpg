@@ -185,6 +185,7 @@ export function buildRouteAccessItems(labels: SurfaceNavLabels): NavItem[] {
     { href: "/disbursement-requests", label: "طلبات الصرف", icon: "＋" },
     { href: "/wallets", label: "المحافظ", icon: "▣" },
     { href: "/notifications", label: labels.notifications, icon: "◌" },
+    { href: "/entities/new", label: "إنشاء صندوق", icon: "＋" },
     {
       href: "/entities",
       label: labels.entities,

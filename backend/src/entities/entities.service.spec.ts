@@ -35,6 +35,7 @@ describe('EntitiesService', () => {
     };
     membershipApplication: { upsert: jest.Mock };
     auditLog: { create: jest.Mock };
+    $executeRaw: jest.Mock;
     $transaction: jest.Mock;
   };
   let notifications: { createBulk: jest.Mock };
@@ -68,6 +69,7 @@ describe('EntitiesService', () => {
       },
       membershipApplication: { upsert: jest.fn() },
       auditLog: { create: jest.fn().mockResolvedValue({}) },
+      $executeRaw: jest.fn().mockResolvedValue(undefined),
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
         Promise.resolve(callback(prisma)),
       ),

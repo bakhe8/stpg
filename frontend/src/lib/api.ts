@@ -221,6 +221,11 @@ function inferEntityIdFromEndpoint(
   return null;
 }
 
+function allowsStoredEntityContext(endpoint: string, method = "GET") {
+  const path = endpoint.split("?")[0];
+  return !(method.toUpperCase() === "POST" && path === "/entities");
+}
+
 function persistAccessToken(accessToken: string) {
   localStorage.setItem("accessToken", accessToken);
   document.cookie = `accessToken=${accessToken}; path=/; max-age=900; samesite=lax`;
@@ -261,7 +266,10 @@ export async function fetchApi<T>(
       options.method,
     );
     const currentEntityId =
-      inferredEntityId ?? localStorage.getItem("currentEntityId");
+      inferredEntityId ??
+      (allowsStoredEntityContext(endpoint, options.method)
+        ? localStorage.getItem("currentEntityId")
+        : null);
     if (currentEntityId && !headers.has("X-Entity-ID")) {
       headers.set("X-Entity-ID", currentEntityId);
     }

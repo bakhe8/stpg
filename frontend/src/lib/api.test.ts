@@ -1,5 +1,41 @@
-import { describe, expect, it } from "vitest";
-import { humanizeApiError } from "./api";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchApi, humanizeApiError } from "./api";
+
+describe("fetchApi", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it("does not attach a stored entity context when creating a new fund", async () => {
+    localStorage.setItem("accessToken", "test-token");
+    localStorage.setItem(
+      "currentEntityId",
+      "11111111-1111-4111-8111-111111111111",
+    );
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: "new-entity-id" }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchApi("/entities", {
+      method: "POST",
+      body: JSON.stringify({ name: "New Fund", type: "COMMUNITY" }),
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const headers = init.headers as Headers;
+    expect(headers.get("Authorization")).toBe("Bearer test-token");
+    expect(headers.get("X-Entity-ID")).toBeNull();
+  });
+});
 
 describe("humanizeApiError", () => {
   it("translates common class-validator messages to Arabic", () => {
