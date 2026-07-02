@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.26`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.27`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -42,7 +42,7 @@
 | 17 | `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` | إغلاق F-005: مراقبة legacy وURL hygiene |
 | 18 | `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md` | فتح Phase G: قبول المنتج وقرار release candidate |
 | 19 | `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
-| 20 | `20_POST_PHASE_G_POLISH_BACKLOG.md` | backlog polish بعد Phase G: `PGP-001` و`PGP-002` منفذتان؛ التالي `PGP-003` |
+| 20 | `20_POST_PHASE_G_POLISH_BACKLOG.md` | backlog polish بعد Phase G: `PGP-001` إلى `PGP-003` منفذة؛ التالي `PGP-004` |
 
 ## ترتيب التنفيذ
 
@@ -150,7 +150,9 @@ Phase F مغلقة.
 
 تم إغلاق `PGP-002`: إضافة dry-run hygiene لبيانات القبول، مع رفض الحذف الجزئي وتوثيق reset الكامل كخيار صريح.
 
-العمل التالي هو `PGP-003`: تثبيت عقد seed validator بعد الفصل بين seed/runtime.
+تم إغلاق `PGP-003`: تثبيت عقد seed validator بحيث تستخدم story coverage سجلات UUID v5 الرسمية فقط، مع بقاء runtime ظاهرا في الإحصاءات.
+
+العمل التالي هو `PGP-004`: Docker Frontend Readiness Check.
 
 ## قواعد الحماية
 

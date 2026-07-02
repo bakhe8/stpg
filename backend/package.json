@@ -18,6 +18,7 @@
     "seed:rollback": "ts-node --transpile-only prisma/seed-restore.ts",
     "seed:smoke-logins": "ts-node --transpile-only prisma/seed-login-smoke.ts",
     "seed:validate": "ts-node --transpile-only prisma/seed-validate.ts",
+    "seed:validate:boundary": "ts-node --transpile-only prisma/seed-runtime-boundary-check.ts",
     "seed:validate:docker": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/seed-validate-docker.ps1",
     "acceptance:phase-g": "node ../scripts/phase-g-acceptance-harness.mjs",
     "acceptance:phase-g:hygiene": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/phase-g-acceptance-data-hygiene.ps1",

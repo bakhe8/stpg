@@ -2,7 +2,7 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.26
+**الإصدار التشغيلي:** 2.27
 **التاريخ:** 2026-07-02
 **الحالة:** مفتوحة للتنفيذ
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
@@ -39,8 +39,8 @@
 
 1. `PGP-001`: تثبيت acceptance harness قابل للإعادة. **منفذة ومتحقق منها في 2.25.**
 2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **منفذة ومتحقق منها في 2.26.**
-3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **التالي.**
-4. `PGP-004`: إضافة readiness check للـ Docker frontend.
+3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **منفذة ومتحقق منها في 2.27.**
+4. `PGP-004`: إضافة readiness check للـ Docker frontend. **التالي.**
 5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance.
 6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط.
 
@@ -152,6 +152,8 @@
 
 الأولوية: P1.
 
+الحالة: منفذة ومتحقق منها.
+
 الهدف: تثبيت القرار الذي نتج من G-OPS-001: validator يختبر seed الرسمي بقوة، لكنه لا يفشل بسبب سجلات runtime أنشأها التطبيق.
 
 النطاق:
@@ -172,6 +174,24 @@
 - `npm run seed:validate:docker`.
 - targeted test أو review موثق للفصل بين seed/runtime.
 - `git diff --check`.
+
+نتيجة التنفيذ:
+
+- أضيف `backend/prisma/seed-runtime-boundary.ts` كمصدر واضح لتعريف seed الرسمي.
+- معيار seed الرسمي هو UUID v5 مستقر؛ أي UUID runtime مثل v4 لا يدخل في story coverage الصارمة.
+- نقل بناء `seedStoryCoverage` إلى `buildSeedStoryCoverage(...)` بحيث يفلتر كل مصادر التغطية عبر `seedOnly(...)`.
+- أضيف `backend/prisma/seed-runtime-boundary-check.ts` كفحص targeted يثبت أن قيم runtime لا تدخل في coverage.
+- أضيف الأمر `npm run seed:validate:boundary` في `backend/package.json`.
+- أضيف في summary حقلا `seedEntities` و`runtimeCreatedEntities`.
+- بقيت بيانات runtime ظاهرة في summary و`Active membership distribution by entity`، لكنها لا تحدد نجاح/فشل story coverage الرسمية.
+- رسالة validator أصبحت تصرح بالنطاق: `stable UUID v5 seed records only`.
+
+دليل التحقق:
+
+- `npm run seed:validate:boundary` في backend: passed.
+- `npm run seed:validate:docker` في backend: passed.
+- خرج validator الحالي أظهر `seedEntities = 8` و`runtimeCreatedEntities = 20` مع بقاء validation ناجحا.
+- `git diff --check`: passed.
 
 ### PGP-004 - Docker Frontend Readiness Check
 

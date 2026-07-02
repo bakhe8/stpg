@@ -1,5 +1,31 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.27 - 2026-07-02
+
+**النوع:** PGP-003 seed validator runtime boundary
+**الحالة:** منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيف `backend/prisma/seed-runtime-boundary.ts`.
+- أضيف `backend/prisma/seed-runtime-boundary-check.ts`.
+- أضيف أمر `npm run seed:validate:boundary` في `backend/package.json`.
+- أصبحت story coverage في `seed-validate` تبنى عبر `buildSeedStoryCoverage(...)` من سجلات UUID v5 الرسمية فقط.
+- صار `seed-validate` يعرض `seedEntities` و`runtimeCreatedEntities` في summary.
+- بقيت بيانات runtime-created ظاهرة في الإحصاءات والتوزيعات، لكنها لا تدخل في قواعد coverage الرسمية.
+- تم تحديث `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.27`.
+
+### المعنى العملي
+
+يمكن تشغيل قبول Phase G عدة مرات بدون أن تتحول بيانات runtime إلى مصدر نجاح أو فشل لقصة seed الرسمية. العمل التالي هو `PGP-004`: Docker Frontend Readiness Check.
+
+### التحقق
+
+- `npm run seed:validate:boundary` في backend: passed.
+- `npm run seed:validate:docker` في backend: passed.
+- خرج validator الحالي أظهر `seedEntities = 8` و`runtimeCreatedEntities = 20`.
+- `git diff --check`.
+
 ## 2.26 - 2026-07-02
 
 **النوع:** PGP-002 acceptance data hygiene

@@ -23,6 +23,10 @@ import {
   summarizeConnectionString,
 } from './seed-runtime';
 import {
+  buildSeedStoryCoverage,
+  isStableSeedUuid,
+} from './seed-runtime-boundary';
+import {
   seedStoryDefinitions,
   type SeedStoryRequirements,
 } from './seed-stories';
@@ -59,11 +63,6 @@ const countBy = <T>(items: T[], selector: (item: T) => string) => {
 const sampleList = (items: string[], limit = 3) =>
   items.slice(0, limit).join(' | ');
 
-const isStableSeedUuid = (id: string) =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    id,
-  );
-
 const requiredCoverageKeys: Array<keyof SeedStoryRequirements> = [
   'usernames',
   'entityNames',
@@ -97,15 +96,6 @@ function pushFinding(
   sample?: string,
 ) {
   findings.push({ severity, code, message, count, sample });
-}
-
-function toCoverageSet(values: Array<string | null | undefined>) {
-  return new Set(
-    values
-      .filter((value): value is string => typeof value === 'string')
-      .map((value) => value.trim())
-      .filter(Boolean),
-  );
 }
 
 function pushSeedStoryCoverageFindings(
@@ -218,7 +208,7 @@ async function main() {
   ] = await Promise.all([
     prisma.person.count(),
     prisma.person.findMany({
-      select: { username: true, name: true },
+      select: { id: true, username: true, name: true },
     }),
     prisma.membership.count(),
     prisma.membership.findMany({ select: { id: true } }),
@@ -400,7 +390,7 @@ async function main() {
       },
     }),
     prisma.document.findMany({
-      select: { name: true, privacyLevel: true, uploadedById: true },
+      select: { id: true, name: true, privacyLevel: true, uploadedById: true },
     }),
     prisma.wallet.count(),
     prisma.governancePath.findMany({
@@ -591,12 +581,14 @@ async function main() {
     }),
     prisma.entityRelationship.findMany({
       select: {
+        id: true,
         type: true,
         approvalStatus: true,
       },
     }),
     prisma.walletRelationship.findMany({
       select: {
+        id: true,
         relationshipType: true,
         approvalStatus: true,
         contributionPercent: true,
@@ -714,68 +706,22 @@ async function main() {
     wallets.filter((wallet) => wallet.isActive),
     (wallet) => wallet.entityId,
   );
-  const seedStoryCoverage: Record<keyof SeedStoryRequirements, Set<string>> = {
-    usernames: toCoverageSet(persons.map((person) => person.username)),
-    entityNames: toCoverageSet(entities.map((entity) => entity.name)),
-    entityTypes: toCoverageSet(entities.map((entity) => entity.type)),
-    platformStatuses: toCoverageSet(
-      entities.map((entity) => entity.platformStatus),
-    ),
-    walletNames: toCoverageSet(wallets.map((wallet) => wallet.name)),
-    walletBenefitTypes: toCoverageSet(
-      wallets.map((wallet) => wallet.benefitType),
-    ),
-    governancePathTypes: toCoverageSet(
-      governancePaths.map((path) => path.type),
-    ),
-    subscriptionStates: toCoverageSet(
-      subscriptions.map((subscription) => subscription.state),
-    ),
-    paymentDueStatuses: toCoverageSet(paymentDues.map((due) => due.status)),
-    paymentRecordStatuses: toCoverageSet(
-      paymentRecords.map((record) => record.status),
-    ),
-    decisionTypes: toCoverageSet(
-      decisions.map((decision) => decision.decisionType),
-    ),
-    decisionStatuses: toCoverageSet(
-      decisions.map((decision) => decision.status),
-    ),
-    decisionResults: toCoverageSet(
-      decisions.map((decision) => decision.result),
-    ),
-    disbursementStatuses: toCoverageSet(
-      allDisbursementRequests.map((request) => request.status),
-    ),
-    appealStatuses: toCoverageSet(appeals.map((appeal) => appeal.status)),
-    disputeStatuses: toCoverageSet(disputes.map((dispute) => dispute.status)),
-    documentPrivacyLevels: toCoverageSet(
-      documents.map((document) => document.privacyLevel),
-    ),
-    entityRelationshipTypes: toCoverageSet(
-      entityRelationships.map((relationship) => relationship.type),
-    ),
-    walletRelationshipTypes: toCoverageSet(
-      walletRelationships.map((relationship) => relationship.relationshipType),
-    ),
-    relationshipApprovalStatuses: toCoverageSet([
-      ...entityRelationships.map((relationship) => relationship.approvalStatus),
-      ...walletRelationships.map((relationship) => relationship.approvalStatus),
-    ]),
-    walletRelationshipRights: toCoverageSet(
-      walletRelationships.flatMap((relationship) => [
-        relationship.hasOversightRights && !relationship.hasVotingRights
-          ? 'OVERSIGHT_WITHOUT_VOTE'
-          : null,
-        relationship.hasVotingRights && relationship.hasOversightRights
-          ? 'VOTING_AND_OVERSIGHT'
-          : null,
-        Number(relationship.contributionPercent ?? 0) > 0
-          ? 'CONTRIBUTION_PERCENT'
-          : null,
-      ]),
-    ),
-  };
+  const seedStoryCoverage = buildSeedStoryCoverage({
+    persons,
+    entities,
+    wallets,
+    governancePaths,
+    subscriptions,
+    paymentDues,
+    paymentRecords,
+    decisions,
+    disbursementRequests: allDisbursementRequests,
+    appeals,
+    disputes,
+    documents,
+    entityRelationships,
+    walletRelationships,
+  });
   const expectedMinPersons =
     BASE_PERSON_COUNT +
     seedRuntime.profileConfig.familyExtraCount +
@@ -2197,6 +2143,8 @@ async function main() {
       activeMemberships.map((membership) => membership.person.id),
     ).size,
     entities: entities.length,
+    seedEntities: seedEntities.length,
+    runtimeCreatedEntities: entities.length - seedEntities.length,
     wallets: walletCount,
     paths: pathCount,
     committees: committees.length,
@@ -2220,6 +2168,9 @@ async function main() {
   };
 
   console.table(summary);
+  console.log(
+    'Seed story coverage scope: stable UUID v5 seed records only; runtime-created records remain visible in summary and distributions.',
+  );
   console.log('Active membership distribution by entity:');
   console.table(membershipDistribution);
   console.log('Payment due status coverage:');
