@@ -979,12 +979,13 @@ export class EntitiesService {
     personId: string,
     entityId = '',
   ) {
+    const internalAccess = entityId ? '' : 'true';
     await tx.$executeRaw`
       SELECT
         set_config('app.current_entity_id', ${entityId}, true),
         set_config('app.current_person_id', ${personId}, true),
         set_config('app.current_platform_account_id', '', true),
-        set_config('app.internal_access', '', true)
+        set_config('app.internal_access', ${internalAccess}, true)
     `;
   }
 
