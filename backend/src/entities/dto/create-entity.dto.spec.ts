@@ -23,6 +23,16 @@ describe('CreateEntityDto', () => {
     expect(errors).toHaveLength(0);
   });
 
+  it('accepts stable v5 entity template ids from seeded templates', async () => {
+    const errors = await validateCreateEntity({
+      name: 'Template Fund',
+      type: EntityType.COMMUNITY,
+      templateId: 'fba96d5c-f6b8-52fb-92c9-0659b0e99211',
+    });
+
+    expect(errors).toHaveLength(0);
+  });
+
   it('rejects setup-only fields until the setup contract exists', async () => {
     const errors = await validateCreateEntity({
       name: 'Family Fund',

@@ -58,6 +58,12 @@ const countBy = <T>(items: T[], selector: (item: T) => string) => {
 
 const sampleList = (items: string[], limit = 3) =>
   items.slice(0, limit).join(' | ');
+
+const isStableSeedUuid = (id: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    id,
+  );
+
 const requiredCoverageKeys: Array<keyof SeedStoryRequirements> = [
   'usernames',
   'entityNames',
@@ -172,6 +178,7 @@ async function main() {
     personsCount,
     persons,
     membershipsCount,
+    allMemberships,
     entities,
     activeMemberships,
     committees,
@@ -214,6 +221,7 @@ async function main() {
       select: { username: true, name: true },
     }),
     prisma.membership.count(),
+    prisma.membership.findMany({ select: { id: true } }),
     prisma.entity.findMany({
       select: {
         id: true,
@@ -609,6 +617,21 @@ async function main() {
     }),
   ]);
 
+  const seedEntities = entities.filter((entity) =>
+    isStableSeedUuid(entity.id),
+  );
+  const seedMembershipIds = new Set(
+    allMemberships
+      .filter((membership) => isStableSeedUuid(membership.id))
+      .map((membership) => membership.id),
+  );
+  const seedActiveMemberships = activeMemberships.filter((membership) =>
+    seedMembershipIds.has(membership.id),
+  );
+  const seedMemberPreferences = memberPreferences.filter((preference) =>
+    seedMembershipIds.has(preference.membershipId),
+  );
+
   const invalidTemplateFindings = entityTemplates.flatMap((template) => {
     try {
       normalizeEntityTemplate(template);
@@ -633,7 +656,7 @@ async function main() {
     );
   }
 
-  const entitiesMissingProfile = entities.filter(
+  const entitiesMissingProfile = seedEntities.filter(
     (entity) =>
       entity.isActive &&
       !entity.isCampaign &&
@@ -650,7 +673,7 @@ async function main() {
     );
   }
 
-  const pendingClosureEntities = entities.filter(
+  const pendingClosureEntities = seedEntities.filter(
     (entity) => entity.closureStatus === 'PENDING_CLOSURE',
   );
   const closureReadiness = await Promise.all(
@@ -888,7 +911,7 @@ async function main() {
     );
   }
 
-  const invalidBankAccounts = entities.filter(
+  const invalidBankAccounts = seedEntities.filter(
     (entity) =>
       !entity.bankName?.trim() ||
       !entity.bankAccountNumber ||
@@ -905,7 +928,7 @@ async function main() {
     );
   }
 
-  const unsupportedClosureStates = entities.filter(
+  const unsupportedClosureStates = seedEntities.filter(
     (entity) =>
       entity.closureStatus !== null &&
       entity.closureStatus !== 'PENDING_CLOSURE',
@@ -960,29 +983,29 @@ async function main() {
   }
 
   const preferenceMembershipIds = new Set(
-    memberPreferences.map((preference) => preference.membershipId),
+    seedMemberPreferences.map((preference) => preference.membershipId),
   );
   if (
-    memberPreferences.length !== membershipsCount ||
-    preferenceMembershipIds.size !== membershipsCount
+    seedMemberPreferences.length !== seedMembershipIds.size ||
+    preferenceMembershipIds.size !== seedMembershipIds.size
   ) {
     pushFinding(
       findings,
       'error',
       'MEMBER_PREFERENCE_COVERAGE_INCOMPLETE',
       'Every seeded membership must have exactly one preference profile for policy impact scenarios.',
-      memberPreferences.length,
+      seedMemberPreferences.length,
     );
   }
 
   const preferenceDiversity = {
-    requiresAudit: memberPreferences.filter(
+    requiresAudit: seedMemberPreferences.filter(
       (preference) => preference.requiresAuditAccess,
     ).length,
-    requiresCommittee: memberPreferences.filter(
+    requiresCommittee: seedMemberPreferences.filter(
       (preference) => preference.requiresCommitteeApproval,
     ).length,
-    flexible: memberPreferences.filter(
+    flexible: seedMemberPreferences.filter(
       (preference) =>
         !preference.requiresAuditAccess &&
         !preference.requiresCommitteeApproval,
@@ -1447,7 +1470,7 @@ async function main() {
   }
 
   const activeMembershipIds = new Set(
-    activeMemberships
+    seedActiveMemberships
       // المراجع لا يشترك مالياً — دوره رقابي فقط
       .filter((membership) => membership.role !== MemberRole.AUDITOR)
       .map((membership) => membership.id),
@@ -1782,7 +1805,7 @@ async function main() {
     );
   }
 
-  const unrealisticEntityStructures = entities.filter((entity) => {
+  const unrealisticEntityStructures = seedEntities.filter((entity) => {
     const memberCount = activeMembershipsByEntity.get(entity.id) ?? 0;
     const committeeCount = committeesByEntity.get(entity.id) ?? 0;
     const walletCountForEntity = activeWalletsByEntity.get(entity.id) ?? 0;

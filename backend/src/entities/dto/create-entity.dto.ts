@@ -28,7 +28,7 @@ export class CreateEntityDto {
   logoUrl?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   templateId?: string;
 
   @IsOptional()
