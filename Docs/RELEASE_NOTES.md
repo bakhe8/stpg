@@ -1,5 +1,26 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.24 - 2026-07-02
+
+**النوع:** Post Phase G polish backlog
+**الحالة:** backlog مفتوح للتنفيذ
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`.
+- حُولت ملاحظات `RC_READY_WITH_POLISH` إلى backlog صغير مستقل.
+- رتب backlog الجديد البنود `PGP-001` إلى `PGP-006`: acceptance harness، data hygiene، seed validator runtime boundary، Docker frontend readiness، RC acceptance runbook، وroute alias watch.
+- ثبتت الوثيقة أن هذا العمل tooling/runbook فقط، ولا يفتح schema أو route alias أو ميزة منتج جديدة.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.24`.
+
+### المعنى العملي
+
+قبول Phase G بقي `RC_READY_WITH_POLISH`. العمل التالي ليس ميزة جديدة؛ يبدأ من `PGP-001` لتحويل قبول API اليدوي إلى acceptance harness قابل للإعادة.
+
+### التحقق
+
+- `git diff --check`.
+
 ## 2.23 - 2026-07-02
 
 **النوع:** Phase G product acceptance report
