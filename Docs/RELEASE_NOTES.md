@@ -1,5 +1,29 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.30 - 2026-07-02
+
+**النوع:** PGP-006 route alias watch/no-action
+**الحالة:** مغلقة ومتحقق منها
+
+### ما تغير
+
+- تم إغلاق `PGP-006` كـ `Watch / No Action`.
+- تم تثبيت أن `/entities` هو المسار التوافقي/canonical الحالي للواجهة والروابط والاختبارات.
+- لم تتم إضافة `/funds` كـ alias أو redirect أو rewrite.
+- تم إغلاق `20_POST_PHASE_G_POLISH_BACKLOG.md` بعد اكتمال `PGP-001` إلى `PGP-006`.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/README.md`, و`Docs/REPOSITORY_STATE.md` إلى الإصدار التشغيلي `2.30`.
+
+### المعنى العملي
+
+لا يوجد بند مفتوح في post Phase G polish backlog. إعادة قبول المنتج تتم من `21_RC_ACCEPTANCE_RUNBOOK.md`. قرار `/funds` لا يفتح إلا كقرار منتج جديد وبحزمة additive مستقلة.
+
+### التحقق
+
+- `frontend/next.config.ts`: لا `rewrites` ولا `redirects`.
+- لا توجد route directories لـ `/funds`.
+- بحث focused في `frontend` و`backend` عن `/funds`, `funds/`, `redirects(`, و`rewrites(`: لا نتائج.
+- `git diff --check`.
+
 ## 2.29 - 2026-07-02
 
 **النوع:** PGP-005 RC acceptance runbook

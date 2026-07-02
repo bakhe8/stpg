@@ -3,7 +3,7 @@
 > **نظام تشغيل للثقة الجماعية**
 > منصة حوكمة مرنة للصناديق الاجتماعية
 
-**الحالة الحالية:** الإصدار التشغيلي `2.29` بتاريخ 2026-07-02.
+**الحالة الحالية:** الإصدار التشغيلي `2.30` بتاريخ 2026-07-02.
 مرجع الحالة الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md).  
 سجل الإصدارات: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -104,7 +104,7 @@
 | [17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md](09_Improvement/17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md) | إغلاق F-005: مراقبة legacy وURL hygiene |
 | [18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md](09_Improvement/18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md) | فتح Phase G: قبول المنتج وقرار release candidate |
 | [19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md](09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md) | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
-| [20_POST_PHASE_G_POLISH_BACKLOG.md](09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md) | backlog polish بعد Phase G: `PGP-001` إلى `PGP-005` منفذة؛ التالي `PGP-006` |
+| [20_POST_PHASE_G_POLISH_BACKLOG.md](09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md) | backlog polish بعد Phase G: `PGP-001` إلى `PGP-006` مغلقة؛ `/entities` watch/no-action |
 | [21_RC_ACCEPTANCE_RUNBOOK.md](09_Improvement/21_RC_ACCEPTANCE_RUNBOOK.md) | runbook إعادة تشغيل قبول RC |
 
 ---
@@ -144,8 +144,8 @@
 | Production Readiness 08 | مغلق حسب `BACKLOG.md` v2.1 |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit Report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit؛ F-004 أغلقت template capability matrix؛ F-005 أغلقت legacy URL hygiene؛ Phase G أغلقت قبول المنتج بقرار `RC_READY_WITH_POLISH`؛ و`PGP-001` أغلقت acceptance harness؛ و`PGP-002` أغلقت acceptance data hygiene؛ و`PGP-003` أغلقت seed validator runtime boundary؛ و`PGP-004` أغلقت Docker frontend readiness؛ و`PGP-005` أغلقت RC acceptance runbook |
-| أول عمل مرشح | `PGP-006`: Route Alias Watch |
+| Improvement 09 | Phase A وB وC منفذة؛ Phase D أغلقت default switch في D-011؛ Phase E أغلقت E-001 إلى E-006؛ F-001 أغلقت evidence pack؛ F-002 أغلقت first-run setup guidance؛ F-003 أغلقت advanced settings access audit؛ F-004 أغلقت template capability matrix؛ F-005 أغلقت legacy URL hygiene؛ Phase G أغلقت قبول المنتج بقرار `RC_READY_WITH_POLISH`؛ و`PGP-001` أغلقت acceptance harness؛ و`PGP-002` أغلقت acceptance data hygiene؛ و`PGP-003` أغلقت seed validator runtime boundary؛ و`PGP-004` أغلقت Docker frontend readiness؛ و`PGP-005` أغلقت RC acceptance runbook؛ و`PGP-006` أغلقت route alias watch/no-action |
+| أول عمل مرشح | لا يوجد بند مفتوح في post Phase G polish؛ استخدم `21_RC_ACCEPTANCE_RUNBOOK.md` لجولة قبول جديدة أو افتح قرار منتج جديد |
 | قاعدة التنفيذ | مسار صندوق/حملة هو default؛ `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` rollback مؤقت |
 
 > للتفصيل الحالي: [REPOSITORY_STATE.md](REPOSITORY_STATE.md)

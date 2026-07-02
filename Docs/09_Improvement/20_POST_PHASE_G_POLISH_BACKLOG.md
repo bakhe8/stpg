@@ -2,9 +2,9 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.29
+**الإصدار التشغيلي:** 2.30
 **التاريخ:** 2026-07-02
-**الحالة:** مفتوحة للتنفيذ
+**الحالة:** مغلقة للتنفيذ؛ `PGP-006` مستمر كـ Watch / No Action
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
 
 ## الهدف
@@ -42,7 +42,7 @@
 3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **منفذة ومتحقق منها في 2.27.**
 4. `PGP-004`: إضافة readiness check للـ Docker frontend. **منفذة ومتحقق منها في 2.28.**
 5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance. **منفذة ومتحقق منها في 2.29.**
-6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط. **التالي.**
+6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط. **مغلقة كـ Watch / No Action في 2.30.**
 
 ## Backlog
 
@@ -282,6 +282,8 @@
 
 الأولوية: P3.
 
+الحالة: مغلقة كـ `Watch / No Action`.
+
 الهدف: تثبيت أن `/entities` ليس فجوة polish حاليا، بل قرار منتج مقبول حتى يوجد سبب واضح لـ `/funds`.
 
 النطاق:
@@ -298,15 +300,35 @@
 - هذا البند يعتبر `Watch / No Action`.
 - لا يدخل ضمن sprint إلا إذا ظهر قرار منتج جديد.
 
+نتيجة التنفيذ:
+
+- لا يوجد تغيير كود.
+- لا يوجد route alias.
+- لا يوجد redirect.
+- لا يوجد rewrite.
+- يبقى `/entities` هو المسار التوافقي/canonical الحالي للواجهة والروابط والاختبارات.
+- يبقى `/funds` قرارا مؤجلا ولا يفتح إلا بحزمة مستقلة additive عند وجود سبب منتج واضح.
+- القرار مفصل سابقا في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` ومثبت في تقرير Phase G كملاحظة `accepted product decision`.
+- تم إغلاق هذا backlog لأن كل شروط بوابة الإغلاق تحققت.
+
+دليل التحقق:
+
+- `frontend/next.config.ts`: لا يحتوي `rewrites` أو `redirects`.
+- `frontend/src/app/(main)/funds`: غير موجود.
+- `frontend/src/app/funds`: غير موجود.
+- `frontend/src/app/api/funds`: غير موجود.
+- بحث focused في `frontend` و`backend` عن `/funds`, `funds/`, `redirects(`, و`rewrites(`: لا نتائج.
+- `git diff --check`: passed.
+
 ## قرارات لا تحتاج موافقة الآن
 
-لا أحتاج قرارا إداريا جديدا لتنفيذ `PGP-001` إلى `PGP-005` لأنها tooling/runbook فقط.
+لا أحتاج قرارا إداريا جديدا لتنفيذ `PGP-001` إلى `PGP-006` لأنها tooling/runbook/watch فقط.
 
 القرار الوحيد المؤجل: هل نضيف `/funds` كـ alias عام. القرار الحالي: لا.
 
 ## بوابة إغلاق هذا backlog
 
-نغلق هذا backlog عندما:
+تم إغلاق هذا backlog لأن:
 
 - توجد طريقة قابلة للإعادة لتشغيل قبول الصندوق/القالب/الحملة.
 - توجد طريقة آمنة للتعامل مع بيانات القبول.
