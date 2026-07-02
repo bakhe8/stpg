@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.21`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.22`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -40,6 +40,7 @@
 | 15 | `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md` | إغلاق F-003: تدقيق وصول الإعدادات المتقدمة |
 | 16 | `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md` | إغلاق F-004: مصفوفة قدرات القوالب |
 | 17 | `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` | إغلاق F-005: مراقبة legacy وURL hygiene |
+| 18 | `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md` | فتح Phase G: قبول المنتج وقرار release candidate |
 
 ## ترتيب التنفيذ
 
@@ -135,7 +136,11 @@ Phase E بدأت بعد default switch لتنظيف لغة المنتج الظا
 
 تم إغلاق `F-005` في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md`: تثبيت rollback وقرار إبقاء `/entities` بدون `/funds` alias الآن.
 
-Phase F مغلقة. أي عمل تالٍ يحتاج backlog أو قرار منتج جديد.
+Phase F مغلقة.
+
+تم فتح Phase G في `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md`: قبول المنتج كرحلات كاملة قبل أي ميزة جديدة أو route alias.
+
+العمل التالي هو `G-001`: تجهيز acceptance inventory وأدلة التشغيل.
 
 ## قواعد الحماية
 

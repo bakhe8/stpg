@@ -1,8 +1,8 @@
 # Repository State - CollectiveTrustOS
 
-**الإصدار التشغيلي:** 2.21
-**التاريخ:** 2026-07-01
-**الحالة:** Production readiness 08 closed; Improvement 09 Phase E closed; Phase F F-005 legacy URL hygiene verified
+**الإصدار التشغيلي:** 2.22
+**التاريخ:** 2026-07-02
+**الحالة:** Production readiness 08 closed; Improvement 09 Phase G product acceptance backlog opened
 **سجل الإصدار:** `Docs/RELEASE_NOTES.md`
 
 ## الغرض
@@ -18,8 +18,8 @@
 | Production readiness 08 | مغلق تنفيذيا حسب `Docs/08_Production_Readiness/BACKLOG.md` |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 إلى E-006 وتم التحقق منها؛ F-001 منفذة ومثبتة في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`؛ F-002 منفذة ومثبتة في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`؛ F-003 منفذة ومثبتة في `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`؛ F-004 منفذة ومثبتة في `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md`؛ F-005 منفذة ومثبتة في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` |
-| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`، وE-003 ثبتت لغة أدوات المنصة على صندوق/حملة مع إبقاء `Entity` داخليا، وE-004 ثبتت نصوص الشروط والخصوصية وإقرار الإنشاء على أن المنصة أداة تنظيمية لا تنشئ جهة قانونية، وفتحت `/terms` و`/privacy` للعامة قبل تسجيل الدخول، وE-005 أغلقت تدقيق الأدوار الواسع على 18 مستخدم seed مع تنظيف بقايا سطح العمل، وE-006 حسمت عدم إضافة `/funds` alias الآن. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا. F-001 ثبتت حفظ القدرات بعد default switch؛ F-002 حسنت إرشاد أول تشغيل بعد إنشاء الصندوق؛ F-003 طابقت واجهة القواعد مع صلاحية الإعدادات المتقدمة المستقلة؛ F-004 ثبتت القوالب كنقاط بداية لا تقفل قدرات الصندوق؛ F-005 ثبتت legacy/URL hygiene. Phase F مغلقة. |
+| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 إلى E-006 وتم التحقق منها؛ F-001 منفذة ومثبتة في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`؛ F-002 منفذة ومثبتة في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`؛ F-003 منفذة ومثبتة في `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`؛ F-004 منفذة ومثبتة في `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md`؛ F-005 منفذة ومثبتة في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md`؛ Phase G مفتوحة في `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md` |
+| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`، وE-003 ثبتت لغة أدوات المنصة على صندوق/حملة مع إبقاء `Entity` داخليا، وE-004 ثبتت نصوص الشروط والخصوصية وإقرار الإنشاء على أن المنصة أداة تنظيمية لا تنشئ جهة قانونية، وفتحت `/terms` و`/privacy` للعامة قبل تسجيل الدخول، وE-005 أغلقت تدقيق الأدوار الواسع على 18 مستخدم seed مع تنظيف بقايا سطح العمل، وE-006 حسمت عدم إضافة `/funds` alias الآن. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا. F-001 ثبتت حفظ القدرات بعد default switch؛ F-002 حسنت إرشاد أول تشغيل بعد إنشاء الصندوق؛ F-003 طابقت واجهة القواعد مع صلاحية الإعدادات المتقدمة المستقلة؛ F-004 ثبتت القوالب كنقاط بداية لا تقفل قدرات الصندوق؛ F-005 ثبتت legacy/URL hygiene. Phase G تبدأ بقبول المنتج كرحلات كاملة قبل أي ميزة جديدة. |
 
 ## مصادر الحقيقة
 
@@ -29,7 +29,7 @@
 | ما حالة تقرير التدقيق v2؟ | `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` مع ملاحظة أنه superseded |
 | ما الخطة التالية؟ | `Docs/09_Improvement/00_README.md` |
 | ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` |
-| ما العمل التالي؟ | لا يوجد بند متبق في Phase F؛ أي عمل تالٍ يحتاج backlog أو قرار منتج جديد |
+| ما العمل التالي؟ | `Docs/09_Improvement/18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md`؛ ابدأ بـ `G-001` |
 | ما القدرات التي لا يجوز خسارتها؟ | `Docs/09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md` |
 | ما دليل حفظ القدرات بعد default switch؟ | `Docs/09_Improvement/13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md` |
 
@@ -64,6 +64,7 @@
 - F-003 أغلقت تدقيق وصول الإعدادات المتقدمة: `findMyEntities/findById` يعيدان `canManageAdvancedSettings`، و`/rules` تعتمد على صلاحية الإعدادات المتقدمة لا `ADMIN_ROLES`. تم التحقق باختبارات backend/frontend وفحص Browser للمؤسس، وغير المفوض، والمفوض مؤقتا. لا يوجد schema جديد؛ التالي F-004.
 - F-004 أغلقت مصفوفة قدرات القوالب: `ابدأ فارغا` والقوالب الأربعة والحملة المرتبطة موثقة كنقاط بداية، مع تثبيت أن القالب لا يقفل قدرات الصندوق وأن `enabledModules` metadata فقط حاليا. لا يوجد schema أو API أو route جديد؛ التالي F-005.
 - F-005 أغلقت legacy/URL hygiene watch: rollback flag مثبت، `/entities` مستقر، لا يوجد `/funds` alias أو redirect أو rewrite، ومكان ظهور `/entities` المتبقي هو URL/links لا نص واجهة مباشر. Phase F مغلقة.
+- Phase G فُتحت كقبول منتج وقرار release candidate: تبدأ بـ `G-001` لتجهيز inventory وأدلة التشغيل، ثم رحلات المؤسس والعضو والحملة والأدوار التشغيلية والحوكمة قبل قرار `RC_READY/RC_BLOCKED`.
 
 ## بوابات أغلقت قبل default switch
 

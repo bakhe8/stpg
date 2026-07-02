@@ -1,5 +1,26 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.22 - 2026-07-02
+
+**النوع:** Phase G product acceptance backlog
+**الحالة:** Phase G مفتوحة للتنفيذ
+
+### ما تغير
+
+- أضيفت وثيقة `Docs/09_Improvement/18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md`.
+- فتحت الوثيقة مرحلة قبول المنتج كرحلات كاملة قبل أي ميزة جديدة أو route alias.
+- رتبت Phase G إلى بنود `G-001` إلى `G-008`: inventory، رحلة المؤسس بصندوق فارغ، رحلة القالب، الحملة، العضو والاشتراك والدفع، الأدوار التشغيلية، الحوكمة والتدقيق والنزاعات، ثم قرار release candidate.
+- ثبتت الوثيقة أن Phase G لا تغير schema أو routes أو `Entity` داخليا، ولا تحذف rollback flag.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.22`.
+
+### المعنى العملي
+
+انتهى hardening الحالي، والخطوة التالية صارت قبول المنتج لا بناء ميزة. يبدأ التنفيذ من `G-001` لتجهيز أدلة القبول، ثم تشغيل رحلات المستخدمين والأدوار قبل قرار `RC_READY` أو `RC_BLOCKED`.
+
+### التحقق
+
+- `git diff --check`.
+
 ## 2.21 - 2026-07-01
 
 **النوع:** Phase F legacy and URL hygiene watch
