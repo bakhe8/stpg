@@ -1,5 +1,28 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.29 - 2026-07-02
+
+**النوع:** PGP-005 RC acceptance runbook
+**الحالة:** منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيف `Docs/09_Improvement/21_RC_ACCEPTANCE_RUNBOOK.md`.
+- يوضح runbook طريقة إعادة تشغيل قبول RC من الوثائق فقط.
+- يغطي تشغيل Docker stack، backend health، frontend readiness، acceptance harness، create-flow smoke، UX role audit، seed validation، وbackend parity عند الحاجة.
+- يوضح أين تحفظ أدلة التشغيل المؤقتة خارج المستودع.
+- يوضح متى نعيد `seed:reset:docker` ومتى نكتفي بالتحقق.
+- تم تحديث `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.29`.
+
+### المعنى العملي
+
+إعادة قبول المنتج لم تعد تعتمد على المحادثة أو تقرير Phase G الطويل. عضو جديد في الفريق يستطيع تشغيل الجولة من runbook واحد. العمل التالي هو `PGP-006`: Route Alias Watch.
+
+### التحقق
+
+- تمت مراجعة أوامر runbook مقابل `backend/package.json` و`frontend/package.json`.
+- `git diff --check`.
+
 ## 2.28 - 2026-07-02
 
 **النوع:** PGP-004 Docker frontend readiness

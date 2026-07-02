@@ -2,7 +2,7 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.28
+**الإصدار التشغيلي:** 2.29
 **التاريخ:** 2026-07-02
 **الحالة:** مفتوحة للتنفيذ
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
@@ -41,8 +41,8 @@
 2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **منفذة ومتحقق منها في 2.26.**
 3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **منفذة ومتحقق منها في 2.27.**
 4. `PGP-004`: إضافة readiness check للـ Docker frontend. **منفذة ومتحقق منها في 2.28.**
-5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance. **التالي.**
-6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط.
+5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance. **منفذة ومتحقق منها في 2.29.**
+6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط. **التالي.**
 
 ## Backlog
 
@@ -242,6 +242,8 @@
 
 الأولوية: P2.
 
+الحالة: منفذة ومتحقق منها.
+
 الهدف: جعل إعادة قبول المنتج عملية واضحة للفريق بدون الرجوع إلى محادثة أو تقرير طويل.
 
 النطاق:
@@ -266,6 +268,15 @@
 
 - review للخطوات مقابل أوامر `package.json` الحالية.
 - `git diff --check`.
+
+نتيجة التنفيذ:
+
+- أضيف `21_RC_ACCEPTANCE_RUNBOOK.md` كمرجع مستقل لإعادة تشغيل قبول RC.
+- يغطي runbook تشغيل Docker stack، backend health، frontend readiness، acceptance harness، create-flow smoke، UX roles، seed validation، وbackend parity عند الحاجة.
+- يوضح runbook أين تحفظ الأدلة المؤقتة خارج المستودع.
+- يوضح متى نعيد `seed:reset:docker` ومتى نكتفي بالتحقق.
+- يثبت أن `-Delete` في hygiene غير مستخدم لأن الحذف الجزئي مرفوض عمدا.
+- يرتبط runbook بتقرير Phase G وbacklog polish.
 
 ### PGP-006 - Route Alias Watch
 
