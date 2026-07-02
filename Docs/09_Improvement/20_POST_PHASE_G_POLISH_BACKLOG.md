@@ -2,7 +2,7 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.27
+**الإصدار التشغيلي:** 2.28
 **التاريخ:** 2026-07-02
 **الحالة:** مفتوحة للتنفيذ
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
@@ -40,8 +40,8 @@
 1. `PGP-001`: تثبيت acceptance harness قابل للإعادة. **منفذة ومتحقق منها في 2.25.**
 2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **منفذة ومتحقق منها في 2.26.**
 3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **منفذة ومتحقق منها في 2.27.**
-4. `PGP-004`: إضافة readiness check للـ Docker frontend. **التالي.**
-5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance.
+4. `PGP-004`: إضافة readiness check للـ Docker frontend. **منفذة ومتحقق منها في 2.28.**
+5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance. **التالي.**
 6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط.
 
 ## Backlog
@@ -197,6 +197,8 @@
 
 الأولوية: P1.
 
+الحالة: منفذة ومتحقق منها.
+
 الهدف: منع عودة مشكلة `ERR_EMPTY_RESPONSE` قبل تشغيل `test:ux:roles`.
 
 النطاق:
@@ -218,6 +220,23 @@
 - `docker compose up -d frontend`.
 - readiness check ينجح.
 - `npm run test:ux:roles` في frontend.
+
+نتيجة التنفيذ:
+
+- أضيف السكربت `frontend/scripts/docker-frontend-readiness.cjs`.
+- أضيف الأمر `npm run readiness:frontend` في `frontend/package.json`.
+- أضيف `pretest:ux:roles` حتى يعمل readiness تلقائيا قبل `npm run test:ux:roles`.
+- يفحص السكربت `BASE_URL` افتراضيا على `http://localhost:3000` والمسار `/login`.
+- يفشل السكربت برسالة صريحة إذا لم ترد الواجهة HTTP أو كان الرد فارغا.
+- أضيف healthcheck للـ `frontend` في `docker-compose.yml` على `http://127.0.0.1:3000/login`.
+- بقي `frontend/Dockerfile` مثبتا على `HOSTNAME=0.0.0.0`.
+
+دليل التحقق:
+
+- `npm run readiness:frontend` في frontend: passed.
+- `docker compose up -d frontend`: frontend أصبح `healthy`.
+- `npm run test:ux:roles` في frontend: passed، مع تشغيل pre-readiness.
+- `git diff --check`: passed.
 
 ### PGP-005 - RC Acceptance Runbook
 

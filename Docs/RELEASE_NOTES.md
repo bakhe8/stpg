@@ -1,5 +1,31 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.28 - 2026-07-02
+
+**النوع:** PGP-004 Docker frontend readiness
+**الحالة:** منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيف `frontend/scripts/docker-frontend-readiness.cjs`.
+- أضيف أمر `npm run readiness:frontend` في `frontend/package.json`.
+- أضيف `pretest:ux:roles` حتى يفشل UX role audit مبكرا إذا لم ترد الواجهة.
+- أضيف healthcheck لخدمة `frontend` في `docker-compose.yml`.
+- يستخدم healthcheck داخل الحاوية `http://127.0.0.1:3000/login` لتفادي رفض الاتصال عبر `localhost` في Alpine.
+- بقي `frontend/Dockerfile` مثبتا على `HOSTNAME=0.0.0.0`.
+- تم تحديث `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.28`.
+
+### المعنى العملي
+
+مشكلة frontend port mapping ستظهر الآن كفشل readiness واضح قبل Playwright، كما أن Docker يعلن حالة الواجهة الصحية. العمل التالي هو `PGP-005`: RC Acceptance Runbook.
+
+### التحقق
+
+- `npm run readiness:frontend` في frontend: passed.
+- `docker compose up -d frontend`: frontend `healthy`.
+- `npm run test:ux:roles` في frontend: passed مع pre-readiness.
+- `git diff --check`.
+
 ## 2.27 - 2026-07-02
 
 **النوع:** PGP-003 seed validator runtime boundary
