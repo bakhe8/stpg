@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.24`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.25`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -42,7 +42,7 @@
 | 17 | `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md` | إغلاق F-005: مراقبة legacy وURL hygiene |
 | 18 | `18_PHASE_G_PRODUCT_ACCEPTANCE_BACKLOG.md` | فتح Phase G: قبول المنتج وقرار release candidate |
 | 19 | `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
-| 20 | `20_POST_PHASE_G_POLISH_BACKLOG.md` | backlog polish بعد Phase G: acceptance harness، data hygiene، runbook |
+| 20 | `20_POST_PHASE_G_POLISH_BACKLOG.md` | backlog polish بعد Phase G: `PGP-001` منفذة؛ التالي `PGP-002` |
 
 ## ترتيب التنفيذ
 
@@ -146,7 +146,9 @@ Phase F مغلقة.
 
 تم فتح backlog polish مستقل في `20_POST_PHASE_G_POLISH_BACKLOG.md`.
 
-العمل التالي هو `PGP-001`: تحويل قبول API اليدوي إلى acceptance harness قابل للإعادة.
+تم إغلاق `PGP-001`: تحويل قبول API اليدوي إلى acceptance harness قابل للإعادة.
+
+العمل التالي هو `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول.
 
 ## قواعد الحماية
 

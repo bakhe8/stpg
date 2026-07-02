@@ -19,6 +19,7 @@
     "seed:smoke-logins": "ts-node --transpile-only prisma/seed-login-smoke.ts",
     "seed:validate": "ts-node --transpile-only prisma/seed-validate.ts",
     "seed:validate:docker": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/seed-validate-docker.ps1",
+    "acceptance:phase-g": "node ../scripts/phase-g-acceptance-harness.mjs",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

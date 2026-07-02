@@ -1,5 +1,29 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.25 - 2026-07-02
+
+**النوع:** PGP-001 acceptance harness
+**الحالة:** منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيف `scripts/phase-g-acceptance-harness.mjs`.
+- أضيف أمر `npm run acceptance:phase-g` في `backend/package.json`.
+- صار قبول API لصندوق فارغ، القوالب الأربعة، والحملة المرتبطة قابلا للإعادة بدون نسخ يدوي.
+- يستخدم السكربت أسماء ASCII و`profileKey=ACCEPTANCE` و`profileLabel=Acceptance Harness`.
+- يخرج السكربت JSON summary ويحفظ نسخة في temp.
+- تم تحديث `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.25`.
+
+### المعنى العملي
+
+لم يعد قبول G-002/G-003/G-004 معتمدا على سكربت PowerShell يدوي. العمل التالي هو `PGP-002`: Acceptance Data Hygiene.
+
+### التحقق
+
+- `npm run acceptance:phase-g` في backend: passed.
+- `npm run seed:validate:docker` في backend بعد تشغيل harness: passed.
+- `git diff --check`.
+
 ## 2.24 - 2026-07-02
 
 **النوع:** Post Phase G polish backlog

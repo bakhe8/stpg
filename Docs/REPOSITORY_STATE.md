@@ -1,8 +1,8 @@
 # Repository State - CollectiveTrustOS
 
-**الإصدار التشغيلي:** 2.24
+**الإصدار التشغيلي:** 2.25
 **التاريخ:** 2026-07-02
-**الحالة:** Production readiness 08 closed; Improvement 09 post-Phase G polish backlog opened
+**الحالة:** Production readiness 08 closed; PGP-001 acceptance harness implemented
 **سجل الإصدار:** `Docs/RELEASE_NOTES.md`
 
 ## الغرض
@@ -18,8 +18,8 @@
 | Production readiness 08 | مغلق تنفيذيا حسب `Docs/08_Production_Readiness/BACKLOG.md` |
 | Backlog 08 | كل البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified` |
 | Audit report v2 | مرجع تاريخي، وليس حالة المشروع الحالية عند التعارض |
-| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 إلى E-006 وتم التحقق منها؛ F-001 منفذة ومثبتة في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`؛ F-002 منفذة ومثبتة في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`؛ F-003 منفذة ومثبتة في `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`؛ F-004 منفذة ومثبتة في `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md`؛ F-005 منفذة ومثبتة في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md`؛ Phase G منفذة ومثبتة في `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`؛ post-Phase G polish backlog مفتوح في `20_POST_PHASE_G_POLISH_BACKLOG.md` |
-| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`، وE-003 ثبتت لغة أدوات المنصة على صندوق/حملة مع إبقاء `Entity` داخليا، وE-004 ثبتت نصوص الشروط والخصوصية وإقرار الإنشاء على أن المنصة أداة تنظيمية لا تنشئ جهة قانونية، وفتحت `/terms` و`/privacy` للعامة قبل تسجيل الدخول، وE-005 أغلقت تدقيق الأدوار الواسع على 18 مستخدم seed مع تنظيف بقايا سطح العمل، وE-006 حسمت عدم إضافة `/funds` alias الآن. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا. F-001 ثبتت حفظ القدرات بعد default switch؛ F-002 حسنت إرشاد أول تشغيل بعد إنشاء الصندوق؛ F-003 طابقت واجهة القواعد مع صلاحية الإعدادات المتقدمة المستقلة؛ F-004 ثبتت القوالب كنقاط بداية لا تقفل قدرات الصندوق؛ F-005 ثبتت legacy/URL hygiene. Phase G قبلت المنتج بقرار `RC_READY_WITH_POLISH`؛ العمل الحالي هو تحويل ملاحظات polish إلى tooling/runbook قابل للإعادة. |
+| Improvement 09 | Phase A وB وC منفذة ومثبتة بالتحقق؛ Phase D أغلقت default switch في D-011؛ Phase E نفذت E-001 إلى E-006 وتم التحقق منها؛ F-001 منفذة ومثبتة في `13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md`؛ F-002 منفذة ومثبتة في `14_PHASE_F_FIRST_RUN_SETUP_GUIDANCE.md`؛ F-003 منفذة ومثبتة في `15_PHASE_F_ADVANCED_SETTINGS_ACCESS_AUDIT.md`؛ F-004 منفذة ومثبتة في `16_PHASE_F_TEMPLATE_CAPABILITY_MATRIX.md`؛ F-005 منفذة ومثبتة في `17_PHASE_F_LEGACY_URL_HYGIENE_WATCH.md`؛ Phase G منفذة ومثبتة في `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`؛ `PGP-001` منفذة ومثبتة في `20_POST_PHASE_G_POLISH_BACKLOG.md` |
+| تنفيذ 09 | مسار إنشاء صندوق/حملة هو default، وتوجد setup checklist للصناديق وخريطة تشغيل للحملات، وتعرض القوالب كاختيارات تشغيلية مبسطة، وأضيف parity pack للقدرات وUX smoke test للعلمين. E-001 نظفت الواجهة من "كيان" كنص ظاهر، وE-002 جعلت الشاشات المشتركة تفرق بين صندوق وحملة من `isCampaign/type`، وE-003 ثبتت لغة أدوات المنصة على صندوق/حملة مع إبقاء `Entity` داخليا، وE-004 ثبتت نصوص الشروط والخصوصية وإقرار الإنشاء على أن المنصة أداة تنظيمية لا تنشئ جهة قانونية، وفتحت `/terms` و`/privacy` للعامة قبل تسجيل الدخول، وE-005 أغلقت تدقيق الأدوار الواسع على 18 مستخدم seed مع تنظيف بقايا سطح العمل، وE-006 حسمت عدم إضافة `/funds` alias الآن. قيمة `NEXT_PUBLIC_ENABLE_FUND_CREATE_FLOW=false` تبقى rollback مؤقتا. F-001 ثبتت حفظ القدرات بعد default switch؛ F-002 حسنت إرشاد أول تشغيل بعد إنشاء الصندوق؛ F-003 طابقت واجهة القواعد مع صلاحية الإعدادات المتقدمة المستقلة؛ F-004 ثبتت القوالب كنقاط بداية لا تقفل قدرات الصندوق؛ F-005 ثبتت legacy/URL hygiene. Phase G قبلت المنتج بقرار `RC_READY_WITH_POLISH`؛ `PGP-001` حول قبول API اليدوي إلى harness قابل للإعادة. |
 
 ## مصادر الحقيقة
 
@@ -29,7 +29,7 @@
 | ما حالة تقرير التدقيق v2؟ | `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` مع ملاحظة أنه superseded |
 | ما الخطة التالية؟ | `Docs/09_Improvement/00_README.md` |
 | ما آخر حزمة تنفيذية مغلقة؟ | `Docs/09_Improvement/19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` |
-| ما العمل التالي؟ | `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`؛ ابدأ بـ `PGP-001` |
+| ما العمل التالي؟ | `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`؛ ابدأ بـ `PGP-002` |
 | ما القدرات التي لا يجوز خسارتها؟ | `Docs/09_Improvement/02_CAPABILITY_PRESERVATION_AUDIT.md` |
 | ما دليل حفظ القدرات بعد default switch؟ | `Docs/09_Improvement/13_PHASE_F_CAPABILITY_EVIDENCE_PACK.md` |
 
@@ -65,7 +65,7 @@
 - F-004 أغلقت مصفوفة قدرات القوالب: `ابدأ فارغا` والقوالب الأربعة والحملة المرتبطة موثقة كنقاط بداية، مع تثبيت أن القالب لا يقفل قدرات الصندوق وأن `enabledModules` metadata فقط حاليا. لا يوجد schema أو API أو route جديد؛ التالي F-005.
 - F-005 أغلقت legacy/URL hygiene watch: rollback flag مثبت، `/entities` مستقر، لا يوجد `/funds` alias أو redirect أو rewrite، ومكان ظهور `/entities` المتبقي هو URL/links لا نص واجهة مباشر. Phase F مغلقة.
 - Phase G أغلقت تقرير قبول المنتج في `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`: القرار `RC_READY_WITH_POLISH`، مع إصلاح قبول UUID v5 للقوالب، وتثبيت Docker frontend على `0.0.0.0`، وجعل seed validator يميز seed الرسمي عن سجلات قبول runtime.
-- بعد Phase G فُتح `20_POST_PHASE_G_POLISH_BACKLOG.md`: يبدأ بـ `PGP-001` لتحويل قبول API اليدوي إلى acceptance harness قابل للإعادة، ثم data hygiene وrunbook.
+- PGP-001 أغلقت acceptance harness: أضيف `scripts/phase-g-acceptance-harness.mjs` وأمر `npm run acceptance:phase-g` في backend، وتم التحقق منه مع `seed:validate:docker`.
 
 ## بوابات أغلقت قبل default switch
 

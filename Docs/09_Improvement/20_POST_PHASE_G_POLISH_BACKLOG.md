@@ -2,7 +2,7 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.24
+**الإصدار التشغيلي:** 2.25
 **التاريخ:** 2026-07-02
 **الحالة:** مفتوحة للتنفيذ
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
@@ -37,8 +37,8 @@
 
 ## ترتيب التنفيذ المقترح
 
-1. `PGP-001`: تثبيت acceptance harness قابل للإعادة.
-2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول.
+1. `PGP-001`: تثبيت acceptance harness قابل للإعادة. **منفذة ومتحقق منها في 2.25.**
+2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **التالي.**
 3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime.
 4. `PGP-004`: إضافة readiness check للـ Docker frontend.
 5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance.
@@ -49,6 +49,8 @@
 ### PGP-001 - Acceptance Harness Script
 
 الأولوية: P0.
+
+الحالة: منفذة ومتحقق منها.
 
 الهدف: تحويل API acceptance الذي شغلناه يدويا إلى سكربت قابل للإعادة، بدون الاعتماد على قراءة terminal عربية أو نسخ يدوي للنتائج.
 
@@ -77,6 +79,22 @@
 - تشغيل السكربت على Docker stack المحلي.
 - `npm run seed:validate:docker` في backend.
 - `git diff --check`.
+
+نتيجة التنفيذ:
+
+- أضيف السكربت `scripts/phase-g-acceptance-harness.mjs`.
+- أضيف الأمر `npm run acceptance:phase-g` في `backend/package.json`.
+- السكربت يستخدم `API_URL` افتراضيا على `http://localhost:3001/api`.
+- السكربت يستخدم `ACCEPTANCE` كـ `profileKey` و`Acceptance Harness` كـ `profileLabel`.
+- السكربت ينشئ صندوقا فارغا، صناديق القوالب الأربعة، وحملة مرتبطة بالصندوق الفارغ.
+- السكربت يتحقق من `walletCount`, `walletBenefitTypes`, `pathCount`, و`pathTypes` لكل قالب.
+- السكربت يخرج JSON summary ويحفظ نسخة في مجلد temp.
+
+دليل التحقق:
+
+- `npm run acceptance:phase-g` في backend: passed.
+- آخر summary محلي: `C:\Users\Bakheet\AppData\Local\Temp\stgp-phase-g-acceptance-20260702094417\phase-g-acceptance-summary.json`.
+- `npm run seed:validate:docker` في backend بعد تشغيل harness: passed.
 
 ### PGP-002 - Acceptance Data Hygiene
 
