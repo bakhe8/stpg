@@ -20,6 +20,7 @@
     "seed:validate": "ts-node --transpile-only prisma/seed-validate.ts",
     "seed:validate:docker": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/seed-validate-docker.ps1",
     "acceptance:phase-g": "node ../scripts/phase-g-acceptance-harness.mjs",
+    "acceptance:phase-g:hygiene": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/phase-g-acceptance-data-hygiene.ps1",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

@@ -1,5 +1,30 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.26 - 2026-07-02
+
+**النوع:** PGP-002 acceptance data hygiene
+**الحالة:** منفذة ومتحقق منها
+
+### ما تغير
+
+- أضيف `scripts/phase-g-acceptance-data-hygiene.ps1`.
+- أضيف أمر `npm run acceptance:phase-g:hygiene` في `backend/package.json`.
+- صار لدينا dry-run واضح يعرض سجلات acceptance المرشحة فقط من `profileKey=ACCEPTANCE` أو `profileLabel=Acceptance Harness` أو أسماء `Acceptance %`.
+- يعرض السكربت JSON فيه `candidateCount`, `candidates`, `relatedCounts`, وقرار السلامة.
+- رُفض الحذف الجزئي عبر `-Delete` صراحة لأن علاقات ledger/audit/membership/wallet/path/policy لا تجعل حذف صفوف acceptance فقط خيارا آمنا.
+- بقي التنظيف الفعلي الموثوق عبر reset كامل صريح عند الحاجة إلى قاعدة تطوير نظيفة.
+- تم تحديث `Docs/09_Improvement/20_POST_PHASE_G_POLISH_BACKLOG.md`, `Docs/09_Improvement/00_README.md`, `Docs/REPOSITORY_STATE.md`, و`Docs/README.md` إلى الإصدار التشغيلي `2.26`.
+
+### المعنى العملي
+
+يمكن للفريق الآن معرفة بيانات قبول Phase G الحالية بدون الرجوع إلى قاعدة البيانات يدويا، وبدون خطر حذف جزئي. العمل التالي هو `PGP-003`: Seed Validator Runtime Boundary.
+
+### التحقق
+
+- `npm run acceptance:phase-g:hygiene` في backend: passed، ووجد `candidateCount = 6`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\phase-g-acceptance-data-hygiene.ps1 -Delete`: rejected by design.
+- `npm run seed:validate:docker` في backend: passed.
+
 ## 2.25 - 2026-07-02
 
 **النوع:** PGP-001 acceptance harness

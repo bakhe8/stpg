@@ -2,7 +2,7 @@
 
 ## حالة الوثيقة
 
-**الإصدار التشغيلي:** 2.25
+**الإصدار التشغيلي:** 2.26
 **التاريخ:** 2026-07-02
 **الحالة:** مفتوحة للتنفيذ
 **المرجع السابق:** `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md`
@@ -38,8 +38,8 @@
 ## ترتيب التنفيذ المقترح
 
 1. `PGP-001`: تثبيت acceptance harness قابل للإعادة. **منفذة ومتحقق منها في 2.25.**
-2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **التالي.**
-3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime.
+2. `PGP-002`: توثيق وتنفيذ hygiene اختياري لبيانات القبول. **منفذة ومتحقق منها في 2.26.**
+3. `PGP-003`: توثيق عقد seed validator بعد الفصل بين seed/runtime. **التالي.**
 4. `PGP-004`: إضافة readiness check للـ Docker frontend.
 5. `PGP-005`: كتابة runbook قصير لإعادة تشغيل RC acceptance.
 6. `PGP-006`: تثبيت قرار `/entities` كـ no-action watch فقط.
@@ -100,6 +100,8 @@
 
 الأولوية: P1.
 
+الحالة: منفذة ومتحقق منها.
+
 الهدف: منع تراكم بيانات قبول غير واضحة في قاعدة التطوير، بدون حذف عشوائي أو كسر أدلة مفيدة.
 
 النطاق:
@@ -109,7 +111,8 @@
   - `profileKey` أو `profileLabel` يميز سجلات القبول.
 - إضافة خيار cleanup آمن:
   - dry-run افتراضي يعرض السجلات المرشحة.
-  - delete صريح فقط عند تمرير flag واضح.
+  - حذف جزئي مرفوض صراحة لأن schema الحالي يحتوي علاقات ledger/audit/membership/wallet/path/policy بدون cascade عام.
+  - التنظيف الفعلي الموثوق يكون full seed reset عبر flag صريح عند الحاجة إلى قاعدة تطوير نظيفة.
 - توثيق متى نستخدم cleanup ومتى نفضل `seed:reset:docker`.
 - عدم حذف seed الرسمي أو السجلات غير الموسومة كقبول.
 
@@ -124,6 +127,26 @@
 - dry-run يعرض سجلات acceptance فقط.
 - cleanup الصريح لا يعمل بدون flag.
 - `npm run seed:validate:docker` بعد cleanup أو بعد إبقاء البيانات.
+
+نتيجة التنفيذ:
+
+- أضيف السكربت `scripts/phase-g-acceptance-data-hygiene.ps1`.
+- أضيف الأمر `npm run acceptance:phase-g:hygiene` في `backend/package.json`.
+- dry-run الافتراضي يبحث فقط عن:
+  - `entities.profileKey = ACCEPTANCE`
+  - `entities.profileLabel = Acceptance Harness`
+  - `entities.name LIKE Acceptance %`
+- dry-run يخرج JSON فيه `candidateCount`, `candidates`, `relatedCounts`, و`safety`.
+- خيار `-Delete` مرفوض صراحة حتى لا ننفذ حذف صفوف جزئي يترك علاقات مالية أو تدقيقية ناقصة.
+- خيار `-ResetSeedData` متاح للتنظيف الكامل عبر `seed-reset-docker.ps1` عندما يريد الفريق قاعدة تطوير نظيفة.
+- لم يتم تشغيل reset أثناء إغلاق هذا البند؛ التحقق تم بإبقاء البيانات وتشغيل validator.
+
+دليل التحقق:
+
+- `npm run acceptance:phase-g:hygiene` في backend: passed.
+- dry-run الحالي وجد `candidateCount = 6` لسجلات acceptance التي أنشأها harness.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\phase-g-acceptance-data-hygiene.ps1 -Delete`: rejected by design.
+- `npm run seed:validate:docker` في backend بعد dry-run: passed.
 
 ### PGP-003 - Seed Validator Runtime Boundary
 
