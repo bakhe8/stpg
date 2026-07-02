@@ -1,5 +1,36 @@
 # Release Notes - CollectiveTrustOS
 
+## 2.31 - 2026-07-02
+
+**النوع:** RC acceptance run
+**الحالة:** `v0.1.0-rc.1` جاهز كمرشح إصدار
+
+### ما تغير
+
+- أضيف `Docs/09_Improvement/22_RC_ACCEPTANCE_RUN_20260702.md`.
+- تم تشغيل جولة RC نظيفة بعد `seed:reset:docker`.
+- تم تثبيت القرار النهائي للجولة كـ `RC_READY`.
+- تم اعتماد وسم الإصدار المرشح `v0.1.0-rc.1`.
+- تم تحديث `Docs/09_Improvement/00_README.md`, `Docs/README.md`, و`Docs/REPOSITORY_STATE.md` إلى الإصدار التشغيلي `2.31`.
+
+### المعنى العملي
+
+المستودع جاهز كأول Release Candidate بعد إغلاق 08 و09. هذا ليس production deployment تلقائيا؛ النشر الفعلي يحتاج قرار بيئة نشر وخطة تشغيل مستقلة.
+
+### التحقق
+
+- `npm run seed:reset:docker`: passed، وبدأت الجولة من `runtimeCreatedEntities = 0`.
+- `npm run acceptance:phase-g:hygiene` قبل الجولة: passed، `candidateCount = 0`.
+- `npm run seed:validate:boundary` قبل وبعد الجولة: passed.
+- `npm run seed:validate:docker` قبل وبعد الجولة: passed.
+- `npm run acceptance:phase-g`: passed.
+- `npm run test:phase-d:parity`: passed، 2 suites / 12 tests.
+- `npm run build` في backend: passed.
+- `npm run test:phase-d:create-flow`: passed، 3 tests.
+- `npm run test:ux:roles`: passed، مع readiness تلقائي.
+- `npm run build` في frontend: passed.
+- `npm run acceptance:phase-g:hygiene` بعد الجولة: passed، `candidateCount = 6`.
+
 ## 2.30 - 2026-07-02
 
 **النوع:** PGP-006 route alias watch/no-action

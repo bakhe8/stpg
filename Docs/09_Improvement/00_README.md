@@ -10,7 +10,7 @@
 
 ## الحالة الحالية
 
-- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.30`.
+- الحالة العامة للمستودع مثبتة في `Docs/REPOSITORY_STATE.md` كإصدار تشغيلي `2.31`.
 - `Docs/08_Production_Readiness/BACKLOG.md` هو مرجع حالة الإنتاج الحالي.
 - حسب قراءة 08 بعد تحديثه، البنود `BL-001` إلى `BL-042` مغلقة كـ `Fixed / Verified` أو `Verified`.
 - `Docs/08_Production_Readiness/AUDIT_REPORT_v2.md` يحتوي حالة تدقيق أقدم. عند التعارض، نعتمد `BACKLOG.md` لأنه أحدث.
@@ -44,6 +44,7 @@
 | 19 | `19_PHASE_G_PRODUCT_ACCEPTANCE_REPORT.md` | إغلاق Phase G: تقرير قبول المنتج وقرار `RC_READY_WITH_POLISH` |
 | 20 | `20_POST_PHASE_G_POLISH_BACKLOG.md` | backlog polish بعد Phase G: `PGP-001` إلى `PGP-006` مغلقة؛ `/entities` watch/no-action |
 | 21 | `21_RC_ACCEPTANCE_RUNBOOK.md` | runbook إعادة تشغيل قبول RC |
+| 22 | `22_RC_ACCEPTANCE_RUN_20260702.md` | جولة قبول RC النظيفة وقرار `v0.1.0-rc.1` |
 
 ## ترتيب التنفيذ
 
@@ -159,7 +160,9 @@ Phase F مغلقة.
 
 تم إغلاق `PGP-006`: تثبيت قرار route alias كـ `Watch / No Action` بدون إضافة `/funds`.
 
-لا يوجد بند مفتوح في post Phase G polish backlog. العمل القادم يكون إما تشغيل `21_RC_ACCEPTANCE_RUNBOOK.md` لجولة قبول جديدة، أو فتح قرار منتج جديد إذا احتجنا `/funds` لاحقا.
+تم تشغيل جولة RC نظيفة بعد reset وتوثيقها في `22_RC_ACCEPTANCE_RUN_20260702.md`. القرار: `RC_READY`، والوسم المعتمد: `v0.1.0-rc.1`.
+
+لا يوجد بند مفتوح في post Phase G polish backlog. العمل القادم يكون إما نشر/اختبار `v0.1.0-rc.1` في بيئة محددة، أو فتح قرار منتج جديد إذا احتجنا `/funds` لاحقا.
 
 ## قواعد الحماية
 
